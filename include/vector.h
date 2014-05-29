@@ -148,7 +148,7 @@ int tl_vector_is_empty( tl_vector* vec );
  *
  * \return A pointer to an element, or NULL if index out of bounds
  */
-void* tl_vector_at( tl_vector* vec, size_t index );
+void* tl_vector_at( const tl_vector* vec, size_t index );
 
 /**
  * \brief Overwrite an element in a vector

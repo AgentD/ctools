@@ -222,7 +222,7 @@ int tl_vector_is_empty( tl_vector* this )
     return this ? (this->used==0) : 1;
 }
 
-void* tl_vector_at( tl_vector* this, size_t index )
+void* tl_vector_at( const tl_vector* this, size_t index )
 {
     if( !this || (index >= this->used) )
         return NULL;
