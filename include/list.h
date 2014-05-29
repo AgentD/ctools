@@ -1,0 +1,286 @@
+#ifndef TOOLS_LIST_H
+#define TOOLS_LIST_H
+
+
+
+#include <stddef.h>
+
+
+
+typedef struct tl_list_node
+{
+    /** \brief A pointer to the preceeding list node */
+    struct tl_list_node* next;
+
+    /** \brief A pointer to the following list node */
+    struct tl_list_node* prev;
+
+    /** \brief A padding data block used internally for alignment */
+    void* padding;
+}
+tl_list_node;
+
+typedef struct
+{
+    /** \brief A pointer to the head (i.e. first) node in the list */
+    tl_list_node* first;
+
+    /** \brief A pointer to the tail (i.e. last) node in the list */
+    tl_list_node* last;
+
+    /** \brief The number of elements currently in the list */
+    size_t size;
+
+    /** \brief The size of a single element */
+    size_t unitsize;
+}
+tl_list;
+
+
+
+/**
+ * \brief Create a list node and set its initial data
+ *
+ * \param list A pointer to a list to get information about the data field
+ *             size from
+ * \param data A pointer to a data field to copy into the node, or NULL to
+ *             keep the node uninitialized
+ *
+ * \return On success, a pointer to a list node that has to be freed using
+ *         free( ). NULL on failure
+ */
+tl_list_node* tl_list_node_create( tl_list* list, const void* data );
+
+/**
+ * \brief Get a pointer to the data field of a linked list node
+ *
+ * \param node A pointer to a list node
+ *
+ * \return A pointer to the data field
+ */
+void* tl_list_node_get_data( const tl_list_node* node );
+
+/**
+ * \brief Initialize a previously uninitialized list
+ *
+ * \param list        A pointer to a list
+ * \param elementsize The size of an individual element
+ */
+void tl_list_init( tl_list* list, size_t elementsize );
+
+/**
+ * \brief Free the memory used by a list and reset it
+ *
+ * \note This function runs in linear time
+ *
+ * \param list A pointer to a list
+ */
+void tl_list_cleanup( tl_list* list );
+
+/**
+ * \brief Get a pointer to a list node by its index
+ *
+ * \note This function runs in linear time
+ *
+ * \param list  A pointer to a list
+ * \param index The zero based index of the element
+ *
+ * \return A pointer to the node on success, NULL if index out of bounds or
+ *         the list pointer is NULL
+ */
+tl_list_node* tl_list_node_from_index( const tl_list* list, size_t index );
+
+/**
+ * \brief Generate a list of elements from an array
+ *
+ * \note This function runs in linear time
+ *
+ * \param list  A pointer to a list. Previous contents are discarded
+ * \param data  A pointer to an array of elements
+ * \param count The number of elements to read from the data block
+ *
+ * \return Non-zero on success, zero on failure (read: out of memory)
+ */
+int tl_list_from_array( tl_list* list, const void* data, size_t count );
+
+/**
+ * \brief Copy the contents of a list to an array of elements
+ *
+ * \note This function runs in linear time
+ *
+ * \param list A pointer to a list
+ * \param data A pointer to an array of elements, large enough to hold at
+ *             least as many elements as the list contains.
+ */
+void tl_list_to_array( const tl_list* list, void* data );
+
+/**
+ * \brief Create a copy of a list
+ *
+ * \note This function runs in linear time
+ *
+ * \param dst A pointer to a list. Previous contents are discarded.
+ * \param src A pointer to a source list to copy elements from.
+ *
+ * \return Non-zero on success, zero on failure (read: out of memory)
+ */
+int tl_list_copy( tl_list* dst, const tl_list* src );
+
+/**
+ * \brief Create a copy of a sub range of a list
+ *
+ * \note This function runs in linear time
+ *
+ * \param dst   A pointer to a list. Previous contents are discarded.
+ * \param src   A pointer to a source list to copy elements from.
+ * \param start The index of the first element to copy
+ * \param count The number of elements to copy.
+ *
+ * \return Non-zero on success, zero on failure (read: out of memory)
+ */
+int tl_list_copy_range( tl_list* dst, const tl_list* src,
+                        size_t start, size_t count );
+
+/**
+ * \brief Insert into a list the contents of another list
+ *
+ * \note If index is 0 (prepend) or list->size (append), this function runs
+ *       in constant time. If not, it runs in linear time.
+ *
+ * \param list  A list to add the elements of an other list to.
+ * \param other A pointer to a list to take elements from. This list is empty
+ *              afterwards.
+ * \param index The at which to insert the elements. Zero prepends the other,
+ *              list list->size appends it. When index is N, the first element
+ *              of the second list will end up at N.
+ *
+ * \return Non-zero on success, zero on failure (one of the list pointers is
+ *         NULL, index is out of bounds, element sizes don't match, etc...)
+ */
+int tl_list_join( tl_list* list, tl_list* other, size_t index );
+
+/**
+ * \brief Reverse the order of elements in a list
+ *
+ * \note This function runs in linear time
+ *
+ * \param list A pointer to a list
+ */
+void tl_list_reverse( tl_list* list );
+
+/**
+ * \brief Concatenate two lists, copying the elements of the second to the
+ *        end of the first
+ *
+ * \note This function runs in linear time
+ *
+ * \param list A pointer to a list to append elements to
+ * \param src  A pointer to a list to copy elements from
+ *
+ * \return Non-zero on success, zero on failure (read: out of memory)
+ */
+int tl_list_concat( tl_list* dst, const tl_list* src );
+
+/**
+ * \brief Remove elements from a list
+ *
+ * \note This function runs in linear time
+ *
+ * \param list  A pointer to a list
+ * \param index The index of the first element to remove
+ * \param count The number of elements to remove
+ */
+int tl_list_remove( tl_list* list, size_t index, size_t count );
+
+/**
+ * \brief Check if a list is empty
+ *
+ * \note This function runs in constant time
+ *
+ * \param list A pointer to a list
+ *
+ * \return Non-zero if the list is empty, zero if not.
+ */
+int tl_list_is_empty( const tl_list* list );
+
+/**
+ * \brief Get a pointer to the data of a list node by its index
+ *
+ * \note This function runs in linear time
+ *
+ * \param list  A pointer to a list
+ * \param index The index of the node to get the data from
+ *
+ * \return A pointer to the data, or NULL if index out of bounds
+ */
+void* tl_list_at( const tl_list* list, size_t index );
+
+/**
+ * \brief Overwrite an element of a list
+ *
+ * \note This function runs in linear time
+ *
+ * \param list    A pointer to a list
+ * \param index   The index of the destination element in the list
+ * \param element A pointer to the data to copy over the list element
+ *
+ * \return Non-zero on success, zero on failure (index out of bounds, invalid
+ *         pointers, etc...)
+ */
+int tl_list_set( tl_list* list, size_t index, const void* element );
+
+/**
+ * \brief Add a new element to a list
+ *
+ * \note This function runs in constant time
+ *
+ * \param list    A pointer to a list
+ * \param element A pointer to the data to copy to the element
+ * \param append  Non-zero to add the element at the end of the list, zero to
+ *                add it at the beginning.
+ *
+ * \return Non-zero on success, zero on failure (out of memory, invalid
+ *         arguments)
+ */
+int tl_list_add( tl_list* list, const void* element, int append );
+
+/**
+ * \brief Insert a range of elements to a list
+ *
+ * \note This function runs in constant time
+ *
+ * \param list     A pointer to a list
+ * \param index    The index at which to inser the first element
+ * \param elements A pointer to an array of elements to add
+ * \param count    The number of elements from the array to add
+ *
+ * \return Non-zero on success, zero on failure (out of memory, index out of
+ *         bounds, invalid pointers, etc...)
+ */
+int tl_list_insert( tl_list* list, size_t index,
+                    const void* elements, size_t count );
+
+/**
+ * \brief Remove an element from an end of a list
+ *
+ * \note This function runs in constant time
+ *
+ * \param list A pointer to a list
+ * \param head Non-zero to remove the head end of the list, zero to remove the
+ *             tail
+ */
+void tl_list_remove_end( tl_list* list, int head );
+
+/**
+ * \brief Remove all elements of a list
+ *
+ * \note This function runs in linear time
+ *
+ * \param list A pointer to a list
+ */
+void tl_list_clear( tl_list* list );
+
+
+
+#endif /* TOOLS_LIST_H */
+

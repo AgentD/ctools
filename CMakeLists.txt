@@ -61,15 +61,19 @@ endif( )
 #----------------------------------------------------------------------
 include_directories( ${CMAKE_SOURCE_DIR}/include/ )
 
-add_library( ctools STATIC src/vector.c )
+add_library( ctools STATIC src/vector.c
+                           src/list.c )
 
 #----------------------------------------------------------------------
 # Configure tests
 #----------------------------------------------------------------------
 add_executable( test_vector tests/test_vector.c )
+add_executable( test_list tests/test_list.c )
 
 target_link_libraries( test_vector ctools )
+target_link_libraries( test_list ctools )
 
 enable_testing( )
 add_test( test_vector ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_vector )
+add_test( test_list ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_list )
 
