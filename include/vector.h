@@ -25,6 +25,10 @@ tl_vector;
 
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief Initialize a vector
  *
@@ -211,7 +215,9 @@ void tl_vector_remove_last( tl_vector* vec );
  */
 void tl_vector_clear( tl_vector* vec );
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TOOLS_VECTOR_H */
 

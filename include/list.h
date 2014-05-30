@@ -38,6 +38,10 @@ tl_list;
 
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief Create a list node and set its initial data
  *
@@ -280,7 +284,9 @@ void tl_list_remove_end( tl_list* list, int head );
  */
 void tl_list_clear( tl_list* list );
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TOOLS_LIST_H */
 

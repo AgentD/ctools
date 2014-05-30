@@ -16,6 +16,10 @@ tl_queue;
 
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief Initialize a queue
  *
@@ -114,7 +118,9 @@ size_t tl_queue_size( const tl_queue* queue );
  */
 void tl_queue_flush( tl_queue* queue );
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TOOLS_QUEUE_H */
 

@@ -16,6 +16,10 @@ tl_stack;
 
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief Initialize a previously uninitialized stack
  *
@@ -78,7 +82,9 @@ int tl_stack_is_empty( tl_stack* stack );
  */
 size_t tl_stack_size( tl_stack* stack );
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TOOLS_STACK_H */
 
