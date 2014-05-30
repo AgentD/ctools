@@ -193,7 +193,7 @@ void* tl_vector_at( const tl_vector* vec, size_t index );
 int tl_vector_set( tl_vector* vec, size_t index, const void* element );
 
 /**
- * \brief Append an element in a vector
+ * \brief Append an element to a vector
  *
  * \note This function runs in linear time (worst case), constant at avarge
  *       if the vector is roughly three quarters filled
@@ -204,6 +204,18 @@ int tl_vector_set( tl_vector* vec, size_t index, const void* element );
  * \return Non-zero on success, zero on failure (read: out memory)
  */
 int tl_vector_append( tl_vector* vec, const void* element );
+
+/**
+ * \brief Insert an element at the beginning of a vector
+ *
+ * \note This function runs in linear time
+ *
+ * \param vec     A pointer to a vector
+ * \param element A pointer to the data to copy to the vector
+ *
+ * \return Non-zero on success, zero on failure (read: out memory)
+ */
+int tl_vector_prepend( tl_vector* vec, const void* element );
 
 /**
  * \brief Insert elements into a vector
@@ -220,6 +232,15 @@ int tl_vector_append( tl_vector* vec, const void* element );
  */
 int tl_vector_insert( tl_vector* vec, size_t index,
                       const void* element, size_t count );
+
+/**
+ * \brief Remove the first element of a vector
+ *
+ * \note This function runs in linear time
+ *
+ * \param vec A pointer to a vector
+ */
+void tl_vector_remove_first( tl_vector* vec );
 
 /**
  * \brief Remove the last element of a vector

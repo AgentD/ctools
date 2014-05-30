@@ -258,10 +258,29 @@ int tl_vector_append( tl_vector* this, const void* element )
     return 1;
 }
 
+int tl_vector_prepend( tl_vector* this, const void* element )
+{
+    if( !this || !element )
+        return 0;
+
+    if( !tl_vector_reserve( this, this->used+1 ) )
+        return 0;
+
+    if( this->used )
+    {
+        memmove( (unsigned char*)this->data + this->unitsize, this->data,
+                 this->used * this->unitsize );
+    }
+
+    memcpy( this->data, element, this->unitsize );
+    ++(this->used);
+    return 1;
+}
+
 int tl_vector_insert( tl_vector* this, size_t index,
                       const void* element, size_t count )
 {
-    if( !this || !element || (index+count)>=this->used )
+    if( !this || !element || index>=this->used )
         return 0;
 
     if( count==0 )
@@ -282,6 +301,20 @@ int tl_vector_insert( tl_vector* this, size_t index,
 
     this->used += count;
     return 1;
+}
+
+void tl_vector_remove_first( tl_vector* this )
+{
+    if( this && this->used )
+    {
+        if( this->used > 1 )
+        {
+            memmove( this->data, (unsigned char*)this->data + this->unitsize,
+                     (this->used - 1) * this->unitsize );
+        }
+
+        tl_vector_resize( this, this->used - 1 );
+    }
 }
 
 void tl_vector_remove_last( tl_vector* this )

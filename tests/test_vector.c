@@ -7,7 +7,7 @@
 
 int main( void )
 {
-    int i, vals[10] = { 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 };
+    int i, j, vals[10] = { 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 };
     tl_vector avec, bvec;
 
     tl_vector_init( &avec, sizeof(int) );
@@ -192,6 +192,106 @@ int main( void )
     /* cleanup */
     tl_vector_cleanup( &bvec );
     tl_vector_cleanup( &avec );
+
+    /* append and prepend elements */
+    tl_vector_init( &avec, sizeof(int) );
+
+    for( i=0; i<10; ++i )
+    {
+        if( avec.used != (size_t)i ) return EXIT_FAILURE;
+        tl_vector_prepend( &avec, &i );
+        if( avec.used != (size_t)(i+1) ) return EXIT_FAILURE;
+    }
+
+    for( i=0; i<10; ++i )
+    {
+        if( *((int*)tl_vector_at( &avec, i )) != 9-i )
+            return EXIT_FAILURE;
+    }
+
+    tl_vector_cleanup( &avec );
+
+    tl_vector_init( &avec, sizeof(int) );
+
+    for( i=0; i<10; ++i )
+    {
+        if( avec.used != (size_t)i ) return EXIT_FAILURE;
+        tl_vector_append( &avec, &i );
+        if( avec.used != (size_t)(i+1) ) return EXIT_FAILURE;
+    }
+
+    for( i=0; i<10; ++i )
+    {
+        if( *((int*)tl_vector_at( &avec, i )) != i )
+            return EXIT_FAILURE;
+    }
+
+    tl_vector_cleanup( &avec );
+
+    /* remove first element */
+    tl_vector_init( &avec, sizeof(int) );
+    tl_vector_from_array( &avec, vals, 10 );
+    if( avec.used != 10 ) return EXIT_FAILURE;
+
+    for( i=0; i<10; ++i )
+    {
+        if( *((int*)tl_vector_at( &avec, i )) != vals[i] )
+            return EXIT_FAILURE;
+    }
+
+    for( i=0; i<10; ++i )
+    {
+        for( j=0; j<(int)avec.used; ++j )
+        {
+            if( *((int*)tl_vector_at( &avec, j )) != vals[j+i] )
+                return EXIT_FAILURE;
+        }
+
+        if( avec.used != (size_t)j ) return EXIT_FAILURE;
+        tl_vector_remove_first( &avec );
+        if( avec.used != (size_t)(j-1) ) return EXIT_FAILURE;
+
+        for( j=0; j<(int)avec.used; ++j )
+        {
+            if( *((int*)tl_vector_at( &avec, j )) != vals[j+i+1] )
+                return EXIT_FAILURE;
+        }
+    }
+
+    tl_vector_cleanup( &avec );
+
+    /* remove last element */
+    tl_vector_init( &avec, sizeof(int) );
+    tl_vector_from_array( &avec, vals, 10 );
+    if( avec.used != 10 ) return EXIT_FAILURE;
+
+    for( i=0; i<10; ++i )
+    {
+        if( *((int*)tl_vector_at( &avec, i )) != vals[i] )
+            return EXIT_FAILURE;
+    }
+
+    for( i=0; i<10; ++i )
+    {
+        for( j=0; j<(int)avec.used; ++j )
+        {
+            if( *((int*)tl_vector_at( &avec, j )) != vals[j] )
+                return EXIT_FAILURE;
+        }
+
+        if( avec.used != (size_t)j ) return EXIT_FAILURE;
+        tl_vector_remove_last( &avec );
+        if( avec.used != (size_t)(j-1) ) return EXIT_FAILURE;
+
+        for( j=0; j<(int)avec.used; ++j )
+        {
+            if( *((int*)tl_vector_at( &avec, j )) != vals[j] )
+                return EXIT_FAILURE;
+        }
+    }
+
+    tl_vector_cleanup( &avec );
+
     return EXIT_SUCCESS;
 }
 
