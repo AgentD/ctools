@@ -45,6 +45,30 @@ void tl_vector_init( tl_vector* vec, size_t elementsize );
 void tl_vector_cleanup( tl_vector* vec );
 
 /**
+ * \brief Generate a vector from an array
+ *
+ * \note This function runs in linear time
+ *
+ * \param vec   A pointer to a vector. Previous contents are discarded
+ * \param data  A pointer to an array of elements
+ * \param count The number of elements to read from the data block
+ *
+ * \return Non-zero on success, zero on failure (read: out of memory)
+ */
+int tl_vector_from_array( tl_vector* vec, const void* data, size_t count );
+
+/**
+ * \brief Copy the contents of a vector to an array
+ *
+ * \note This function runs in linear time
+ *
+ * \param vec  A pointer to a vector
+ * \param data A pointer to an array of elements, large enough to hold at
+ *             least as many elements as the vector contains.
+ */
+void tl_vector_to_array( const tl_vector* vec, void* data );
+
+/**
  * \brief Copy the data of a source vector to a destination vector
  *
  * \note This function runs in linear time

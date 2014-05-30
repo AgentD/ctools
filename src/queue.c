@@ -56,7 +56,7 @@ void tl_queue_remove_back( tl_queue* this, void* data )
     {
         if( data )
         {
-            memcpy( data, stl_list_node_get_data( this->list.last ),
+            memcpy( data, tl_list_node_get_data( this->list.last ),
                     this->list.unitsize );
         }
 

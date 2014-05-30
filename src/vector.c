@@ -27,32 +27,31 @@ void tl_vector_cleanup( tl_vector* this )
     }
 }
 
+int tl_vector_from_array( tl_vector* this, const void* data, size_t count )
+{
+    if( !this || !data )
+        return 0;
+
+    if( !tl_vector_resize( this, count ) )
+        return 0;
+
+    memcpy( this->data, data, count * this->unitsize );
+    this->used = count;
+    return 1;
+}
+
+void tl_vector_to_array( const tl_vector* this, void* data )
+{
+    if( this && data )
+        memcpy( data, this->data, this->used*this->unitsize );
+}
+
 int tl_vector_copy( tl_vector* this, const tl_vector* src )
 {
-    void* newdata;
-
     if( !this || !src )
         return 0;
 
-    /* make sure we have enough space available */
-    if( (this->reserved*src->unitsize) < (src->used*src->unitsize) )
-    {
-        newdata = malloc( src->unitsize * src->used );
-
-        if( !newdata )
-            return 0;
-
-        free( this->data );
-        this->data     = newdata;
-        this->reserved = src->used;
-    }
-
-    /* copy the data over */
-    memcpy( this->data, src->data, src->unitsize * src->used );
-    this->used     = src->used;
-    this->unitsize = src->unitsize;
-
-    return 1;
+    return tl_vector_copy_range( this, src, 0, src->used );
 }
 
 int tl_vector_copy_range( tl_vector* this, const tl_vector* src,
