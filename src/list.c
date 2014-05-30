@@ -90,7 +90,7 @@ int tl_list_from_array( tl_list* this, const void* data, size_t count )
 
     for( i=0; i<count; ++i )
     {
-        if( !tl_list_add( &temp, data, 1 ) )
+        if( !tl_list_append( &temp, data ) )
         {
             tl_list_clear( &temp );
             return 0;
@@ -145,7 +145,7 @@ int tl_list_copy_range( tl_list* this, const tl_list* src,
 
     for( i=0; i<count; ++i, n=n->next )
     {
-        if( !tl_list_add( &temp, tl_list_node_get_data( n ), 1 ) )
+        if( !tl_list_append( &temp, tl_list_node_get_data( n ) ) )
         {
             tl_list_clear( &temp );
             return 0;
@@ -338,7 +338,7 @@ int tl_list_set( tl_list* this, size_t index, const void* element )
     return 1;
 }
 
-int tl_list_add( tl_list* this, const void* element, int append )
+int tl_list_append( tl_list* this, const void* element )
 {
     tl_list_node* node;
 
@@ -354,11 +354,32 @@ int tl_list_add( tl_list* this, const void* element, int append )
     {
         this->first = this->last = node;
     }
-    else if( append )
+    else
     {
         this->last->next = node;
         node->prev = this->last;
         this->last = node;
+    }
+
+    ++(this->size);
+    return 1;
+}
+
+int tl_list_prepend( tl_list* this, const void* element )
+{
+    tl_list_node* node;
+
+    if( !this || !element )
+        return 0;
+
+    node = tl_list_node_create( this, element );
+
+    if( !node )
+        return 0;
+
+    if( !this->size )
+    {
+        this->first = this->last = node;
     }
     else
     {
@@ -397,7 +418,7 @@ int tl_list_insert( tl_list* this, size_t index,
     return 1;
 }
 
-void tl_list_remove_end( tl_list* this, int head )
+void tl_list_remove_first( tl_list* this )
 {
     tl_list_node* n;
 
@@ -408,11 +429,28 @@ void tl_list_remove_end( tl_list* this, int head )
             n = this->first;
             this->first = this->last = NULL;
         }
-        else if( head )
+        else
         {
             n = this->first;
             this->first = this->first->next;
             this->first->prev = NULL;
+        }
+
+        free( n );
+        --(this->size);
+    }
+}
+
+void tl_list_remove_last( tl_list* this )
+{
+    tl_list_node* n;
+
+    if( this && this->size )
+    {
+        if( this->size==1 )
+        {
+            n = this->first;
+            this->first = this->last = NULL;
         }
         else
         {

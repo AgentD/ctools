@@ -119,13 +119,13 @@ int main( void )
     if( l1.size || !tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
     for( i=10; i<20; ++i )
-        tl_list_add( &l1, &i, 1 );
+        tl_list_append( &l1, &i );
 
     if( l1.size!=10 || tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
     for( i=9; i>0; --i )
-        tl_list_add( &l1, &i, 0 );
-    tl_list_add( &l1, &i, 0 );
+        tl_list_prepend( &l1, &i );
+    tl_list_prepend( &l1, &i );
 
     if( l1.size!=20 || tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
@@ -142,10 +142,10 @@ int main( void )
     if( l1.size || !tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
     for( i=0; i<20; ++i )
-        tl_list_add( &l1, &i, 1 );
+        tl_list_append( &l1, &i );
 
     for( i=0; i<10; ++i )
-        tl_list_remove_end( &l1, 1 );
+        tl_list_remove_first( &l1 );
 
     if( l1.size!=10 || tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
@@ -156,7 +156,7 @@ int main( void )
     }
 
     for( i=0; i<5; ++i )
-        tl_list_remove_end( &l1, 0 );
+        tl_list_remove_last( &l1 );
 
     if( l1.size!=5 || tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
@@ -167,7 +167,7 @@ int main( void )
     }
 
     for( i=0; i<5; ++i )
-        tl_list_remove_end( &l1, 0 );
+        tl_list_remove_last( &l1 );
 
     if( l1.size || !tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
@@ -178,7 +178,7 @@ int main( void )
     if( l1.size || !tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
     for( i=0; i<20; ++i )
-        tl_list_add( &l1, &i, 1 );
+        tl_list_append( &l1, &i );
 
     tl_list_remove( &l1, 0, 5 );
     if( l1.size!=15 || tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
@@ -219,7 +219,7 @@ int main( void )
     if( l1.size || !tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
     for( i=0; i<20; ++i )
-        tl_list_add( &l1, &i, 1 );
+        tl_list_append( &l1, &i );
 
     for( i=0; i<20; ++i )
     {

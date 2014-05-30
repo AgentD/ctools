@@ -18,12 +18,12 @@ void tl_queue_cleanup( tl_queue* this )
 
 int tl_queue_insert_front( tl_queue* this, const void* element )
 {
-    return (this && element) ? tl_list_add(&(this->list), element, 0) : 0;
+    return (this && element) ? tl_list_prepend(&(this->list), element) : 0;
 }
 
 int tl_queue_insert_back( tl_queue* this, const void* element )
 {
-    return (this && element) ? tl_list_add(&(this->list), element, 1) : 0;
+    return (this && element) ? tl_list_append(&(this->list), element) : 0;
 }
 
 void* tl_queue_peek_front( const tl_queue* this )
@@ -46,7 +46,7 @@ void tl_queue_remove_front( tl_queue* this, void* data )
                     this->list.unitsize );
         }
 
-        tl_list_remove_end( &(this->list), 1 );
+        tl_list_remove_first( &(this->list) );
     }
 }
 
@@ -60,7 +60,7 @@ void tl_queue_remove_back( tl_queue* this, void* data )
                     this->list.unitsize );
         }
 
-        tl_list_remove_end( &(this->list), 0 );
+        tl_list_remove_last( &(this->list) );
     }
 }
 

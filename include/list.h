@@ -234,19 +234,30 @@ void* tl_list_at( const tl_list* list, size_t index );
 int tl_list_set( tl_list* list, size_t index, const void* element );
 
 /**
- * \brief Add a new element to a list
+ * \brief Add a new element to the end of a list
  *
  * \note This function runs in constant time
  *
  * \param list    A pointer to a list
  * \param element A pointer to the data to copy to the element
- * \param append  Non-zero to add the element at the end of the list, zero to
- *                add it at the beginning.
  *
  * \return Non-zero on success, zero on failure (out of memory, invalid
  *         arguments)
  */
-int tl_list_add( tl_list* list, const void* element, int append );
+int tl_list_append( tl_list* list, const void* element );
+
+/**
+ * \brief Add a new element to the beginning of list
+ *
+ * \note This function runs in constant time
+ *
+ * \param list    A pointer to a list
+ * \param element A pointer to the data to copy to the element
+ *
+ * \return Non-zero on success, zero on failure (out of memory, invalid
+ *         arguments)
+ */
+int tl_list_prepend( tl_list* list, const void* element );
 
 /**
  * \brief Insert a range of elements to a list
@@ -265,15 +276,22 @@ int tl_list_insert( tl_list* list, size_t index,
                     const void* elements, size_t count );
 
 /**
- * \brief Remove an element from an end of a list
+ * \brief Remove the first element of a list
  *
  * \note This function runs in constant time
  *
  * \param list A pointer to a list
- * \param head Non-zero to remove the head end of the list, zero to remove the
- *             tail
  */
-void tl_list_remove_end( tl_list* list, int head );
+void tl_list_remove_first( tl_list* list );
+
+/**
+ * \brief Remove the last element of a list
+ *
+ * \note This function runs in constant time
+ *
+ * \param list A pointer to a list
+ */
+void tl_list_remove_last( tl_list* list );
 
 /**
  * \brief Remove all elements of a list
