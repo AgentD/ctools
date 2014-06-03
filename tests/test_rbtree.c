@@ -133,19 +133,19 @@ int main( void )
     for( i=0; i<1000; ++i )
     {
         j = i*10 + 5;
-        if( !tl_rbtree_find( &t0, &i ) ) return EXIT_FAILURE;
-        if( *((int*)tl_rbtree_find( &t0, &i )) != j ) return EXIT_FAILURE;
+        if( !tl_rbtree_at( &t0, &i ) ) return EXIT_FAILURE;
+        if( *((int*)tl_rbtree_at( &t0, &i )) != j ) return EXIT_FAILURE;
     }
 
     /* try accessing nodes with non existent indices */
     for( i=-10000; i<0; ++i )
     {
-        if( tl_rbtree_find( &t0, &i ) ) return EXIT_FAILURE;
+        if( tl_rbtree_at( &t0, &i ) ) return EXIT_FAILURE;
     }
 
     for( i=1000; i<10000; ++i )
     {
-        if( tl_rbtree_find( &t0, &i ) ) return EXIT_FAILURE;
+        if( tl_rbtree_at( &t0, &i ) ) return EXIT_FAILURE;
     }
 
     /* remove minima */
@@ -167,9 +167,9 @@ int main( void )
         }
 
         /* remove minimum */
-        if( !tl_rbtree_find( &t0, &i ) ) return EXIT_FAILURE;
+        if( !tl_rbtree_at( &t0, &i ) ) return EXIT_FAILURE;
         tl_rbtree_remove_min( &t0 );
-        if( tl_rbtree_find( &t0, &i ) ) return EXIT_FAILURE;
+        if( tl_rbtree_at( &t0, &i ) ) return EXIT_FAILURE;
 
         /* check if tree is valid */
         if( !check_tree( &t0 ) ) return EXIT_FAILURE;
@@ -213,9 +213,9 @@ int main( void )
 
         /* remove maximum */
         j = 999-i;
-        if( !tl_rbtree_find( &t0, &j ) ) return EXIT_FAILURE;
+        if( !tl_rbtree_at( &t0, &j ) ) return EXIT_FAILURE;
         tl_rbtree_remove_max( &t0 );
-        if( tl_rbtree_find( &t0, &j ) ) return EXIT_FAILURE;
+        if( tl_rbtree_at( &t0, &j ) ) return EXIT_FAILURE;
 
         /* check if tree is valid */
         if( !check_tree( &t0 ) ) return EXIT_FAILURE;
@@ -244,11 +244,11 @@ int main( void )
 
     for( i=250; i<750; ++i )
     {
-        if( !tl_rbtree_find( &t0, &i ) ) return EXIT_FAILURE;
+        if( !tl_rbtree_at( &t0, &i ) ) return EXIT_FAILURE;
         if( t0.size != 1000-((size_t)i-250) ) return EXIT_FAILURE;
         if( !check_tree( &t0 ) ) return EXIT_FAILURE;
         tl_rbtree_remove( &t0, &i );
-        if( tl_rbtree_find( &t0, &i ) ) return EXIT_FAILURE;
+        if( tl_rbtree_at( &t0, &i ) ) return EXIT_FAILURE;
         if( t0.size != 1000-((size_t)(i+1)-250) ) return EXIT_FAILURE;
         if( !check_tree( &t0 ) ) return EXIT_FAILURE;
     }
@@ -257,11 +257,11 @@ int main( void )
 
     for( i=249; i>=0; --i )
     {
-        if( !tl_rbtree_find( &t0, &i ) ) return EXIT_FAILURE;
+        if( !tl_rbtree_at( &t0, &i ) ) return EXIT_FAILURE;
         if( t0.size != 500-(249-(size_t)i) ) return EXIT_FAILURE;
         if( !check_tree( &t0 ) ) return EXIT_FAILURE;
         tl_rbtree_remove( &t0, &i );
-        if( tl_rbtree_find( &t0, &i ) ) return EXIT_FAILURE;
+        if( tl_rbtree_at( &t0, &i ) ) return EXIT_FAILURE;
         if( t0.size != 500-(249-(size_t)i+1) ) return EXIT_FAILURE;
         if( !check_tree( &t0 ) ) return EXIT_FAILURE;
     }
@@ -270,11 +270,11 @@ int main( void )
 
     for( i=750; i<1000; ++i )
     {
-        if( !tl_rbtree_find( &t0, &i ) ) return EXIT_FAILURE;
+        if( !tl_rbtree_at( &t0, &i ) ) return EXIT_FAILURE;
         if( t0.size != 250-((size_t)i-750) ) return EXIT_FAILURE;
         if( !check_tree( &t0 ) ) return EXIT_FAILURE;
         tl_rbtree_remove( &t0, &i );
-        if( tl_rbtree_find( &t0, &i ) ) return EXIT_FAILURE;
+        if( tl_rbtree_at( &t0, &i ) ) return EXIT_FAILURE;
         if( t0.size != 250-((size_t)i+1-750) ) return EXIT_FAILURE;
         if( !check_tree( &t0 ) ) return EXIT_FAILURE;
     }

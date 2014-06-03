@@ -130,7 +130,21 @@ int tl_rbtree_insert( tl_rbtree* tree, const void* key, const void* value );
  *
  * \return A pointer to the value if found, NULL otherwise
  */
-void* tl_rbtree_find( tl_rbtree* tree, const void* key );
+void* tl_rbtree_at( const tl_rbtree* tree, const void* key );
+
+/**
+ * \brief Overwrite the value of an existing node in a red-black tree
+ *
+ * \note This function runs in logarithmic time
+ *
+ * \param tree  A pointer to a red-black tree
+ * \param key   A pointer to the key of the node to overwrite
+ * \param value A pointer to the value of copy over the node
+ *
+ * \return Non-zero on success, zero if one of the keys is NULL or the node
+ *         could not be found.
+ */
+int tl_rbtree_set( tl_rbtree* tree, const void* key, const void* value );
 
 /**
  * \brief Get the minimum (i.e. left most) node of a red-black tree
@@ -185,6 +199,26 @@ void tl_rbtree_remove_max( tl_rbtree* tree );
  * \param key A pointer to the key of the node to remove
  */
 void tl_rbtree_remove( tl_rbtree* tree, const void* key );
+
+/**
+ * \brief Returns non-zero if a given rb-tree contains no nodes
+ *
+ * \note This function runs in constant time
+ *
+ * \param tree A pointer to an red-black tree
+ *
+ * \return Non-zero if the tree is empty, zero if it contains nodes
+ */
+int tl_rbtree_is_empty( const tl_rbtree* tree );
+
+/**
+ * \brief Remove all nodes from a red-black tree
+ *
+ * \note This function runs in linear time
+ *
+ * \param tree A pointer to an red-black tree
+ */
+void tl_rbtree_clear( tl_rbtree* tree );
 
 #ifdef __cplusplus
 }

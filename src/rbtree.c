@@ -321,7 +321,7 @@ int tl_rbtree_insert( tl_rbtree* this, const void* key, const void* value )
     return 1;
 }
 
-void* tl_rbtree_find( tl_rbtree* this, const void* key )
+void* tl_rbtree_at( const tl_rbtree* this, const void* key )
 {
     tl_rbtree_node* node;
     void* nodekey;
@@ -344,6 +344,20 @@ void* tl_rbtree_find( tl_rbtree* this, const void* key )
     }
 
     return NULL;
+}
+
+int tl_rbtree_set( tl_rbtree* this, const void* key, const void* value )
+{
+    void* ptr;
+
+    if( !this || !key || !value )
+        return 0;
+
+    if( !(ptr = tl_rbtree_at( this, key )) )
+        return 0;
+
+    memcpy( ptr, value, this->valuesize );
+    return 1;
 }
 
 int tl_rbtree_get_min( tl_rbtree* this, void* key, void* value )
@@ -424,7 +438,7 @@ void tl_rbtree_remove_max( tl_rbtree* this )
 
 void tl_rbtree_remove( tl_rbtree* this, const void* key )
 { 
-    if( !this || !key || !this->size || !tl_rbtree_find( this, key ) )
+    if( !this || !key || !this->size || !tl_rbtree_at( this, key ) )
         return;
 
     if( !IS_RED(this->root->left) && !IS_RED(this->root->right) )
@@ -436,5 +450,20 @@ void tl_rbtree_remove( tl_rbtree* this, const void* key )
         this->root->is_red = 0;
 
     --(this->size);
+}
+
+int tl_rbtree_is_empty( const tl_rbtree* this )
+{
+    return !this || (this->size == 0);
+}
+
+void tl_rbtree_clear( tl_rbtree* this )
+{
+    if( this )
+    {
+        node_recursive_delete( this->root );
+        this->root = NULL;
+        this->size = 0;
+    }
 }
 
