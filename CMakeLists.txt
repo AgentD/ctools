@@ -64,7 +64,8 @@ include_directories( ${CMAKE_SOURCE_DIR}/include/ )
 add_library( ctools STATIC src/vector.c
                            src/list.c
                            src/stack.c
-                           src/queue.c )
+                           src/queue.c
+                           src/rbtree.c )
 
 #----------------------------------------------------------------------
 # Configure tests
@@ -73,15 +74,18 @@ add_executable( test_vector tests/test_vector.c )
 add_executable( test_list tests/test_list.c )
 add_executable( test_stack tests/test_stack.c )
 add_executable( test_queue tests/test_queue.c )
+add_executable( test_rbtree tests/test_rbtree.c )
 
 target_link_libraries( test_vector ctools )
 target_link_libraries( test_list ctools )
 target_link_libraries( test_stack ctools )
 target_link_libraries( test_queue ctools )
+target_link_libraries( test_rbtree ctools )
 
 enable_testing( )
 add_test( test_vector ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_vector )
 add_test( test_list ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_list )
 add_test( test_stack ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_stack )
 add_test( test_queue ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_queue )
+add_test( test_rbtree ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_rbtree )
 
