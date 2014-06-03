@@ -5,9 +5,7 @@
 
 #include <stddef.h>
 
-
-
-typedef int(* tl_compare )( const void* a, const void* b );
+#include "interfaces.h"
 
 
 
