@@ -277,6 +277,38 @@ void* tl_rbtree_node_get_value( const tl_rbtree* tree,
     return ptr;
 }
 
+static tl_rbtree_node* copy_subtree( tl_rbtree* this, tl_rbtree_node* src )
+{
+    tl_rbtree_node* copy;
+
+    if( !this || !src )
+        return NULL;
+
+    /* create a copy node */
+    copy = tl_rbtree_node_create( this, NULL, NULL );
+
+    if( !copy )
+        return NULL;
+
+    /* copy entire source data over */
+    memcpy( (unsigned char*)copy + sizeof(tl_rbtree_node),
+            (unsigned char*)src  + sizeof(tl_rbtree_node),
+            2*sizeof(void*) + this->keysize + this->valuesize );
+
+    /* copy subtrees */
+    copy->left  = copy_subtree( this, src->left  );
+    copy->right = copy_subtree( this, src->right );
+    return copy;
+}
+
+static size_t size_of_subtree( tl_rbtree_node* this )
+{
+    if( !this )
+        return 0;
+
+    return 1 + size_of_subtree( this->left ) + size_of_subtree( this->right );
+}
+
 /****************************************************************************/
 
 void tl_rbtree_init( tl_rbtree* this, size_t keysize, size_t valuesize,
@@ -300,6 +332,33 @@ void tl_rbtree_cleanup( tl_rbtree* this )
         this->root = NULL;
         this->size = 0;
     }
+}
+
+int tl_rbtree_copy( tl_rbtree* this, tl_rbtree* src )
+{
+    tl_rbtree_node* newroot;
+
+    if( !this || !src )
+        return 0;
+
+    /* create a copy of the source tree */
+    newroot = copy_subtree( src, src->root );
+
+    /* check if all nodes were copied */
+    if( size_of_subtree( newroot ) != src->size )
+    {
+        node_recursive_delete( newroot );
+        return 0;
+    }
+
+    /* copy over new tree and data of source tree */
+    node_recursive_delete( this->root );
+    this->root      = newroot;
+    this->size      = src->size;
+    this->keysize   = src->keysize;
+    this->valuesize = src->valuesize;
+    this->compare   = src->compare;
+    return 1;
 }
 
 int tl_rbtree_insert( tl_rbtree* this, const void* key, const void* value )

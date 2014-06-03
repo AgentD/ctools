@@ -100,10 +100,33 @@ static int check_tree( tl_rbtree* tree )
            is_balanced( tree );
 }
 
+static int are_subtrees_equal( tl_rbtree* atree, tl_rbtree* btree,
+                               tl_rbtree_node* a, tl_rbtree_node* b )
+{
+    if( !a && !b )
+        return 1;
+
+    if( a && b )
+    {
+        if( *((int*)tl_rbtree_node_get_key( atree, a )) !=
+            *((int*)tl_rbtree_node_get_key( btree, b )) )
+            return 0;
+
+        if( *((int*)tl_rbtree_node_get_value( atree, a )) !=
+            *((int*)tl_rbtree_node_get_value( btree, b )) )
+            return 0;
+
+        return are_subtrees_equal( atree, btree, a->left, b->left ) &&
+               are_subtrees_equal( atree, btree, a->right, b->right );
+    }
+
+    return 0;
+}
+
 int main( void )
 {
+    tl_rbtree t0, t1;
     int i, j, k, l;
-    tl_rbtree t0;
 
     tl_rbtree_init( &t0, sizeof(int), sizeof(int), compare_int );
 
@@ -281,7 +304,29 @@ int main( void )
 
     if( t0.size ) return EXIT_FAILURE;
 
+    /* copy */
+    tl_rbtree_init( &t1, sizeof(int), sizeof(int), compare_int );
+
+    for( i=0; i<1000; ++i )
+    {
+        j = i*10 + 5;
+        tl_rbtree_insert( &t0, &i, &j );
+    }
+
+    if( are_subtrees_equal( &t0, &t1, t0.root, t1.root ) )
+        return EXIT_FAILURE;
+
+    tl_rbtree_copy( &t1, &t0 );
+
+    if( t1.size     !=t0.size      ) return EXIT_FAILURE;
+    if( t1.keysize  !=t0.keysize   ) return EXIT_FAILURE;
+    if( t1.valuesize!=t0.valuesize ) return EXIT_FAILURE;
+
+    if( !are_subtrees_equal( &t0, &t1, t0.root, t1.root ) )
+        return EXIT_FAILURE;
+
     tl_rbtree_cleanup( &t0 );
+    tl_rbtree_cleanup( &t1 );
     return EXIT_SUCCESS;
 }
 

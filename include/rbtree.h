@@ -107,6 +107,18 @@ void tl_rbtree_init( tl_rbtree* tree, size_t keysize, size_t valuesize,
 void tl_rbtree_cleanup( tl_rbtree* tree );
 
 /**
+ * \brief Overwrite a red-black tree with a copy of another red-black tree
+ *
+ * \param dst A pointer to the destination tree. Previous contents are
+ *            discarded.
+ * \param src A pointer to the source tree
+ *
+ * \return Non-zero on success, zero if one of the pointers is NULL or out of
+ *         memory
+ */
+int tl_rbtree_copy( tl_rbtree* dst, tl_rbtree* src );
+
+/**
  * \brief Insert a key-value pair into a red-black tree
  *
  * \note This function runs in logarithmic time
