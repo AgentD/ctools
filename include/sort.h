@@ -38,7 +38,7 @@ void tl_quicksort( void* data, size_t elements, size_t size, tl_compare cmp );
 /**
  * \brief Sort an array of elements using the heapsort algorithm
  *
- * The implementation of this function uses heapsort based on the paper
+ * The implementation of this function uses heapsort based on the book
  * "Algorithms, 4th Edition" by ROBERT SEDGEWICK and KEVIN WAYNE.
  *
  * Heapsort is guaranteed to always run in linearithmic time with constant
@@ -54,6 +54,26 @@ void tl_quicksort( void* data, size_t elements, size_t size, tl_compare cmp );
  * \param cmp      A function used for comparing two elements
  */
 void tl_heapsort( void* data, size_t elements, size_t size, tl_compare cmp );
+
+/**
+ * \brief Sort an array of elements using the merge sort algorithm
+ *
+ * The implementation of this function uses merge sort based on the book
+ * "Algorithms, 4th Edition" by ROBERT SEDGEWICK and KEVIN WAYNE.
+ *
+ * Merge sort is guaranteed to run in linearithmic time (or linear if already
+ * sorted), with linear memory overhead.
+ *
+ * Merge sort is a stable sorting algorithm.
+ *
+ * \param data     A pointer to the array to sort
+ * \param elements The number of elements to sort
+ * \param size     The size of a single element
+ * \param cmp      A function used for comparing two elements
+ *
+ * \return Non-zero on success, zero if there is not enough memory
+ */
+int tl_mergesort( void* data, size_t elements, size_t size, tl_compare cmp );
 
 #ifdef __cplusplus
 }

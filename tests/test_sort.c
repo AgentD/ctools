@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include <time.h>
 
 #include "sort.h"
@@ -14,118 +13,160 @@ int compare_ints( const void* a, const void* b )
     return *((int*)a) - *((int*)b);
 }
 
+int compare_ints_tenth( const void* a, const void* b )
+{
+    return (*((int*)a)) / 10 - (*((int*)b)) / 10;
+}
+
+int is_sorted( int* array, size_t size )
+{
+    size_t i;
+    for( i=1; i<size; ++i )
+    {
+        if( array[i-1] > array[i] )
+            return 0;
+    }
+    return 1;
+}
+
+int is_equal( int* array, size_t size )
+{
+    size_t i;
+    for( i=0; i<size; ++i )
+    {
+        if( array[i]!=42 )
+            return 0;
+    }
+    return 1;
+}
+
+int is_asc( int* array, size_t size )
+{
+    size_t i;
+    for( i=0; i<size; ++i )
+    {
+        if( array[i]!=(int)i )
+            return 0;
+    }
+    return 1;
+}
+
+void make_equal( int* array, size_t size )
+{
+    size_t i;
+    for( i=0; i<size; ++i )
+        array[i] = 42;
+}
+
+void make_asc( int* array, size_t size )
+{
+    size_t i;
+    for( i=0; i<size; ++i )
+        array[i] = i;
+}
+
+void make_dsc( int* array, size_t size )
+{
+    size_t i;
+    for( i=0; i<size; ++i )
+        array[i] = size-i-1;
+}
+
+void make_rand( int* array, size_t size )
+{
+    size_t i;
+    for( i=0; i<size; ++i )
+        array[i] = rand( );
+}
 
 int main( void )
 {
-    int j, i, array[TESTSIZE];
+    int i, j, array[TESTSIZE];
 
-    /*************** quicksort ***************/
-
-    /* sort already sorted elements */
-    for( i=0; i<TESTSIZE; ++i )
-        array[i] = i;
-
-    tl_quicksort( array, TESTSIZE, sizeof(int), compare_ints );
-
-    for( i=0; i<TESTSIZE; ++i )
-    {
-        if( array[i] != i )
-            return EXIT_FAILURE;
-    }
-
-    /* sort reversed elements */
-    for( i=0; i<TESTSIZE; ++i )
-        array[i] = TESTSIZE-1-i;
-
-    tl_quicksort( array, TESTSIZE, sizeof(int), compare_ints );
-
-    for( i=0; i<TESTSIZE; ++i )
-    {
-        if( array[i] != i )
-            return EXIT_FAILURE;
-    }
-
-    /* sort equal elements */
-    for( i=0; i<TESTSIZE; ++i )
-        array[i] = 42;
-
-    tl_quicksort( array, TESTSIZE, sizeof(int), compare_ints );
-
-    for( i=0; i<TESTSIZE; ++i )
-    {
-        if( array[i] != 42 )
-            return EXIT_FAILURE;
-    }
-
-    /* sort a bunch of random numbers */
     srand( time(NULL) );
+
+    /********** quicksort **********/
+    make_asc( array, TESTSIZE );
+    tl_quicksort( array, TESTSIZE, sizeof(int), compare_ints );
+    if( !is_asc( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
+
+    make_dsc( array, TESTSIZE );
+    tl_quicksort( array, TESTSIZE, sizeof(int), compare_ints );
+    if( !is_asc( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
+
+    make_equal( array, TESTSIZE );
+    tl_quicksort( array, TESTSIZE, sizeof(int), compare_ints );
+    if( !is_equal( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
 
     for( j=0; j<RANDCASES; ++j )
     {
-        for( i=0; i<TESTSIZE; ++i )
-            array[i] = rand( );
-
+        make_rand( array, TESTSIZE );
         tl_quicksort( array, TESTSIZE, sizeof(int), compare_ints );
-
-        for( i=1; i<TESTSIZE; ++i )
-        {
-            if( array[i-1] > array[i] )
-                return EXIT_FAILURE;
-        }
+        if( !is_sorted( array, TESTSIZE ) )
+            exit( EXIT_FAILURE );
     }
 
-    /*************** heapsort ***************/
-
-    /* sort already sorted elements */
-    for( i=0; i<TESTSIZE; ++i )
-        array[i] = i;
-
+    /********** heapsort **********/
+    make_asc( array, TESTSIZE );
     tl_heapsort( array, TESTSIZE, sizeof(int), compare_ints );
+    if( !is_asc( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
 
-    for( i=0; i<TESTSIZE; ++i )
-    {
-        if( array[i] != i )
-            return EXIT_FAILURE;
-    }
-
-    /* sort reversed elements */
-    for( i=0; i<TESTSIZE; ++i )
-        array[i] = TESTSIZE-1-i;
-
+    make_dsc( array, TESTSIZE );
     tl_heapsort( array, TESTSIZE, sizeof(int), compare_ints );
+    if( !is_asc( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
 
-    for( i=0; i<TESTSIZE; ++i )
-    {
-        if( array[i] != i )
-            return EXIT_FAILURE;
-    }
-
-    /* sort equal elements */
-    for( i=0; i<TESTSIZE; ++i )
-        array[i] = 42;
-
+    make_equal( array, TESTSIZE );
     tl_heapsort( array, TESTSIZE, sizeof(int), compare_ints );
-
-    for( i=0; i<TESTSIZE; ++i )
-    {
-        if( array[i] != 42 )
-            return EXIT_FAILURE;
-    }
-
-    /* sort a bunch of random numbers */
-    srand( time(NULL) );
+    if( !is_equal( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
 
     for( j=0; j<RANDCASES; ++j )
     {
-        for( i=0; i<TESTSIZE; ++i )
-            array[i] = rand( );
+        make_rand( array, TESTSIZE );
+        tl_heapsort( array, TESTSIZE, sizeof(int), compare_ints );
+        if( !is_sorted( array, TESTSIZE ) )
+            exit( EXIT_FAILURE );
+    }
 
-        tl_quicksort( array, TESTSIZE, sizeof(int), compare_ints );
+    /********** merge sort **********/
+    make_asc( array, TESTSIZE );
+    tl_mergesort( array, TESTSIZE, sizeof(int), compare_ints );
+    if( !is_asc( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
 
-        for( i=1; i<TESTSIZE; ++i )
+    make_dsc( array, TESTSIZE );
+    tl_mergesort( array, TESTSIZE, sizeof(int), compare_ints );
+    if( !is_asc( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
+
+    make_equal( array, TESTSIZE );
+    tl_mergesort( array, TESTSIZE, sizeof(int), compare_ints );
+    if( !is_equal( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
+
+    for( j=0; j<RANDCASES; ++j )
+    {
+        make_rand( array, TESTSIZE );
+        tl_mergesort( array, TESTSIZE, sizeof(int), compare_ints );
+        if( !is_sorted( array, TESTSIZE ) )
+            exit( EXIT_FAILURE );
+    }
+
+    /* check if sorting is stable */
+    make_dsc( array, TESTSIZE );
+    tl_mergesort( array, TESTSIZE, sizeof(int), compare_ints_tenth );
+
+    for( j=0; j<TESTSIZE; j+=10 )
+    {
+        for( i=0; i<10; ++i )
         {
-            if( array[i-1] > array[i] )
-                return EXIT_FAILURE;
+            if( array[j+i] != (9-i+j) )
+                exit( EXIT_FAILURE );
         }
     }
 
