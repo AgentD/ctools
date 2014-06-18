@@ -1,6 +1,9 @@
 /*
     Quicksort implementation is based on "Engineering a Sort Function"
     by JON L. BENTLEY and M. DOUGLAS McILROY
+
+    Heapsort implementation is based on "Algorithms, 4th Edition"
+    by ROBERT SEDGEWICK and KEVIN WAYNE
  */
 #include "sort.h"
 
@@ -128,6 +131,43 @@ recursion:
         data = pn - r;
         n = r / size;
         goto recursion;
+    }
+}
+
+/****************************************************************************/
+
+static INLINE void sink( char* pq, size_t k, size_t N,
+                         size_t size, tl_compare cmp )
+{
+    size_t j;
+
+    for( j=2*k; j<=N; j*=2 )
+    {
+        if( j<N && cmp( pq+size*(j-1), pq+size*j )<0 )
+            ++j;
+
+        if( cmp( pq+size*(k-1), pq+size*(j-1) )>=0 )
+            break;
+
+        swap( pq+size*(k-1), pq+size*(j-1), size );
+        k = j;
+    }
+}
+
+void tl_heapsort( void* data, size_t n, size_t size, tl_compare cmp )
+{
+    char *pq, *last;
+    size_t k;
+
+    pq = data;
+
+    for( k=n/2; k>=1; --k )
+        sink( pq, k, n, size, cmp );
+
+    for( last=pq+size*(n-1); n>1; last-=size )
+    {
+        swap( pq, last, size );
+        sink( pq, 1, --n, size, cmp );
     }
 }
 

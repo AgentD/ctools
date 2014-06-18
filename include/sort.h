@@ -22,7 +22,11 @@ extern "C" {
  * implementation is also used by *BSD based operating systems.
  *
  * Quicksort has linearithmic best and average case time complexity and
- * quadratic worst case time complexity.
+ * quadratic worst case time complexity with logarithmic memory overhead.
+ *
+ * For most cases, quicksort is faster than heapsort due to caching effects.
+ * In some cases however, quicksort can degenerate to quadratic time. When
+ * guaranteed linearithmic time is needed, heapsort can be used instead.
  *
  * \param data     A pointer to the array to sort
  * \param elements The number of elements to sort
@@ -30,6 +34,26 @@ extern "C" {
  * \param cmp      A function used for comparing two elements
  */
 void tl_quicksort( void* data, size_t elements, size_t size, tl_compare cmp );
+
+/**
+ * \brief Sort an array of elements using the heapsort algorithm
+ *
+ * The implementation of this function uses heapsort based on the paper
+ * "Algorithms, 4th Edition" by ROBERT SEDGEWICK and KEVIN WAYNE.
+ *
+ * Heapsort is guaranteed to always run in linearithmic time with constant
+ * memory overhead.
+ *
+ * For most cases, heapsort is slower than quicksort due to caching effects.
+ * In some cases however, quicksort can degenerate to quadratic time. When
+ * guaranteed linearithmic time is needed, heapsort can be used instead.
+ *
+ * \param data     A pointer to the array to sort
+ * \param elements The number of elements to sort
+ * \param size     The size of a single element
+ * \param cmp      A function used for comparing two elements
+ */
+void tl_heapsort( void* data, size_t elements, size_t size, tl_compare cmp );
 
 #ifdef __cplusplus
 }
