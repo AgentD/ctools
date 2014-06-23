@@ -1,4 +1,5 @@
 #include "array.h"
+#include "sort.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -358,5 +359,11 @@ void tl_array_clear( tl_array* this )
 {
     if( this )
         this->used = 0;
+}
+
+void tl_array_sort( tl_array* this, tl_compare cmp )
+{
+    if( this && cmp && this->data && this->used )
+        tl_heapsort( this->data, this->used, this->unitsize, cmp );
 }
 

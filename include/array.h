@@ -5,6 +5,8 @@
 
 #include <stddef.h>
 
+#include "interfaces.h"
+
 
 
 typedef struct
@@ -259,6 +261,19 @@ void tl_array_remove_last( tl_array* vec );
  * \param vec A pointer to an array
  */
 void tl_array_clear( tl_array* vec );
+
+/**
+ * \brief Sort a dynamic array in ascending order
+ *
+ * \note This function runs in linearithmic time. The sorting is not stable
+ *
+ * This functions uses heap sort and is guaranteed to always run in
+ * linearithmic time (albeit a tiny bit slower than quick sort).
+ *
+ * \param arr A pointer to an array
+ * \param cmp A function used to compare two elements, determining the order
+ */
+void tl_array_sort( tl_array* arr, tl_compare cmp );
 
 #ifdef __cplusplus
 }
