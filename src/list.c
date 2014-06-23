@@ -469,3 +469,67 @@ void tl_list_clear( tl_list* this )
     tl_list_remove( this, 0, this->size );
 }
 
+/****************************************************************************/
+
+static tl_list_node* merge( tl_list_node* a, tl_list_node* b,
+                            tl_compare cmp )
+{
+    tl_list_node dummy, *tail;
+
+    if( !a ) return b;
+    if( !b ) return a;
+
+    for( tail=&dummy; a && b; tail=tail->next )
+    {
+        if( cmp( tl_list_node_get_data(a), tl_list_node_get_data(b) ) <= 0 )
+        {
+            a->prev = tail;
+            tail->next = a;
+            a = a->next;
+        }
+        else
+        {
+            b->prev = tail;
+            tail->next = b;
+            b = b->next;
+        }
+    }
+
+    tail->next = a ? a : b;
+    tail->next->prev = tail;
+    dummy.next->prev = NULL;
+    return dummy.next;
+}
+
+static tl_list_node* msort( tl_list_node* list, tl_compare cmp )
+{
+    tl_list_node *a, *b;
+
+    if( !list || !list->next )
+        return list;
+
+    /* find center of the list */
+    a = b = list;
+
+    while( (b = b->next) && (b = b->next) )
+        a = a->next;
+
+    /* split list in half, sort sublists, merge back */
+    b = a->next;
+    a->next = NULL;
+    return merge( msort(list, cmp), msort(b,cmp), cmp );
+}
+
+void tl_list_sort( tl_list* this, tl_compare cmp )
+{
+    tl_list_node* n;
+
+    if( this && cmp && this->size>1 )
+    {
+        this->first = msort( this->first, cmp );
+
+        for( n=this->first; n->next; n=n->next ) { }
+        this->last = n;
+    }
+}
+

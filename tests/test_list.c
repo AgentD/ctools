@@ -3,11 +3,150 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+
+#define TESTSIZE 1000
+#define RANDCASES 100
+
+
+
+int compare_ints( const void* a, const void* b )
+{
+    return *((int*)a) - *((int*)b);
+}
+
+int compare_ints_tenth( const void* a, const void* b )
+{
+    return ((*((int*)a)) / 10) - ((*((int*)b)) / 10);
+}
+
+int is_sorted( tl_list* list )
+{
+    tl_list_node* n = list->first->next;
+    int a, b;
+
+    while( n )
+    {
+        a = *((int*)tl_list_node_get_data( n->prev ));
+        b = *((int*)tl_list_node_get_data( n       ));
+
+        if( a > b )
+            return 0;
+
+        n = n->next;
+    }
+    return 1;
+}
+
+int is_equal( tl_list* list )
+{
+    tl_list_node* n = list->first;
+
+    while( n )
+    {
+        if( *((int*)tl_list_node_get_data( n )) != 42 )
+            return 0;
+
+        n = n->next;
+    }
+    return 1;
+}
+
+int is_asc( tl_list* list )
+{
+    tl_list_node* n = list->first;
+    int i = 0;
+
+    while( n )
+    {
+        if( *((int*)tl_list_node_get_data( n )) != i )
+            return 0;
+
+        n = n->next;
+        ++i;
+    }
+    return 1;
+}
+
+void make_equal( tl_list* list, int size )
+{
+    int i, a = 42;
+
+    tl_list_init( list, sizeof(int) );
+
+    for( i=0; i<size; ++i )
+        tl_list_append( list, &a );
+}
+
+void make_asc( tl_list* list, int size )
+{
+    int i;
+
+    tl_list_init( list, sizeof(int) );
+
+    for( i=0; i<size; ++i )
+        tl_list_append( list, &i );
+}
+
+void make_dsc( tl_list* list, int size )
+{
+    int i, a;
+
+    tl_list_init( list, sizeof(int) );
+
+    for( i=0; i<size; ++i )
+    {
+        a = size-i-1;
+        tl_list_append( list, &a );
+    }
+}
+
+void make_rand( tl_list* list, int size )
+{
+    int i, a;
+
+    tl_list_init( list, sizeof(int) );
+
+    for( i=0; i<size; ++i )
+    {
+        a = rand( );
+        tl_list_append( list, &a );
+    }
+}
+
+int check_list( tl_list* list )
+{
+    tl_list_node* n;
+    size_t i = 1;
+
+    if( list->first && list->first->prev )
+        return 0;
+
+    if( list->last && list->last->next )
+        return 0;
+
+    if( list->first->next )
+    {
+        for( n=list->first->next; n; n=n->next, ++i )
+        {
+            if( n->prev->next!=n )
+                return 0;
+        }
+    }
+
+    if( i!=list->size )
+        return 0;
+
+    return 1;
+}
+
+
+
 int main( void )
 {
     int testdata[ 20 ], target[ 20 ];
     tl_list l0, l1;
-    size_t i;
+    size_t i, j;
 
     for( i=0; i<sizeof(testdata)/sizeof(int); ++i )
         testdata[i] = i;
@@ -223,7 +362,7 @@ int main( void )
 
     for( i=0; i<20; ++i )
     {
-        size_t j = 20-i;
+        j = 20-i;
         tl_list_set( &l1, i, &j );
     }
 
@@ -279,6 +418,53 @@ int main( void )
     }
 
     tl_list_cleanup( &l1 );
+
+    /******************** sort ********************/
+    make_asc( &l1, TESTSIZE );
+    tl_list_sort( &l1, compare_ints );
+    if( !is_asc( &l1 ) || !check_list( &l1 ) )
+        exit( EXIT_FAILURE );
+    tl_list_cleanup( &l1 );
+
+    make_dsc( &l1, TESTSIZE );
+    tl_list_sort( &l1, compare_ints );
+    if( !is_asc( &l1 ) || !check_list( &l1 ) )
+        exit( EXIT_FAILURE );
+    tl_list_cleanup( &l1 );
+
+    make_equal( &l1, TESTSIZE );
+    tl_list_sort( &l1, compare_ints );
+    if( !is_equal( &l1 ) || !check_list( &l1 ) )
+        exit( EXIT_FAILURE );
+    tl_list_cleanup( &l1 );
+
+    for( i=0; i<RANDCASES; ++i )
+    {
+        make_rand( &l1, TESTSIZE );
+        tl_list_sort( &l1, compare_ints );
+        if( !is_sorted( &l1 ) || !check_list( &l1 ) )
+            exit( EXIT_FAILURE );
+        tl_list_cleanup( &l1 );
+    }
+
+    /* check if sorting is stable */
+    make_dsc( &l1, TESTSIZE );
+    tl_list_sort( &l1, compare_ints_tenth );
+
+    if( !check_list( &l1 ) )
+        exit( EXIT_FAILURE );
+
+    for( j=0; j<TESTSIZE; j+=10 )
+    {
+        for( i=0; i<10; ++i )
+        {
+            if( *((int*)tl_list_at( &l1, j+i )) != (int)(9-i+j) )
+                exit( EXIT_FAILURE );
+        }
+    }
+
+    tl_list_cleanup( &l1 );
+
     return EXIT_SUCCESS;
 }
 

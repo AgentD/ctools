@@ -5,6 +5,8 @@
 
 #include <stddef.h>
 
+#include "interfaces.h"
+
 
 
 typedef struct tl_list_node
@@ -301,6 +303,20 @@ void tl_list_remove_last( tl_list* list );
  * \param list A pointer to a list
  */
 void tl_list_clear( tl_list* list );
+
+/**
+ * \brief Sort a list in ascending order
+ *
+ * \note This function runs in linearithmic time. The sorting is stable
+ *
+ * This functions uses merge sort and is guaranteed to always run in
+ * linearithmic time with logarithmic space overhead. The sorting is
+ * stable.
+ *
+ * \param list A pointer to an list
+ * \param cmp  A function used to compare two elements, determining the order
+ */
+void tl_list_sort( tl_list* list, tl_compare cmp );
 
 #ifdef __cplusplus
 }
