@@ -7,13 +7,13 @@
 void tl_stack_init( tl_stack* this, size_t element_size )
 {
     if( this )
-        tl_vector_init( &(this->vec), element_size );
+        tl_array_init( &(this->vec), element_size );
 }
 
 void tl_stack_cleanup( tl_stack* this )
 {
     if( this )
-        tl_vector_cleanup( &(this->vec) );
+        tl_array_cleanup( &(this->vec) );
 }
 
 int tl_stack_push( tl_stack* this, const void* element )
@@ -21,7 +21,7 @@ int tl_stack_push( tl_stack* this, const void* element )
     if( !this || !element )
         return 0;
 
-    return tl_vector_append( &(this->vec), element );
+    return tl_array_append( &(this->vec), element );
 }
 
 void* tl_stack_top( const tl_stack* this )
@@ -29,7 +29,7 @@ void* tl_stack_top( const tl_stack* this )
     if( !this || !this->vec.used )
         return NULL;
 
-    return tl_vector_at( &(this->vec), this->vec.used-1 );
+    return tl_array_at( &(this->vec), this->vec.used-1 );
 }
 
 void tl_stack_pop( tl_stack* this, void* data )
@@ -40,11 +40,11 @@ void tl_stack_pop( tl_stack* this, void* data )
     if( data )
     {
         memcpy( data,
-                tl_vector_at( &(this->vec), this->vec.used-1 ),
+                tl_array_at( &(this->vec), this->vec.used-1 ),
                 this->vec.unitsize );
     }
 
-    tl_vector_resize( &(this->vec), this->vec.used-1 );
+    tl_array_resize( &(this->vec), this->vec.used-1 );
 }
 
 int tl_stack_is_empty( tl_stack* this )

@@ -1,11 +1,11 @@
-#include "vector.h"
+#include "array.h"
 
 #include <stdlib.h>
 #include <string.h>
 
 
 
-void tl_vector_init( tl_vector* this, size_t elementsize )
+void tl_array_init( tl_array* this, size_t elementsize )
 {
     if( this )
     {
@@ -16,7 +16,7 @@ void tl_vector_init( tl_vector* this, size_t elementsize )
     }
 }
 
-void tl_vector_cleanup( tl_vector* this )
+void tl_array_cleanup( tl_array* this )
 {
     if( this )
     {
@@ -27,12 +27,12 @@ void tl_vector_cleanup( tl_vector* this )
     }
 }
 
-int tl_vector_from_array( tl_vector* this, const void* data, size_t count )
+int tl_array_from_array( tl_array* this, const void* data, size_t count )
 {
     if( !this || !data )
         return 0;
 
-    if( !tl_vector_resize( this, count ) )
+    if( !tl_array_resize( this, count ) )
         return 0;
 
     memcpy( this->data, data, count * this->unitsize );
@@ -40,21 +40,21 @@ int tl_vector_from_array( tl_vector* this, const void* data, size_t count )
     return 1;
 }
 
-void tl_vector_to_array( const tl_vector* this, void* data )
+void tl_array_to_array( const tl_array* this, void* data )
 {
     if( this && data )
         memcpy( data, this->data, this->used*this->unitsize );
 }
 
-int tl_vector_copy( tl_vector* this, const tl_vector* src )
+int tl_array_copy( tl_array* this, const tl_array* src )
 {
     if( !this || !src )
         return 0;
 
-    return tl_vector_copy_range( this, src, 0, src->used );
+    return tl_array_copy_range( this, src, 0, src->used );
 }
 
-int tl_vector_copy_range( tl_vector* this, const tl_vector* src,
+int tl_array_copy_range( tl_array* this, const tl_array* src,
                           size_t start, size_t count )
 {
     void* newdata;
@@ -88,7 +88,7 @@ int tl_vector_copy_range( tl_vector* this, const tl_vector* src,
     return 1;
 }
 
-int tl_vector_concat( tl_vector* this, const tl_vector* src )
+int tl_array_concat( tl_array* this, const tl_array* src )
 {
     if( !this || !src || this->unitsize!=src->unitsize )
         return 0;
@@ -98,10 +98,10 @@ int tl_vector_concat( tl_vector* this, const tl_vector* src )
         return 1;
 
     if( !this->used )
-        return tl_vector_copy( this, src );
+        return tl_array_copy( this, src );
 
     /* make sure there is enough space */
-    if( !tl_vector_reserve( this, this->used + src->used ) )
+    if( !tl_array_reserve( this, this->used + src->used ) )
         return 0;
 
     /* copy the data over */
@@ -113,7 +113,7 @@ int tl_vector_concat( tl_vector* this, const tl_vector* src )
     return 1;
 }
 
-int tl_vector_resize( tl_vector* this, size_t size )
+int tl_array_resize( tl_array* this, size_t size )
 {
     void* newdata;
 
@@ -143,7 +143,7 @@ int tl_vector_resize( tl_vector* this, size_t size )
         if( !newdata )
             return 0;
 
-        /* update vector contents */
+        /* update array contents */
         this->reserved = size;
         this->used     = size;
         this->data     = newdata;
@@ -151,7 +151,7 @@ int tl_vector_resize( tl_vector* this, size_t size )
     return 1;
 }
 
-int tl_vector_reserve( tl_vector* this, size_t size )
+int tl_array_reserve( tl_array* this, size_t size )
 {
     void* newdata;
 
@@ -168,13 +168,13 @@ int tl_vector_reserve( tl_vector* this, size_t size )
     if( !newdata )
         return 0;
 
-    /* update vector contents */
+    /* update array contents */
     this->reserved = size;
     this->data     = newdata;
     return 1;
 }
 
-int tl_vector_set_capacity( tl_vector* this, size_t size )
+int tl_array_set_capacity( tl_array* this, size_t size )
 {
     void* newdata;
 
@@ -187,14 +187,14 @@ int tl_vector_set_capacity( tl_vector* this, size_t size )
     if( !newdata )
         return 0;
 
-    /* update vector contents */
+    /* update array contents */
     this->reserved = size;
     this->used     = this->used>=size ? size : this->used;
     this->data     = newdata;
     return 1;
 }
 
-void tl_vector_remove( tl_vector* this, size_t index, size_t count )
+void tl_array_remove( tl_array* this, size_t index, size_t count )
 {
     unsigned char* data;
 
@@ -212,16 +212,16 @@ void tl_vector_remove( tl_vector* this, size_t index, size_t count )
         if( (index + count) > this->used )
             count = this->used - index;
 
-        tl_vector_resize( this, this->used - count );
+        tl_array_resize( this, this->used - count );
     }
 }
 
-int tl_vector_is_empty( tl_vector* this )
+int tl_array_is_empty( tl_array* this )
 {
     return this ? (this->used==0) : 1;
 }
 
-void* tl_vector_at( const tl_vector* this, size_t index )
+void* tl_array_at( const tl_array* this, size_t index )
 {
     if( !this || (index >= this->used) )
         return NULL;
@@ -229,7 +229,7 @@ void* tl_vector_at( const tl_vector* this, size_t index )
     return ((unsigned char*)this->data + index * this->unitsize);
 }
 
-int tl_vector_set( tl_vector* this, size_t index, const void* element )
+int tl_array_set( tl_array* this, size_t index, const void* element )
 {
     if( !this || (index >= this->used) || !element )
         return 0;
@@ -240,16 +240,16 @@ int tl_vector_set( tl_vector* this, size_t index, const void* element )
     return 1;
 }
 
-int tl_vector_append( tl_vector* this, const void* element )
+int tl_array_append( tl_array* this, const void* element )
 {
     if( !this || !element )
         return 0;
 
     /* make sure there is enough room available */
-    if( !tl_vector_reserve( this, this->used+1 ) )
+    if( !tl_array_reserve( this, this->used+1 ) )
         return 0;
 
-    /* copy the element to the end of the vector */
+    /* copy the element to the end of the array */
     memcpy( (unsigned char*)this->data + this->used * this->unitsize,
             element,
             this->unitsize );
@@ -258,12 +258,12 @@ int tl_vector_append( tl_vector* this, const void* element )
     return 1;
 }
 
-int tl_vector_prepend( tl_vector* this, const void* element )
+int tl_array_prepend( tl_array* this, const void* element )
 {
     if( !this || !element )
         return 0;
 
-    if( !tl_vector_reserve( this, this->used+1 ) )
+    if( !tl_array_reserve( this, this->used+1 ) )
         return 0;
 
     if( this->used )
@@ -277,7 +277,7 @@ int tl_vector_prepend( tl_vector* this, const void* element )
     return 1;
 }
 
-int tl_vector_insert( tl_vector* this, size_t index,
+int tl_array_insert( tl_array* this, size_t index,
                       const void* element, size_t count )
 {
     if( !this || !element || index>=this->used )
@@ -286,7 +286,7 @@ int tl_vector_insert( tl_vector* this, size_t index,
     if( count==0 )
         return 1;
 
-    if( !tl_vector_reserve( this, this->used+count ) )
+    if( !tl_array_reserve( this, this->used+count ) )
         return 0;
 
     /* move elements ahead */
@@ -294,7 +294,7 @@ int tl_vector_insert( tl_vector* this, size_t index,
              (unsigned char*)this->data +  index          * this->unitsize,
              (this->used - count - index) * this->unitsize );
 
-    /* copy elements into vector */
+    /* copy elements into array */
     memcpy( (unsigned char*)this->data + index * this->unitsize,
             element,
             count * this->unitsize );
@@ -303,7 +303,7 @@ int tl_vector_insert( tl_vector* this, size_t index,
     return 1;
 }
 
-void tl_vector_remove_first( tl_vector* this )
+void tl_array_remove_first( tl_array* this )
 {
     if( this && this->used )
     {
@@ -313,17 +313,17 @@ void tl_vector_remove_first( tl_vector* this )
                      (this->used - 1) * this->unitsize );
         }
 
-        tl_vector_resize( this, this->used - 1 );
+        tl_array_resize( this, this->used - 1 );
     }
 }
 
-void tl_vector_remove_last( tl_vector* this )
+void tl_array_remove_last( tl_array* this )
 {
     if( this && this->used )
-        tl_vector_resize( this, this->used - 1 );
+        tl_array_resize( this, this->used - 1 );
 }
 
-void tl_vector_clear( tl_vector* this )
+void tl_array_clear( tl_array* this )
 {
     if( this )
         this->used = 0;

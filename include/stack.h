@@ -3,14 +3,14 @@
 
 
 
-#include "vector.h"
+#include "array.h"
 
 
 
 typedef struct
 {
     /** \brief The underlying container used to implement a stack */
-    tl_vector vec;
+    tl_array vec;
 }
 tl_stack;
 
