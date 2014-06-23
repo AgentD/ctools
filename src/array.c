@@ -5,6 +5,50 @@
 
 
 
+static int tl_array_increment( tl_array* this )
+{
+    size_t newsize;
+    void* ptr;
+
+    if( this->reserved > this->used )
+    {
+        this->used += 1;
+        return 1;
+    }
+
+    newsize = this->reserved ? this->reserved * 2 : 10;
+
+    ptr = realloc( this->data, newsize * this->unitsize );
+
+    if( !ptr )
+        return 0;
+
+    this->data = ptr;
+    this->reserved = newsize;
+    this->used += 1;
+    return 1;
+}
+
+static void tl_array_decrement( tl_array* this )
+{
+    void* ptr;
+
+    this->used -= 1;
+
+    if( this->used < (this->reserved/4) )
+    {
+        ptr = realloc( this->data, this->unitsize*(this->reserved/2) );
+
+        if( ptr )
+        {
+            this->data = ptr;
+            this->reserved /= 2;
+        }
+    }
+}
+
+/****************************************************************************/
+
 void tl_array_init( tl_array* this, size_t elementsize )
 {
     if( this )
@@ -55,7 +99,7 @@ int tl_array_copy( tl_array* this, const tl_array* src )
 }
 
 int tl_array_copy_range( tl_array* this, const tl_array* src,
-                          size_t start, size_t count )
+                         size_t start, size_t count )
 {
     void* newdata;
 
@@ -125,11 +169,10 @@ int tl_array_resize( tl_array* this, size_t size )
         this->used = size;
 
         /* try to shrink if less than half filled */
-        if( this->used < this->reserved/2 )
+        if( this->used < this->reserved/4 )
         {
             newdata =
-            realloc( this->data,
-                     (this->reserved/2 + this->reserved/4) * this->unitsize );
+            realloc( this->data, (this->reserved/2) * this->unitsize );
 
             if( newdata )
                 this->data = newdata;
@@ -242,38 +285,26 @@ int tl_array_set( tl_array* this, size_t index, const void* element )
 
 int tl_array_append( tl_array* this, const void* element )
 {
-    if( !this || !element )
+    if( !this || !element || !tl_array_increment( this ) )
         return 0;
 
-    /* make sure there is enough room available */
-    if( !tl_array_reserve( this, this->used+1 ) )
-        return 0;
-
-    /* copy the element to the end of the array */
-    memcpy( (unsigned char*)this->data + this->used * this->unitsize,
-            element,
-            this->unitsize );
-
-    ++(this->used);
+    memcpy( (unsigned char*)this->data + (this->used-1) * this->unitsize,
+            element, this->unitsize );
     return 1;
 }
 
 int tl_array_prepend( tl_array* this, const void* element )
 {
-    if( !this || !element )
+    if( !this || !element || !tl_array_increment( this ) )
         return 0;
 
-    if( !tl_array_reserve( this, this->used+1 ) )
-        return 0;
-
-    if( this->used )
+    if( this->used > 1 )
     {
         memmove( (unsigned char*)this->data + this->unitsize, this->data,
-                 this->used * this->unitsize );
+                 (this->used-1) * this->unitsize );
     }
 
     memcpy( this->data, element, this->unitsize );
-    ++(this->used);
     return 1;
 }
 
@@ -313,14 +344,14 @@ void tl_array_remove_first( tl_array* this )
                      (this->used - 1) * this->unitsize );
         }
 
-        tl_array_resize( this, this->used - 1 );
+        tl_array_decrement( this );
     }
 }
 
 void tl_array_remove_last( tl_array* this )
 {
-    if( this && this->used )
-        tl_array_resize( this, this->used - 1 );
+    if( this && this->used >= 1 )
+        tl_array_decrement( this );
 }
 
 void tl_array_clear( tl_array* this )
