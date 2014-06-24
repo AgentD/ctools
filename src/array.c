@@ -367,3 +367,47 @@ void tl_array_sort( tl_array* this, tl_compare cmp )
         tl_heapsort( this->data, this->used, this->unitsize, cmp );
 }
 
+void* tl_array_search( const tl_array* this, tl_compare cmp, const void* key )
+{
+    size_t i, l, u;
+    char* ptr;
+    int cv;
+
+    if( !this || !cmp || !key || !this->used )
+        return NULL;
+
+    l = 0;
+    u = this->used;
+
+    while( l < u )
+    {
+        i = (l + u) >> 1;
+        ptr = (char*)this->data + i*this->unitsize;
+        cv = cmp( key, ptr );
+
+        if( cv<0 )
+            u = i;
+        else if( cv>0 )
+            l = i + 1;
+        else
+            return ptr;
+    }
+
+    return NULL;
+}
+
+void* tl_array_search_unsorted( const tl_array* this, tl_compare cmp,
+                                const void* key )
+{
+    char* ptr;
+    size_t i;
+
+    for( ptr=this->data, i=0; i<this->used; ++i, ptr+=this->unitsize )
+    {
+        if( cmp( ptr, key )==0 )
+            return ptr;
+    }
+
+    return NULL;
+}
+

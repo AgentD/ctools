@@ -275,6 +275,34 @@ void tl_array_clear( tl_array* vec );
  */
 void tl_array_sort( tl_array* arr, tl_compare cmp );
 
+/**
+ * \brief Search an element in a sorted array
+ *
+ * \note This function runs in logarithmic time
+ *
+ * \param arr A pointer to a dynamic array, assumed to be sorted in ascending
+ *            order in respect to the given comparison function
+ * \param cmp A function used to compare two elements
+ * \param key A pointer to a value to search for
+ *
+ * \return A pointer to the element if found, NULL otherwise
+ */
+void* tl_array_search( const tl_array* arr, tl_compare cmp, const void* key );
+
+/**
+ * \brief Search an element in an unsorted array
+ *
+ * \note This function runs in linear time
+ *
+ * \param arr A pointer to a dynamic array
+ * \param cmp A function used to compare two elements
+ * \param key A pointer to a value to search for
+ *
+ * \return A pointer to the element if found, NULL otherwise
+ */
+void* tl_array_search_unsorted( const tl_array* arr, tl_compare cmp,
+                                const void* key );
+
 #ifdef __cplusplus
 }
 #endif

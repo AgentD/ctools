@@ -4,6 +4,11 @@
 #include <stdio.h>
 
 
+int compare_ints( const void* a, const void* b )
+{
+    return *((int*)a) - *((int*)b);
+}
+
 
 int main( void )
 {
@@ -288,6 +293,38 @@ int main( void )
             if( *((int*)tl_array_at( &avec, j )) != vals[j] )
                 return EXIT_FAILURE;
         }
+    }
+
+    tl_array_cleanup( &avec );
+
+    /* search linear */
+    tl_array_init( &avec, sizeof(int) );
+
+    for( i=1000; i>=0; --i )
+    {
+        if( tl_array_search_unsorted( &avec, compare_ints, &i ) )
+            return EXIT_FAILURE;
+
+        tl_array_append( &avec, &i );
+
+        if( *((int*)tl_array_search_unsorted(&avec,compare_ints,&i))!=i )
+            return EXIT_FAILURE;
+    }
+
+    tl_array_cleanup( &avec );
+
+    /* search binary */
+    tl_array_init( &avec, sizeof(int) );
+
+    for( i=0; i<1000; ++i )
+    {
+        if( tl_array_search( &avec, compare_ints, &i ) )
+            return EXIT_FAILURE;
+
+        tl_array_append( &avec, &i );
+
+        if( *((int*)tl_array_search(&avec,compare_ints,&i))!=i )
+            return EXIT_FAILURE;
     }
 
     tl_array_cleanup( &avec );
