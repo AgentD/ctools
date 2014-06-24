@@ -355,8 +355,10 @@ int tl_array_insert_sorted( tl_array* this, tl_compare cmp,
                 return 0;
 
             /* move rest of the array ahead */
+            ptr = (char*)this->data + i*this->unitsize;
+
             memmove( ptr + this->unitsize, ptr,
-                     (this->used-2-i) * this->unitsize );
+                     (this->used-1-i) * this->unitsize );
 
             /* insert and return success */
             memcpy( ptr, element, this->unitsize );

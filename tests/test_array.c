@@ -332,20 +332,31 @@ int main( void )
     /* insert sorted */
     tl_array_init( &avec, sizeof(int) );
 
-    for( i=999; i>=0; --i )
+    for( i=1000; i>1; i-=2 )
     {
-        if( avec.used!=(size_t)(999-i) )
+        if( avec.used!=(size_t)(1000-i)/2 )
             return EXIT_FAILURE;
 
         tl_array_insert_sorted( &avec, compare_ints, &i );
 
-        if( avec.used!=(size_t)(1000-i) )
+        if( avec.used!=(1+(size_t)(1000-i)/2) )
             return EXIT_FAILURE;
     }
 
-    for( j=0; j<1000; ++j )
+    for( i=1; i<1000; i+=2 )
     {
-        if( *((int*)tl_array_at( &avec, j ))!=j )
+        if( avec.used!=(500+(size_t)i/2) )
+            return EXIT_FAILURE;
+
+        tl_array_insert_sorted( &avec, compare_ints, &i );
+
+        if( avec.used!=(501+(size_t)i/2) )
+            return EXIT_FAILURE;
+    }
+
+    for( i=1; i<=1000; ++i )
+    {
+        if( *((int*)tl_array_at( &avec, i-1 ))!=i )
             return EXIT_FAILURE;
     }
 
