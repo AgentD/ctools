@@ -145,6 +145,7 @@ int check_list( tl_list* list )
 int main( void )
 {
     int testdata[ 20 ], target[ 20 ];
+    tl_list_node* n;
     tl_list l0, l1;
     size_t i, j;
 
@@ -461,6 +462,23 @@ int main( void )
             if( *((int*)tl_list_at( &l1, j+i )) != (int)(9-i+j) )
                 exit( EXIT_FAILURE );
         }
+    }
+
+    tl_list_cleanup( &l1 );
+
+    /********** search **********/
+    tl_list_init( &l1, sizeof(size_t) );
+
+    for( i=0; i<1000; ++i )
+    {
+        if( tl_list_search( &l1, compare_ints, &i ) )
+            return EXIT_FAILURE;
+
+        tl_list_append( &l1, &i );
+
+        n = tl_list_search( &l1, compare_ints, &i );
+        if( !n || *((size_t*)tl_list_node_get_data(n)) != i )
+            return EXIT_FAILURE;
     }
 
     tl_list_cleanup( &l1 );

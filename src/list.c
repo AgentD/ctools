@@ -533,3 +533,20 @@ void tl_list_sort( tl_list* this, tl_compare cmp )
     }
 }
 
+tl_list_node* tl_list_search( const tl_list* this, tl_compare cmp,
+                              const void* key )
+{
+    tl_list_node* n;
+
+    if( this && cmp && key )
+    {
+        for( n=this->first; n; n=n->next )
+        {
+            if( cmp( tl_list_node_get_data( n ), key )==0 )
+                return n;
+        }
+    }
+
+    return NULL;
+}
+

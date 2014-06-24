@@ -313,10 +313,24 @@ void tl_list_clear( tl_list* list );
  * linearithmic time with logarithmic space overhead. The sorting is
  * stable.
  *
- * \param list A pointer to an list
+ * \param list A pointer to a list
  * \param cmp  A function used to compare two elements, determining the order
  */
 void tl_list_sort( tl_list* list, tl_compare cmp );
+
+/**
+ * \brief Search for a key in a given list
+ *
+ * \note This function runs in linear time
+ *
+ * \param list A pointer to a list
+ * \param cmp  A comparison function used to compare elements to the key
+ * \param key  The key to search for
+ *
+ * \return A pointer to a node containing the key, or NULL if not found
+ */
+tl_list_node* tl_list_search( const tl_list* list, tl_compare cmp,
+                              const void* key );
 
 #ifdef __cplusplus
 }
