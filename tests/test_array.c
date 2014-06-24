@@ -329,6 +329,28 @@ int main( void )
 
     tl_array_cleanup( &avec );
 
+    /* insert sorted */
+    tl_array_init( &avec, sizeof(int) );
+
+    for( i=999; i>=0; --i )
+    {
+        if( avec.used!=(size_t)(999-i) )
+            return EXIT_FAILURE;
+
+        tl_array_insert_sorted( &avec, compare_ints, &i );
+
+        if( avec.used!=(size_t)(1000-i) )
+            return EXIT_FAILURE;
+    }
+
+    for( j=0; j<1000; ++j )
+    {
+        if( *((int*)tl_array_at( &avec, j ))!=j )
+            return EXIT_FAILURE;
+    }
+
+    tl_array_cleanup( &avec );
+
     return EXIT_SUCCESS;
 }
 

@@ -335,6 +335,39 @@ int tl_array_insert( tl_array* this, size_t index,
     return 1;
 }
 
+int tl_array_insert_sorted( tl_array* this, tl_compare cmp,
+                            const void* element )
+{
+    size_t i = 0;
+    char* ptr;
+
+    if( !this || !cmp || !element )
+        return 0;
+
+    /* for each element */
+    for( ptr=this->data, i=0; i<this->used; ++i, ptr+=this->unitsize )
+    {
+        /* if we found the first element that is larger */
+        if( cmp( ptr, element )>0 )
+        {
+            /* allocate space for one more element */
+            if( !tl_array_increment( this ) )
+                return 0;
+
+            /* move rest of the array ahead */
+            memmove( ptr + this->unitsize, ptr,
+                     (this->used-2-i) * this->unitsize );
+
+            /* insert and return success */
+            memcpy( ptr, element, this->unitsize );
+            return 1;
+        }
+    }
+
+    /* no element found that is smaller? */
+    return tl_array_append( this, element );
+}
+
 void tl_array_remove_first( tl_array* this )
 {
     if( this && this->used )

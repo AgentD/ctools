@@ -236,6 +236,20 @@ int tl_array_insert( tl_array* vec, size_t index,
                      const void* element, size_t count );
 
 /**
+ * \brief Insert an element into a sorted array at the right position
+ *
+ * \note This function runs in linear time
+ *
+ * \param vec     A pointer to an array
+ * \param cmp     A comparison function used to compare elements
+ * \param element A pointer to the element to insert
+ *
+ * \return Non-zero on success, zero on failure (out of memory)
+ */
+int tl_array_insert_sorted( tl_array* vec, tl_compare cmp,
+                            const void* element );
+
+/**
  * \brief Remove the first element of an array
  *
  * \note This function runs in linear time
