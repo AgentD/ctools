@@ -483,6 +483,39 @@ int main( void )
 
     tl_list_cleanup( &l1 );
 
+    /********** insert sorted **********/
+    tl_list_init( &l1, sizeof(size_t) );
+
+    for( i=1000; i>=1; i-=2 )
+    {
+        if( l1.size!=(size_t)(1000-i)/2 )
+            return EXIT_FAILURE;
+
+        tl_list_insert_sorted( &l1, compare_ints, &i );
+
+        if( l1.size!=(1+(size_t)(1000-i)/2) )
+            return EXIT_FAILURE;
+    }
+
+    for( i=1; i<1000; i+=2 )
+    {
+        if( l1.size!=(500+(size_t)i/2) )
+            return EXIT_FAILURE;
+
+        tl_list_insert_sorted( &l1, compare_ints, &i );
+
+        if( l1.size!=(501+(size_t)i/2) )
+            return EXIT_FAILURE;
+    }
+
+    for( i=1; i<=1000; ++i )
+    {
+        if( *((size_t*)tl_list_at( &l1, i-1 ))!=i )
+            return EXIT_FAILURE;
+    }
+
+    tl_list_cleanup( &l1 );
+
     return EXIT_SUCCESS;
 }
 

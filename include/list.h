@@ -278,6 +278,20 @@ int tl_list_insert( tl_list* list, size_t index,
                     const void* elements, size_t count );
 
 /**
+ * \brief Insert an element into a sorted list at the right position
+ *
+ * \note This function runs in linear time
+ *
+ * \param list    A pointer to a list
+ * \param cmp     A comparison function used to compare elements
+ * \param element A pointer to the element to insert
+ *
+ * \return Non-zero on success, zero on failure (out of memory)
+ */
+int tl_list_insert_sorted( tl_list* list, tl_compare cmp,
+                           const void* element );
+
+/**
  * \brief Remove the first element of a list
  *
  * \note This function runs in constant time
