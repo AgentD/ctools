@@ -1,5 +1,5 @@
-#include "array.h"
-#include "sort.h"
+#include "tl_array.h"
+#include "tl_sort.h"
 
 #include <stdlib.h>
 #include <string.h>

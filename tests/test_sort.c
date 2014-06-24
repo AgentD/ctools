@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "sort.h"
+#include "tl_sort.h"
 
 #define TESTSIZE 1000
 #define RANDCASES 100

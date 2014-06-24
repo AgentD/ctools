@@ -1,4 +1,4 @@
-#include "array.h"
+#include "tl_array.h"
 
 #include <stdlib.h>
 #include <stdio.h>

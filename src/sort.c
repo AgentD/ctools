@@ -5,7 +5,7 @@
     Heapsort and merge sort implementations are based on
     "Algorithms, 4th Edition" by ROBERT SEDGEWICK and KEVIN WAYNE
  */
-#include "sort.h"
+#include "tl_sort.h"
 
 #include <string.h>
 #include <stdlib.h>
