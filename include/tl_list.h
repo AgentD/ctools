@@ -333,6 +333,13 @@ void tl_list_clear( tl_list* list );
 void tl_list_sort( tl_list* list, tl_compare cmp );
 
 /**
+ * \def tl_list_stable_sort
+ *
+ * \copydoc tl_list_sort
+ */
+#define tl_list_stable_sort tl_list_sort
+
+/**
  * \brief Search for a key in a given list
  *
  * \note This function runs in linear time
@@ -345,6 +352,13 @@ void tl_list_sort( tl_list* list, tl_compare cmp );
  */
 tl_list_node* tl_list_search( const tl_list* list, tl_compare cmp,
                               const void* key );
+
+/**
+ * \def tl_list_search_unsorted
+ *
+ * \copydoc tl_list_search
+ */
+#define tl_list_search_unsorted tl_list_search
 
 #ifdef __cplusplus
 }
