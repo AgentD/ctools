@@ -75,6 +75,22 @@ void tl_heapsort( void* data, size_t elements, size_t size, tl_compare cmp );
  */
 int tl_mergesort( void* data, size_t elements, size_t size, tl_compare cmp );
 
+/**
+ * \brief Sort an array of elements using an in-place merge sort
+ *
+ * The in-place merge sort implementation is guaranteed to run in
+ * O(N*log(N)*log(N)) time (wurst case), with logarithmic memory
+ * overhead (stack, recursion).
+ *
+ * Merge sort is a stable sorting algorithm.
+ *
+ * \param data     A pointer to the array to sort
+ * \param elements The number of elements to sort
+ * \param size     The size of a single element
+ * \param cmp      A function used for comparing two elements
+ */
+void tl_mergesort_inplace(void* data, size_t N, size_t size, tl_compare cmp);
+
 #ifdef __cplusplus
 }
 #endif

@@ -170,6 +170,43 @@ int main( void )
         }
     }
 
+    /********** in place merge sort **********/
+    make_asc( array, TESTSIZE );
+    tl_mergesort_inplace( array, TESTSIZE, sizeof(int), compare_ints );
+    if( !is_asc( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
+
+    make_dsc( array, TESTSIZE );
+    tl_mergesort_inplace( array, TESTSIZE, sizeof(int), compare_ints );
+    if( !is_asc( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
+
+    make_equal( array, TESTSIZE );
+    tl_mergesort_inplace( array, TESTSIZE, sizeof(int), compare_ints );
+    if( !is_equal( array, TESTSIZE ) )
+        exit( EXIT_FAILURE );
+
+    for( j=0; j<RANDCASES; ++j )
+    {
+        make_rand( array, TESTSIZE );
+        tl_mergesort_inplace( array, TESTSIZE, sizeof(int), compare_ints );
+        if( !is_sorted( array, TESTSIZE ) )
+            exit( EXIT_FAILURE );
+    }
+
+    /* check if sorting is stable */
+    make_dsc( array, TESTSIZE );
+    tl_mergesort_inplace( array, TESTSIZE, sizeof(int), compare_ints_tenth );
+
+    for( j=0; j<TESTSIZE; j+=10 )
+    {
+        for( i=0; i<10; ++i )
+        {
+            if( array[j+i] != (9-i+j) )
+                exit( EXIT_FAILURE );
+        }
+    }
+
     return EXIT_SUCCESS;
 }
 
