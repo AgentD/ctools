@@ -402,6 +402,18 @@ void tl_array_sort( tl_array* this, tl_compare cmp )
         tl_heapsort( this->data, this->used, this->unitsize, cmp );
 }
 
+void tl_array_stable_sort( tl_array* this, tl_compare cmp )
+{
+    if( this && cmp && this->data && this->used )
+    {
+        if( !tl_mergesort( this->data, this->used, this->unitsize, cmp ) )
+        {
+            tl_mergesort_inplace( this->data, this->used,
+                                  this->unitsize, cmp );
+        }
+    }
+}
+
 void* tl_array_search( const tl_array* this, tl_compare cmp, const void* key )
 {
     size_t i, l, u;

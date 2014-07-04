@@ -290,6 +290,20 @@ void tl_array_clear( tl_array* vec );
 void tl_array_sort( tl_array* arr, tl_compare cmp );
 
 /**
+ * \brief Sort a dynamic array in ascending order in a stable manner
+ *
+ * \note If enough memory is available, this function runs in linearithmic
+ *       time. If not, it runs in O(N*log(N)*log(N)) time.
+ *
+ * This functions uses merge sort, with a fallback to a slower, in-place merge
+ * sort if there is not enough memory available.
+ *
+ * \param arr A pointer to an array
+ * \param cmp A function used to compare two elements, determining the order
+ */
+void tl_array_stable_sort( tl_array* arr, tl_compare cmp );
+
+/**
  * \brief Search an element in a sorted array
  *
  * \note This function runs in logarithmic time
