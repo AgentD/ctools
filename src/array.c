@@ -324,7 +324,7 @@ int tl_array_insert( tl_array* this, size_t index,
     /* move elements ahead */
     memmove( (unsigned char*)this->data + (index + count) * this->unitsize,
              (unsigned char*)this->data +  index          * this->unitsize,
-             (this->used - count - index) * this->unitsize );
+             (this->used - index) * this->unitsize );
 
     /* copy elements into array */
     memcpy( (unsigned char*)this->data + index * this->unitsize,
