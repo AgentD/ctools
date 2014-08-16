@@ -4,6 +4,18 @@
 
 
 
+const uint16_t utf16[7] =
+{
+    0x00E4,         /* 'ä' */
+    0x00F6,         /* 'ö' */
+    0xD800, 0xDC00, /* LINEAR B SYLLABLE B008 A */
+    0xDC00,         /* rouge trail surrogate */
+    0xD800,         /* rouge lead surrogate */
+    0x0000          /* terminator */
+};
+
+
+
 int main( void )
 {
     tl_string str;
@@ -172,6 +184,74 @@ int main( void )
     if( tl_string_at( &str, 2 ) != 0       ) return EXIT_FAILURE;
 
     tl_string_cleanup( &str );
+
+    /* append UTF-16 */
+    tl_string_init( &str );
+
+    tl_string_append_utf16( &str, utf16 );
+    if( str.charcount!=5 || str.surrogates!=2 ) return EXIT_FAILURE;
+    if( str.vec.used!=7 ) return EXIT_FAILURE;
+
+    if( tl_string_cstr( &str )[0] != 0x00E4 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[1] != 0x00F6 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[2] != 0xD800 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[3] != 0xDC00 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[4] != 0xFFFD ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[5] != 0xFFFD ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[6] != 0x0000 ) return EXIT_FAILURE;
+
+    tl_string_append_utf16( &str, utf16 );
+    if( str.charcount!=10 || str.surrogates!=2 ) return EXIT_FAILURE;
+    if( str.vec.used!=13 ) return EXIT_FAILURE;
+
+    if( tl_string_cstr( &str )[ 0] != 0x00E4 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[ 1] != 0x00F6 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[ 2] != 0xD800 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[ 3] != 0xDC00 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[ 4] != 0xFFFD ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[ 5] != 0xFFFD ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[ 6] != 0x00E4 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[ 7] != 0x00F6 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[ 8] != 0xD800 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[ 9] != 0xDC00 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[10] != 0xFFFD ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[11] != 0xFFFD ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[12] != 0x0000 ) return EXIT_FAILURE;
+
+    tl_string_cleanup( &str );
+
+    /* append UTF-16 substring */
+    tl_string_init( &str );
+
+    tl_string_append_utf16_count( &str, utf16, 4 );
+    if( str.charcount!=4 || str.surrogates!=2 ) return EXIT_FAILURE;
+    if( str.vec.used!=6 ) return EXIT_FAILURE;
+
+    if( tl_string_cstr( &str )[0] != 0x00E4 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[1] != 0x00F6 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[2] != 0xD800 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[3] != 0xDC00 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[4] != 0xFFFD ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[5] != 0x0000 ) return EXIT_FAILURE;
+
+
+    tl_string_append_utf16_count( &str, utf16+2, 5 );
+    if( str.charcount!=7 || str.surrogates!=2 ) return EXIT_FAILURE;
+    if( str.vec.used!=10 ) return EXIT_FAILURE;
+
+    if( tl_string_cstr( &str )[0] != 0x00E4 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[1] != 0x00F6 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[2] != 0xD800 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[3] != 0xDC00 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[4] != 0xFFFD ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[5] != 0xD800 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[6] != 0xDC00 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[7] != 0xFFFD ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[8] != 0xFFFD ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[9] != 0x0000 ) return EXIT_FAILURE;
+
+    tl_string_cleanup( &str );
+
     return EXIT_SUCCESS;
 }
 

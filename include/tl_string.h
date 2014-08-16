@@ -147,6 +147,15 @@ void tl_string_append_utf8( tl_string* str, const char* utf8 );
 void tl_string_append_latin1( tl_string* str, const char* latin1 );
 
 /**
+ * \brief Append a null-terminated UTF-16 string to a string
+ *
+ * \param str A pointer to a string object
+ * \param utf16 A pointer to a null-terminated UTF-16 string in the systems
+ *              byte order
+ */
+void tl_string_append_utf16( tl_string* str, const uint16_t* utf16 );
+
+/**
  * \brief Append a number of UTF-8 or ASCII characters to a string object
  *
  * \param str   A pointer to a string object
@@ -157,7 +166,7 @@ void tl_string_append_utf8_count( tl_string* str, const char* utf8,
                                   size_t count );
 
 /**
- * \brief Append a null-terminated Latin-1 or ASCII characters to a string
+ * \brief Append a number of Latin-1 or ASCII characters to a string
  *
  * \param str    A pointer to a string object
  * \param latin1 A pointer to a Latin-1 string (not neccessarily null
@@ -166,6 +175,18 @@ void tl_string_append_utf8_count( tl_string* str, const char* utf8,
  */
 void tl_string_append_latin1_count( tl_string* str, const char* latin1,
                                     size_t count );
+
+/**
+ * \brief Append a number of UTF-16 characters to a string
+ *
+ * \param str   A pointer to a string object
+ * \param utf16 A pointer to a UTF-16 string (not neccessarily null
+ *              terminated), in system byte order.
+ * \param count The number of characters to read from the string (surrogate
+ *              pairs count as one character)
+ */
+void tl_string_append_utf16_count( tl_string* str, const uint16_t* utf16,
+                                   size_t count );
 
 /**
  * \brief Append an unsigned intger value to a string

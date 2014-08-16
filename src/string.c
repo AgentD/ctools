@@ -7,6 +7,9 @@
 #define LEAD_OFFSET (0xD800 - (0x10000 >> 10))
 #define SURROGATE_OFFSET (0x10000 - (0xD800 << 10) - 0xDC00)
 
+#define IS_LEAD_SURROGATE( x ) (((x)>=0xD800) && ((x)<=0xDBFF))
+#define IS_TRAIL_SURROGATE( x ) (((x)>=0xDC00) && ((x)<=0xDFFF))
+
 #define IS_SURROGATE( x ) (((x) >= 0xD800) && ((x) <= 0xDFFF))
 #define UNICODE_MAX 0x0010FFFF
 #define REPLACEMENT_CHAR 0xFFFD
@@ -193,6 +196,41 @@ void tl_string_append_latin1( tl_string* this, const char* latin1 )
         tl_string_append_code_point( this, *(str++) );
 }
 
+void tl_string_append_utf16( tl_string* this, const uint16_t* str )
+{
+    unsigned int cp;
+
+    if( !this || !str )
+        return;
+
+    while( *str )
+    {
+        if( IS_LEAD_SURROGATE( *str ) )
+        {
+            if( IS_TRAIL_SURROGATE( str[1] ) )
+            {
+                cp = (str[0] << 10) + str[1] + SURROGATE_OFFSET;
+                ++str;
+            }
+            else
+            {
+                cp = REPLACEMENT_CHAR;
+            }
+        }
+        else if( IS_TRAIL_SURROGATE( *str ) )
+        {
+            cp = REPLACEMENT_CHAR;
+        }
+        else
+        {
+            cp = *str;
+        }
+
+        tl_string_append_code_point( this, cp );
+        ++str;
+    }
+}
+
 void tl_string_append_utf8_count( tl_string* this, const char* utf8,
                                   size_t count )
 {
@@ -243,6 +281,41 @@ void tl_string_append_latin1_count( tl_string* this, const char* latin1,
 
     for( i=0; i<count; ++i )
         tl_string_append_code_point( this, *(str++) );
+}
+
+void tl_string_append_utf16_count( tl_string* this, const uint16_t* str,
+                                   size_t count )
+{
+    size_t i, cp;
+
+    if( !this || !str || !count )
+        return;
+
+    for( i=0; i<count && *str; ++i, ++str )
+    {
+        if( IS_LEAD_SURROGATE( *str ) )
+        {
+            if( IS_TRAIL_SURROGATE( str[1] ) )
+            {
+                cp = (str[0] << 10) + str[1] + SURROGATE_OFFSET;
+                ++str;
+            }
+            else
+            {
+                cp = REPLACEMENT_CHAR;
+            }
+        }
+        else if( IS_TRAIL_SURROGATE( *str ) )
+        {
+            cp = REPLACEMENT_CHAR;
+        }
+        else
+        {
+            cp = *str;
+        }
+
+        tl_string_append_code_point( this, cp );
+    }
 }
 
 void tl_string_append_uint( tl_string* this, unsigned long value, int base )
