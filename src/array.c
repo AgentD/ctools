@@ -310,7 +310,7 @@ int tl_array_prepend( tl_array* this, const void* element )
 }
 
 int tl_array_insert( tl_array* this, size_t index,
-                      const void* element, size_t count )
+                     const void* element, size_t count )
 {
     if( !this || !element || index>=this->used )
         return 0;
@@ -329,6 +329,25 @@ int tl_array_insert( tl_array* this, size_t index,
     /* copy elements into array */
     memcpy( (unsigned char*)this->data + index * this->unitsize,
             element,
+            count * this->unitsize );
+
+    this->used += count;
+    return 1;
+}
+
+int tl_array_append_array( tl_array* this, const void* data, size_t count )
+{
+    if( !this || !data )
+        return 0;
+
+    if( !count )
+        return 1;
+
+    if( !tl_array_reserve( this, this->used+count ) )
+        return 0;
+
+    memcpy( (unsigned char*)this->data + this->used * this->unitsize,
+            data,
             count * this->unitsize );
 
     this->used += count;

@@ -236,6 +236,20 @@ int tl_array_insert( tl_array* vec, size_t index,
                      const void* element, size_t count );
 
 /**
+ * \brief Append an array of elements to an array
+ *
+ * \note This function runs in linear time
+ *
+ * \param vec   A pointer to an array
+ * \param data  A pointer to the element array to append
+ * \param count The number of elements to copy from the source array
+ *
+ * \return Non-zero on succes, zero if out of memory or either of the input
+ *         pointers was NULL
+ */
+int tl_array_append_array( tl_array* vec, const void* data, size_t count );
+
+/**
  * \brief Insert an element into a sorted array at the right position
  *
  * \note This function runs in linear time

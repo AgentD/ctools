@@ -362,6 +362,31 @@ int main( void )
 
     tl_array_cleanup( &avec );
 
+    /* append array */
+    tl_array_init( &avec, sizeof(int) );
+
+    tl_array_append_array( &avec, vals, 5 );
+    if( avec.used!=5 )
+        return EXIT_FAILURE;
+
+    for( i=0; i<5; ++i )
+    {
+        if( *((int*)tl_array_at( &avec, i ))!=vals[i] )
+            return EXIT_FAILURE;
+    }
+
+    tl_array_append_array( &avec, vals+5, 5 );
+    if( avec.used!=10 )
+        return EXIT_FAILURE;
+
+    for( i=0; i<10; ++i )
+    {
+        if( *((int*)tl_array_at( &avec, i ))!=vals[i] )
+            return EXIT_FAILURE;
+    }
+
+    tl_array_cleanup( &avec );
+
     return EXIT_SUCCESS;
 }
 
