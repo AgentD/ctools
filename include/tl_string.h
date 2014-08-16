@@ -56,6 +56,16 @@ void tl_string_init( tl_string* str );
 void tl_string_cleanup( tl_string* str );
 
 /**
+ * \brief Copy the contents of one string over another string
+ *
+ * \param dst The destination string
+ * \param src The source string
+ *
+ * \return Non-zero on success, zero on failure (read: out of memory)
+ */
+int tl_string_copy( tl_string* dst, const tl_string* src );
+
+/**
  * \brief Get the number of characters stored in a string object, counting
  *        surrogate pairs as a single character
  *

@@ -41,6 +41,16 @@ void tl_string_cleanup( tl_string* this )
     }
 }
 
+int tl_string_copy( tl_string* this, const tl_string* src )
+{
+    if( tl_array_copy( &this->vec, &src->vec ) )
+        return 0;
+
+    this->charcount  = src->charcount;
+    this->surrogates = src->surrogates;
+    return 1;
+}
+
 size_t tl_string_characters( tl_string* this )
 {
     return this ? this->charcount : 0;
