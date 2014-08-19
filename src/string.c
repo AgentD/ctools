@@ -54,12 +54,12 @@ int tl_string_copy( tl_string* this, const tl_string* src )
     return 1;
 }
 
-size_t tl_string_characters( tl_string* this )
+size_t tl_string_characters( const tl_string* this )
 {
     return this ? this->charcount : 0;
 }
 
-size_t tl_string_length( tl_string* this )
+size_t tl_string_length( const tl_string* this )
 {
     return this ? (this->vec.used - 1) : 0;
 }
@@ -76,24 +76,24 @@ void tl_string_clear( tl_string* this )
     }
 }
 
-int tl_string_is_empty( tl_string* this )
+int tl_string_is_empty( const tl_string* this )
 {
     return (!this) || (this->charcount==0);
 }
 
-unsigned int tl_string_at( tl_string* this, size_t index )
+unsigned int tl_string_at( const tl_string* this, size_t index )
 {
-    uint16_t* ptr;
+    const uint16_t* ptr;
     size_t i;
 
     if( this && (index < this->charcount) )
     {
         /* direct mapping of character index to array index */
         if( index < this->surrogates )
-            return ((uint16_t*)this->vec.data)[ index ];
+            return ((const uint16_t*)this->vec.data)[ index ];
 
         /* linearly search to target character index */
-        ptr = ((uint16_t*)this->vec.data) + this->surrogates;
+        ptr = ((const uint16_t*)this->vec.data) + this->surrogates;
         i = this->surrogates;
 
         while( i<index )

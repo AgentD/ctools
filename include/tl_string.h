@@ -74,7 +74,7 @@ int tl_string_copy( tl_string* dst, const tl_string* src );
  * \return The number of characters in the string object, excluding the
  *         null-terminator
  */
-size_t tl_string_characters( tl_string* str );
+size_t tl_string_characters( const tl_string* str );
 
 /**
  * \brief Get the number of code units stored in a string object (surrogate
@@ -85,7 +85,7 @@ size_t tl_string_characters( tl_string* str );
  * \return The number of code units in the string object, excluding the
  *         null-terminator
  */
-size_t tl_string_length( tl_string* str );
+size_t tl_string_length( const tl_string* str );
 
 /**
  * \brief Remove all characters from a string
@@ -101,7 +101,7 @@ void tl_string_clear( tl_string* str );
  *
  * \return Non-zero if a string is empty, zero if it is not
  */
-int tl_string_is_empty( tl_string* str );
+int tl_string_is_empty( const tl_string* str );
 
 /**
  * \brief Get a code point value from a character index
@@ -111,7 +111,7 @@ int tl_string_is_empty( tl_string* str );
  *
  * \return A unicode code point value
  */
-unsigned int tl_string_at( tl_string* str, size_t index );
+unsigned int tl_string_at( const tl_string* str, size_t index );
 
 /**
  * \brief Get a null-terminated UTF-16 string from a string object
