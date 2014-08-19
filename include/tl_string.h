@@ -45,8 +45,11 @@ extern "C" {
  * \brief Initialize a string
  *
  * \param str A pointer to a string object
+ *
+ * \return Non-zero on success, zero in the unlikely case that it is not
+ *         possible to allocate space for the null-terminator
  */
-void tl_string_init( tl_string* str );
+int tl_string_init( tl_string* str );
 
 /**
  * \brief Uninitialize a string and free all its memory
@@ -125,59 +128,95 @@ uint16_t* tl_string_cstr( tl_string* str );
 /**
  * \brief Append a unicode code point value to a string object
  *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
+ *
  * \param str A pointer to a string object
  * \param cp  A unicode code point value
+ *
+ * \return Non-zero on success, zero if out of memory (or str==NULL)
  */
-void tl_string_append_code_point( tl_string* str, unsigned int cp );
+int tl_string_append_code_point( tl_string* str, unsigned int cp );
 
 /**
  * \brief Append a null-terminated UTF-8 or ASCII string to a string object
  *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
+ *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
+ *
  * \param str  A pointer to a string object
  * \param utf8 A pointer to a null-terminated UTF-8 string
+ *
+ * \return Non-zero on success, zero if out of memory (or str==NULL)
  */
-void tl_string_append_utf8( tl_string* str, const char* utf8 );
+int tl_string_append_utf8( tl_string* str, const char* utf8 );
 
 /**
  * \brief Append a null-terminated Latin-1 or ASCII string to a string object
  *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
+ *
  * \param str    A pointer to a string object
  * \param latin1 A pointer to a null-terminated Latin-1 string
+ *
+ * \return Non-zero on success, zero if out of memory (or str==NULL)
  */
-void tl_string_append_latin1( tl_string* str, const char* latin1 );
+int tl_string_append_latin1( tl_string* str, const char* latin1 );
 
 /**
  * \brief Append a null-terminated UTF-16 string to a string
  *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
+ *
  * \param str A pointer to a string object
  * \param utf16 A pointer to a null-terminated UTF-16 string in the systems
  *              byte order
+ *
+ * \return Non-zero on success, zero if out of memory (or str==NULL)
  */
-void tl_string_append_utf16( tl_string* str, const uint16_t* utf16 );
+int tl_string_append_utf16( tl_string* str, const uint16_t* utf16 );
 
 /**
  * \brief Append a number of UTF-8 or ASCII characters to a string object
  *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
+ *
  * \param str   A pointer to a string object
  * \param utf8  A pointer to a UTF-8 string (not neccessarily null terminated)
  * \param count The number of characters (!) to read from the string
+ *
+ * \return Non-zero on success, zero if out of memory (or str==NULL)
  */
-void tl_string_append_utf8_count( tl_string* str, const char* utf8,
-                                  size_t count );
+int tl_string_append_utf8_count( tl_string* str, const char* utf8,
+                                 size_t count );
 
 /**
  * \brief Append a number of Latin-1 or ASCII characters to a string
+ *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
  *
  * \param str    A pointer to a string object
  * \param latin1 A pointer to a Latin-1 string (not neccessarily null
  *               terminated)
  * \param count  The number of characters to read from the string
+ *
+ * \return Non-zero on success, zero if out of memory (or str==NULL)
  */
-void tl_string_append_latin1_count( tl_string* str, const char* latin1,
-                                    size_t count );
+int tl_string_append_latin1_count( tl_string* str, const char* latin1,
+                                   size_t count );
 
 /**
  * \brief Append a number of UTF-16 characters to a string
+ *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
  *
  * \param str   A pointer to a string object
  * \param utf16 A pointer to a UTF-16 string (not neccessarily null
@@ -185,11 +224,14 @@ void tl_string_append_latin1_count( tl_string* str, const char* latin1,
  * \param count The number of characters to read from the string (surrogate
  *              pairs count as one character)
  */
-void tl_string_append_utf16_count( tl_string* str, const uint16_t* utf16,
-                                   size_t count );
+int tl_string_append_utf16_count( tl_string* str, const uint16_t* utf16,
+                                  size_t count );
 
 /**
  * \brief Append an unsigned intger value to a string
+ *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
  *
  * For bases above 10, upper case letters are used for digits with a value
  * greather than 9, i.e. 'A' for 10, 'B' for 11 up to 'Z' for 35.
@@ -200,11 +242,16 @@ void tl_string_append_utf16_count( tl_string* str, const uint16_t* utf16,
  * \param base  The base to convert the number to when printing it. Everything
  *              less than 2 is interpreted as base 10 and everything greater
  *              than 36 is clamped to 36.
+ *
+ * \return Non-zero on success, zero if out of memory (or str==NULL)
  */
-void tl_string_append_uint( tl_string* str, unsigned long value, int base );
+int tl_string_append_uint( tl_string* str, unsigned long value, int base );
 
 /**
  * \brief Append a signed intger value to a string
+ *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
  *
  * For bases above 10, upper case letters are used for digits with a value
  * greather than 9, i.e. 'A' for 10, 'B' for 11 up to 'Z' for 35.
@@ -216,8 +263,10 @@ void tl_string_append_uint( tl_string* str, unsigned long value, int base );
  * \param base  The base to convert the number to when printing it. Everything
  *              less than 2 is interpreted as base 10 and everything greater
  *              than 36 is clamped to 36.
+ *
+ * \return Non-zero on success, zero if out of memory (or str==NULL)
  */
-void tl_string_append_int( tl_string* str, long value, int base );
+int tl_string_append_int( tl_string* str, long value, int base );
 
 #ifdef __cplusplus
 }

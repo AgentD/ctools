@@ -1,6 +1,6 @@
 #include "tl_string.h"
 
-#include <stdarg.h>
+#include <string.h>
 
 
 
@@ -18,19 +18,104 @@
 
 
 
+/*
+    determine how many UTF-16 code units are required to
+    encode a given UTF-8 string
+ */
+static size_t utf8_count( const unsigned char* str, size_t chars )
+{
+    size_t i=0, count = 0;
 
-void tl_string_init( tl_string* this )
+    while( *str && i<chars )
+    {
+        if( (*str & 0xC0) != 0x80 )
+        {
+            count += ((*str & 0xF8)==0xF0) ? 2 : 1;
+            ++i;
+        }
+
+        ++str;
+    }
+
+    return count;
+}
+
+static size_t utf8_strlen( const char* utf8 )
+{
+    const unsigned char* str = (const unsigned char*)utf8;
+    size_t count = 0;
+
+    while( *str )
+    {
+        if( (*str & 0xC0) != 0x80 )
+            ++count;
+        ++str;
+    }
+
+    return count;
+}
+
+static size_t utf16_strlen( const uint16_t* str )
+{
+    size_t count = 0;
+
+    while( *str )
+    {
+        if( IS_LEAD_SURROGATE( *str ) )
+        {
+            if( IS_TRAIL_SURROGATE( str[1] ) )
+            {
+                str += 2;
+                ++count;
+                continue;
+            }
+        }
+        ++count;
+        ++str;
+    }
+
+    return count;
+}
+
+static size_t utf16_code_count( const uint16_t* str, size_t chars )
+{
+    size_t i, count = 0;
+
+    for( i=0; i<chars; ++i )
+    {
+        if( IS_LEAD_SURROGATE( *str ) )
+        {
+            if( IS_TRAIL_SURROGATE( str[1] ) )
+            {
+                count += 2;
+                str += 2;
+                continue;
+            }
+        }
+        count += 1;
+        str += 1;
+    }
+
+    return count;
+}
+
+/****************************************************************************/
+
+int tl_string_init( tl_string* this )
 {
     uint16_t null = 0;
 
     if( this )
     {
         tl_array_init( &(this->vec), sizeof(uint16_t) );
-        tl_array_append( &(this->vec), &null );
-
         this->charcount = 0;
         this->surrogates = 0;
+
+        if( tl_array_append( &(this->vec), &null ) )
+            return 1;
     }
+
+    return 0;
 }
 
 void tl_string_cleanup( tl_string* this )
@@ -117,20 +202,116 @@ uint16_t* tl_string_cstr( tl_string* this )
     return this ? this->vec.data : NULL;
 }
 
-void tl_string_append_code_point( tl_string* this, unsigned int cp )
+int tl_string_append_code_point( tl_string* this, unsigned int cp )
 {
     uint16_t val[2];
 
-    if( this )
+    if( !this )
+        return 0;
+
+    if( IS_SURROGATE(cp) || cp>UNICODE_MAX || cp==BOM || cp==BOM2 )
+        cp = REPLACEMENT_CHAR;
+
+    if( cp <= 0xFFFF )
     {
+        val[0] = cp;
+
+        if( !tl_array_insert( &(this->vec), this->vec.used - 1, val, 1 ) )
+            return 0;
+
+        /* no surrogates yet? */
+        if( this->surrogates == this->charcount )
+            ++this->surrogates;
+    }
+    else
+    {
+        val[0] = LEAD_OFFSET + (cp >> 10);
+        val[1] = 0xDC00 + (cp & 0x3FF);
+
+        if( !tl_array_insert( &(this->vec), this->vec.used - 1, val, 2 ) )
+            return 0;
+    }
+
+    ++this->charcount;
+    return 1;
+}
+
+int tl_string_append_utf8( tl_string* this, const char* utf8 )
+{
+    if( !this ) return 0;
+    if( !utf8 ) return 1;
+
+    return tl_string_append_utf8_count( this, utf8, utf8_strlen( utf8 ) );
+}
+
+int tl_string_append_latin1( tl_string* this, const char* latin1 )
+{
+    if( !this   ) return 0;
+    if( !latin1 ) return 1;
+
+    return tl_string_append_latin1_count( this, latin1, strlen( latin1 ) );
+}
+
+int tl_string_append_utf16( tl_string* this, const uint16_t* str )
+{
+    if( !this ) return 0;
+    if( !str  ) return 1;
+
+    return tl_string_append_utf16_count( this, str, utf16_strlen( str ) );
+}
+
+int tl_string_append_utf8_count( tl_string* this, const char* utf8,
+                                 size_t count )
+{
+    unsigned char* str = (unsigned char*)utf8;
+    unsigned int cp, i, len;
+    size_t u8len, j;
+    uint16_t* dst;
+
+    if( !this           ) return 0;
+    if( !utf8 || !count ) return 1;
+
+    /* compute number of bytes to add */
+    if( !(u8len = utf8_count( str, count )) )
+        return 1;
+
+    /* resize array */
+    dst = (uint16_t*)this->vec.data + this->vec.used - 1;
+
+    if( !tl_array_resize( &this->vec, this->vec.used + u8len ) )
+        return 0;
+
+    for( j=0; j<count; ++j, ++this->charcount )
+    {
+        len = 1;
+        cp = *(str++);
+
+             if( (cp & 0xFE) == 0xFC ) { len = 6; cp &= 0x01; }
+        else if( (cp & 0xFC) == 0xF8 ) { len = 5; cp &= 0x03; }
+        else if( (cp & 0xF8) == 0xF0 ) { len = 4; cp &= 0x07; }
+        else if( (cp & 0xF0) == 0xE0 ) { len = 3; cp &= 0x0F; }
+        else if( (cp & 0xE0) == 0xC0 ) { len = 2; cp &= 0x1F; }
+        else if( cp >= 0x80          ) { len = 1; cp = REPLACEMENT_CHAR; }
+
+        for( i=1; i<len; ++i )
+        {
+            if( ((*str) & 0xC0)!=0x80 )
+            {
+                ++str;
+                cp = REPLACEMENT_CHAR;
+                break;
+            }
+
+            cp <<= 6;
+            cp |= (*(str++)) & 0x3F;
+        }
+
         if( IS_SURROGATE(cp) || cp>UNICODE_MAX || cp==BOM || cp==BOM2 )
             cp = REPLACEMENT_CHAR;
 
         if( cp <= 0xFFFF )
         {
-            val[0] = cp;
-
-            tl_array_insert( &(this->vec), this->vec.used - 1, val, 1 );
+            *dst++ = cp;
 
             /* no surrogates yet? */
             if( this->surrogates == this->charcount )
@@ -138,193 +319,101 @@ void tl_string_append_code_point( tl_string* this, unsigned int cp )
         }
         else
         {
-            val[0] = LEAD_OFFSET + (cp >> 10);
-            val[1] = 0xDC00 + (cp & 0x3FF);
-
-            tl_array_insert( &(this->vec), this->vec.used - 1, val, 2 );
+            *dst++ = LEAD_OFFSET + (cp >> 10);
+            *dst++ = 0xDC00 + (cp & 0x3FF);
         }
-
-        ++this->charcount;
     }
+
+    *dst = 0;
+    return 1;
 }
 
-void tl_string_append_utf8( tl_string* this, const char* utf8 )
-{
-    unsigned char* str = (unsigned char*)utf8;
-    unsigned int cp, i, len;
-
-    if( !this || !str )
-        return;
-
-    while( *str )
-    {
-        len = 1;
-        cp = *(str++);
-
-             if( (cp & 0xFE) == 0xFC ) { len = 6; cp &= 0x01; }
-        else if( (cp & 0xFC) == 0xF8 ) { len = 5; cp &= 0x03; }
-        else if( (cp & 0xF8) == 0xF0 ) { len = 4; cp &= 0x07; }
-        else if( (cp & 0xF0) == 0xE0 ) { len = 3; cp &= 0x0F; }
-        else if( (cp & 0xE0) == 0xC0 ) { len = 2; cp &= 0x1F; }
-        else if( cp >= 0x80          ) { len = 1; cp = REPLACEMENT_CHAR; }
-
-        for( i=1; i<len; ++i )
-        {
-            if( ((*str) & 0xC0)!=0x80 )
-            {
-                ++str;
-                cp = REPLACEMENT_CHAR;
-                break;
-            }
-
-            cp <<= 6;
-            cp |= (*(str++)) & 0x3F;
-        }
-
-        tl_string_append_code_point( this, cp );
-    }
-}
-
-void tl_string_append_latin1( tl_string* this, const char* latin1 )
-{
-    unsigned char* str = (unsigned char*)latin1;
-
-    if( !this || !str )
-        return;
-
-    while( *str )
-        tl_string_append_code_point( this, *(str++) );
-}
-
-void tl_string_append_utf16( tl_string* this, const uint16_t* str )
-{
-    unsigned int cp;
-
-    if( !this || !str )
-        return;
-
-    while( *str )
-    {
-        if( IS_LEAD_SURROGATE( *str ) )
-        {
-            if( IS_TRAIL_SURROGATE( str[1] ) )
-            {
-                cp = (str[0] << 10) + str[1] + SURROGATE_OFFSET;
-                ++str;
-            }
-            else
-            {
-                cp = REPLACEMENT_CHAR;
-            }
-        }
-        else if( IS_TRAIL_SURROGATE( *str ) )
-        {
-            cp = REPLACEMENT_CHAR;
-        }
-        else
-        {
-            cp = *str;
-        }
-
-        tl_string_append_code_point( this, cp );
-        ++str;
-    }
-}
-
-void tl_string_append_utf8_count( tl_string* this, const char* utf8,
-                                  size_t count )
-{
-    unsigned char* str = (unsigned char*)utf8;
-    unsigned int cp, i, len;
-    size_t j;
-
-    if( !this || !str )
-        return;
-
-    for( j=0; j<count; ++j )
-    {
-        len = 1;
-        cp = *(str++);
-
-             if( (cp & 0xFE) == 0xFC ) { len = 6; cp &= 0x01; }
-        else if( (cp & 0xFC) == 0xF8 ) { len = 5; cp &= 0x03; }
-        else if( (cp & 0xF8) == 0xF0 ) { len = 4; cp &= 0x07; }
-        else if( (cp & 0xF0) == 0xE0 ) { len = 3; cp &= 0x0F; }
-        else if( (cp & 0xE0) == 0xC0 ) { len = 2; cp &= 0x1F; }
-        else if( cp >= 0x80          ) { len = 1; cp = REPLACEMENT_CHAR; }
-
-        for( i=1; i<len; ++i )
-        {
-            if( ((*str) & 0xC0)!=0x80 )
-            {
-                ++str;
-                cp = REPLACEMENT_CHAR;
-                break;
-            }
-
-            cp <<= 6;
-            cp |= (*(str++)) & 0x3F;
-        }
-
-        tl_string_append_code_point( this, cp );
-    }
-}
-
-void tl_string_append_latin1_count( tl_string* this, const char* latin1,
-                                    size_t count )
-{
-    unsigned char* str = (unsigned char*)latin1;
-    size_t i;
-
-    if( !this || !str )
-        return;
-
-    for( i=0; i<count; ++i )
-        tl_string_append_code_point( this, *(str++) );
-}
-
-void tl_string_append_utf16_count( tl_string* this, const uint16_t* str,
+int tl_string_append_latin1_count( tl_string* this, const char* latin1,
                                    size_t count )
 {
-    size_t i, cp;
+    unsigned char* str = (unsigned char*)latin1;
+    uint16_t* dst;
+    size_t i;
 
-    if( !this || !str || !count )
-        return;
+    if( !this ) return 0;
+    if( !str  ) return 1;
 
-    for( i=0; i<count && *str; ++i, ++str )
+    dst = (uint16_t*)this->vec.data + this->vec.used - 1;
+
+    if( !tl_array_resize( &this->vec, this->vec.used + count ) )
+        return 0;
+
+    for( i=0; i<count; ++i )
+        *(dst++) = *(str++);
+
+    *dst = 0;
+
+    if( this->surrogates == this->charcount )
+        this->surrogates += count;
+
+    this->charcount += count;
+    return 1;
+}
+
+int tl_string_append_utf16_count( tl_string* this, const uint16_t* str,
+                                  size_t count )
+{
+    size_t i, total;
+    uint16_t* dst;
+
+    if( !this          ) return 0;
+    if( !str || !count ) return 1;
+
+    total = utf16_code_count( str, count );
+
+    if( !total )
+        return 1;
+
+    dst = (uint16_t*)this->vec.data + this->vec.used - 1;
+
+    if( !tl_array_resize( &this->vec, this->vec.used + total ) )
+        return 0;
+
+    for( i=0; i<count; ++i )
     {
         if( IS_LEAD_SURROGATE( *str ) )
         {
             if( IS_TRAIL_SURROGATE( str[1] ) )
             {
-                cp = (str[0] << 10) + str[1] + SURROGATE_OFFSET;
-                ++str;
+                *(dst++) = *(str++);
+                *(dst++) = *(str++);
+                ++this->charcount;
+                continue;
             }
-            else
-            {
-                cp = REPLACEMENT_CHAR;
-            }
+
+            *(dst++) = REPLACEMENT_CHAR;
+            ++str;
         }
         else if( IS_TRAIL_SURROGATE( *str ) )
         {
-            cp = REPLACEMENT_CHAR;
+            *(dst++) = REPLACEMENT_CHAR;
+            ++str;
         }
         else
         {
-            cp = *str;
+            *(dst++) = *(str++);
         }
 
-        tl_string_append_code_point( this, cp );
+        if( this->surrogates == (this->charcount++) )
+            ++this->surrogates;
     }
+
+    *dst = 0;
+    return 1;
 }
 
-void tl_string_append_uint( tl_string* this, unsigned long value, int base )
+int tl_string_append_uint( tl_string* this, unsigned long value, int base )
 {
     char buffer[ 128 ];     /* enough for a 128 bit number in base 2 */
     int digit, i = sizeof(buffer)-1;
 
     if( !this )
-        return;
+        return 0;
 
     if( !value )
     {
@@ -343,17 +432,43 @@ void tl_string_append_uint( tl_string* this, unsigned long value, int base )
         }
     }
 
-    tl_string_append_latin1_count( this, buffer+i+1, sizeof(buffer)-i-1 );
+    return tl_string_append_latin1_count(this,buffer+i+1,sizeof(buffer)-i-1);
 }
 
-void tl_string_append_int( tl_string* this, long value, int base )
+int tl_string_append_int( tl_string* this, long value, int base )
 {
-    if( value < 0 )
+    char buffer[ 129 ];     /* enough for a 128 bit number in base 2 + sign */
+    int digit, i = sizeof(buffer)-1, sign = 0;
+
+    if( !this )
+        return 0;
+
+    if( !value )
     {
-        tl_string_append_code_point( this, '-' );
-        value = -value;
+        buffer[ i-- ] = 0x30;
+    }
+    else
+    {
+        if( value < 0 )
+        {
+            sign = 1;
+            value = -value;
+        }
+
+        base = base<2 ? 10 : (base>36 ? 36 : base);
+
+        while( value!=0 )
+        {
+            digit = value % base;
+            value /= base;
+
+            buffer[ i-- ] = (digit<10) ? (0x30|digit) : (0x41 + digit - 10);
+        }
+
+        if( sign )
+            buffer[ i-- ] = '-';
     }
 
-    tl_string_append_uint( this, value, base );
+    return tl_string_append_latin1_count(this,buffer+i+1,sizeof(buffer)-i-1);
 }
 

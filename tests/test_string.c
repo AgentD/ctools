@@ -235,7 +235,7 @@ int main( void )
     if( tl_string_cstr( &str )[5] != 0x0000 ) return EXIT_FAILURE;
 
 
-    tl_string_append_utf16_count( &str, utf16+2, 5 );
+    tl_string_append_utf16_count( &str, utf16+2, 3 );
     if( str.charcount!=7 || str.surrogates!=2 ) return EXIT_FAILURE;
     if( str.vec.used!=10 ) return EXIT_FAILURE;
 
