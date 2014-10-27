@@ -114,4 +114,5 @@ add_test( test_rbtree ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_rbtree )
 add_test( test_sort ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_sort )
 add_test( test_string ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_string )
 add_test( test_string2 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_string2 )
+add_test( test_fs ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_fs )
 

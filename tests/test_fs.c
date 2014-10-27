@@ -36,6 +36,7 @@ int main( void )
     tl_string str;
     tl_dir* dir;
     size_t i;
+    FILE* f;
 
     /* print system & setup dependend values */
     tl_string_init( &str );
@@ -87,20 +88,38 @@ int main( void )
     tl_string_cleanup( &str );
     tl_dir_close( dir );
 
-    /* XXX: generate directory structure for testing? */
+    /* test filesystem functions */
+    if( tl_fs_exists_utf8( "FOO" )           ) return EXIT_FAILURE;
+    if( tl_fs_is_directory_utf8( "FOO" )     ) return EXIT_FAILURE;
+    if( tl_fs_mkdir_utf8( "FOO" )!=0         ) return EXIT_FAILURE;
+    if( !tl_fs_exists_utf8( "FOO" )          ) return EXIT_FAILURE;
+    if( !tl_fs_is_directory_utf8( "FOO" )    ) return EXIT_FAILURE;
+    if( tl_fs_exists_utf8( "FOO/bar" )       ) return EXIT_FAILURE;
+    if( tl_fs_is_directory_utf8( "FOO/bar" ) ) return EXIT_FAILURE;
+
+    if( tl_fs_cwd_utf8( "FOO" )!=0       ) return EXIT_FAILURE;
+    if( tl_fs_exists_utf8( "FOO" )       ) return EXIT_FAILURE;
+    if( tl_fs_is_directory_utf8( "FOO" ) ) return EXIT_FAILURE;
+    f = fopen( "bar", "w" );
+    fclose( f );
+    if( tl_fs_cwd_utf8( ".." )!=0            ) return EXIT_FAILURE;
+    if( !tl_fs_exists_utf8( "FOO" )          ) return EXIT_FAILURE;
+    if( !tl_fs_is_directory_utf8( "FOO" )    ) return EXIT_FAILURE;
+    if( !tl_fs_exists_utf8( "FOO/bar" )      ) return EXIT_FAILURE;
+    if( tl_fs_is_directory_utf8( "FOO/bar" ) ) return EXIT_FAILURE;
+
+    if( tl_fs_delete_utf8( "FOO" )!=TL_FS_NOT_EMPTY )
+        return EXIT_FAILURE;
+
+    if( tl_fs_delete_utf8( "FOO/bar" )!=0    ) return EXIT_FAILURE;
+    if( tl_fs_exists_utf8( "FOO/bar" )       ) return EXIT_FAILURE;
+    if( tl_fs_is_directory_utf8( "FOO/bar" ) ) return EXIT_FAILURE;
+    if( tl_fs_delete_utf8( "FOO" )!=0        ) return EXIT_FAILURE;
+    if( tl_fs_exists_utf8( "FOO" )           ) return EXIT_FAILURE;
+    if( tl_fs_is_directory_utf8( "FOO" )     ) return EXIT_FAILURE;
+
 #if 0
-int tl_fs_exists( const tl_string* path );
-int tl_fs_exists_utf8( const char* path );
-int tl_fs_is_directory( const tl_string* path );
-int tl_fs_is_directory_utf8( const char* path );
-int tl_fs_is_symlink( const tl_string* path );
 int tl_fs_is_symlink_utf8( const char* path );
-int tl_fs_mkdir( const tl_string* path );
-int tl_fs_mkdir_utf8( const char* path );
-int tl_fs_cwd( const tl_string* path );
-int tl_fs_cwd_utf8( const char* path );
-int tl_fs_delete( const tl_string* path );
-int tl_fs_delete_utf8( const char* path );
 #endif
 
     return EXIT_SUCCESS;
