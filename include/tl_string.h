@@ -268,6 +268,36 @@ int tl_string_append_uint( tl_string* str, unsigned long value, int base );
  */
 int tl_string_append_int( tl_string* str, long value, int base );
 
+/**
+ * \brief Determine how much space is needed to convert a tl_string to UTF-8
+ *
+ * This function computes the number of characters (excluding null-terminator)
+ * are required to hold the UTF-8 version of a tl_string.
+ *
+ * \param str A pointer to a string
+ *
+ * \return The number of characters required
+ */
+size_t tl_string_utf8_len( const tl_string* str );
+
+/**
+ * \brief Convert a tl_string to UTF-8
+ *
+ * This function attempts to convert a tl_string to an UTF-8 representation.
+ * The resulting buffer will always be null-terminated and never contain an
+ * unfinished UTF-8 character. If a character plus null-terminator would go
+ * beyond the buffer size, conversion is aborted and a null-terminator is
+ * added. If the input string pointer is NULL, a null-terminator is added
+ * (given the buffer is not NULL and size is large enough).
+ *
+ * \param str    A pointer to a string
+ * \param buffer The destination buffer to write to
+ * \param size   The number of characters available in the destination buffer
+ *
+ * \return The number of characters written (exlcuding the null-terminator)
+ */
+size_t tl_string_to_utf8( const tl_string* str, char* buffer, size_t size );
+
 #ifdef __cplusplus
 }
 #endif

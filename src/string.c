@@ -472,3 +472,108 @@ int tl_string_append_int( tl_string* this, long value, int base )
     return tl_string_append_latin1_count(this,buffer+i+1,sizeof(buffer)-i-1);
 }
 
+size_t tl_string_utf8_len( const tl_string* this )
+{
+    const uint16_t* in;
+    size_t i, count=0;
+    unsigned int cp;
+
+    if( this )
+    {
+        for( in=this->vec.data, i=0; i<this->charcount; ++i )
+        {
+            if( IS_SURROGATE(*in) )
+            {
+                cp  = ((*(in++)) << 10) + SURROGATE_OFFSET;
+                cp +=   *(in++);
+            }
+            else
+            {
+                cp = *(in++);
+            }
+
+                 if( cp<=0x007F ) count += 1;
+            else if( cp<=0x07FF ) count += 2;
+            else if( cp<=0xFFFF ) count += 3;
+            else                  count += 4;
+        }
+    }
+    return count;
+}
+
+size_t tl_string_to_utf8( const tl_string* this, char* buffer, size_t size )
+{
+    unsigned char* chr;
+    const uint16_t* in;
+    unsigned int cp;
+    size_t i, j;
+
+    /* sanity check */
+    if( !buffer || !size )
+        return 0;
+
+    if( !this )
+    {
+        buffer[0] = '\0';
+        return 0;
+    }
+
+    chr = (unsigned char*)buffer;
+    in = this->vec.data;
+
+    for( j=0, i=0; i<this->charcount; ++i )
+    {
+        if( IS_SURROGATE(*in) )
+        {
+            cp  = ((*(in++)) << 10) + SURROGATE_OFFSET;
+            cp +=   *(in++);
+        }
+        else
+        {
+            cp = *(in++);
+        }
+    
+        if( cp<=0x007F )
+        {
+            ++j;
+            if( j>=(size-1) )
+                break;
+
+            *(chr++) = cp;
+        }
+        else if( cp<=0x07FF )
+        {
+            j += 2;
+            if( j>=(size-1) )
+                break;
+
+            *(chr++) = ((cp>>6) & 0x1F) | 0xC0;
+            *(chr++) = ( cp     & 0x3F) | 0x80;
+        }
+        else if( cp<=0xFFFF )
+        {
+            j += 3;
+            if( j>=(size-1) )
+                break;
+
+            *(chr++) = ((cp>>12) & 0x0F) | 0xE0;
+            *(chr++) = ((cp>> 6) & 0x3F) | 0x80;
+            *(chr++) = ( cp      & 0x3F) | 0x80;
+        }
+        else
+        {
+            j += 4;
+            if( j>=(size-1) )
+                break;
+
+            *(chr++) = ((cp>>18) & 0x07) | 0xF0;
+            *(chr++) = ((cp>>12) & 0x3F) | 0x80;
+            *(chr++) = ((cp>> 6) & 0x3F) | 0x80;
+            *(chr++) = ( cp      & 0x3F) | 0x80;
+        }
+    }
+
+    *chr = '\0';
+    return i;
+}
+
