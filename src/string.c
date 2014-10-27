@@ -340,10 +340,12 @@ int tl_string_append_latin1_count( tl_string* this, const char* latin1,
     if( !this ) return 0;
     if( !str  ) return 1;
 
-    dst = (uint16_t*)this->vec.data + this->vec.used - 1;
+    i = this->vec.used - 1;
 
     if( !tl_array_resize( &this->vec, this->vec.used + count ) )
         return 0;
+
+    dst = (uint16_t*)this->vec.data + i;
 
     for( i=0; i<count; ++i )
         *(dst++) = *(str++);
@@ -371,10 +373,12 @@ int tl_string_append_utf16_count( tl_string* this, const uint16_t* str,
     if( !total )
         return 1;
 
-    dst = (uint16_t*)this->vec.data + this->vec.used - 1;
+    i = this->vec.used - 1;
 
     if( !tl_array_resize( &this->vec, this->vec.used + total ) )
         return 0;
+
+    dst = (uint16_t*)this->vec.data + i;
 
     for( i=0; i<count; ++i )
     {
