@@ -176,7 +176,10 @@ int tl_array_resize( tl_array* this, size_t size )
             realloc( this->data, (this->reserved/2) * this->unitsize );
 
             if( newdata )
+            {
+                this->reserved = this->reserved/2;
                 this->data = newdata;
+            }
         }
     }
     else
