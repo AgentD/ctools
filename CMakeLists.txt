@@ -61,13 +61,19 @@ endif( )
 #----------------------------------------------------------------------
 include_directories( ${CMAKE_SOURCE_DIR}/include/ )
 
+if( UNIX )
+  set( CTOOLS_SYSDEP src/unix/os.c
+                     src/unix/fs.c )
+endif( )
+
 add_library( ctools STATIC src/array.c
                            src/list.c
                            src/stack.c
                            src/queue.c
                            src/rbtree.c
                            src/string.c
-                           src/sort.c )
+                           src/sort.c
+                           ${CTOOLS_SYSDEP} )
 
 #----------------------------------------------------------------------
 # Configure tests
@@ -80,6 +86,7 @@ add_executable( test_rbtree tests/test_rbtree.c )
 add_executable( test_sort tests/test_sort.c )
 add_executable( test_string tests/test_string.c )
 add_executable( test_string2 tests/test_string2.c )
+add_executable( test_fs tests/test_fs.c )
 
 target_link_libraries( test_array ctools )
 target_link_libraries( test_list ctools )
@@ -89,6 +96,7 @@ target_link_libraries( test_rbtree ctools )
 target_link_libraries( test_sort ctools )
 target_link_libraries( test_string ctools )
 target_link_libraries( test_string2 ctools )
+target_link_libraries( test_fs ctools )
 
 enable_testing( )
 add_test( test_array ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_array )
