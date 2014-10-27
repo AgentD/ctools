@@ -276,10 +276,12 @@ int tl_string_append_utf8_count( tl_string* this, const char* utf8,
         return 1;
 
     /* resize array */
-    dst = (uint16_t*)this->vec.data + this->vec.used - 1;
+    i = this->vec.used - 1;
 
     if( !tl_array_resize( &this->vec, this->vec.used + u8len ) )
         return 0;
+
+    dst = (uint16_t*)this->vec.data + i;
 
     for( j=0; j<count; ++j, ++this->charcount )
     {
