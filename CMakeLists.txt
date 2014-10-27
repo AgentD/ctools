@@ -63,7 +63,8 @@ include_directories( ${CMAKE_SOURCE_DIR}/include/ )
 
 if( UNIX )
   set( CTOOLS_SYSDEP src/unix/os.c
-                     src/unix/fs.c )
+                     src/unix/fs.c
+                     src/unix/dir.c )
 endif( )
 
 add_library( ctools STATIC src/array.c

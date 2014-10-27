@@ -1,4 +1,6 @@
 #include "tl_string.h"
+#include "tl_array.h"
+#include "tl_dir.h"
 #include "tl_fs.h"
 
 #include <stdlib.h>
@@ -6,11 +8,36 @@
 
 
 
+int tl_string_compare( const void* a, const void* b )
+{
+    const tl_string *stra = a, *strb = b;
+    size_t i = 0;
+
+    while( i<stra->vec.used && i<strb->vec.used )
+    {
+        if( ((uint16_t*)stra->vec.data)[i] < ((uint16_t*)strb->vec.data)[i] )
+            return -1;
+
+        if( ((uint16_t*)stra->vec.data)[i] > ((uint16_t*)strb->vec.data)[i] )
+            return 1;
+
+        ++i;
+    }
+
+    return ((uint16_t*)stra->vec.data)[i] - ((uint16_t*)strb->vec.data)[i];
+}
+
+
+
 int main( void )
 {
     char buffer[128];
+    tl_array strlist;
     tl_string str;
+    tl_dir* dir;
+    size_t i;
 
+    /* print system & setup dependend values */
     tl_string_init( &str );
 
     printf( "OS dir seperator: '%s'\n", tl_fs_get_dir_sep( ) );
@@ -26,6 +53,39 @@ int main( void )
     printf( "Current working directory: '%s'\n", buffer );
 
     tl_string_cleanup( &str );
+
+    /* print contents of working directory */
+    puts( "********************************" );
+
+    tl_array_init( &strlist, sizeof(tl_string) );
+    tl_dir_scan_utf8( ".", &strlist );
+    tl_array_stable_sort( &strlist, tl_string_compare );
+
+    for( i=0; i<strlist.used; ++i )
+    {
+        tl_string_to_utf8( (tl_string*)tl_array_at( &strlist, i ),
+                           buffer, sizeof(buffer) );
+
+        puts( buffer );
+
+        tl_string_cleanup( (tl_string*)tl_array_at( &strlist, i ) );
+    }
+
+    tl_array_cleanup( &strlist );
+
+    puts( "********************************" );
+
+    dir = tl_dir_open_utf8( "." );
+    tl_string_init( &str );
+
+    while( tl_dir_read( dir, &str ) )
+    {
+        tl_string_to_utf8( &str, buffer, sizeof(buffer) );
+        puts( buffer );
+    }
+
+    tl_string_cleanup( &str );
+    tl_dir_close( dir );
 
     /* XXX: generate directory structure for testing? */
 #if 0
