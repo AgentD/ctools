@@ -65,6 +65,12 @@ if( UNIX )
   set( CTOOLS_SYSDEP src/unix/os.c
                      src/unix/fs.c
                      src/unix/dir.c )
+elseif( WIN32 )
+  set( CTOOLS_SYSDEP src/W32/os.c
+                     src/W32/fs.c
+                     src/W32/dir.c )
+
+  set( CTOOLS_SYSLIBS userenv )
 endif( )
 
 add_library( ctools STATIC src/array.c
@@ -89,7 +95,7 @@ add_executable( test_string tests/test_string.c )
 add_executable( test_string2 tests/test_string2.c )
 add_executable( test_fs tests/test_fs.c )
 
-target_link_libraries( test_array ctools )
+target_link_libraries( test_array ctools  )
 target_link_libraries( test_list ctools )
 target_link_libraries( test_stack ctools )
 target_link_libraries( test_queue ctools )
@@ -97,7 +103,7 @@ target_link_libraries( test_rbtree ctools )
 target_link_libraries( test_sort ctools )
 target_link_libraries( test_string ctools )
 target_link_libraries( test_string2 ctools )
-target_link_libraries( test_fs ctools )
+target_link_libraries( test_fs ctools ${CTOOLS_SYSLIBS} )
 
 enable_testing( )
 add_test( test_array ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_array )
