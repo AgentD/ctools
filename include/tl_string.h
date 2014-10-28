@@ -298,6 +298,23 @@ size_t tl_string_utf8_len( const tl_string* str );
  */
 size_t tl_string_to_utf8( const tl_string* str, char* buffer, size_t size );
 
+/**
+ * \brief Get the last character of a string
+ *
+ * \param str A pointer to a string
+ *
+ * \return The unicode code point of the last character in the string, or 0 if
+ *         the string is empty or NULL
+ */
+unsigned int tl_string_last( const tl_string* str );
+
+/**
+ * \brief Remove the last character of a string
+ *
+ * \param str A pointer to a string
+ */
+void tl_string_drop_last( tl_string* str );
+
 #ifdef __cplusplus
 }
 #endif

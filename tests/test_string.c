@@ -289,6 +289,63 @@ int main( void )
 
     tl_string_cleanup( &str );
 
+    /* retrieve and remove end */
+    tl_string_init( &str );
+
+    if( tl_string_last( &str )!=0 ) return EXIT_FAILURE;
+    if( tl_string_last( NULL )!=0 ) return EXIT_FAILURE;
+    tl_string_drop_last( &str );
+    tl_string_drop_last( NULL );
+    if( tl_string_last( &str )!=0 ) return EXIT_FAILURE;
+
+    tl_string_append_code_point( &str, 'A' );
+    if( tl_string_last( &str )!='A' ) return EXIT_FAILURE;
+    tl_string_append_code_point( &str, 'B' );
+    if( tl_string_last( &str )!='B' ) return EXIT_FAILURE;
+    tl_string_append_code_point( &str, 0x0000FFFF );
+    if( tl_string_last( &str )!=0xFFFF ) return EXIT_FAILURE;
+    tl_string_append_code_point( &str, 0x00010000 );
+    if( tl_string_last( &str )!=0x10000 ) return EXIT_FAILURE;
+    tl_string_append_code_point( &str, 0x0001F710 );
+    if( tl_string_last( &str )!=0x1F710 ) return EXIT_FAILURE;
+    tl_string_append_code_point( &str, 0x0001F61C );
+    if( tl_string_last( &str )!=0x1F61C ) return EXIT_FAILURE;
+    tl_string_append_code_point( &str, 'B' );
+    if( tl_string_last( &str )!='B' ) return EXIT_FAILURE;
+    tl_string_append_code_point( &str, 'A' );
+    if( tl_string_last( &str )!='A' ) return EXIT_FAILURE;
+
+    if( str.charcount!=8 ) return EXIT_FAILURE;
+    tl_string_drop_last( &str );
+    if( str.charcount!=7 ) return EXIT_FAILURE;
+    if( tl_string_last( &str )!='B' ) return EXIT_FAILURE;
+    tl_string_drop_last( &str );
+    if( str.charcount!=6 ) return EXIT_FAILURE;
+    if( tl_string_last( &str )!=0x1F61C ) return EXIT_FAILURE;
+    tl_string_drop_last( &str );
+    if( str.charcount!=5 ) return EXIT_FAILURE;
+    if( tl_string_last( &str )!=0x1F710 ) return EXIT_FAILURE;
+    tl_string_drop_last( &str );
+    if( str.charcount!=4 ) return EXIT_FAILURE;
+    if( tl_string_last( &str )!=0x10000 ) return EXIT_FAILURE;
+    tl_string_drop_last( &str );
+    if( str.charcount!=3 ) return EXIT_FAILURE;
+    if( tl_string_last( &str )!=0xFFFF ) return EXIT_FAILURE;
+    tl_string_drop_last( &str );
+    if( str.charcount!=2 ) return EXIT_FAILURE;
+    if( tl_string_last( &str )!='B' ) return EXIT_FAILURE;
+    tl_string_drop_last( &str );
+    if( str.charcount!=1 ) return EXIT_FAILURE;
+    if( tl_string_last( &str )!='A' ) return EXIT_FAILURE;
+    tl_string_drop_last( &str );
+    if( str.charcount!=0 ) return EXIT_FAILURE;
+    if( tl_string_last( &str )!=0 ) return EXIT_FAILURE;
+    tl_string_drop_last( &str );
+    if( str.charcount!=0 ) return EXIT_FAILURE;
+    if( tl_string_last( &str )!=0 ) return EXIT_FAILURE;
+
+    tl_string_cleanup( &str );
+
     return EXIT_SUCCESS;
 }
 

@@ -577,3 +577,38 @@ size_t tl_string_to_utf8( const tl_string* this, char* buffer, size_t size )
     return i;
 }
 
+unsigned int tl_string_last( const tl_string* this )
+{
+    unsigned int cp = 0;
+    uint16_t* ptr;
+
+    if( this && this->charcount )
+    {
+        ptr = (uint16_t*)this->vec.data + this->vec.used - 2;
+        cp = *ptr;
+        return IS_SURROGATE(cp) ? (cp+(ptr[-1]<<10)+SURROGATE_OFFSET) : cp;
+    }
+
+    return cp;
+}
+
+void tl_string_drop_last( tl_string* this )
+{
+    unsigned int cp;
+
+    if( this && this->charcount )
+    {
+        cp = ((uint16_t*)this->vec.data)[this->vec.used - 2];
+
+        tl_array_resize( &this->vec,
+                         this->vec.used - (IS_SURROGATE(cp) ? 2 : 1) );
+
+        ((uint16_t*)this->vec.data)[ this->vec.used - 1 ] = '\0';
+
+        --this->charcount;
+
+        if( this->surrogates > this->charcount )
+            this->surrogates = this->charcount;
+    }
+}
+
