@@ -119,9 +119,28 @@ int tl_fs_is_directory( const tl_string* path )
 
 int tl_fs_is_symlink( const tl_string* path )
 {
-    /* XXX: WinDOS Vista introduced NTFS symlinks */
-    (void)path;
-    return 0;
+    WIN32_FIND_DATAW entw;
+    HANDLE hnd;
+    DWORD attr;
+
+    if( !path )
+        return 0;
+
+    attr = GetFileAttributesW( path->vec.data );
+
+    if( attr == INVALID_FILE_ATTRIBUTES )
+        return 0;
+
+    if( (attr & FILE_ATTRIBUTE_REPARSE_POINT)==0 )
+        return 0;
+
+    hnd = FindFirstFileW( path->vec.data, &entw );
+
+    if( hnd == INVALID_HANDLE_VALUE )
+        return 0;
+
+    FindClose( hnd );
+    return (entw.dwReserved0 == 0xA000000C);    /* IO_REPARSE_TAG_SYMLINK */
 }
 
 int tl_fs_cwd( const tl_string* path )
