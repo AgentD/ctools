@@ -15,6 +15,7 @@
 static void fix_string( tl_string* path )
 {
     uint16_t* ptr;
+    size_t i = 0;
 
     path->charcount = 0;
     path->surrogates = 0;
@@ -33,7 +34,52 @@ static void fix_string( tl_string* path )
 
         ++ptr;
         ++path->charcount;
+        ++i;
     }
+
+    path->vec.used = i+1;
+}
+
+static int get_user_dir_fallback( tl_string* path )
+{
+    WCHAR dummy = 0;
+    DWORD size = 0;
+
+    /* get length & allocate */
+    GetUserNameW( &dummy, &size );
+
+    tl_string_clear( path );
+
+    if( !tl_array_resize( &path->vec, size+4 ) )
+        return 0;
+
+    /* try C:\<username>\ */
+    ((uint16_t*)path->vec.data)[0] = 'C';
+    ((uint16_t*)path->vec.data)[1] = ':';
+    ((uint16_t*)path->vec.data)[2] = '\\';
+
+    if( GetUserNameW( ((uint16_t*)path->vec.data)+3, &size ) )
+    {
+        fix_string( path );
+        tl_string_append_code_point( path, '\\' );
+
+        if( tl_fs_mkdir( path )==0 )
+            return 1;
+    }
+
+    /* try C:\temp\ */
+    tl_string_clear( path );
+    if( !tl_string_append_utf8( path, "C:\\temp\\" ) )
+        return 0;
+
+    if( tl_fs_mkdir( path )==0 )
+        return 1;
+
+    /* try C:\ */
+    if( !tl_string_append_utf8( path, "C:\\" ) )
+        return 0;
+
+    return tl_fs_exists( path );
 }
 
 
@@ -48,7 +94,7 @@ int tl_fs_get_wd( tl_string* path )
     size_t length = 0;
 
     if( !path )
-        return 0;
+        return 1;
 
     tl_string_clear( path );
     length = GetCurrentDirectoryW( length, NULL );
@@ -60,6 +106,9 @@ int tl_fs_get_wd( tl_string* path )
         return errno_to_fs( GetLastError( ) );
 
     fix_string( path );
+
+    if( tl_string_last( path )!='\\' )
+        tl_string_append_code_point( path, '\\' );
     return 0;
 }
 
@@ -74,24 +123,31 @@ int tl_fs_get_user_dir( tl_string* path )
 
     tl_string_clear( path );
 
+    /* get security token */
     if( !OpenProcessToken( GetCurrentProcess(), TOKEN_QUERY, &token ) )
-        return 0;
+        return get_user_dir_fallback( path );
 
+    /* get length and allocate */
     if( GetUserProfileDirectoryW( token, &dummy, &size ) )
         goto fail;
 
     if( !tl_array_resize( &path->vec, size+1 ) )
         goto fail;
 
+    /* retrieve */
     if( !GetUserProfileDirectoryW( token, path->vec.data, &size ) )
         goto fail;
 
+    /* allocate and return */
     CloseHandle( token );
     fix_string( path );
+
+    if( tl_string_last( path )!='\\' )
+        tl_string_append_code_point( path, '\\' );
     return 1;
 fail:
     CloseHandle( token );
-    return 0;
+    return get_user_dir_fallback( path );
 }
 
 int tl_fs_exists( const tl_string* path )
@@ -146,7 +202,7 @@ int tl_fs_is_symlink( const tl_string* path )
 int tl_fs_cwd( const tl_string* path )
 {
     if( !path )
-        return TL_FS_NOT_EXIST;
+        return TL_FS_NOT_DIR;
 
     if( SetCurrentDirectory( path->vec.data ) )
         return 0;
@@ -156,8 +212,15 @@ int tl_fs_cwd( const tl_string* path )
 
 int tl_fs_mkdir( const tl_string* path )
 {
+    DWORD attr;
+
     if( !path )
         return TL_FS_NOT_DIR;
+
+    attr = GetFileAttributesW( path->vec.data );
+
+    if( attr!=INVALID_FILE_ATTRIBUTES )
+        return (attr & FILE_ATTRIBUTE_DIRECTORY) ? 0 : TL_FS_EXISTS;
 
     if( CreateDirectoryW( path->vec.data, NULL ) )
         return 0;
@@ -174,18 +237,19 @@ int tl_fs_delete( const tl_string* path )
 
     attr = GetFileAttributesW( path->vec.data );
 
-    if( attr != INVALID_FILE_ATTRIBUTES )
+    if( attr == INVALID_FILE_ATTRIBUTES )
+        return 0;
+
+    if( attr & FILE_ATTRIBUTE_DIRECTORY )
     {
-        if( attr & FILE_ATTRIBUTE_DIRECTORY )
-        {
-            if( RemoveDirectoryW( path->vec.data ) )
-                return 0;
-        }
-        else if( DeleteFileW( path->vec.data ) )
-        {
+        if( RemoveDirectoryW( path->vec.data ) )
             return 0;
-        }
     }
+    else if( DeleteFileW( path->vec.data ) )
+    {
+        return 0;
+    }
+
     return errno_to_fs( GetLastError( ) );
 }
 

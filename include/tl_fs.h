@@ -83,11 +83,14 @@ int tl_fs_is_symlink_utf8( const char* path );
  *
  * \param path The path to create
  *
+ * \note If the given directory already exists, this function reports success
+ *
  * \return Zero on success, TL_FS_ACCESS if the calling process does not have
- *         the neccessarry permissions, TL_FS_EXISTS if the directory already
- *         exists TL_FS_NO_SPACE if there is not enough space on the target
- *         file system, TL_FS_NOT_EXIST if a part of the path does not exist,
- *         TL_FS_NOT_DIR if an element of the path is not a directory
+ *         the neccessarry permissions, TL_FS_EXISTS if the path already
+ *         exists and is not a directory, TL_FS_NO_SPACE if there is not
+ *         enough space on the target file system, TL_FS_NOT_EXIST if a part
+ *         of the path does not exist, TL_FS_NOT_DIR if an element of the path
+ *         is not a directory
  */
 int tl_fs_mkdir( const tl_string* path );
 
@@ -130,8 +133,12 @@ int tl_fs_get_wd( tl_string* path );
  * \brief Get the user home directory
  *
  * This function can be used to get the home directory of the current user.
- * If the OS does not have the concept of a home directory, or users, a
- * directory where the process can write to is returned.
+ * If the OS does not have the concept of a home directory, or users, or
+ * otherwise cannot give us a valid result, some directory that the process
+ * can write to is returned as last resort.
+ *
+ * The home directory returned always ends with the systems directory
+ * seperator, so filenames can be directly appended to it.
  *
  * \param path Returns the user home directory
  *
