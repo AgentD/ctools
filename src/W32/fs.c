@@ -148,19 +148,25 @@ int tl_fs_mkdir( const tl_string* path )
 
 int tl_fs_delete( const tl_string* path )
 {
+    DWORD attr;
+
     if( !path )
         return 0;
 
-    if( GetFileAttributesW( path->vec.data ) & FILE_ATTRIBUTE_DIRECTORY )
-    {
-        if( RemoveDirectoryW( path->vec.data ) )
-            return 0;
-    }
-    else if( DeleteFileW( path->vec.data ) )
-    {
-        return 0;
-    }
+    attr = GetFileAttributesW( path->vec.data );
 
+    if( attr != INVALID_FILE_ATTRIBUTES )
+    {
+        if( attr & FILE_ATTRIBUTE_DIRECTORY )
+        {
+            if( RemoveDirectoryW( path->vec.data ) )
+                return 0;
+        }
+        else if( DeleteFileW( path->vec.data ) )
+        {
+            return 0;
+        }
+    }
     return errno_to_fs( GetLastError( ) );
 }
 

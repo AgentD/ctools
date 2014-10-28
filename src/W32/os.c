@@ -22,8 +22,10 @@ int errno_to_fs( int code )
     case ERROR_DISK_FULL:
         return TL_FS_NO_SPACE;
 
-        /*return TL_FS_NOT_DIR;
-        return TL_FS_NOT_EMPTY;*/
+    case ERROR_DIR_NOT_EMPTY:
+        return TL_FS_NOT_EMPTY;
+
+        /*return TL_FS_NOT_DIR;*/
     }
 
     return code==0 ? 0 : TL_FS_SYS_ERROR;
