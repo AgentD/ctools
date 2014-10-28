@@ -12,6 +12,10 @@ typedef struct tl_dir tl_dir;
 
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief Read all entries of a directory into an array of strings
  *
@@ -76,7 +80,9 @@ void tl_dir_rewind( tl_dir* dir );
  */
 void tl_dir_close( tl_dir* dir );
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TOOLS_DIR */
 

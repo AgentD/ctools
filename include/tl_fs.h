@@ -17,6 +17,10 @@
 
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief Get the directory seperator used by the operating systems
  *
@@ -158,7 +162,9 @@ int tl_fs_delete( const tl_string* path );
  */
 int tl_fs_delete_utf8( const char* path );
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TOOLS_FILESYSTEM_H */
 
