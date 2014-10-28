@@ -40,48 +40,6 @@ static void fix_string( tl_string* path )
     path->vec.used = i+1;
 }
 
-static int get_user_dir_fallback( tl_string* path )
-{
-    WCHAR dummy = 0;
-    DWORD size = 0;
-
-    /* get length & allocate */
-    GetUserNameW( &dummy, &size );
-
-    tl_string_clear( path );
-
-    if( !tl_array_resize( &path->vec, size+4 ) )
-        return 0;
-
-    /* try C:\<username>\ */
-    ((uint16_t*)path->vec.data)[0] = 'C';
-    ((uint16_t*)path->vec.data)[1] = ':';
-    ((uint16_t*)path->vec.data)[2] = '\\';
-
-    if( GetUserNameW( ((uint16_t*)path->vec.data)+3, &size ) )
-    {
-        fix_string( path );
-        tl_string_append_code_point( path, '\\' );
-
-        if( tl_fs_mkdir( path )==0 )
-            return 1;
-    }
-
-    /* try C:\temp\ */
-    tl_string_clear( path );
-    if( !tl_string_append_utf8( path, "C:\\temp\\" ) )
-        return 0;
-
-    if( tl_fs_mkdir( path )==0 )
-        return 1;
-
-    /* try C:\ */
-    if( !tl_string_append_utf8( path, "C:\\" ) )
-        return 0;
-
-    return tl_fs_exists( path );
-}
-
 
 
 const char* tl_fs_get_dir_sep( void )
@@ -125,7 +83,7 @@ int tl_fs_get_user_dir( tl_string* path )
 
     /* get security token */
     if( !OpenProcessToken( GetCurrentProcess(), TOKEN_QUERY, &token ) )
-        return get_user_dir_fallback( path );
+        return 0;
 
     /* get length and allocate */
     if( GetUserProfileDirectoryW( token, &dummy, &size ) )
@@ -147,7 +105,7 @@ int tl_fs_get_user_dir( tl_string* path )
     return 1;
 fail:
     CloseHandle( token );
-    return get_user_dir_fallback( path );
+    return 0;
 }
 
 int tl_fs_exists( const tl_string* path )

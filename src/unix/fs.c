@@ -134,41 +134,28 @@ int tl_fs_get_user_dir( tl_string* path )
     /* try to get passwd entry */
     pw = getpwuid( getuid( ) );
 
-    if( pw != NULL )
-    {
-        /* check home directory from passwd entry */
-        dir = pw->pw_dir;
-        if( dir && tl_fs_is_directory_utf8( dir ) )
-            goto done;
+    dir = pw ? pw->pw_dir : NULL;
+    if( dir && tl_fs_is_directory_utf8( dir ) )
+        goto done;
 
-        dir = buffer;
-
-        /* typicall for new *NIXes */
-        sprintf( buffer, "/home/%s/", pw->pw_name );
-        if( tl_fs_is_directory_utf8( dir ) )
-            goto done;
-
-        /* typicall for (very) old *NIXes */
-        sprintf( buffer, "/usr/%s/", pw->pw_name );
-        if( tl_fs_is_directory_utf8( dir ) )
-            goto done;
-
-        /* what the heck */
-        sprintf( buffer, "/tmp/%s/", pw->pw_name );
-        if( tl_fs_mkdir_utf8( dir ) )
-            goto done;
-    }
-
-    /* try to get home directory from environment */
+    /* try environment */
     dir = getenv("HOME");
     if( dir && tl_fs_is_directory_utf8( dir ) )
         goto done;
 
-    /* if everything failed, try to use /tmp */
-    dir = buffer;
-    sprintf( buffer, "/tmp/" );
-    if( tl_fs_is_directory_utf8( dir ) )
-        goto done;
+    /* try to construct typicall names */
+    if( pw )
+    {
+        dir = buffer;
+
+        sprintf( buffer, "/home/%s/", pw->pw_name );
+        if( tl_fs_is_directory_utf8( dir ) )
+            goto done;
+
+        sprintf( buffer, "/usr/%s/", pw->pw_name );
+        if( tl_fs_is_directory_utf8( dir ) )
+            goto done;
+    }
 
     return 0;
 done:

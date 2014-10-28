@@ -133,9 +133,8 @@ int tl_fs_get_wd( tl_string* path );
  * \brief Get the user home directory
  *
  * This function can be used to get the home directory of the current user.
- * If the OS does not have the concept of a home directory, or users, or
- * otherwise cannot give us a valid result, some directory that the process
- * can write to is returned as last resort.
+ * If the OS does not have the concept of a home directory, or users, some
+ * directory that the process can write to is returned as last resort.
  *
  * The home directory returned always ends with the systems directory
  * seperator, so filenames can be directly appended to it.
