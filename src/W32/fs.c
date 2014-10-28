@@ -104,10 +104,17 @@ int tl_fs_exists( const tl_string* path )
 
 int tl_fs_is_directory( const tl_string* path )
 {
+    DWORD attr;
+
     if( !path )
         return 0;
 
-    return (GetFileAttributesW(path->vec.data) & FILE_ATTRIBUTE_DIRECTORY)!=0;
+    attr = GetFileAttributesW( path->vec.data );
+
+    if( attr == INVALID_FILE_ATTRIBUTES )
+        return 0;
+
+    return (attr & FILE_ATTRIBUTE_DIRECTORY)!=0;
 }
 
 int tl_fs_is_symlink( const tl_string* path )
@@ -125,7 +132,7 @@ int tl_fs_cwd( const tl_string* path )
     if( SetCurrentDirectory( path->vec.data ) )
         return 0;
 
-    return errno_to_fs( GetLastError( ) );;
+    return errno_to_fs( GetLastError( ) );
 }
 
 int tl_fs_mkdir( const tl_string* path )
@@ -133,7 +140,7 @@ int tl_fs_mkdir( const tl_string* path )
     if( !path )
         return TL_FS_NOT_DIR;
 
-    if( CreateDirectoryW( path->vec.data, NULL )==0 )
+    if( CreateDirectoryW( path->vec.data, NULL ) )
         return 0;
 
     return errno_to_fs( GetLastError( ) );
