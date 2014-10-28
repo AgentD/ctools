@@ -5,7 +5,11 @@
 
 #include "tl_array.h"
 
-#include <stdint.h>
+#ifdef _MSC_VER
+    typedef unsigned __int16 uint16_t;
+#else
+    #include <stdint.h>
+#endif
 
 
 
