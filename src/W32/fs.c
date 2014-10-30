@@ -211,13 +211,44 @@ int tl_fs_delete( const tl_string* path )
     return errno_to_fs( GetLastError( ) );
 }
 
+uint64_t tl_fs_get_file_size( const tl_string* path )
+{
+    WIN32_FIND_DATAW entw;
+    HANDLE hnd;
+    DWORD attr;
+
+    /* check if path actually names an existing file */
+    if( !path )
+        return 0;
+
+    attr = GetFileAttributesW( path->vec.data );
+
+    if( attr == INVALID_FILE_ATTRIBUTES )
+        return 0;
+
+    if( attr & FILE_ATTRIBUTE_DIRECTORY )
+        return 0;
+
+    /* get extender information */
+    hnd = FindFirstFileW( path->vec.data, &entw );
+
+    if( hnd == INVALID_HANDLE_VALUE )
+        return 0;
+
+    FindClose( hnd );
+
+    return (uint64_t)entw.nFileSizeHigh * (MAXDWORD+1) +
+           (uint64_t)entw.nFileSizeLow;
+}
+
 /****************************************************************************/
 
-#define UTF8_WRAPPER( function )\
-        int function##_utf8( const char* path )\
+#define UTF8_WRAPPER( type, function, errorcode )\
+        type function##_utf8( const char* path )\
         {\
             tl_string str;\
-            int status;\
+            type status;\
+            if( !path ) return (errorcode);\
             tl_string_init( &str );\
             tl_string_append_utf8( &str, path );\
             status = (function)( &str );\
@@ -225,10 +256,11 @@ int tl_fs_delete( const tl_string* path )
             return status;\
         }
 
-UTF8_WRAPPER( tl_fs_exists )
-UTF8_WRAPPER( tl_fs_is_directory )
-UTF8_WRAPPER( tl_fs_is_symlink )
-UTF8_WRAPPER( tl_fs_mkdir )
-UTF8_WRAPPER( tl_fs_cwd )
-UTF8_WRAPPER( tl_fs_delete )
+UTF8_WRAPPER( int, tl_fs_exists, 0 )
+UTF8_WRAPPER( int, tl_fs_is_directory, 0 )
+UTF8_WRAPPER( int, tl_fs_is_symlink, 0 )
+UTF8_WRAPPER( int, tl_fs_mkdir, TL_FS_NOT_DIR )
+UTF8_WRAPPER( int, tl_fs_cwd, TL_FS_NOT_DIR )
+UTF8_WRAPPER( int, tl_fs_delete, TL_FS_NOT_DIR )
+UTF8_WRAPPER( uint64_t, tl_fs_get_file_size, 0 )
 

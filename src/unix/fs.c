@@ -167,12 +167,22 @@ done:
     return 1;
 }
 
+uint64_t tl_fs_get_file_size_utf8( const char* path )
+{
+    struct stat sb;
+
+    if( path && stat( path, &sb )==0 && !S_ISDIR(sb.st_mode) )
+        return sb.st_size;
+
+    return 0;
+}
+
 /****************************************************************************/
 
-#define UTF8_CONVERT_WRAPPER( function, errorstatus )\
-        int function( const tl_string* path )\
+#define UTF8_CONVERT_WRAPPER( type, function, errorstatus )\
+        type function( const tl_string* path )\
         {\
-            int status; char* ptr;\
+            type status; char* ptr;\
             if( !path ) return errorstatus;\
             if( !(ptr = to_utf8( path )) ) return TL_FS_SYS_ERROR;\
             status = function##_utf8( ptr );\
@@ -180,10 +190,11 @@ done:
             return status;\
         }
 
-UTF8_CONVERT_WRAPPER( tl_fs_exists, 0 )
-UTF8_CONVERT_WRAPPER( tl_fs_is_directory, 0 )
-UTF8_CONVERT_WRAPPER( tl_fs_is_symlink, 0 )
-UTF8_CONVERT_WRAPPER( tl_fs_cwd, TL_FS_NOT_EXIST )
-UTF8_CONVERT_WRAPPER( tl_fs_mkdir, TL_FS_NOT_DIR )
-UTF8_CONVERT_WRAPPER( tl_fs_delete, 0 )
+UTF8_CONVERT_WRAPPER( int, tl_fs_exists, 0 )
+UTF8_CONVERT_WRAPPER( int, tl_fs_is_directory, 0 )
+UTF8_CONVERT_WRAPPER( int, tl_fs_is_symlink, 0 )
+UTF8_CONVERT_WRAPPER( int, tl_fs_cwd, TL_FS_NOT_EXIST )
+UTF8_CONVERT_WRAPPER( int, tl_fs_mkdir, TL_FS_NOT_DIR )
+UTF8_CONVERT_WRAPPER( int, tl_fs_delete, 0 )
+UTF8_CONVERT_WRAPPER( uint64_t, tl_fs_get_file_size, 0 )
 

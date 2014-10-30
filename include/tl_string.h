@@ -4,12 +4,7 @@
 
 
 #include "tl_array.h"
-
-#ifdef _MSC_VER
-    typedef unsigned __int16 uint16_t;
-#else
-    #include <stdint.h>
-#endif
+#include "tl_interfaces.h"
 
 
 

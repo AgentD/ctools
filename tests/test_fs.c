@@ -97,11 +97,15 @@ int main( void )
     if( tl_fs_exists_utf8( "FOO/bar" )       ) return EXIT_FAILURE;
     if( tl_fs_is_directory_utf8( "FOO/bar" ) ) return EXIT_FAILURE;
 
-    if( tl_fs_cwd_utf8( "FOO" )!=0       ) return EXIT_FAILURE;
-    if( tl_fs_exists_utf8( "FOO" )       ) return EXIT_FAILURE;
-    if( tl_fs_is_directory_utf8( "FOO" ) ) return EXIT_FAILURE;
-    f = fopen( "bar", "w" );
+    if( tl_fs_cwd_utf8( "FOO" )!=0           ) return EXIT_FAILURE;
+    if( tl_fs_exists_utf8( "FOO" )           ) return EXIT_FAILURE;
+    if( tl_fs_is_directory_utf8( "FOO" )     ) return EXIT_FAILURE;
+    if( tl_fs_get_file_size_utf8( "bar" )!=0 ) return EXIT_FAILURE;
+    f = fopen( "bar", "wb" );
+    if( tl_fs_get_file_size_utf8( "bar" )!=0 ) return EXIT_FAILURE;
+    fwrite( "Hello World", 1, 11, f );
     fclose( f );
+    if( tl_fs_get_file_size_utf8("bar")!=11  ) return EXIT_FAILURE;
     if( tl_fs_cwd_utf8( ".." )!=0            ) return EXIT_FAILURE;
     if( !tl_fs_exists_utf8( "FOO" )          ) return EXIT_FAILURE;
     if( !tl_fs_is_directory_utf8( "FOO" )    ) return EXIT_FAILURE;
