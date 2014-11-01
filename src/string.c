@@ -1,4 +1,6 @@
 #include "tl_string.h"
+#include "tl_utf16.h"
+#include "tl_utf8.h"
 
 #include <string.h>
 
@@ -17,89 +19,6 @@
 #define BOM2 0xFFFE
 
 
-
-/*
-    determine how many UTF-16 code units are required to
-    encode a given UTF-8 string
- */
-static size_t utf8_count( const unsigned char* str, size_t chars )
-{
-    size_t i=0, count = 0;
-
-    while( *str && i<chars )
-    {
-        if( (*str & 0xC0) != 0x80 )
-        {
-            count += ((*str & 0xF8)==0xF0) ? 2 : 1;
-            ++i;
-        }
-
-        ++str;
-    }
-
-    return count;
-}
-
-static size_t utf8_strlen( const char* utf8 )
-{
-    const unsigned char* str = (const unsigned char*)utf8;
-    size_t count = 0;
-
-    while( *str )
-    {
-        if( (*str & 0xC0) != 0x80 )
-            ++count;
-        ++str;
-    }
-
-    return count;
-}
-
-static size_t utf16_strlen( const uint16_t* str )
-{
-    size_t count = 0;
-
-    while( *str )
-    {
-        if( IS_LEAD_SURROGATE( *str ) )
-        {
-            if( IS_TRAIL_SURROGATE( str[1] ) )
-            {
-                str += 2;
-                ++count;
-                continue;
-            }
-        }
-        ++count;
-        ++str;
-    }
-
-    return count;
-}
-
-static size_t utf16_code_count( const uint16_t* str, size_t chars )
-{
-    size_t i, count = 0;
-
-    for( i=0; i<chars; ++i )
-    {
-        if( IS_LEAD_SURROGATE( *str ) )
-        {
-            if( IS_TRAIL_SURROGATE( str[1] ) )
-            {
-                count += 2;
-                str += 2;
-                continue;
-            }
-        }
-        count += 1;
-        str += 1;
-    }
-
-    return count;
-}
-
-/****************************************************************************/
 
 int tl_string_init( tl_string* this )
 {
@@ -241,7 +160,7 @@ int tl_string_append_utf8( tl_string* this, const char* utf8 )
     if( !this ) return 0;
     if( !utf8 ) return 1;
 
-    return tl_string_append_utf8_count( this, utf8, utf8_strlen( utf8 ) );
+    return tl_string_append_utf8_count( this, utf8, tl_utf8_charcount(utf8) );
 }
 
 int tl_string_append_latin1( tl_string* this, const char* latin1 )
@@ -257,13 +176,12 @@ int tl_string_append_utf16( tl_string* this, const uint16_t* str )
     if( !this ) return 0;
     if( !str  ) return 1;
 
-    return tl_string_append_utf16_count( this, str, utf16_strlen( str ) );
+    return tl_string_append_utf16_count( this, str, tl_utf16_charcount(str) );
 }
 
 int tl_string_append_utf8_count( tl_string* this, const char* utf8,
                                  size_t count )
 {
-    unsigned char* str = (unsigned char*)utf8;
     unsigned int cp, i, len;
     size_t u8len, j;
     uint16_t* dst;
@@ -272,7 +190,7 @@ int tl_string_append_utf8_count( tl_string* this, const char* utf8,
     if( !utf8 || !count ) return 1;
 
     /* compute number of bytes to add */
-    if( !(u8len = utf8_count( str, count )) )
+    if( !(u8len = tl_utf16_estimate_utf8_length( utf8, count )) )
         return 1;
 
     /* resize array */
@@ -285,28 +203,11 @@ int tl_string_append_utf8_count( tl_string* this, const char* utf8,
 
     for( j=0; j<count; ++j, ++this->charcount )
     {
-        len = 1;
-        cp = *(str++);
+        cp = tl_utf8_decode( utf8, &len );
+        utf8 += len;
 
-             if( (cp & 0xFE) == 0xFC ) { len = 6; cp &= 0x01; }
-        else if( (cp & 0xFC) == 0xF8 ) { len = 5; cp &= 0x03; }
-        else if( (cp & 0xF8) == 0xF0 ) { len = 4; cp &= 0x07; }
-        else if( (cp & 0xF0) == 0xE0 ) { len = 3; cp &= 0x0F; }
-        else if( (cp & 0xE0) == 0xC0 ) { len = 2; cp &= 0x1F; }
-        else if( cp >= 0x80          ) { len = 1; cp = REPLACEMENT_CHAR; }
-
-        for( i=1; i<len; ++i )
-        {
-            if( ((*str) & 0xC0)!=0x80 )
-            {
-                ++str;
-                cp = REPLACEMENT_CHAR;
-                break;
-            }
-
-            cp <<= 6;
-            cp |= (*(str++)) & 0x3F;
-        }
+        if( !cp || !len )
+            break;
 
         if( IS_SURROGATE(cp) || cp>UNICODE_MAX || cp==BOM || cp==BOM2 )
             cp = REPLACEMENT_CHAR;
@@ -315,7 +216,6 @@ int tl_string_append_utf8_count( tl_string* this, const char* utf8,
         {
             *dst++ = cp;
 
-            /* no surrogates yet? */
             if( this->surrogates == this->charcount )
                 ++this->surrogates;
         }
@@ -368,7 +268,7 @@ int tl_string_append_utf16_count( tl_string* this, const uint16_t* str,
     if( !this          ) return 0;
     if( !str || !count ) return 1;
 
-    total = utf16_code_count( str, count );
+    total = tl_utf16_strlen( str, count );
 
     if( !total )
         return 1;
@@ -480,55 +380,31 @@ int tl_string_append_int( tl_string* this, long value, int base )
 
 size_t tl_string_utf8_len( const tl_string* this )
 {
-    const uint16_t* in;
-    size_t i, count=0;
-    unsigned int cp;
+    if( !this || !this->charcount )
+        return 0;
 
-    if( this )
-    {
-        for( in=this->vec.data, i=0; i<this->charcount; ++i )
-        {
-            if( IS_SURROGATE(*in) )
-            {
-                cp  = ((*(in++)) << 10) + SURROGATE_OFFSET;
-                cp +=   *(in++);
-            }
-            else
-            {
-                cp = *(in++);
-            }
-
-                 if( cp<=0x007F ) count += 1;
-            else if( cp<=0x07FF ) count += 2;
-            else if( cp<=0xFFFF ) count += 3;
-            else                  count += 4;
-        }
-    }
-    return count;
+    return tl_utf8_estimate_utf16_length( this->vec.data, this->charcount );
 }
 
 size_t tl_string_to_utf8( const tl_string* this, char* buffer, size_t size )
 {
-    unsigned char* chr;
+    unsigned int cp, len;
     const uint16_t* in;
-    unsigned int cp;
-    size_t i, j;
+    char data[4];
+    size_t i;
 
-    /* sanity check */
     if( !buffer || !size )
         return 0;
 
-    if( !this )
+    if( !this || !this->charcount )
     {
-        buffer[0] = '\0';
+        *buffer = '\0';
         return 0;
     }
 
-    chr = (unsigned char*)buffer;
-    in = this->vec.data;
-
-    for( j=0, i=0; i<this->charcount; ++i )
+    for( in=this->vec.data, i=0; i<this->charcount; ++i, size-=len )
     {
+        /* decode input */
         if( IS_SURROGATE(*in) )
         {
             cp  = ((*(in++)) << 10) + SURROGATE_OFFSET;
@@ -538,48 +414,19 @@ size_t tl_string_to_utf8( const tl_string* this, char* buffer, size_t size )
         {
             cp = *(in++);
         }
-    
-        if( cp<=0x007F )
-        {
-            ++j;
-            if( j>=(size-1) )
-                break;
 
-            *(chr++) = cp;
-        }
-        else if( cp<=0x07FF )
-        {
-            j += 2;
-            if( j>=(size-1) )
-                break;
+        /* encode and check */
+        len = tl_utf8_encode( data, cp );
 
-            *(chr++) = ((cp>>6) & 0x1F) | 0xC0;
-            *(chr++) = ( cp     & 0x3F) | 0x80;
-        }
-        else if( cp<=0xFFFF )
-        {
-            j += 3;
-            if( j>=(size-1) )
-                break;
+        if( !len      ) continue;
+        if( len>=size ) break;
 
-            *(chr++) = ((cp>>12) & 0x0F) | 0xE0;
-            *(chr++) = ((cp>> 6) & 0x3F) | 0x80;
-            *(chr++) = ( cp      & 0x3F) | 0x80;
-        }
-        else
-        {
-            j += 4;
-            if( j>=(size-1) )
-                break;
-
-            *(chr++) = ((cp>>18) & 0x07) | 0xF0;
-            *(chr++) = ((cp>>12) & 0x3F) | 0x80;
-            *(chr++) = ((cp>> 6) & 0x3F) | 0x80;
-            *(chr++) = ( cp      & 0x3F) | 0x80;
-        }
+        /* copy */
+        memcpy( buffer, data, len );
+        buffer += len;
     }
 
-    *chr = '\0';
+    *buffer = '\0';
     return i;
 }
 

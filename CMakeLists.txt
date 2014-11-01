@@ -80,6 +80,8 @@ add_library( ctools STATIC src/array.c
                            src/rbtree.c
                            src/string.c
                            src/sort.c
+                           src/utf8.c
+                           src/utf16.c
                            ${CTOOLS_SYSDEP} )
 
 #----------------------------------------------------------------------
