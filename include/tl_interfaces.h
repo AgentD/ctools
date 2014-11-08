@@ -1,3 +1,8 @@
+/**
+ * \file tl_interfaces.h
+ *
+ * \brief Forward declarations and callback types
+ */
 #ifndef TOOLS_INTERFACES_H
 #define TOOLS_INTERFACES_H
 

@@ -1,3 +1,8 @@
+/**
+ * \file tl_string.h
+ *
+ * \brief Contains a UTF-16 dynamic string
+ */
 #ifndef TOOLS_STRING_H
 #define TOOLS_STRING_H
 
@@ -8,6 +13,11 @@
 
 
 
+/**
+ * \struct tl_string
+ *
+ * \brief A dynamically resizeable UTF-16 string
+ */
 typedef struct
 {
     /** \brief A null-terimated UTF-16 string */
@@ -17,7 +27,7 @@ typedef struct
      * \brief The number of characters stored in a string
      *
      * If the string contains surrogate pairs, this does not neccessarily have
-     * to match the number of code units.
+     * to match the number of elements in the underlying container.
      */
     size_t charcount;
 
@@ -26,6 +36,7 @@ typedef struct
      *
      * If the string contains surrogate pairs this points to the first
      * surrogate, pair. Otherwise, it set to an out of bounds value.
+     *
      * A mapping from character index to array index below this value can
      * be done in constant time. Above this value, a linear search is
      * required.
@@ -43,6 +54,8 @@ extern "C" {
 /**
  * \brief Initialize a string
  *
+ * \memberof tl_string
+ *
  * \param str A pointer to a string object
  *
  * \return Non-zero on success, zero in the unlikely case that it is not
@@ -53,12 +66,18 @@ int tl_string_init( tl_string* str );
 /**
  * \brief Uninitialize a string and free all its memory
  *
+ * \memberof tl_string
+ *
  * \param str A pointer to a string object
  */
 void tl_string_cleanup( tl_string* str );
 
 /**
  * \brief Copy the contents of one string over another string
+ *
+ * \memberof tl_string
+ *
+ * \note This function runs in linear time
  *
  * \param dst The destination string
  * \param src The source string
@@ -71,6 +90,10 @@ int tl_string_copy( tl_string* dst, const tl_string* src );
  * \brief Get the number of characters stored in a string object, counting
  *        surrogate pairs as a single character
  *
+ * \memberof tl_string
+ *
+ * \note This function runs in constant time
+ *
  * \param str A pointer to a string object
  *
  * \return The number of characters in the string object, excluding the
@@ -82,6 +105,10 @@ size_t tl_string_characters( const tl_string* str );
  * \brief Get the number of code units stored in a string object (surrogate
  *        pairs are two code units)
  *
+ * \memberof tl_string
+ *
+ * \note This function runs in constant time
+ *
  * \param str A pointer to a string object
  *
  * \return The number of code units in the string object, excluding the
@@ -92,12 +119,18 @@ size_t tl_string_length( const tl_string* str );
 /**
  * \brief Remove all characters from a string
  *
+ * \memberof tl_string
+ *
  * \param str A pointer to a string object
  */
 void tl_string_clear( tl_string* str );
 
 /**
  * \brief Returns non-zero if a string is empty
+ *
+ * \memberof tl_string
+ *
+ * \note This function runs in constant time
  *
  * \param str A pointer to a string object
  *
@@ -107,6 +140,12 @@ int tl_string_is_empty( const tl_string* str );
 
 /**
  * \brief Get a code point value from a character index
+ *
+ * \memberof tl_string
+ *
+ * \note This function runs in constant time if the index is before the first
+ *       surrogate pair, linear in worst case (string starts with surrogate
+ *       pair).
  *
  * \param str   A pointer to a string object
  * \param index A character index
@@ -118,6 +157,10 @@ unsigned int tl_string_at( const tl_string* str, size_t index );
 /**
  * \brief Get a null-terminated UTF-16 string from a string object
  *
+ * \memberof tl_string
+ *
+ * \note This function runs in constant time
+ *
  * \param str A pointer to a string object
  *
  * \return A pointer to a null-terminated UTF-16 string
@@ -126,6 +169,8 @@ uint16_t* tl_string_cstr( tl_string* str );
 
 /**
  * \brief Append a unicode code point value to a string object
+ *
+ * \memberof tl_string
  *
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
@@ -140,8 +185,7 @@ int tl_string_append_code_point( tl_string* str, unsigned int cp );
 /**
  * \brief Append a null-terminated UTF-8 or ASCII string to a string object
  *
- * \note If the function fails to allocate enough memory, the string is left
- *       unchanged.
+ * \memberof tl_string
  *
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
@@ -156,6 +200,8 @@ int tl_string_append_utf8( tl_string* str, const char* utf8 );
 /**
  * \brief Append a null-terminated Latin-1 or ASCII string to a string object
  *
+ * \memberof tl_string
+ *
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
  *
@@ -168,6 +214,8 @@ int tl_string_append_latin1( tl_string* str, const char* latin1 );
 
 /**
  * \brief Append a null-terminated UTF-16 string to a string
+ *
+ * \memberof tl_string
  *
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
@@ -183,6 +231,8 @@ int tl_string_append_utf16( tl_string* str, const uint16_t* utf16 );
 /**
  * \brief Append a number of UTF-8 or ASCII characters to a string object
  *
+ * \memberof tl_string
+ *
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
  *
@@ -197,6 +247,8 @@ int tl_string_append_utf8_count( tl_string* str, const char* utf8,
 
 /**
  * \brief Append a number of Latin-1 or ASCII characters to a string
+ *
+ * \memberof tl_string
  *
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
@@ -214,6 +266,8 @@ int tl_string_append_latin1_count( tl_string* str, const char* latin1,
 /**
  * \brief Append a number of UTF-16 characters to a string
  *
+ * \memberof tl_string
+ *
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
  *
@@ -228,6 +282,8 @@ int tl_string_append_utf16_count( tl_string* str, const uint16_t* utf16,
 
 /**
  * \brief Append an unsigned intger value to a string
+ *
+ * \memberof tl_string
  *
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
@@ -248,6 +304,8 @@ int tl_string_append_uint( tl_string* str, unsigned long value, int base );
 
 /**
  * \brief Append a signed intger value to a string
+ *
+ * \memberof tl_string
  *
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
@@ -270,6 +328,10 @@ int tl_string_append_int( tl_string* str, long value, int base );
 /**
  * \brief Determine how much space is needed to convert a tl_string to UTF-8
  *
+ * \memberof tl_string
+ *
+ * \note This function runs in linear time
+ *
  * This function computes the number of characters (excluding null-terminator)
  * are required to hold the UTF-8 version of a tl_string.
  *
@@ -281,6 +343,8 @@ size_t tl_string_utf8_len( const tl_string* str );
 
 /**
  * \brief Convert a tl_string to UTF-8
+ *
+ * \memberof tl_string
  *
  * This function attempts to convert a tl_string to an UTF-8 representation.
  * The resulting buffer will always be null-terminated and never contain an
@@ -300,6 +364,10 @@ size_t tl_string_to_utf8( const tl_string* str, char* buffer, size_t size );
 /**
  * \brief Get the last character of a string
  *
+ * \memberof tl_string
+ *
+ * \note This function runs in constant time
+ *
  * \param str A pointer to a string
  *
  * \return The unicode code point of the last character in the string, or 0 if
@@ -309,6 +377,11 @@ unsigned int tl_string_last( const tl_string* str );
 
 /**
  * \brief Remove the last character of a string
+ *
+ * \memberof tl_string
+ *
+ * \note This function runs in constant amortized time, linear if the
+ *       underlying container decides to shrink
  *
  * \param str A pointer to a string
  */

@@ -1,3 +1,8 @@
+/**
+ * \file tl_array.h
+ *
+ * \brief Contains a dynamic array container
+ */
 #ifndef TOOLS_ARRAY_H
 #define TOOLS_ARRAY_H
 
@@ -9,6 +14,15 @@
 
 
 
+/**
+ * \struct tl_array
+ *
+ * \brief A dynamically resizing array container
+ *
+ * The data structure manages a dynamically allocated array. The array size is
+ * doubled when adding an element to a full array. And cut in half if after
+ * removing an element the array is less than a quarter filled.
+ */
 typedef struct
 {
     /** \brief Number of elements available */
@@ -34,6 +48,8 @@ extern "C" {
 /**
  * \brief Initialize a dynamic array
  *
+ * \memberof tl_array
+ *
  * \param vec         A pointer to an uninitialized dynamic array
  * \param elementsize The size of a single element
  */
@@ -42,12 +58,16 @@ void tl_array_init( tl_array* vec, size_t elementsize );
 /**
  * \brief Free the memory used by a array and reset its fields
  *
+ * \memberof tl_array
+ *
  * \param vec A pointer to a dynamic array
  */
 void tl_array_cleanup( tl_array* vec );
 
 /**
- * \brief Generate a array from an array
+ * \brief Generate a dynamic array from an existing array
+ *
+ * \memberof tl_array
  *
  * \note This function runs in linear time
  *
@@ -55,12 +75,15 @@ void tl_array_cleanup( tl_array* vec );
  * \param data  A pointer to an other array
  * \param count The number of elements to read from the data block
  *
- * \return Non-zero on success, zero on failure (read: out of memory)
+ * \return Non-zero on success, zero on failure (out of memory or
+ *         invalid arguments)
  */
 int tl_array_from_array( tl_array* vec, const void* data, size_t count );
 
 /**
  * \brief Copy the contents of an array to an array
+ *
+ * \memberof tl_array
  *
  * \note This function runs in linear time
  *
@@ -73,6 +96,8 @@ void tl_array_to_array( const tl_array* vec, void* data );
 /**
  * \brief Copy the data of a source array to a destination array
  *
+ * \memberof tl_array
+ *
  * \note This function runs in linear time
  *
  * \param dst A pointer to an array to copy the data to
@@ -84,6 +109,8 @@ int tl_array_copy( tl_array* dst, const tl_array* src );
 
 /**
  * \brief Copy a sub range of an array to a destination array
+ *
+ * \memberof tl_array
  *
  * \note This function runs in linear time
  *
@@ -101,6 +128,8 @@ int tl_array_copy_range( tl_array* dst, const tl_array* src,
 /**
  * \brief Append an array to another array
  *
+ * \memberof tl_array
+ *
  * \note This function runs in linear time
  *
  * \param dst A pointer to an array to copy the data to
@@ -113,7 +142,13 @@ int tl_array_concat( tl_array* dst, const tl_array* src );
 /**
  * \brief Make sure the size of an array matches a given size
  *
+ * \memberof tl_array
+ *
  * \note This function runs in linear time
+ *
+ * If the new size is less than the current size, the array is trucated, if it
+ * is larget than the current size, the new elements are initialized with
+ * zero.
  *
  * \param vec  A pinter to an array
  * \param size Size of the array to set (number of used elements)
@@ -123,9 +158,15 @@ int tl_array_concat( tl_array* dst, const tl_array* src );
 int tl_array_resize( tl_array* vec, size_t size );
 
 /**
- * \brief Make sure there an array has at least a certain capacity
+ * \brief Make sure an array has at least a certain capacity
+ *
+ * \memberof tl_array
  *
  * \note This function runs in linear time
+ *
+ * If the specified size is less than the current capacity, the memory
+ * is not changed. Only if the new capacity is larger than the current
+ * capacity, the array is resized.
  *
  * \param vec A pointer to an array
  * \param size The number elements available (minimum capacity)
@@ -136,6 +177,8 @@ int tl_array_reserve( tl_array* vec, size_t size );
 
 /**
  * \brief Make sure an array has precisely a certain capacity
+ *
+ * \memberof tl_array
  *
  * \note This function runs in linear time
  *
@@ -149,6 +192,8 @@ int tl_array_set_capacity( tl_array* vec, size_t size );
 /**
  * \brief Remove elements from an array
  *
+ * \memberof tl_array
+ *
  * \note This function runs in linear time
  *
  * \param vec   A pointer to an array
@@ -159,6 +204,8 @@ void tl_array_remove( tl_array* vec, size_t index, size_t count );
 
 /**
  * \brief Check if an array is empty
+ *
+ * \memberof tl_array
  *
  * \note This function runs in constant time
  *
@@ -171,6 +218,8 @@ int tl_array_is_empty( tl_array* vec );
 /**
  * \brief Get a pointer to an element in a array
  *
+ * \memberof tl_array
+ *
  * \note This function runs in constant time
  *
  * \param vec   A pointer to an array
@@ -182,6 +231,8 @@ void* tl_array_at( const tl_array* vec, size_t index );
 
 /**
  * \brief Overwrite an element in an array
+ *
+ * \memberof tl_array
  *
  * \note This function runs in constant time
  *
@@ -197,8 +248,9 @@ int tl_array_set( tl_array* vec, size_t index, const void* element );
 /**
  * \brief Append an element to an array
  *
- * \note This function runs in linear time (worst case), constant at avarge
- *       if the array is roughly three quarters filled
+ * \memberof tl_array
+ *
+ * \note This function runs in constant amortized time, linear in worst case
  *
  * \param vec     A pointer to an array
  * \param element A pointer to the data to copy to the array
@@ -209,6 +261,8 @@ int tl_array_append( tl_array* vec, const void* element );
 
 /**
  * \brief Insert an element at the beginning of an array
+ *
+ * \memberof tl_array
  *
  * \note This function runs in linear time
  *
@@ -221,6 +275,8 @@ int tl_array_prepend( tl_array* vec, const void* element );
 
 /**
  * \brief Insert elements into an array
+ *
+ * \memberof tl_array
  *
  * \note This function runs in linear time
  *
@@ -238,6 +294,8 @@ int tl_array_insert( tl_array* vec, size_t index,
 /**
  * \brief Append an array of elements to an array
  *
+ * \memberof tl_array
+ *
  * \note This function runs in linear time
  *
  * \param vec   A pointer to an array
@@ -251,6 +309,8 @@ int tl_array_append_array( tl_array* vec, const void* data, size_t count );
 
 /**
  * \brief Insert an element into a sorted array at the right position
+ *
+ * \memberof tl_array
  *
  * \note This function runs in linear time
  *
@@ -266,6 +326,8 @@ int tl_array_insert_sorted( tl_array* vec, tl_compare cmp,
 /**
  * \brief Remove the first element of an array
  *
+ * \memberof tl_array
+ *
  * \note This function runs in linear time
  *
  * \param vec A pointer to an array
@@ -274,6 +336,8 @@ void tl_array_remove_first( tl_array* vec );
 
 /**
  * \brief Remove the last element of a array
+ *
+ * \memberof tl_array
  *
  * \note This function runs in constant time
  *
@@ -284,6 +348,8 @@ void tl_array_remove_last( tl_array* vec );
 /**
  * \brief Remove all elements of an array
  *
+ * \memberof tl_array
+ *
  * \note This function runs in constant time
  *
  * \param vec A pointer to an array
@@ -292,6 +358,8 @@ void tl_array_clear( tl_array* vec );
 
 /**
  * \brief Sort a dynamic array in ascending order
+ *
+ * \memberof tl_array
  *
  * \note This function runs in linearithmic time. The sorting is not stable
  *
@@ -305,6 +373,8 @@ void tl_array_sort( tl_array* arr, tl_compare cmp );
 
 /**
  * \brief Sort a dynamic array in ascending order in a stable manner
+ *
+ * \memberof tl_array
  *
  * \note If enough memory is available, this function runs in linearithmic
  *       time. If not, it runs in O(N*log(N)*log(N)) time.
@@ -320,6 +390,8 @@ void tl_array_stable_sort( tl_array* arr, tl_compare cmp );
 /**
  * \brief Search an element in a sorted array
  *
+ * \memberof tl_array
+ *
  * \note This function runs in logarithmic time
  *
  * \param arr A pointer to a dynamic array, assumed to be sorted in ascending
@@ -333,6 +405,8 @@ void* tl_array_search( const tl_array* arr, tl_compare cmp, const void* key );
 
 /**
  * \brief Search an element in an unsorted array
+ *
+ * \memberof tl_array
  *
  * \note This function runs in linear time
  *

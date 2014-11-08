@@ -1,3 +1,8 @@
+/**
+ * \file tl_stack.h
+ *
+ * \brief Contains a dynamic array based stack implementation
+ */
 #ifndef TOOLS_STACK_H
 #define TOOLS_STACK_H
 
@@ -7,6 +12,11 @@
 
 
 
+/**
+ * \struct tl_stack
+ *
+ * \brief A dynamic array based stack implementation
+ */
 typedef struct
 {
     /** \brief The underlying container used to implement a stack */
@@ -23,6 +33,8 @@ extern "C" {
 /**
  * \brief Initialize a previously uninitialized stack
  *
+ * \memberof tl_stack
+ *
  * \param stack        A pointer to an uninitialized stack
  * \param element_size The size of an element
  */
@@ -31,12 +43,16 @@ void tl_stack_init( tl_stack* stack, size_t element_size );
 /**
  * \brief Cleanup a stack, freeing all its memory and resetting it
  *
+ * \memberof tl_stack
+ *
  * \param stack A pointer to a stack
  */
 void tl_stack_cleanup( tl_stack* stack );
 
 /**
  * \brief Push an element onto a stack
+ *
+ * \memberof tl_stack
  *
  * \param stack   A pointer to a stack
  * \param element A pointer to the data to copy onto the top of the stack
@@ -49,6 +65,8 @@ int tl_stack_push( tl_stack* stack, const void* element );
 /**
  * \brief Get a pointer to the element on top of a stack
  *
+ * \memberof tl_stack
+ *
  * \param stack A pointer to a stack
  *
  * \return A pointer to the element on top of the stack, or NULL if the stack
@@ -59,6 +77,8 @@ void* tl_stack_top( const tl_stack* stack );
 /**
  * \brief Remove the topmost element of a stack
  *
+ * \memberof tl_stack
+ *
  * \param stack A pointer to a stack
  * \param data  If not NULL, the data is copied here before removing it
  */
@@ -66,6 +86,8 @@ void tl_stack_pop( tl_stack* stack, void* data );
 
 /**
  * \brief Returns non-zero if a stack is empty
+ *
+ * \memberof tl_stack
  *
  * \param stack A pointer to a stack
  *
@@ -75,6 +97,8 @@ int tl_stack_is_empty( tl_stack* stack );
 
 /**
  * \brief Get the number of elements currently on a stack
+ *
+ * \memberof tl_stack
  *
  * \param stack A pointer to a stack
  *

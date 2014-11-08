@@ -190,6 +190,10 @@ int tl_array_resize( tl_array* this, size_t size )
         if( !newdata )
             return 0;
 
+        /* clear new entries */
+        memset( (unsigned char*)newdata + this->used * this->unitsize, 0,
+                (size - this->used) * this->unitsize );
+
         /* update array contents */
         this->reserved = size;
         this->used     = size;

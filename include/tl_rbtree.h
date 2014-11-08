@@ -1,3 +1,8 @@
+/**
+ * \file tl_rbtree.h
+ *
+ * \brief Contains a red-black tree
+ */
 #ifndef TOOLS_RBTREE_H
 #define TOOLS_RBTREE_H
 
@@ -9,6 +14,11 @@
 
 
 
+/**
+ * \struct tl_rbtree_node
+ *
+ * \brief A node in a red-black tree
+ */
 typedef struct tl_rbtree_node
 {
     /** \brief A pointer to the left child node */
@@ -22,6 +32,11 @@ typedef struct tl_rbtree_node
 }
 tl_rbtree_node;
 
+/**
+ * \struct tl_rbtree
+ *
+ * \brief A red-black tree implementation
+ */
 typedef struct
 {
     /** \brief A pointer to the root node */
@@ -50,6 +65,8 @@ extern "C" {
 /**
  * \brief Create and initialize a node for a red-black tree
  *
+ * \memberof tl_rbtree_node
+ *
  * \param tree  A pointer to a red-black tree to get key and value size from
  * \param key   A pointer to the key
  * \param value A pointer to a value, or NULL to leave it unitialized
@@ -62,6 +79,8 @@ tl_rbtree_node* tl_rbtree_node_create( const tl_rbtree* tree,
 
 /**
  * \brief Get a pointer to the key field of a red-black tree node
+*
+ * \memberof tl_rbtree_node
  *
  * \param tree A pointer to a red-black tree to get key and value size from
  * \param node A pointer to a red-black tree node
@@ -74,6 +93,8 @@ void* tl_rbtree_node_get_key( const tl_rbtree* tree,
 
 /**
  * \brief Get a pointer to the value field of a red-black tree node
+*
+ * \memberof tl_rbtree_node
  *
  * \param tree A pointer to a red-black tree to get key and value size from
  * \param node A pointer to a red-black tree node
@@ -89,6 +110,8 @@ void* tl_rbtree_node_get_value( const tl_rbtree* tree,
 /**
  * \brief Initialize a red-black tree
  *
+ * \memberof tl_rbtree
+ *
  * \param tree       A pointer to a previously uninitialized red-black tree
  * \param keysize    The size of the data structure used as key field
  * \param valuesize  The size of the data structure used as value field
@@ -100,12 +123,16 @@ void tl_rbtree_init( tl_rbtree* tree, size_t keysize, size_t valuesize,
 /**
  * \brief Free the memory used by a red-black tree and reset it
  *
+ * \memberof tl_rbtree
+ *
  * \param tree A pointer to a red-black tree
  */
 void tl_rbtree_cleanup( tl_rbtree* tree );
 
 /**
  * \brief Overwrite a red-black tree with a copy of another red-black tree
+ *
+ * \memberof tl_rbtree
  *
  * \param dst A pointer to the destination tree. Previous contents are
  *            discarded.
@@ -118,6 +145,8 @@ int tl_rbtree_copy( tl_rbtree* dst, tl_rbtree* src );
 
 /**
  * \brief Insert a key-value pair into a red-black tree
+ *
+ * \memberof tl_rbtree
  *
  * \note This function runs in logarithmic time
  *
@@ -133,6 +162,8 @@ int tl_rbtree_insert( tl_rbtree* tree, const void* key, const void* value );
 /**
  * \brief Find a value in a red-black tree
  *
+ * \memberof tl_rbtree
+ *
  * \note This function runs in logarithmic time
  *
  * \param tree A pointer to a red-black tree
@@ -144,6 +175,8 @@ void* tl_rbtree_at( const tl_rbtree* tree, const void* key );
 
 /**
  * \brief Overwrite the value of an existing node in a red-black tree
+ *
+ * \memberof tl_rbtree
  *
  * \note This function runs in logarithmic time
  *
@@ -159,6 +192,8 @@ int tl_rbtree_set( tl_rbtree* tree, const void* key, const void* value );
 /**
  * \brief Get the minimum (i.e. left most) node of a red-black tree
  *
+ * \memberof tl_rbtree
+ *
  * \note This function runs in logarithmic time
  *
  * \param tree  A pointer to a red-black tree
@@ -171,6 +206,8 @@ int tl_rbtree_get_min( tl_rbtree* tree, void* key, void* value );
 
 /**
  * \brief Get the maximum (i.e. right most) node of a red-black tree
+ *
+ * \memberof tl_rbtree
  *
  * \note This function runs in logarithmic time
  *
@@ -185,6 +222,8 @@ int tl_rbtree_get_max( tl_rbtree* tree, void* key, void* value );
 /**
  * \brief Remove the minimum (i.e. left most) node of a red-black tree
  *
+ * \memberof tl_rbtree
+ *
  * \note This function runs in logarithmic time
  *
  * \param tree A pointer to a red-black tree
@@ -194,6 +233,8 @@ void tl_rbtree_remove_min( tl_rbtree* tree );
 /**
  * \brief Remove the maximum (i.e. right most) node of a red-black tree
  *
+ * \memberof tl_rbtree
+ *
  * \note This function runs in logarithmic time
  *
  * \param tree A pointer to a red-black tree
@@ -202,6 +243,8 @@ void tl_rbtree_remove_max( tl_rbtree* tree );
 
 /**
  * \brief Remove an object from an rb-tree
+ *
+ * \memberof tl_rbtree
  *
  * \note This function runs in logarithmic time
  *
@@ -213,6 +256,8 @@ void tl_rbtree_remove( tl_rbtree* tree, const void* key );
 /**
  * \brief Returns non-zero if a given rb-tree contains no nodes
  *
+ * \memberof tl_rbtree
+ *
  * \note This function runs in constant time
  *
  * \param tree A pointer to an red-black tree
@@ -223,6 +268,8 @@ int tl_rbtree_is_empty( const tl_rbtree* tree );
 
 /**
  * \brief Remove all nodes from a red-black tree
+ *
+ * \memberof tl_rbtree
  *
  * \note This function runs in linear time
  *

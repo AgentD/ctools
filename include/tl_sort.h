@@ -1,3 +1,8 @@
+/**
+ * \file tl_sort.h
+ *
+ * \brief Contains various sorting functions
+ */
 #ifndef TOOLS_SORT_H
 #define TOOLS_SORT_H
 
@@ -79,7 +84,7 @@ int tl_mergesort( void* data, size_t elements, size_t size, tl_compare cmp );
  * \brief Sort an array of elements using an in-place merge sort
  *
  * The in-place merge sort implementation is guaranteed to run in
- * O(N*log(N)*log(N)) time (wurst case), with logarithmic memory
+ * O(N*log(N)*log(N)) time (worst case), with logarithmic memory
  * overhead (stack, recursion).
  *
  * Merge sort is a stable sorting algorithm.
@@ -89,7 +94,8 @@ int tl_mergesort( void* data, size_t elements, size_t size, tl_compare cmp );
  * \param size     The size of a single element
  * \param cmp      A function used for comparing two elements
  */
-void tl_mergesort_inplace(void* data, size_t N, size_t size, tl_compare cmp);
+void tl_mergesort_inplace( void* data, size_t elements,
+                           size_t size, tl_compare cmp );
 
 #ifdef __cplusplus
 }

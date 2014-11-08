@@ -1,3 +1,8 @@
+/**
+ * \file tl_list.h
+ *
+ * \brief Contains a doubly linked list implementation
+ */
 #ifndef TOOLS_LIST_H
 #define TOOLS_LIST_H
 
@@ -9,6 +14,11 @@
 
 
 
+/**
+ * \struct tl_list_node
+ *
+ * \brief A node in a doubly linked list
+ */
 typedef struct tl_list_node
 {
     /** \brief A pointer to the preceeding list node */
@@ -22,6 +32,11 @@ typedef struct tl_list_node
 }
 tl_list_node;
 
+/**
+ * \struct tl_list
+ *
+ * \brief A doubly linked list container
+ */
 typedef struct
 {
     /** \brief A pointer to the head (i.e. first) node in the list */
@@ -47,6 +62,8 @@ extern "C" {
 /**
  * \brief Create a list node and set its initial data
  *
+ * \memberof tl_list_node
+ *
  * \param list A pointer to a list to get information about the data field
  *             size from
  * \param data A pointer to a data field to copy into the node, or NULL to
@@ -60,6 +77,8 @@ tl_list_node* tl_list_node_create( tl_list* list, const void* data );
 /**
  * \brief Get a pointer to the data field of a linked list node
  *
+ * \memberof tl_list_node
+ *
  * \param node A pointer to a list node
  *
  * \return A pointer to the data field
@@ -69,6 +88,8 @@ void* tl_list_node_get_data( const tl_list_node* node );
 /**
  * \brief Initialize a previously uninitialized list
  *
+ * \memberof tl_list
+ *
  * \param list        A pointer to a list
  * \param elementsize The size of an individual element
  */
@@ -76,6 +97,8 @@ void tl_list_init( tl_list* list, size_t elementsize );
 
 /**
  * \brief Free the memory used by a list and reset it
+ *
+ * \memberof tl_list
  *
  * \note This function runs in linear time
  *
@@ -85,6 +108,8 @@ void tl_list_cleanup( tl_list* list );
 
 /**
  * \brief Get a pointer to a list node by its index
+ *
+ * \memberof tl_list
  *
  * \note This function runs in linear time
  *
@@ -99,6 +124,8 @@ tl_list_node* tl_list_node_from_index( const tl_list* list, size_t index );
 /**
  * \brief Generate a list of elements from an array
  *
+ * \memberof tl_list
+ *
  * \note This function runs in linear time
  *
  * \param list  A pointer to a list. Previous contents are discarded
@@ -112,6 +139,8 @@ int tl_list_from_array( tl_list* list, const void* data, size_t count );
 /**
  * \brief Copy the contents of a list to an array of elements
  *
+ * \memberof tl_list
+ *
  * \note This function runs in linear time
  *
  * \param list A pointer to a list
@@ -122,6 +151,8 @@ void tl_list_to_array( const tl_list* list, void* data );
 
 /**
  * \brief Create a copy of a list
+ *
+ * \memberof tl_list
  *
  * \note This function runs in linear time
  *
@@ -134,6 +165,8 @@ int tl_list_copy( tl_list* dst, const tl_list* src );
 
 /**
  * \brief Create a copy of a sub range of a list
+ *
+ * \memberof tl_list
  *
  * \note This function runs in linear time
  *
@@ -149,6 +182,8 @@ int tl_list_copy_range( tl_list* dst, const tl_list* src,
 
 /**
  * \brief Insert into a list the contents of another list
+ *
+ * \memberof tl_list
  *
  * \note If index is 0 (prepend) or list->size (append), this function runs
  *       in constant time. If not, it runs in linear time.
@@ -168,6 +203,8 @@ int tl_list_join( tl_list* list, tl_list* other, size_t index );
 /**
  * \brief Reverse the order of elements in a list
  *
+ * \memberof tl_list
+ *
  * \note This function runs in linear time
  *
  * \param list A pointer to a list
@@ -177,6 +214,8 @@ void tl_list_reverse( tl_list* list );
 /**
  * \brief Concatenate two lists, copying the elements of the second to the
  *        end of the first
+ *
+ * \memberof tl_list
  *
  * \note This function runs in linear time
  *
@@ -190,6 +229,8 @@ int tl_list_concat( tl_list* dst, const tl_list* src );
 /**
  * \brief Remove elements from a list
  *
+ * \memberof tl_list
+ *
  * \note This function runs in linear time
  *
  * \param list  A pointer to a list
@@ -200,6 +241,8 @@ int tl_list_remove( tl_list* list, size_t index, size_t count );
 
 /**
  * \brief Check if a list is empty
+ *
+ * \memberof tl_list
  *
  * \note This function runs in constant time
  *
@@ -212,6 +255,8 @@ int tl_list_is_empty( const tl_list* list );
 /**
  * \brief Get a pointer to the data of a list node by its index
  *
+ * \memberof tl_list
+ *
  * \note This function runs in linear time
  *
  * \param list  A pointer to a list
@@ -223,6 +268,8 @@ void* tl_list_at( const tl_list* list, size_t index );
 
 /**
  * \brief Overwrite an element of a list
+ *
+ * \memberof tl_list
  *
  * \note This function runs in linear time
  *
@@ -238,6 +285,8 @@ int tl_list_set( tl_list* list, size_t index, const void* element );
 /**
  * \brief Add a new element to the end of a list
  *
+ * \memberof tl_list
+ *
  * \note This function runs in constant time
  *
  * \param list    A pointer to a list
@@ -251,6 +300,8 @@ int tl_list_append( tl_list* list, const void* element );
 /**
  * \brief Add a new element to the beginning of list
  *
+ * \memberof tl_list
+ *
  * \note This function runs in constant time
  *
  * \param list    A pointer to a list
@@ -263,6 +314,8 @@ int tl_list_prepend( tl_list* list, const void* element );
 
 /**
  * \brief Insert a range of elements to a list
+ *
+ * \memberof tl_list
  *
  * \note This function runs in constant time
  *
@@ -280,6 +333,8 @@ int tl_list_insert( tl_list* list, size_t index,
 /**
  * \brief Insert an element into a sorted list at the right position
  *
+ * \memberof tl_list
+ *
  * \note This function runs in linear time
  *
  * \param list    A pointer to a list
@@ -294,6 +349,8 @@ int tl_list_insert_sorted( tl_list* list, tl_compare cmp,
 /**
  * \brief Remove the first element of a list
  *
+ * \memberof tl_list
+ *
  * \note This function runs in constant time
  *
  * \param list A pointer to a list
@@ -302,6 +359,8 @@ void tl_list_remove_first( tl_list* list );
 
 /**
  * \brief Remove the last element of a list
+ *
+ * \memberof tl_list
  *
  * \note This function runs in constant time
  *
@@ -312,6 +371,8 @@ void tl_list_remove_last( tl_list* list );
 /**
  * \brief Remove all elements of a list
  *
+ * \memberof tl_list
+ *
  * \note This function runs in linear time
  *
  * \param list A pointer to a list
@@ -320,6 +381,8 @@ void tl_list_clear( tl_list* list );
 
 /**
  * \brief Sort a list in ascending order
+ *
+ * \memberof tl_list
  *
  * \note This function runs in linearithmic time. The sorting is stable
  *
@@ -335,12 +398,16 @@ void tl_list_sort( tl_list* list, tl_compare cmp );
 /**
  * \def tl_list_stable_sort
  *
+ * \memberof tl_list
+ *
  * \copydoc tl_list_sort
  */
 #define tl_list_stable_sort tl_list_sort
 
 /**
  * \brief Search for a key in a given list
+ *
+ * \memberof tl_list
  *
  * \note This function runs in linear time
  *
@@ -355,6 +422,8 @@ tl_list_node* tl_list_search( const tl_list* list, tl_compare cmp,
 
 /**
  * \def tl_list_search_unsorted
+ *
+ * \memberof tl_list
  *
  * \copydoc tl_list_search
  */

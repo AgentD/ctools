@@ -1,3 +1,8 @@
+/**
+ * \file tl_utf8.h
+ *
+ * \brief Contains UTF-8 helper functions
+ */
 #ifndef TL_UTF8_H
 #define TL_UTF8_H
 

@@ -1,3 +1,8 @@
+/**
+ * \file tl_fs.h
+ *
+ * \brief Contains filesystem abstraction functions
+ */
 #ifndef TOOLS_FILESYSTEM_H
 #define TOOLS_FILESYSTEM_H
 
