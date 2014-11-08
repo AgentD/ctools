@@ -3,10 +3,12 @@
  *
  * \brief Forward declarations and callback types
  */
-#ifndef TOOLS_INTERFACES_H
-#define TOOLS_INTERFACES_H
+#ifndef TOOLS_PREDEF_H
+#define TOOLS_PREDEF_H
 
 
+
+#include <stddef.h>
 
 #ifdef _MSC_VER
     typedef unsigned __int8 uint8_t;
@@ -24,6 +26,7 @@
 
 
 
+
 /**
  * \brief A function used to compare two objects
  *
@@ -37,5 +40,5 @@ typedef int(* tl_compare )( const void* a, const void* b );
 
 
 
-#endif /* TOOLS_INTERFACES_H */
+#endif /* TOOLS_PREDEF_H */
 
