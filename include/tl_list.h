@@ -17,25 +17,24 @@
  *
  * \brief A node in a doubly linked list
  */
-typedef struct tl_list_node
+struct tl_list_node
 {
     /** \brief A pointer to the preceeding list node */
-    struct tl_list_node* next;
+    tl_list_node* next;
 
     /** \brief A pointer to the following list node */
-    struct tl_list_node* prev;
+    tl_list_node* prev;
 
     /** \brief A padding data block used internally for alignment */
     void* padding;
-}
-tl_list_node;
+};
 
 /**
  * \struct tl_list
  *
  * \brief A doubly linked list container
  */
-typedef struct
+struct tl_list
 {
     /** \brief A pointer to the head (i.e. first) node in the list */
     tl_list_node* first;
@@ -48,8 +47,7 @@ typedef struct
 
     /** \brief The size of a single element */
     size_t unitsize;
-}
-tl_list;
+};
 
 
 

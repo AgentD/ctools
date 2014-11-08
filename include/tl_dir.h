@@ -8,8 +8,7 @@
 
 
 
-#include "tl_string.h"
-#include "tl_array.h"
+#include "tl_predef.h"
 
 
 
@@ -18,7 +17,6 @@
  *
  * \brief Represents a directory, i.e. a non leaf node in a file system tree
  */
-typedef struct tl_dir tl_dir;
 
 
 

@@ -21,7 +21,7 @@
  * doubled when adding an element to a full array. And cut in half if after
  * removing an element the array is less than a quarter filled.
  */
-typedef struct
+struct tl_array
 {
     /** \brief Number of elements available */
     size_t reserved;
@@ -34,8 +34,7 @@ typedef struct
 
     /** \brief The block of data managed by the array */
     void* data;
-}
-tl_array;
+};
 
 
 

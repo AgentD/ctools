@@ -8,6 +8,7 @@
 
 
 
+#include "tl_predef.h"
 #include "tl_list.h"
 
 
@@ -17,12 +18,11 @@
  *
  * \brief A linked list based double ended queue
  */
-typedef struct
+struct tl_queue
 {
     /** \brief The underlying container used to implement the queue */
     tl_list list;
-}
-tl_queue;
+};
 
 
 

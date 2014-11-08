@@ -26,6 +26,17 @@
 
 
 
+typedef struct tl_array tl_array;
+typedef struct tl_dir tl_dir;
+typedef struct tl_list_node tl_list_node;
+typedef struct tl_list tl_list;
+typedef struct tl_queue tl_queue;
+typedef struct tl_rbtree_node tl_rbtree_node;
+typedef struct tl_rbtree tl_rbtree;
+typedef struct tl_stack tl_stack;
+typedef struct tl_string tl_string;
+
+
 
 /**
  * \brief A function used to compare two objects

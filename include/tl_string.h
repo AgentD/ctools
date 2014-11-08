@@ -18,7 +18,7 @@
  *
  * \brief A dynamically resizeable UTF-16 string
  */
-typedef struct
+struct tl_string
 {
     /** \brief A null-terimated UTF-16 string */
     tl_array vec;
@@ -42,8 +42,7 @@ typedef struct
      * required.
      */
     size_t surrogates;
-}
-tl_string;
+};
 
 
 

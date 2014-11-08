@@ -9,6 +9,7 @@
 
 
 #include "tl_array.h"
+#include "tl_predef.h"
 
 
 
@@ -17,12 +18,11 @@
  *
  * \brief A dynamic array based stack implementation
  */
-typedef struct
+struct tl_stack
 {
     /** \brief The underlying container used to implement a stack */
     tl_array vec;
-}
-tl_stack;
+};
 
 
 

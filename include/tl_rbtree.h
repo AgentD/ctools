@@ -17,25 +17,24 @@
  *
  * \brief A node in a red-black tree
  */
-typedef struct tl_rbtree_node
+struct tl_rbtree_node
 {
     /** \brief A pointer to the left child node */
-    struct tl_rbtree_node* left;
+    tl_rbtree_node* left;
 
     /** \brief A pointer to the right child node */
-    struct tl_rbtree_node* right;
+    tl_rbtree_node* right;
 
     /** \brief Non-zero if a node is red, zero if it is black */
     unsigned char is_red;
-}
-tl_rbtree_node;
+};
 
 /**
  * \struct tl_rbtree
  *
  * \brief A red-black tree implementation
  */
-typedef struct
+struct tl_rbtree
 {
     /** \brief A pointer to the root node */
     tl_rbtree_node* root;
@@ -51,8 +50,7 @@ typedef struct
 
     /** \brief The size of the value field in a node */
     size_t valuesize;
-}
-tl_rbtree;
+};
 
 
 
