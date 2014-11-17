@@ -42,16 +42,18 @@ static INLINE void* median3( void* a, void* b, void* c, tl_compare cmp )
            (cmp(b, c) > 0 ? b : (cmp(a, c) < 0 ? a : c ));
 }
 
-static INLINE void insertionsort( char* data, size_t n, size_t size,
-                                  tl_compare cmp )
+/****************************************************************************/
+
+INLINE void tl_insertionsort( void* data, size_t n, size_t size,
+                              tl_compare cmp )
 {
-    char* first = data + size;
-    char* limit = data + n*size;
+    char* first = (char*)data + size;
+    char* limit = (char*)data + n*size;
     char *ptr, *pl;
 
     for( ptr=first; ptr<limit; ptr+=size )
     {
-        for( pl=ptr; pl>data && cmp(pl-size, pl)>0; pl-=size )
+        for( pl=ptr; pl>(char*)data && cmp(pl-size, pl)>0; pl-=size )
         {
             swap( pl, pl - size, size );
         }
@@ -69,7 +71,7 @@ recursion:
     /* for small arrays, use insertion sort */
     if( n <= 7 )
     {
-        insertionsort( data, n, size, cmp );
+        tl_insertionsort( data, n, size, cmp );
         return;
     }
 
@@ -352,7 +354,7 @@ void tl_mergesort_inplace( void* data, size_t N, size_t size, tl_compare cmp )
 
     if( N < 12 )
     {
-        insertionsort( data, N, size, cmp );
+        tl_insertionsort( data, N, size, cmp );
     }
     else
     {

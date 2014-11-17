@@ -17,6 +17,26 @@ extern "C" {
 #endif
 
 /**
+ * \brief Sort an array of elements using the insertion sort algorithm
+ *
+ * Insertion sort is a very simple, stable, in-place sorting algorithm with
+ * quadratic runtime (linear runtime for arrays that are already sorted). It
+ * is known to be more efficient than other sorting algorithms with quadratic
+ * runtime, what makes it suitable for small problem sizes that need stable
+ * sorting.
+ *
+ * The implementation of tl_quicksort uses this function as a fallback if the
+ * array size is below a certain threshold.
+ *
+ * \param data     A pointer to the array to sort
+ * \param elements The number of elements to sort
+ * \param size     The size of a single element
+ * \param cmp      A function used for comparing two elements
+ */
+void tl_insertionsort( void* data, size_t elements, size_t size,
+                       tl_compare cmp );
+
+/**
  * \brief Sort an array of elements using the quicksort algorithm
  *
  * The implementation of this function uses an optimized quicksort with a

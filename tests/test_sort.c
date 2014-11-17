@@ -85,6 +85,43 @@ int main( void )
 
     srand( time(NULL) );
 
+    /******** insertion sort *******/
+    make_asc( array, TESTSIZE/10 );
+    tl_insertionsort( array, TESTSIZE/10, sizeof(int), compare_ints );
+    if( !is_asc( array, TESTSIZE/10 ) )
+        exit( EXIT_FAILURE );
+
+    make_dsc( array, TESTSIZE/10 );
+    tl_insertionsort( array, TESTSIZE/10, sizeof(int), compare_ints );
+    if( !is_asc( array, TESTSIZE/10 ) )
+        exit( EXIT_FAILURE );
+
+    make_equal( array, TESTSIZE/10 );
+    tl_insertionsort( array, TESTSIZE/10, sizeof(int), compare_ints );
+    if( !is_equal( array, TESTSIZE/10 ) )
+        exit( EXIT_FAILURE );
+
+    for( j=0; j<RANDCASES; ++j )
+    {
+        make_rand( array, TESTSIZE/10 );
+        tl_insertionsort( array, TESTSIZE/10, sizeof(int), compare_ints );
+        if( !is_sorted( array, TESTSIZE/10 ) )
+            exit( EXIT_FAILURE );
+    }
+
+    /* check if sorting is stable */
+    make_dsc( array, TESTSIZE );
+    tl_insertionsort( array, TESTSIZE, sizeof(int), compare_ints_tenth );
+
+    for( j=0; j<TESTSIZE; j+=10 )
+    {
+        for( i=0; i<10; ++i )
+        {
+            if( array[j+i] != (9-i+j) )
+                exit( EXIT_FAILURE );
+        }
+    }
+
     /********** quicksort **********/
     make_asc( array, TESTSIZE );
     tl_quicksort( array, TESTSIZE, sizeof(int), compare_ints );
