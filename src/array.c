@@ -6,50 +6,6 @@
 
 
 
-static int tl_array_increment( tl_array* this )
-{
-    size_t newsize;
-    void* ptr;
-
-    if( this->reserved > this->used )
-    {
-        this->used += 1;
-        return 1;
-    }
-
-    newsize = this->reserved ? this->reserved * 2 : 10;
-
-    ptr = realloc( this->data, newsize * this->unitsize );
-
-    if( !ptr )
-        return 0;
-
-    this->data = ptr;
-    this->reserved = newsize;
-    this->used += 1;
-    return 1;
-}
-
-static void tl_array_decrement( tl_array* this )
-{
-    void* ptr;
-
-    this->used -= 1;
-
-    if( this->used < (this->reserved/4) )
-    {
-        ptr = realloc( this->data, this->unitsize*(this->reserved/2) );
-
-        if( ptr )
-        {
-            this->data = ptr;
-            this->reserved /= 2;
-        }
-    }
-}
-
-/****************************************************************************/
-
 void tl_array_init( tl_array* this, size_t elementsize )
 {
     if( this )
@@ -293,7 +249,7 @@ int tl_array_set( tl_array* this, size_t index, const void* element )
 
 int tl_array_append( tl_array* this, const void* element )
 {
-    if( !this || !element || !tl_array_increment( this ) )
+    if( !this || !element || !tl_array_resize( this, this->used+1 ) )
         return 0;
 
     memcpy( (unsigned char*)this->data + (this->used-1) * this->unitsize,
@@ -303,7 +259,7 @@ int tl_array_append( tl_array* this, const void* element )
 
 int tl_array_prepend( tl_array* this, const void* element )
 {
-    if( !this || !element || !tl_array_increment( this ) )
+    if( !this || !element || !tl_array_resize( this, this->used+1 ) )
         return 0;
 
     if( this->used > 1 )
@@ -377,7 +333,7 @@ int tl_array_insert_sorted( tl_array* this, tl_compare cmp,
         if( cmp( ptr, element )>0 )
         {
             /* allocate space for one more element */
-            if( !tl_array_increment( this ) )
+            if( !tl_array_resize( this, this->used+1 ) )
                 return 0;
 
             /* move rest of the array ahead */
@@ -406,14 +362,14 @@ void tl_array_remove_first( tl_array* this )
                      (this->used - 1) * this->unitsize );
         }
 
-        tl_array_decrement( this );
+        tl_array_resize( this, this->used-1 );
     }
 }
 
 void tl_array_remove_last( tl_array* this )
 {
     if( this && this->used >= 1 )
-        tl_array_decrement( this );
+        tl_array_resize( this, this->used-1 );
 }
 
 void tl_array_clear( tl_array* this )
