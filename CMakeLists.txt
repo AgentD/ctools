@@ -6,6 +6,8 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib" )
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
+set( PROJECT_BRIEF "A collection of tools and utillities for C programs" )
+
 #----------------------------------------------------------------------
 # Compiler detection and configuration
 #----------------------------------------------------------------------
@@ -117,4 +119,20 @@ add_test( test_sort ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_sort )
 add_test( test_string ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_string )
 add_test( test_string2 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_string2 )
 add_test( test_fs ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_fs )
+
+#----------------------------------------------------------------------
+# generate Doxygen API reference
+#----------------------------------------------------------------------
+find_package( Doxygen )
+
+if( DOXYGEN_FOUND )
+    configure_file( ${CMAKE_SOURCE_DIR}/Doxyfile.in
+                    ${CMAKE_BINARY_DIR}/Doxyfile @ONLY )
+
+    add_custom_target( doc ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
+                       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                       COMMENT "Generating API documentation with Doxygen"
+                       VERBATIM
+                     )
+endif( )
 
