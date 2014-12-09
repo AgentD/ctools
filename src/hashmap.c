@@ -6,11 +6,15 @@
 
 
 
-#define PADDING sizeof(void*)
-
-#define ALLIGN( ptr )\
-        if( ((size_t)(ptr)) % PADDING )\
-            (ptr) += PADDING - (((size_t)(ptr)) % PADDING)
+#ifdef TL_ALLIGN_MEMORY
+    #define PADDING sizeof(void*)
+    #define ALLIGN( ptr )\
+            if( ((size_t)(ptr)) % PADDING )\
+                (ptr) += PADDING - (((size_t)(ptr)) % PADDING)
+#else
+    #define PADDING 0
+    #define ALLIGN( ptr )
+#endif
 
 
 

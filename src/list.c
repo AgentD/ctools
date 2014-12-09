@@ -5,20 +5,31 @@
 
 
 
+#ifdef TL_ALLIGN_MEMORY
+    #define PADDING sizeof(void*)
+    #define ALLIGN( ptr )\
+            if( ((size_t)(ptr)) % PADDING )\
+                (ptr) += PADDING - (((size_t)(ptr)) % PADDING)
+#else
+    #define PADDING 0
+    #define ALLIGN( ptr )
+#endif
+
+
+
 tl_list_node* tl_list_node_create( tl_list* this, const void* data )
 {
     tl_list_node* node;
-    unsigned char* ptr;
+    char* ptr;
 
-    node = malloc( sizeof(tl_list_node) + this->unitsize );
+    node = malloc( sizeof(tl_list_node) + this->unitsize + PADDING );
 
     if( node )
     {
         if( data )
         {
-            ptr = (unsigned char*)(&(node->padding));
-            if( ((size_t)ptr) % sizeof(void*) )
-                ptr += sizeof(void*) - ((size_t)ptr) % sizeof(void*);
+            ptr = (char*)node + sizeof(tl_list_node);
+            ALLIGN( ptr );
             memcpy( ptr, data, this->unitsize );
         }
         node->prev = node->next = NULL;
@@ -29,13 +40,12 @@ tl_list_node* tl_list_node_create( tl_list* this, const void* data )
 
 void* tl_list_node_get_data( const tl_list_node* node )
 {
-    unsigned char* ptr = NULL;
+    char* ptr = NULL;
 
     if( node )
     {
-        ptr = (unsigned char*)(&(node->padding));
-        if( ((size_t)ptr) % sizeof(void*) )
-            ptr += sizeof(void*) - ((size_t)ptr) % sizeof(void*);
+        ptr = (char*)node + sizeof(tl_list_node);
+        ALLIGN( ptr );
     }
 
     return ptr;
