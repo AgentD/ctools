@@ -94,6 +94,15 @@ int tl_hashmap_init( tl_hashmap* map, size_t keysize, size_t objsize,
 void tl_hashmap_cleanup( tl_hashmap* map );
 
 /**
+ * \brief Discard all contents of a hash map
+ *
+ * \memberof tl_hashmap
+ *
+ * \param map A pointer to a hashmap
+ */
+void tl_hashmap_clear( tl_hashmap* map );
+
+/**
  * \brief Add an object to a hashmap
  *
  * \memberof tl_hashmap

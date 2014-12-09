@@ -90,8 +90,21 @@ int tl_hashmap_init( tl_hashmap* this, size_t keysize, size_t objsize,
 
 void tl_hashmap_cleanup( tl_hashmap* this )
 {
+    if( this )
+    {
+        tl_hashmap_clear( this );
+
+        free( this->bitmap );
+        free( this->bins );
+
+        memset( this, 0, sizeof(tl_hashmap) );
+    }
+}
+
+void tl_hashmap_clear( tl_hashmap* this )
+{
+    size_t i, binsize, mapcount;
     tl_hashmap_entry *it, *old;
-    size_t i, binsize;
     char* ptr;
 
     if( this )
@@ -110,12 +123,13 @@ void tl_hashmap_cleanup( tl_hashmap* this )
                 it = it->next;
                 free( old );
             }
+
+            ((tl_hashmap_entry*)ptr)->next = NULL;
         }
 
-        free( this->bitmap );
-        free( this->bins );
+        mapcount = 1 + (this->bincount / (sizeof(int)*CHAR_BIT));
 
-        memset( this, 0, sizeof(tl_hashmap) );
+        memset( this->bitmap, 0, mapcount * sizeof(int) );
     }
 }
 
