@@ -497,10 +497,15 @@ void tl_rbtree_remove_max( tl_rbtree* this )
     --(this->size);
 }
 
-void tl_rbtree_remove( tl_rbtree* this, const void* key )
+int tl_rbtree_remove( tl_rbtree* this, const void* key, void* value )
 { 
-    if( !this || !key || !this->size || !tl_rbtree_at( this, key ) )
-        return;
+    void* obj;
+
+    if( !this || !key || !this->size || !(obj = tl_rbtree_at( this, key )) )
+        return 0;
+
+    if( value )
+        memcpy( value, obj, this->valuesize );
 
     if( !IS_RED(this->root->left) && !IS_RED(this->root->right) )
         this->root->is_red = 1;
@@ -511,6 +516,7 @@ void tl_rbtree_remove( tl_rbtree* this, const void* key )
         this->root->is_red = 0;
 
     --(this->size);
+    return 1;
 }
 
 int tl_rbtree_is_empty( const tl_rbtree* this )

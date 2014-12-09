@@ -117,7 +117,7 @@ void tl_hashmap_clear( tl_hashmap* map );
  * \return Non-zero on success, zero if out of memory, or one of the arguments
  *         is NULL.
  */
-int tl_hashmap_add( tl_hashmap* map, const void* key, const void* object );
+int tl_hashmap_insert( tl_hashmap* map, const void* key, const void* object );
 
 /**
  * \brief Get an object stored in a hashmap by its key
@@ -129,7 +129,7 @@ int tl_hashmap_add( tl_hashmap* map, const void* key, const void* object );
  *
  * \return A pointer to the object stored in the hashmap or NULL if not found
  */
-void* tl_hashmap_get( const tl_hashmap* map, const void* key );
+void* tl_hashmap_at( const tl_hashmap* map, const void* key );
 
 /**
  * \brief Remove an object stored in a hashmap

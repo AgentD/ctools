@@ -133,7 +133,8 @@ void tl_hashmap_clear( tl_hashmap* this )
     }
 }
 
-int tl_hashmap_add( tl_hashmap* this, const void* key, const void* object )
+int tl_hashmap_insert( tl_hashmap* this, const void* key,
+                       const void* object )
 {
     tl_hashmap_entry* new;
     entrydata data;
@@ -178,7 +179,7 @@ int tl_hashmap_add( tl_hashmap* this, const void* key, const void* object )
     return 1;
 }
 
-void* tl_hashmap_get( const tl_hashmap* this, const void* key )
+void* tl_hashmap_at( const tl_hashmap* this, const void* key )
 {
     tl_hashmap_entry* it;
     entrydata data;

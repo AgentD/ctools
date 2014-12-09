@@ -244,10 +244,14 @@ void tl_rbtree_remove_max( tl_rbtree* tree );
  *
  * \note This function runs in logarithmic time
  *
- * \param tree A pointer to a red-black tree
- * \param key A pointer to the key of the node to remove
+ * \param tree  A pointer to a red-black tree
+ * \param key   A pointer to the key of the node to remove
+ * \param value If not NULL, the value is memcopied to this location
+ *              before removal.
+ *
+ * \return Non-zero if the value was removed, zero if it was not found
  */
-void tl_rbtree_remove( tl_rbtree* tree, const void* key );
+int tl_rbtree_remove( tl_rbtree* tree, const void* key, void* value );
 
 /**
  * \brief Returns non-zero if a given rb-tree contains no nodes
