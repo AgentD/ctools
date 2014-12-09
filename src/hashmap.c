@@ -280,3 +280,21 @@ int tl_hashmap_remove( tl_hashmap* this, const void* key, void* object )
     return 0;
 }
 
+int tl_hashmap_is_empty( const tl_hashmap* this )
+{
+    size_t i, mapcount;
+
+    if( this )
+    {
+        mapcount = 1 + (this->bincount / (sizeof(int)*CHAR_BIT));
+
+        for( i=0; i<mapcount; ++i )
+        {
+            if( this->bitmap[ i ] )
+                return 0;
+        }
+    }
+
+    return 1;
+}
+

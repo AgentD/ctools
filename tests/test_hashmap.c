@@ -28,6 +28,9 @@ int main( void )
     /* insert and retrieve */
     tl_hashmap_init( &map, sizeof(long), sizeof(long), 10, hash, compare );
 
+    if( !tl_hashmap_is_empty( &map ) ) return EXIT_FAILURE;
+    if( !tl_hashmap_is_empty( NULL ) ) return EXIT_FAILURE;
+
     for( i=0; i<sizeof(test_vals)/sizeof(test_vals[0]); ++i )
     {
         if( tl_hashmap_get( &map, test_keys+i ) )
@@ -35,12 +38,23 @@ int main( void )
 
         tl_hashmap_add( &map, test_keys+i, test_vals+i );
 
+        if( tl_hashmap_is_empty( &map ) )
+            return EXIT_FAILURE;
+
         if( !tl_hashmap_get( &map, test_keys+i ) )
             return EXIT_FAILURE;
 
         if( *((long*)tl_hashmap_get( &map, test_keys+i )) != test_vals[i] )
             return EXIT_FAILURE;
     }
+
+    if( tl_hashmap_is_empty( &map ) )
+        return EXIT_FAILURE;
+
+    tl_hashmap_clear( &map );
+
+    if( !tl_hashmap_is_empty( &map ) )
+        return EXIT_FAILURE;
 
     tl_hashmap_cleanup( &map );
 

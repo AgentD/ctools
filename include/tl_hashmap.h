@@ -145,6 +145,19 @@ void* tl_hashmap_get( const tl_hashmap* map, const void* key );
  */
 int tl_hashmap_remove( tl_hashmap* map, const void* key, void* object );
 
+/**
+ * \brief Returns non-zero if a given hash map contains no entries
+ *
+ * \memberof tl_hashmap
+ *
+ * \note The run time of this function is proportional to the number of bins
+ *
+ * \param map A pointer to a hash map
+ *
+ * \return Non-zero if the map is empty, zero if not
+ */
+int tl_hashmap_is_empty( const tl_hashmap* map );
+
 #ifdef __cplusplus
 }
 #endif
