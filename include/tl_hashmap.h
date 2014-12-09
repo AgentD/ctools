@@ -38,7 +38,7 @@ struct tl_hashmap
      * are multiple objects with the same hash, the index holds the first
      * element of a linked list of entries with the same hash.
      */
-    tl_hashmap_entry* bins;
+    char* bins;
 
     /** \brief Holds one bit for each bin (0 for empty, 1 for used). */
     int* bitmap;
@@ -92,6 +92,45 @@ int tl_hashmap_init( tl_hashmap* map, size_t keysize, size_t objsize,
  * \param map A pointer to a hashmap
  */
 void tl_hashmap_cleanup( tl_hashmap* map );
+
+/**
+ * \brief Get a pointer to the key of a hash map entry
+ *
+ * \memberof tl_hashmap
+ *
+ * \param map   A pointer to a hashmap
+ * \param entry A pointer to a entry
+ *
+ * \return A pointer to the key, or NULL if one of the pointers was NULL
+ */
+void* tl_hashmap_entry_get_key( const tl_hashmap* map,
+                                const tl_hashmap_entry* entry );
+
+/**
+ * \brief Get a pointer to the value of a hash map entry
+ *
+ * \memberof tl_hashmap
+ *
+ * \param map   A pointer to a hashmap
+ * \param entry A pointer to a entry
+ *
+ * \return A pointer to the value, or NULL if one of the pointers was NULL
+ */
+void* tl_hashmap_entry_get_value( const tl_hashmap* map,
+                                  const tl_hashmap_entry* entry );
+
+/**
+ * \brief Get a pointer to a hash map bin head
+ *
+ * \memberof tl_hashmap
+ *
+ * \param map   A pointer to a hash map
+ * \param index The index of the bin
+ *
+ * \return A pointer to the bin (list head) on success, NULL on failure
+ *         (i.e. 'map' is NULL, index is out of range or the bin is empty)
+ */
+tl_hashmap_entry* tl_hashmap_get_bin( const tl_hashmap* map, size_t index );
 
 /**
  * \brief Overwrite a hash map with a copy of another hash map

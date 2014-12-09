@@ -6,18 +6,6 @@
 
 
 
-#ifdef TL_ALLIGN_MEMORY
-    #define PADDING sizeof(void*)
-    #define ALLIGN( ptr )\
-            if( ((size_t)(ptr)) % PADDING )\
-                (ptr) += PADDING - (((size_t)(ptr)) % PADDING)
-#else
-    #define PADDING 0
-    #define ALLIGN( ptr )
-#endif
-
-
-
 int compare( const void* a, const void* b )
 {
     return *((long*)a) - *((long*)b);
@@ -31,8 +19,7 @@ unsigned long hash( const void* obj )
 static int compare_structure( const tl_hashmap* a, const tl_hashmap* b )
 {
     tl_hashmap_entry *ait, *bit;
-    size_t i, size;
-    int used;
+    size_t i;
 
     if( a->bincount != b->bincount )
         return 0;
@@ -43,27 +30,29 @@ static int compare_structure( const tl_hashmap* a, const tl_hashmap* b )
             return 0;
     }
 
-    size = sizeof(tl_hashmap_entry) + a->keysize + a->objsize + 2*PADDING;
-
     for( i=0; i<a->bincount; ++i )
     {
-        ait = (tl_hashmap_entry*)((char*)a->bins + i * size);
-        bit = (tl_hashmap_entry*)((char*)b->bins + i * size);
+        ait = tl_hashmap_get_bin( a, i );
+        bit = tl_hashmap_get_bin( b, i );
 
-        used = a->bitmap[ i/(sizeof(int)*CHAR_BIT) ];
-        used = (used >> (i % (sizeof(int)*CHAR_BIT))) & 0x01;
+        if( (ait && !bit) || (!ait && bit) )
+            return 0;
 
         for( ; ait!=NULL; ait=ait->next, bit=bit->next )
         {
             if( (ait->next && !bit->next) || (!ait->next && bit->next) )
                 return 0;
 
-            if( !used )
-                break;
+            if( memcmp( tl_hashmap_entry_get_key( a, ait ),
+                        tl_hashmap_entry_get_key( b, ait ),
+                        a->keysize )!=0 )
+            {
+                return 0;
+            }
 
-            if( memcmp( (char*)ait + sizeof(tl_hashmap_entry),
-                        (char*)bit + sizeof(tl_hashmap_entry),
-                        size - sizeof(tl_hashmap_entry) )!=0 )
+            if( memcmp( tl_hashmap_entry_get_value( a, ait ),
+                        tl_hashmap_entry_get_value( b, ait ),
+                        a->objsize )!=0 )
             {
                 return 0;
             }
