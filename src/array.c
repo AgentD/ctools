@@ -223,7 +223,7 @@ void tl_array_remove( tl_array* this, size_t index, size_t count )
     }
 }
 
-int tl_array_is_empty( tl_array* this )
+int tl_array_is_empty( const tl_array* this )
 {
     return this ? (this->used==0) : 1;
 }

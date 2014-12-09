@@ -137,7 +137,7 @@ void tl_rbtree_cleanup( tl_rbtree* tree );
  * \return Non-zero on success, zero if one of the pointers is NULL or out of
  *         memory
  */
-int tl_rbtree_copy( tl_rbtree* dst, tl_rbtree* src );
+int tl_rbtree_copy( tl_rbtree* dst, const tl_rbtree* src );
 
 /**
  * \brief Insert a key-value pair into a red-black tree
@@ -198,7 +198,7 @@ int tl_rbtree_set( tl_rbtree* tree, const void* key, const void* value );
  *
  * \return Zero if the tree is empty, non-zero otherwise
  */
-int tl_rbtree_get_min( tl_rbtree* tree, void* key, void* value );
+int tl_rbtree_get_min( const tl_rbtree* tree, void* key, void* value );
 
 /**
  * \brief Get the maximum (i.e. right most) node of a red-black tree
@@ -213,7 +213,7 @@ int tl_rbtree_get_min( tl_rbtree* tree, void* key, void* value );
  *
  * \return Zero if the tree is empty, non-zero otherwise
  */
-int tl_rbtree_get_max( tl_rbtree* tree, void* key, void* value );
+int tl_rbtree_get_max( const tl_rbtree* tree, void* key, void* value );
 
 /**
  * \brief Remove the minimum (i.e. left most) node of a red-black tree

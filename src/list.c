@@ -17,7 +17,7 @@
 
 
 
-tl_list_node* tl_list_node_create( tl_list* this, const void* data )
+tl_list_node* tl_list_node_create( const tl_list* this, const void* data )
 {
     tl_list_node* node;
     char* ptr;

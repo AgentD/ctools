@@ -210,7 +210,7 @@ void tl_array_remove( tl_array* vec, size_t index, size_t count );
  *
  * \return Zero if the array contains elements, zero if it is empty
  */
-int tl_array_is_empty( tl_array* vec );
+int tl_array_is_empty( const tl_array* vec );
 
 /**
  * \brief Get a pointer to an element in a array

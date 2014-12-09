@@ -65,7 +65,7 @@ extern "C" {
  * \return On success, a pointer to a list node that has to be freed using
  *         free( ). NULL on failure
  */
-tl_list_node* tl_list_node_create( tl_list* list, const void* data );
+tl_list_node* tl_list_node_create( const tl_list* list, const void* data );
 
 /**
  * \brief Get a pointer to the data field of a linked list node

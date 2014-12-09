@@ -279,7 +279,8 @@ void* tl_rbtree_node_get_value( const tl_rbtree* tree,
     return ptr;
 }
 
-static tl_rbtree_node* copy_subtree( tl_rbtree* this, tl_rbtree_node* src )
+static tl_rbtree_node* copy_subtree( const tl_rbtree* this,
+                                     const tl_rbtree_node* src )
 {
     tl_rbtree_node* copy;
 
@@ -336,7 +337,7 @@ void tl_rbtree_cleanup( tl_rbtree* this )
     }
 }
 
-int tl_rbtree_copy( tl_rbtree* this, tl_rbtree* src )
+int tl_rbtree_copy( tl_rbtree* this, const tl_rbtree* src )
 {
     tl_rbtree_node* newroot;
 
@@ -421,7 +422,7 @@ int tl_rbtree_set( tl_rbtree* this, const void* key, const void* value )
     return 1;
 }
 
-int tl_rbtree_get_min( tl_rbtree* this, void* key, void* value )
+int tl_rbtree_get_min( const tl_rbtree* this, void* key, void* value )
 {
     tl_rbtree_node* n;
 
@@ -442,7 +443,7 @@ int tl_rbtree_get_min( tl_rbtree* this, void* key, void* value )
     return 1;
 }
 
-int tl_rbtree_get_max( tl_rbtree* this, void* key, void* value )
+int tl_rbtree_get_max( const tl_rbtree* this, void* key, void* value )
 {
     tl_rbtree_node* n;
 

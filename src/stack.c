@@ -47,12 +47,12 @@ void tl_stack_pop( tl_stack* this, void* data )
     tl_array_resize( &(this->vec), this->vec.used-1 );
 }
 
-int tl_stack_is_empty( tl_stack* this )
+int tl_stack_is_empty( const tl_stack* this )
 {
     return (!this || this->vec.used==0);
 }
 
-size_t tl_stack_size( tl_stack* this )
+size_t tl_stack_size( const tl_stack* this )
 {
     return this ? this->vec.used : 0;
 }

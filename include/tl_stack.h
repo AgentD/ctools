@@ -93,7 +93,7 @@ void tl_stack_pop( tl_stack* stack, void* data );
  *
  * \return Non-zero if the stack is empty, zero if not
  */
-int tl_stack_is_empty( tl_stack* stack );
+int tl_stack_is_empty( const tl_stack* stack );
 
 /**
  * \brief Get the number of elements currently on a stack
@@ -104,7 +104,7 @@ int tl_stack_is_empty( tl_stack* stack );
  *
  * \return The number of elements currently on the stack
  */
-size_t tl_stack_size( tl_stack* stack );
+size_t tl_stack_size( const tl_stack* stack );
 
 #ifdef __cplusplus
 }
