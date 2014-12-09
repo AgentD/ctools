@@ -35,6 +35,8 @@ typedef struct tl_rbtree_node tl_rbtree_node;
 typedef struct tl_rbtree tl_rbtree;
 typedef struct tl_stack tl_stack;
 typedef struct tl_string tl_string;
+typedef struct tl_hashmap tl_hashmap;
+typedef struct tl_hashmap_entry tl_hashmap_entry;
 
 
 
@@ -48,6 +50,18 @@ typedef struct tl_string tl_string;
  *         are equal
  */
 typedef int(* tl_compare )( const void* a, const void* b );
+
+/**
+ * \brief A function used to compute the hash value of an object
+ *
+ * The hash value generated for two objects should ideally only be equal if
+ * the two objects are equal in respect to a comparison function.
+ *
+ * \param obj A pointer to an object
+ *
+ * \return An integer value generated from the object
+ */
+typedef unsigned long(* tl_hash )( const void* obj );
 
 
 
