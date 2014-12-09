@@ -142,6 +142,36 @@ int main( void )
 
     tl_hashmap_cleanup( &map );
 
+    /* overwrite */
+    tl_hashmap_init( &map, sizeof(long), sizeof(long), 10, hash, compare );
+
+    tl_hashmap_insert( &map, test_keys, test_vals );
+    if( *((long*)tl_hashmap_at( &map, test_keys )) != test_vals[0] )
+        return EXIT_FAILURE;
+
+    tl_hashmap_set( &map, test_keys, test_vals+1 );
+    if( *((long*)tl_hashmap_at( &map, test_keys )) != test_vals[1] )
+        return EXIT_FAILURE;
+
+    tl_hashmap_set( &map, test_keys, test_vals+2 );
+    if( *((long*)tl_hashmap_at( &map, test_keys )) != test_vals[2] )
+        return EXIT_FAILURE;
+
+    tl_hashmap_set( &map, test_keys, test_vals+3 );
+    if( *((long*)tl_hashmap_at( &map, test_keys )) != test_vals[3] )
+        return EXIT_FAILURE;
+
+    if( !tl_hashmap_remove( &map, test_keys, &l ) || l!=test_vals[3] )
+        return EXIT_FAILURE;
+
+    if( tl_hashmap_remove( &map, test_keys, &l ) )
+        return EXIT_FAILURE;
+
+    if( tl_hashmap_at( &map, test_keys ) )
+        return EXIT_FAILURE;    
+
+    tl_hashmap_cleanup( &map );
+
     return EXIT_SUCCESS;
 }
 

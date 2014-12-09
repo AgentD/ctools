@@ -120,6 +120,20 @@ void tl_hashmap_clear( tl_hashmap* map );
 int tl_hashmap_insert( tl_hashmap* map, const void* key, const void* object );
 
 /**
+ * \brief Overwrite the value of an existing entry in a hash map
+ *
+ * \memberof tl_hashmap
+ *
+ * \param map    A pointer to a hash map
+ * \param key    A pointer to the key of the entry to overwrite
+ * \param object A pointer to the value to write over the existing one
+ *
+ * \return Non-zero on success, zero if one of the arguments is NULL or
+ *         the entry could not be found.
+ */
+int tl_hashmap_set( tl_hashmap* map, const void* key, const void* object );
+
+/**
  * \brief Get an object stored in a hashmap by its key
  *
  * \memberof tl_hashmap

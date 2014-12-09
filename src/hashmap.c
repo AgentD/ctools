@@ -179,6 +179,24 @@ int tl_hashmap_insert( tl_hashmap* this, const void* key,
     return 1;
 }
 
+int tl_hashmap_set( tl_hashmap* this, const void* key, const void* object )
+{
+    void* ptr;
+
+    if( this && key && object )
+    {
+        ptr = tl_hashmap_at( this, key );
+
+        if( ptr )
+        {
+            memcpy( ptr, object, this->objsize );
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 void* tl_hashmap_at( const tl_hashmap* this, const void* key )
 {
     tl_hashmap_entry* it;
