@@ -94,6 +94,20 @@ int tl_hashmap_init( tl_hashmap* map, size_t keysize, size_t objsize,
 void tl_hashmap_cleanup( tl_hashmap* map );
 
 /**
+ * \brief Overwrite a hash map with a copy of another hash map
+ *
+ * \memberof tl_hashmap
+ *
+ * \param dst A pointer to the destination hash map. Previous contents
+ *            are discarded.
+ * \param src A pointer to the source hash map
+ *
+ * \return Non-zero on success, zero if one of the pointers is NULL or out of
+ *         memory
+ */
+int tl_hashmap_copy( tl_hashmap* dst, const tl_hashmap* src );
+
+/**
  * \brief Discard all contents of a hash map
  *
  * \memberof tl_hashmap

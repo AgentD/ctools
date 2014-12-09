@@ -101,6 +101,87 @@ void tl_hashmap_cleanup( tl_hashmap* this )
     }
 }
 
+int tl_hashmap_copy( tl_hashmap* this, const tl_hashmap* src )
+{
+    tl_hashmap_entry *sit, *dit;
+    size_t i, binsize, mapcount;
+    int* bitmap;
+    char* bins;
+
+    if( !this || !src )
+        return 0;
+
+    /* allocate bins */
+    binsize = sizeof(tl_hashmap_entry) + src->keysize + src->objsize;
+    binsize+= 2*PADDING;
+    bins = malloc( binsize * src->bincount );
+
+    if( !bins )
+        return 0;
+
+    /* allocate usage bitmap */
+    mapcount = 1 + (src->bincount / (sizeof(int)*CHAR_BIT));
+    bitmap = malloc( mapcount * sizeof(int) );
+
+    if( !bitmap )
+    {
+        free( bins );
+        return 0;
+    }
+
+    /* copy bin contents */
+    for( i=0; i<src->bincount; ++i )
+    {
+        dit = (tl_hashmap_entry*)(            bins + i * binsize);
+        sit = (tl_hashmap_entry*)((char*)src->bins + i * binsize);
+
+        for( ; sit!=NULL; sit=sit->next, dit=dit->next )
+        {
+            dit->next = NULL;
+
+            memcpy( (char*)dit + sizeof(tl_hashmap_entry),
+                    (char*)sit + sizeof(tl_hashmap_entry),
+                    binsize - sizeof(tl_hashmap_entry) );
+
+            if( sit->next )
+            {
+                dit->next = malloc( binsize );
+                if( !dit->next )
+                    goto fail;
+            }
+        }
+    }
+
+    /* copy */
+    free( this->bins );
+    free( this->bitmap );
+    memcpy( bitmap, src->bitmap, mapcount*sizeof(int) );
+
+    this->keysize  = src->keysize;
+    this->objsize  = src->objsize;
+    this->bincount = src->bincount;
+    this->hash     = src->hash;
+    this->compare  = src->compare;
+    this->bins     = (tl_hashmap_entry*)bins;
+    this->bitmap   = bitmap;
+    return 1;
+fail:
+    for( i=0; i<src->bincount; ++i )
+    {
+        sit = ((tl_hashmap_entry*)(bins + i*binsize))->next;
+
+        while( sit )
+        {
+            dit = sit;
+            sit = sit->next;
+            free( dit );
+        }
+    }
+    free( bins );
+    free( bitmap );
+    return 0;
+}
+
 void tl_hashmap_clear( tl_hashmap* this )
 {
     size_t i, binsize, mapcount;

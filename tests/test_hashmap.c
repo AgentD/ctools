@@ -1,6 +1,20 @@
 #include "tl_hashmap.h"
 
 #include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+
+
+
+#ifdef TL_ALLIGN_MEMORY
+    #define PADDING sizeof(void*)
+    #define ALLIGN( ptr )\
+            if( ((size_t)(ptr)) % PADDING )\
+                (ptr) += PADDING - (((size_t)(ptr)) % PADDING)
+#else
+    #define PADDING 0
+    #define ALLIGN( ptr )
+#endif
 
 
 
@@ -14,6 +28,50 @@ unsigned long hash( const void* obj )
     return (*((unsigned long*)obj)) / 10;
 }
 
+static int compare_structure( const tl_hashmap* a, const tl_hashmap* b )
+{
+    tl_hashmap_entry *ait, *bit;
+    size_t i, size;
+    int used;
+
+    if( a->bincount != b->bincount )
+        return 0;
+
+    for( i=0; i<(1+(a->bincount/(sizeof(int)*CHAR_BIT))); ++i )
+    {
+        if( a->bitmap[i] != b->bitmap[i] )
+            return 0;
+    }
+
+    size = sizeof(tl_hashmap_entry) + a->keysize + a->objsize + 2*PADDING;
+
+    for( i=0; i<a->bincount; ++i )
+    {
+        ait = (tl_hashmap_entry*)((char*)a->bins + i * size);
+        bit = (tl_hashmap_entry*)((char*)b->bins + i * size);
+
+        used = a->bitmap[ i/(sizeof(int)*CHAR_BIT) ];
+        used = (used >> (i % (sizeof(int)*CHAR_BIT))) & 0x01;
+
+        for( ; ait!=NULL; ait=ait->next, bit=bit->next )
+        {
+            if( (ait->next && !bit->next) || (!ait->next && bit->next) )
+                return 0;
+
+            if( !used )
+                break;
+
+            if( memcmp( (char*)ait + sizeof(tl_hashmap_entry),
+                        (char*)bit + sizeof(tl_hashmap_entry),
+                        size - sizeof(tl_hashmap_entry) )!=0 )
+            {
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
 
 
 
@@ -21,7 +79,7 @@ int main( void )
 {
     long test_keys[ ] = {   5,   6,   7,  12,  20 };
     long test_vals[ ] = { 100, 200, 300, 400, 500 };
-    tl_hashmap map;
+    tl_hashmap map, copy;
     size_t i, j;
     long l;
 
@@ -171,6 +229,23 @@ int main( void )
         return EXIT_FAILURE;    
 
     tl_hashmap_cleanup( &map );
+
+    /* copy */
+    tl_hashmap_init( &map,  sizeof(long), sizeof(long), 10, hash, compare );
+    memset( &copy, 0, sizeof(copy) );
+
+    for( i=0; i<sizeof(test_vals)/sizeof(test_vals[0]); ++i )
+    {
+        tl_hashmap_insert( &map, test_keys+i, test_vals+i );
+    }
+
+    tl_hashmap_copy( &copy, &map );
+
+    if( !compare_structure( &copy, &map ) )
+        return EXIT_FAILURE;
+
+    tl_hashmap_cleanup( &map );
+    tl_hashmap_cleanup( &copy );
 
     return EXIT_SUCCESS;
 }
