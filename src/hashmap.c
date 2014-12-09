@@ -63,7 +63,7 @@ int tl_hashmap_init( tl_hashmap* this, size_t keysize, size_t objsize,
         return 0;
 
     /* allocate usage bitmap */
-    mapcount = 1 + ((sizeof(int)*CHAR_BIT) / bincount);
+    mapcount = 1 + (bincount / (sizeof(int)*CHAR_BIT));
     this->bitmap = malloc( mapcount * sizeof(int) );
 
     if( !this->bitmap )
