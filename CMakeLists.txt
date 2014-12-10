@@ -95,6 +95,7 @@ add_library( ctools STATIC src/array.c
                            src/hashmap.c
                            src/utf8.c
                            src/utf16.c
+                           src/allocator.c
                            ${CTOOLS_SYSDEP} )
 
 #----------------------------------------------------------------------
