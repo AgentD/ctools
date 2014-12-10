@@ -15,7 +15,7 @@ int main( void )
     int i, j, vals[10] = { 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 };
     tl_array avec, bvec;
 
-    tl_array_init( &avec, sizeof(int) );
+    tl_array_init( &avec, sizeof(int), NULL );
 
     if( !tl_array_is_empty( &avec ) )
         return EXIT_FAILURE;
@@ -150,7 +150,7 @@ int main( void )
     if( tl_array_insert( &avec,  10, NULL, 1 ) ) return EXIT_FAILURE;
 
     /* copy range */
-    tl_array_init( &bvec, sizeof(int) );
+    tl_array_init( &bvec, sizeof(int), NULL );
     tl_array_copy_range( &bvec, &avec, 10, 10 );
 
     if( bvec.used != 10             ) return EXIT_FAILURE;
@@ -199,7 +199,7 @@ int main( void )
     tl_array_cleanup( &avec );
 
     /* append and prepend elements */
-    tl_array_init( &avec, sizeof(int) );
+    tl_array_init( &avec, sizeof(int), NULL );
 
     for( i=0; i<10; ++i )
     {
@@ -216,7 +216,7 @@ int main( void )
 
     tl_array_cleanup( &avec );
 
-    tl_array_init( &avec, sizeof(int) );
+    tl_array_init( &avec, sizeof(int), NULL );
 
     for( i=0; i<10; ++i )
     {
@@ -234,7 +234,7 @@ int main( void )
     tl_array_cleanup( &avec );
 
     /* remove first element */
-    tl_array_init( &avec, sizeof(int) );
+    tl_array_init( &avec, sizeof(int), NULL );
     tl_array_from_array( &avec, vals, 10 );
     if( avec.used != 10 ) return EXIT_FAILURE;
 
@@ -266,7 +266,7 @@ int main( void )
     tl_array_cleanup( &avec );
 
     /* remove last element */
-    tl_array_init( &avec, sizeof(int) );
+    tl_array_init( &avec, sizeof(int), NULL );
     tl_array_from_array( &avec, vals, 10 );
     if( avec.used != 10 ) return EXIT_FAILURE;
 
@@ -298,7 +298,7 @@ int main( void )
     tl_array_cleanup( &avec );
 
     /* search linear */
-    tl_array_init( &avec, sizeof(int) );
+    tl_array_init( &avec, sizeof(int), NULL );
 
     for( i=1000; i>=0; --i )
     {
@@ -314,7 +314,7 @@ int main( void )
     tl_array_cleanup( &avec );
 
     /* search binary */
-    tl_array_init( &avec, sizeof(int) );
+    tl_array_init( &avec, sizeof(int), NULL );
 
     for( i=0; i<1000; ++i )
     {
@@ -330,7 +330,7 @@ int main( void )
     tl_array_cleanup( &avec );
 
     /* insert sorted */
-    tl_array_init( &avec, sizeof(int) );
+    tl_array_init( &avec, sizeof(int), NULL );
 
     for( i=1000; i>1; i-=2 )
     {
@@ -363,7 +363,7 @@ int main( void )
     tl_array_cleanup( &avec );
 
     /* append array */
-    tl_array_init( &avec, sizeof(int) );
+    tl_array_init( &avec, sizeof(int), NULL );
 
     tl_array_append_array( &avec, vals, 5 );
     if( avec.used!=5 )

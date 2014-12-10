@@ -37,8 +37,10 @@ extern "C" {
  *
  * \param stack        A pointer to an uninitialized stack
  * \param element_size The size of an element
+ * \param alloc        A pointer to an allocator or NULL if not used
  */
-void tl_stack_init( tl_stack* stack, size_t element_size );
+void tl_stack_init( tl_stack* stack, size_t element_size,
+                    tl_allocator* alloc );
 
 /**
  * \brief Cleanup a stack, freeing all its memory and resetting it

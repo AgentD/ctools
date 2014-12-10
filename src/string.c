@@ -26,7 +26,7 @@ int tl_string_init( tl_string* this )
 
     if( this )
     {
-        tl_array_init( &(this->vec), sizeof(uint16_t) );
+        tl_array_init( &(this->vec), sizeof(uint16_t), NULL );
         this->charcount = 0;
         this->surrogates = 0;
 
@@ -72,7 +72,7 @@ void tl_string_clear( tl_string* this )
 {
     if( this )
     {
-        tl_array_resize( &(this->vec), 1 );
+        tl_array_resize( &(this->vec), 1, 0 );
         *((uint16_t*)this->vec.data) = 0;
 
         this->charcount = 0;
@@ -196,7 +196,7 @@ int tl_string_append_utf8_count( tl_string* this, const char* utf8,
     /* resize array */
     i = this->vec.used - 1;
 
-    if( !tl_array_resize( &this->vec, this->vec.used + u8len ) )
+    if( !tl_array_resize( &this->vec, this->vec.used + u8len, 0 ) )
         return 0;
 
     dst = (uint16_t*)this->vec.data + i;
@@ -242,7 +242,7 @@ int tl_string_append_latin1_count( tl_string* this, const char* latin1,
 
     i = this->vec.used - 1;
 
-    if( !tl_array_resize( &this->vec, this->vec.used + count ) )
+    if( !tl_array_resize( &this->vec, this->vec.used + count, 0 ) )
         return 0;
 
     dst = (uint16_t*)this->vec.data + i;
@@ -275,7 +275,7 @@ int tl_string_append_utf16_count( tl_string* this, const uint16_t* str,
 
     i = this->vec.used - 1;
 
-    if( !tl_array_resize( &this->vec, this->vec.used + total ) )
+    if( !tl_array_resize( &this->vec, this->vec.used + total, 0 ) )
         return 0;
 
     dst = (uint16_t*)this->vec.data + i;
@@ -454,7 +454,8 @@ void tl_string_drop_last( tl_string* this )
         cp = ((uint16_t*)this->vec.data)[this->vec.used - 2];
 
         tl_array_resize( &this->vec,
-                         this->vec.used - (IS_SURROGATE(cp) ? 2 : 1) );
+                         this->vec.used - (IS_SURROGATE(cp) ? 2 : 1),
+                         0 );
 
         ((uint16_t*)this->vec.data)[ this->vec.used - 1 ] = '\0';
 

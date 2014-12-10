@@ -34,6 +34,9 @@ struct tl_array
 
     /** \brief The block of data managed by the array */
     void* data;
+
+    /** \brief Pointer to an allocator or NULL if not used */
+    tl_allocator* alloc;
 };
 
 
@@ -49,8 +52,9 @@ extern "C" {
  *
  * \param vec         A pointer to an uninitialized dynamic array
  * \param elementsize The size of a single element
+ * \param alloc       A pointer to an allocator or NULL if not used
  */
-void tl_array_init( tl_array* vec, size_t elementsize );
+void tl_array_init( tl_array* vec, size_t elementsize, tl_allocator* alloc );
 
 /**
  * \brief Free the memory used by a array and reset its fields
@@ -147,12 +151,14 @@ int tl_array_concat( tl_array* dst, const tl_array* src );
  * is larget than the current size, the new elements are initialized with
  * zero.
  *
- * \param vec  A pinter to an array
- * \param size Size of the array to set (number of used elements)
+ * \param vec        A pinter to an array
+ * \param size       Size of the array to set (number of used elements)
+ * \param initialize Non-zero to initialize newly allocated elements, zero to
+ *                   leave the uninitialized
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-int tl_array_resize( tl_array* vec, size_t size );
+int tl_array_resize( tl_array* vec, size_t size, int initialize );
 
 /**
  * \brief Make sure an array has at least a certain capacity
@@ -179,12 +185,14 @@ int tl_array_reserve( tl_array* vec, size_t size );
  *
  * \note This function runs in linear time
  *
- * \param vec  A pointer to an array
- * \param size The precise capacity of the array
+ * \param vec        A pointer to an array
+ * \param size       The precise capacity of the array
+ * \param initialize Non-zero to initialize newly allocated entries, zero
+ *                   to leave them unitialized
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-int tl_array_set_capacity( tl_array* vec, size_t size );
+int tl_array_set_capacity( tl_array* vec, size_t size, int initialize );
 
 /**
  * \brief Remove elements from an array
@@ -415,6 +423,18 @@ void* tl_array_search( const tl_array* arr, tl_compare cmp, const void* key );
  */
 void* tl_array_search_unsorted( const tl_array* arr, tl_compare cmp,
                                 const void* key );
+
+/**
+ * \brief Shrink the reserved elements to one half if an array is
+ *        less than a quarter filled
+ *
+ * \memberof tl_array
+ *
+ * \note This function runs in linear time
+ *
+ * \param arr A pointer to a dynamic array
+ */
+void tl_array_try_shrink( tl_array* arr );
 
 #ifdef __cplusplus
 }

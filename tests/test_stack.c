@@ -7,7 +7,7 @@ int main( void )
     tl_stack s0;
     int i, j;
 
-    tl_stack_init( &s0, sizeof(int) );
+    tl_stack_init( &s0, sizeof(int), NULL );
     if( tl_stack_top( &s0 ) )
         return EXIT_FAILURE;
     if( !tl_stack_is_empty( &s0 ) || tl_stack_size( &s0 ) )

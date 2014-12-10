@@ -4,10 +4,10 @@
 
 
 
-void tl_stack_init( tl_stack* this, size_t element_size )
+void tl_stack_init( tl_stack* this, size_t element_size, tl_allocator* alloc )
 {
     if( this )
-        tl_array_init( &(this->vec), element_size );
+        tl_array_init( &(this->vec), element_size, alloc );
 }
 
 void tl_stack_cleanup( tl_stack* this )
@@ -44,7 +44,8 @@ void tl_stack_pop( tl_stack* this, void* data )
                 this->vec.unitsize );
     }
 
-    tl_array_resize( &(this->vec), this->vec.used-1 );
+    this->vec.used -= 1;
+    tl_array_try_shrink( &(this->vec) );
 }
 
 int tl_stack_is_empty( const tl_stack* this )
