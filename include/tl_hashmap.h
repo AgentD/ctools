@@ -57,6 +57,12 @@ struct tl_hashmap
 
     /** \brief A function used to compare two key objects */
     tl_compare compare;
+
+    /** \brief A pointer to an allocator for keys or NULL if not used */
+    tl_allocator* keyalloc;
+
+    /** \brief A pointer to an allocator for values or NULL if not used */
+    tl_allocator* objalloc;
 };
 
 
@@ -76,13 +82,16 @@ extern "C" {
  * \param bincount   The number of slots to create in the map
  * \param keyhash    A function to compute a hash of a key
  * \param keycompare A function to compare two key objects for equality
+ * \param keyalloc   A pointer to an allocator for keys or NULL if not used
+ * \param valalloc   A pointer to an allocator for values or NULL if not used
  *
  * \return Non-zero on success, zero if out of memory or one of the arguments
  *         is zero/NULL
  */
 int tl_hashmap_init( tl_hashmap* map, size_t keysize, size_t objsize,
                      size_t bincount, tl_hash keyhash,
-                     tl_compare keycompare );
+                     tl_compare keycompare, tl_allocator* keyalloc,
+                     tl_allocator* valalloc );
 
 /**
  * \brief Free all the memory used by a hash map

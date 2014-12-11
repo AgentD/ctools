@@ -73,7 +73,7 @@ int main( void )
     long l;
 
     /* insert and retrieve */
-    tl_hashmap_init( &map, sizeof(long), sizeof(long), 10, hash, compare );
+    tl_hashmap_init(&map,sizeof(long),sizeof(long),10,hash,compare,NULL,NULL);
 
     if( !tl_hashmap_is_empty( &map ) ) return EXIT_FAILURE;
     if( !tl_hashmap_is_empty( NULL ) ) return EXIT_FAILURE;
@@ -106,7 +106,7 @@ int main( void )
     tl_hashmap_cleanup( &map );
 
     /* remove */
-    tl_hashmap_init( &map, sizeof(long), sizeof(long), 10, hash, compare );
+    tl_hashmap_init(&map,sizeof(long),sizeof(long),10,hash,compare,NULL,NULL);
 
     for( i=0; i<sizeof(test_vals)/sizeof(test_vals[0]); ++i )
         tl_hashmap_insert( &map, test_keys+i, test_vals+i );
@@ -145,7 +145,7 @@ int main( void )
     tl_hashmap_cleanup( &map );
 
     /* override behaviour */
-    tl_hashmap_init( &map, sizeof(long), sizeof(long), 10, hash, compare );
+    tl_hashmap_init(&map,sizeof(long),sizeof(long),10,hash,compare,NULL,NULL);
 
     for( i=0; i<sizeof(test_vals)/sizeof(test_vals[0]); ++i )
     {
@@ -190,7 +190,7 @@ int main( void )
     tl_hashmap_cleanup( &map );
 
     /* overwrite */
-    tl_hashmap_init( &map, sizeof(long), sizeof(long), 10, hash, compare );
+    tl_hashmap_init(&map,sizeof(long),sizeof(long),10,hash,compare,NULL,NULL);
 
     tl_hashmap_insert( &map, test_keys, test_vals );
     if( *((long*)tl_hashmap_at( &map, test_keys )) != test_vals[0] )
@@ -220,7 +220,7 @@ int main( void )
     tl_hashmap_cleanup( &map );
 
     /* copy */
-    tl_hashmap_init( &map,  sizeof(long), sizeof(long), 10, hash, compare );
+    tl_hashmap_init(&map,sizeof(long),sizeof(long),10,hash,compare,NULL,NULL);
     memset( &copy, 0, sizeof(copy) );
 
     for( i=0; i<sizeof(test_vals)/sizeof(test_vals[0]); ++i )
