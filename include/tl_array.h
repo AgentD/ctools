@@ -179,22 +179,6 @@ int tl_array_resize( tl_array* vec, size_t size, int initialize );
 int tl_array_reserve( tl_array* vec, size_t size );
 
 /**
- * \brief Make sure an array has precisely a certain capacity
- *
- * \memberof tl_array
- *
- * \note This function runs in linear time
- *
- * \param vec        A pointer to an array
- * \param size       The precise capacity of the array
- * \param initialize Non-zero to initialize newly allocated entries, zero
- *                   to leave them unitialized
- *
- * \return Non-zero on success, zero on failure (read: out of memory)
- */
-int tl_array_set_capacity( tl_array* vec, size_t size, int initialize );
-
-/**
  * \brief Remove elements from an array
  *
  * \memberof tl_array

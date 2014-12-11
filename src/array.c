@@ -201,48 +201,6 @@ int tl_array_reserve( tl_array* this, size_t size )
     return 1;
 }
 
-int tl_array_set_capacity( tl_array* this, size_t size, int initialize )
-{
-    void* newdata;
-
-    if( !this )
-        return 0;
-
-    /* cleanup elements when shrinking */
-    if( size < this->used )
-    {
-        tl_allocator_cleanup( this->alloc,
-                              (char*)this->data + this->unitsize*size,
-                              this->unitsize, this->used - size );
-    }
-
-    /* try to reallocate the data block */
-    newdata = realloc( this->data, size * this->unitsize );
-
-    if( !newdata )
-    {
-        if( size <= this->used )
-        {
-            this->used = size;
-            return 1;
-        }
-        return 0;
-    }
-
-    /* initialize new elements when growing */
-    if( (size > this->used) && initialize )
-    {
-        tl_allocator_init( this->alloc,
-                           (char*)newdata + this->unitsize*this->used,
-                           this->unitsize, size - this->used );
-    }
-
-    this->reserved = size;
-    this->used     = size;
-    this->data     = newdata;
-    return 1;
-}
-
 void tl_array_remove( tl_array* this, size_t index, size_t count )
 {
     if( this && (index < this->used) )
