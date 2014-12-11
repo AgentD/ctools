@@ -4,10 +4,11 @@
 
 
 
-void tl_queue_init( tl_queue* this, size_t element_size )
+void tl_queue_init( tl_queue* this, size_t element_size,
+                    tl_allocator* alloc )
 {
     if( this )
-        tl_list_init( &(this->list), element_size );
+        tl_list_init( &(this->list), element_size, alloc );
 }
 
 void tl_queue_cleanup( tl_queue* this )

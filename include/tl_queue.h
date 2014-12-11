@@ -37,8 +37,10 @@ extern "C" {
  *
  * \param queue        A pointer to a previously uninitialized queue
  * \param element_size The size of an element in the queue
+ * \param alloc        A pointer to an allocator or NULL if not used
  */
-void tl_queue_init( tl_queue* queue, size_t element_size );
+void tl_queue_init( tl_queue* queue, size_t element_size,
+                    tl_allocator* alloc );
 
 /**
  * \brief Free all the memory used by a queue and reset it

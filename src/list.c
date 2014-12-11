@@ -1,3 +1,4 @@
+#include "tl_allocator.h"
 #include "tl_list.h"
 
 #include <stdlib.h>
@@ -26,12 +27,18 @@ tl_list_node* tl_list_node_create( const tl_list* this, const void* data )
 
     if( node )
     {
+        ptr = (char*)node + sizeof(tl_list_node);
+        ALLIGN( ptr );
+
         if( data )
         {
-            ptr = (char*)node + sizeof(tl_list_node);
-            ALLIGN( ptr );
-            memcpy( ptr, data, this->unitsize );
+            tl_allocator_copy( this->alloc, ptr, data, this->unitsize, 1 );
         }
+        else
+        {
+            tl_allocator_init( this->alloc, ptr, this->unitsize, 1 );
+        }
+
         node->prev = node->next = NULL;
     }
 
@@ -53,7 +60,7 @@ void* tl_list_node_get_data( const tl_list_node* node )
 
 /****************************************************************************/
 
-void tl_list_init( tl_list* this, size_t elementsize )
+void tl_list_init( tl_list* this, size_t elementsize, tl_allocator* alloc )
 {
     if( this )
     {
@@ -61,6 +68,7 @@ void tl_list_init( tl_list* this, size_t elementsize )
         this->last     = NULL;
         this->size     = 0;
         this->unitsize = elementsize;
+        this->alloc    = alloc;
     }
 }
 
@@ -96,7 +104,7 @@ int tl_list_from_array( tl_list* this, const void* data, size_t count )
     if( !this || !data )
         return 0;
 
-    tl_list_init( &temp, this->unitsize );
+    tl_list_init( &temp, this->unitsize, this->alloc );
 
     for( i=0; i<count; ++i )
     {
@@ -124,7 +132,9 @@ void tl_list_to_array( const tl_list* this, void* data )
     {
         for( n=this->first; n; n=n->next )
         {
-            memcpy( data, tl_list_node_get_data( n ), this->unitsize );
+            tl_allocator_copy( this->alloc, data,
+                               tl_list_node_get_data( n ),
+                               this->unitsize, 1 );
             data = (unsigned char*)data + this->unitsize;
         }
     }
@@ -151,7 +161,7 @@ int tl_list_copy_range( tl_list* this, const tl_list* src,
         return 0;
 
     /* create a copy of the sublist */
-    tl_list_init( &temp, src->unitsize );
+    tl_list_init( &temp, src->unitsize, this->alloc );
 
     for( i=0; i<count; ++i, n=n->next )
     {
@@ -252,7 +262,7 @@ int tl_list_concat( tl_list* this, const tl_list* src )
         return 1;
 
     /* create a copy of the source list */
-    tl_list_init( &temp, src->unitsize );
+    tl_list_init( &temp, src->unitsize, this->alloc );
 
     if( !tl_list_copy( &temp, src ) )
         return 0;
@@ -265,6 +275,7 @@ int tl_list_remove( tl_list* this, size_t index, size_t count )
 {
     tl_list_node* old;
     tl_list_node* n;
+    char* ptr;
     size_t i;
 
     if( !this || index>=this->size )
@@ -278,6 +289,11 @@ int tl_list_remove( tl_list* this, size_t index, size_t count )
         {
             n = this->first;
             this->first = this->first->next;
+
+            ptr = (char*)n + sizeof(tl_list_node);
+            ALLIGN( ptr );
+            tl_allocator_cleanup( this->alloc, ptr, this->unitsize, 1 );
+
             free( n );
         }
 
@@ -291,6 +307,11 @@ int tl_list_remove( tl_list* this, size_t index, size_t count )
         {
             n = this->last;
             this->last = this->last->prev;
+
+            ptr = (char*)n + sizeof(tl_list_node);
+            ALLIGN( ptr );
+            tl_allocator_cleanup( this->alloc, ptr, this->unitsize, 1 );
+
             free( n );
         }
 
@@ -309,6 +330,10 @@ int tl_list_remove( tl_list* this, size_t index, size_t count )
             n->prev->next = n->next;
             n->next->prev = n->prev;
             n = n->next;
+
+            ptr = (char*)old + sizeof(tl_list_node);
+            ALLIGN( ptr );
+            tl_allocator_cleanup( this->alloc, ptr, this->unitsize, 1 );
 
             free( old );
         }
@@ -344,7 +369,8 @@ int tl_list_set( tl_list* this, size_t index, const void* element )
     if( !ptr )
         return 0;
 
-    memcpy( ptr, element, this->unitsize );
+    tl_allocator_cleanup( this->alloc, ptr, this->unitsize, 1 );
+    tl_allocator_copy( this->alloc, ptr, element, this->unitsize, 1 );
     return 1;
 }
 
@@ -414,7 +440,7 @@ int tl_list_insert( tl_list* this, size_t index,
         return 1;
 
     /* construct a list from the array */
-    tl_list_init( &list, this->unitsize );
+    tl_list_init( &list, this->unitsize, this->alloc );
 
     if( !tl_list_from_array( &list, elements, count ) )
         return 0;
@@ -476,6 +502,7 @@ done:
 void tl_list_remove_first( tl_list* this )
 {
     tl_list_node* n;
+    char* ptr;
 
     if( this && this->size )
     {
@@ -491,6 +518,10 @@ void tl_list_remove_first( tl_list* this )
             this->first->prev = NULL;
         }
 
+        ptr = (char*)n + sizeof(tl_list_node);
+        ALLIGN( ptr );
+        tl_allocator_cleanup( this->alloc, ptr, this->unitsize, 1 );
+
         free( n );
         --(this->size);
     }
@@ -499,6 +530,7 @@ void tl_list_remove_first( tl_list* this )
 void tl_list_remove_last( tl_list* this )
 {
     tl_list_node* n;
+    char* ptr;
 
     if( this && this->size )
     {
@@ -513,6 +545,10 @@ void tl_list_remove_last( tl_list* this )
             this->last = this->last->prev;
             this->last->next = NULL;
         }
+
+        ptr = (char*)n + sizeof(tl_list_node);
+        ALLIGN( ptr );
+        tl_allocator_cleanup( this->alloc, ptr, this->unitsize, 1 );
 
         free( n );
         --(this->size);

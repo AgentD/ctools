@@ -72,7 +72,7 @@ void make_equal( tl_list* list, int size )
 {
     int i, a = 42;
 
-    tl_list_init( list, sizeof(int) );
+    tl_list_init( list, sizeof(int), NULL );
 
     for( i=0; i<size; ++i )
         tl_list_append( list, &a );
@@ -82,7 +82,7 @@ void make_asc( tl_list* list, int size )
 {
     int i;
 
-    tl_list_init( list, sizeof(int) );
+    tl_list_init( list, sizeof(int), NULL );
 
     for( i=0; i<size; ++i )
         tl_list_append( list, &i );
@@ -92,7 +92,7 @@ void make_dsc( tl_list* list, int size )
 {
     int i, a;
 
-    tl_list_init( list, sizeof(int) );
+    tl_list_init( list, sizeof(int), NULL );
 
     for( i=0; i<size; ++i )
     {
@@ -105,7 +105,7 @@ void make_rand( tl_list* list, int size )
 {
     int i, a;
 
-    tl_list_init( list, sizeof(int) );
+    tl_list_init( list, sizeof(int), NULL );
 
     for( i=0; i<size; ++i )
     {
@@ -153,7 +153,7 @@ int main( void )
         testdata[i] = i;
 
     /******************** list from array ********************/
-    tl_list_init( &l0, sizeof(int) );
+    tl_list_init( &l0, sizeof(int), NULL );
 
     if( l0.size || !tl_list_is_empty( &l0 ) ) return EXIT_FAILURE;
 
@@ -203,7 +203,7 @@ int main( void )
     }
 
     /******************** copy ********************/
-    tl_list_init( &l1, sizeof(int) );
+    tl_list_init( &l1, sizeof(int), NULL );
     tl_list_copy( &l1, &l0 );
     if( l1.size != l0.size ) return EXIT_FAILURE;
 
@@ -216,7 +216,7 @@ int main( void )
     tl_list_cleanup( &l1 );
 
     /******************** copy range from the start ********************/
-    tl_list_init( &l1, sizeof(int) );
+    tl_list_init( &l1, sizeof(int), NULL );
     tl_list_copy_range( &l1, &l0, 0, 5 );
     if( l1.size != 5 ) return EXIT_FAILURE;
 
@@ -228,7 +228,7 @@ int main( void )
     tl_list_cleanup( &l1 );
 
     /******************** copy range from the end ********************/
-    tl_list_init( &l1, sizeof(int) );
+    tl_list_init( &l1, sizeof(int), NULL );
     tl_list_copy_range( &l1, &l0, l0.size-5, 5 );
     if( l1.size != 5 ) return EXIT_FAILURE;
 
@@ -241,7 +241,7 @@ int main( void )
     tl_list_cleanup( &l1 );
 
     /******************* copy range somewhere in between *******************/
-    tl_list_init( &l1, sizeof(int) );
+    tl_list_init( &l1, sizeof(int), NULL );
     tl_list_copy_range( &l1, &l0, 5, 5 );
     if( l1.size != 5 ) return EXIT_FAILURE;
 
@@ -255,7 +255,7 @@ int main( void )
     tl_list_cleanup( &l0 );
 
     /******************** adding elements to a list ********************/
-    tl_list_init( &l1, sizeof(size_t) );
+    tl_list_init( &l1, sizeof(size_t), NULL );
     if( l1.size || !tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
     for( i=10; i<20; ++i )
@@ -278,7 +278,7 @@ int main( void )
     tl_list_cleanup( &l1 );
 
     /******************* removing elements from the ends *******************/
-    tl_list_init( &l1, sizeof(size_t) );
+    tl_list_init( &l1, sizeof(size_t), NULL );
     if( l1.size || !tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
     for( i=0; i<20; ++i )
@@ -314,7 +314,7 @@ int main( void )
     tl_list_cleanup( &l1 );
 
     /******************** remove ranges ********************/
-    tl_list_init( &l1, sizeof(size_t) );
+    tl_list_init( &l1, sizeof(size_t), NULL );
     if( l1.size || !tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
     for( i=0; i<20; ++i )
@@ -355,7 +355,7 @@ int main( void )
     tl_list_cleanup( &l1 );
 
     /******************** element setting ********************/
-    tl_list_init( &l1, sizeof(size_t) );
+    tl_list_init( &l1, sizeof(size_t), NULL );
     if( l1.size || !tl_list_is_empty( &l1 ) ) return EXIT_FAILURE;
 
     for( i=0; i<20; ++i )
@@ -376,7 +376,7 @@ int main( void )
     tl_list_cleanup( &l1 );
 
     /******************** insert ********************/
-    tl_list_init( &l1, sizeof(int) );
+    tl_list_init( &l1, sizeof(int), NULL );
 
     for( i=0; i<10; ++i )
         testdata[i] = i;
@@ -467,7 +467,7 @@ int main( void )
     tl_list_cleanup( &l1 );
 
     /********** search **********/
-    tl_list_init( &l1, sizeof(size_t) );
+    tl_list_init( &l1, sizeof(size_t), NULL );
 
     for( i=0; i<1000; ++i )
     {
@@ -484,7 +484,7 @@ int main( void )
     tl_list_cleanup( &l1 );
 
     /********** insert sorted **********/
-    tl_list_init( &l1, sizeof(size_t) );
+    tl_list_init( &l1, sizeof(size_t), NULL );
 
     for( i=1000; i>=1; i-=2 )
     {

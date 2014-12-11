@@ -9,7 +9,7 @@ int main( void )
     tl_queue q0;
     int i;
 
-    tl_queue_init( &q0, sizeof(int) );
+    tl_queue_init( &q0, sizeof(int), NULL );
 
     /* test if fresh queue is actually empty */
     if( tl_queue_peek_front( &q0 ) || tl_queue_peek_back( &q0 ) )

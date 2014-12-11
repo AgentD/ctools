@@ -44,6 +44,9 @@ struct tl_list
 
     /** \brief The size of a single element */
     size_t unitsize;
+
+    /** \brief Pointer to an allocator or NULL if not used */
+    tl_allocator* alloc;
 };
 
 
@@ -60,7 +63,7 @@ extern "C" {
  * \param list A pointer to a list to get information about the data field
  *             size from
  * \param data A pointer to a data field to copy into the node, or NULL to
- *             keep the node uninitialized
+ *             initialize to an empty default
  *
  * \return On success, a pointer to a list node that has to be freed using
  *         free( ). NULL on failure
@@ -85,8 +88,9 @@ void* tl_list_node_get_data( const tl_list_node* node );
  *
  * \param list        A pointer to a list
  * \param elementsize The size of an individual element
+ * \param alloc       Pointer to an allocator or NULL if not used
  */
-void tl_list_init( tl_list* list, size_t elementsize );
+void tl_list_init( tl_list* list, size_t elementsize, tl_allocator* alloc );
 
 /**
  * \brief Free the memory used by a list and reset it
