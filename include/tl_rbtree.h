@@ -50,6 +50,12 @@ struct tl_rbtree
 
     /** \brief The size of the value field in a node */
     size_t valuesize;
+
+    /** \brief Pointer to allocator for key or NULL if not used */
+    tl_allocator* keyalloc;
+
+    /** \brief Pointer to allocator for values or NULL if not used */
+    tl_allocator* valalloc;
 };
 
 
@@ -112,9 +118,12 @@ void* tl_rbtree_node_get_value( const tl_rbtree* tree,
  * \param keysize    The size of the data structure used as key field
  * \param valuesize  The size of the data structure used as value field
  * \param comparefun A pointer to a function used to compare two keys
+ * \param keyalloc   A pointer to an allocator for keys or NULL if not used
+ * \param valalloc   A pointer to an allocator for values or NULL if not used
  */
 void tl_rbtree_init( tl_rbtree* tree, size_t keysize, size_t valuesize,
-                     tl_compare comparefun );
+                     tl_compare comparefun, tl_allocator* keyalloc,
+                     tl_allocator* valalloc );
 
 /**
  * \brief Free the memory used by a red-black tree and reset it
@@ -193,12 +202,13 @@ int tl_rbtree_set( tl_rbtree* tree, const void* key, const void* value );
  * \note This function runs in logarithmic time
  *
  * \param tree  A pointer to a red-black tree
- * \param key   If not NULL, returns the key of the minimum node
- * \param value If not NULL, returns the value of the minimum node
+ * \param key   If not NULL, returns a pointer to the key of the minimum node
+ * \param value If not NULL, returns a pointer to the value
+ *              of the minimum node
  *
  * \return Zero if the tree is empty, non-zero otherwise
  */
-int tl_rbtree_get_min( const tl_rbtree* tree, void* key, void* value );
+int tl_rbtree_get_min( const tl_rbtree* tree, void** key, void** value );
 
 /**
  * \brief Get the maximum (i.e. right most) node of a red-black tree
@@ -208,12 +218,13 @@ int tl_rbtree_get_min( const tl_rbtree* tree, void* key, void* value );
  * \note This function runs in logarithmic time
  *
  * \param tree  A pointer to a red-black tree
- * \param key   If not NULL, returns the key of the maximum node
- * \param value If not NULL, returns the value of the maximum node
+ * \param key   If not NULL, returns a pointer to the key of the maximum node
+ * \param value If not NULL, returns a pointer to the value
+ *              of the maximum node
  *
  * \return Zero if the tree is empty, non-zero otherwise
  */
-int tl_rbtree_get_max( const tl_rbtree* tree, void* key, void* value );
+int tl_rbtree_get_max( const tl_rbtree* tree, void** key, void** value );
 
 /**
  * \brief Remove the minimum (i.e. left most) node of a red-black tree
@@ -247,7 +258,8 @@ void tl_rbtree_remove_max( tl_rbtree* tree );
  * \param tree  A pointer to a red-black tree
  * \param key   A pointer to the key of the node to remove
  * \param value If not NULL, the value is memcopied to this location
- *              before removal.
+ *              before removal and freeing the object is left as a task
+ *              to the calling function.
  *
  * \return Non-zero if the value was removed, zero if it was not found
  */

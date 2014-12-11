@@ -126,9 +126,10 @@ static int are_subtrees_equal( tl_rbtree* atree, tl_rbtree* btree,
 int main( void )
 {
     tl_rbtree t0, t1;
-    int i, j, k, l;
+    int *p0, *p1;
+    int i, j;
 
-    tl_rbtree_init( &t0, sizeof(int), sizeof(int), compare_int );
+    tl_rbtree_init( &t0, sizeof(int), sizeof(int), compare_int, NULL, NULL );
 
     /* insert nodes */
     for( i=0; i<1000; ++i )
@@ -146,10 +147,10 @@ int main( void )
         if( !check_tree( &t0 ) ) return EXIT_FAILURE;
 
         /* check if min an max are correct */
-        tl_rbtree_get_min( &t0, &k, &l );
-        if( k!=0 || l!=5 ) return EXIT_FAILURE;
-        tl_rbtree_get_max( &t0, &k, &l );
-        if( k!=i || l!=j ) return EXIT_FAILURE;
+        tl_rbtree_get_min( &t0, (void**)&p0, (void**)&p1 );
+        if( !p0 || !p1 || *p0!=0 || *p1!=5 ) return EXIT_FAILURE;
+        tl_rbtree_get_max( &t0, (void**)&p0, (void**)&p1 );
+        if( !p0 || !p1 || *p0!=i || *p1!=j ) return EXIT_FAILURE;
     }
 
     /* read back nodes */
@@ -183,10 +184,10 @@ int main( void )
         /* check if min an max are correct */
         if( t0.size )
         {
-            tl_rbtree_get_min( &t0, &k, &l );
-            if( k!=i || l!=(i*10+5) ) return EXIT_FAILURE;
-            tl_rbtree_get_max( &t0, &k, &l );
-            if( k!=999 || l!=9995 ) return EXIT_FAILURE;
+            tl_rbtree_get_min( &t0, (void**)&p0, (void**)&p1 );
+            if( !p0 || !p1 || *p0!=i || *p1!=(i*10+5) ) return EXIT_FAILURE;
+            tl_rbtree_get_max( &t0, (void**)&p0, (void**)&p1 );
+            if( !p0 || !p1 || *p0!=999 || *p1!=9995 ) return EXIT_FAILURE;
         }
 
         /* remove minimum */
@@ -201,10 +202,11 @@ int main( void )
         /* check if min an max are correct */
         if( t0.size )
         {
-            tl_rbtree_get_min( &t0, &k, &l );
-            if( k!=(i+1) || l!=((i+1)*10+5) ) return EXIT_FAILURE;
-            tl_rbtree_get_max( &t0, &k, &l );
-            if( k!=999 || l!=9995 ) return EXIT_FAILURE;
+            tl_rbtree_get_min( &t0, (void**)&p0, (void**)&p1 );
+            if( !p0 || !p1 || *p0!=(i+1) || *p1!=((i+1)*10+5) )
+                return EXIT_FAILURE;
+            tl_rbtree_get_max( &t0, (void**)&p0, (void**)&p1 );
+            if( !p0 || !p1 || *p0!=999 || *p1!=9995 ) return EXIT_FAILURE;
         }
     }
 
@@ -228,10 +230,11 @@ int main( void )
         /* check if min an max are correct */
         if( t0.size )
         {
-            tl_rbtree_get_min( &t0, &k, &l );
-            if( k!=0 || l!=5 ) return EXIT_FAILURE;
-            tl_rbtree_get_max( &t0, &k, &l );
-            if( k!=(999-i) || l!=((999-i)*10+5) ) return EXIT_FAILURE;
+            tl_rbtree_get_min( &t0, (void**)&p0, (void**)&p1 );
+            if( !p0 || !p1 || *p0!=0 || *p1!=5 ) return EXIT_FAILURE;
+            tl_rbtree_get_max( &t0, (void**)&p0, (void**)&p1 );
+            if( !p0 || !p1 || *p0!=(999-i) || *p1!=((999-i)*10+5) )
+                return EXIT_FAILURE;
         }
 
         /* remove maximum */
@@ -247,10 +250,11 @@ int main( void )
         /* check if min an max are correct */
         if( t0.size )
         {
-            tl_rbtree_get_min( &t0, &k, &l );
-            if( k!=0 || l!=5 ) return EXIT_FAILURE;
-            tl_rbtree_get_max( &t0, &k, &l );
-            if( k!=(999-i-1) || l!=((999-i-1)*10+5) ) return EXIT_FAILURE;
+            tl_rbtree_get_min( &t0, (void**)&p0, (void**)&p1 );
+            if( !p0 || !p1 || *p0!=0 || *p1!=5 ) return EXIT_FAILURE;
+            tl_rbtree_get_max( &t0, (void**)&p0, (void**)&p1 );
+            if( !p0 || !p1 || *p0!=(999-i-1) || *p1!=((999-i-1)*10+5) )
+                return EXIT_FAILURE;
         }
     }
 
@@ -305,7 +309,7 @@ int main( void )
     if( t0.size ) return EXIT_FAILURE;
 
     /* copy */
-    tl_rbtree_init( &t1, sizeof(int), sizeof(int), compare_int );
+    tl_rbtree_init( &t1, sizeof(int), sizeof(int), compare_int, NULL, NULL );
 
     for( i=0; i<1000; ++i )
     {
