@@ -426,6 +426,35 @@ tl_list_node* tl_list_search( const tl_list* list, tl_compare cmp,
  */
 #define tl_list_search_unsorted tl_list_search
 
+/**
+ * \brief Get an iterator to the first element
+ *
+ * \memberof tl_list
+ *
+ * \note Requesting the key of the iterator returns a pointer to a size_t
+ *       index of the current element.
+ *
+ * \param list A pointer to a list
+ *
+ * \return A pointer to an iterator or NULL on failure
+ */
+tl_iterator* tl_list_first( tl_list* list );
+
+/**
+ * \brief Get an iterator to the last element that moves backwards throug
+ *        the list
+ *
+ * \memberof tl_list
+ *
+ * \note Requesting the key of the iterator returns a pointer to a size_t
+ *       index of the current element.
+ *
+ * \param list A pointer to a list
+ *
+ * \return A pointer to an iterator or NULL on failure
+ */
+tl_iterator* tl_list_last( tl_list* list );
+
 #ifdef __cplusplus
 }
 #endif

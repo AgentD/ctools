@@ -38,6 +38,7 @@ typedef struct tl_string tl_string;
 typedef struct tl_hashmap tl_hashmap;
 typedef struct tl_hashmap_entry tl_hashmap_entry;
 typedef struct tl_allocator tl_allocator;
+typedef struct tl_iterator tl_iterator;
 
 
 

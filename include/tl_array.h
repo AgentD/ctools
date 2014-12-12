@@ -420,6 +420,34 @@ void* tl_array_search_unsorted( const tl_array* arr, tl_compare cmp,
  */
 void tl_array_try_shrink( tl_array* arr );
 
+/**
+ * \brief Get an iterator to the first element
+ *
+ * \memberof tl_array
+ *
+ * \note Requesting the key of the iterator returns a pointer to a size_t
+ *       index of the current element.
+ *
+ * \param arr A pointer to a dynamic array
+ *
+ * \return A pointer to an iterator or NULL on failure
+ */
+tl_iterator* tl_array_first( tl_array* arr );
+
+/**
+ * \brief Get an iterator to the last element that moves backwards throug
+ *        the array
+ *
+ * \memberof tl_array
+ *
+ * \note Requesting the key of the iterator returns NULL
+ *
+ * \param arr A pointer to a dynamic array
+ *
+ * \return A pointer to an iterator or NULL on failure
+ */
+tl_iterator* tl_array_last( tl_array* arr );
+
 #ifdef __cplusplus
 }
 #endif
