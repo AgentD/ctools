@@ -27,7 +27,6 @@
 
 
 typedef struct tl_array tl_array;
-typedef struct tl_dir tl_dir;
 typedef struct tl_list_node tl_list_node;
 typedef struct tl_list tl_list;
 typedef struct tl_queue tl_queue;

@@ -1,3 +1,4 @@
+#include "tl_iterator.h"
 #include "tl_string.h"
 #include "tl_array.h"
 #include "tl_dir.h"
@@ -32,9 +33,9 @@ int tl_string_compare( const void* a, const void* b )
 int main( void )
 {
     char buffer[128];
+    tl_iterator* dir;
     tl_array strlist;
     tl_string str;
-    tl_dir* dir;
     size_t i;
     FILE* f;
 
@@ -76,17 +77,13 @@ int main( void )
 
     puts( "********************************" );
 
-    dir = tl_dir_open_utf8( "." );
-    tl_string_init( &str );
-
-    while( tl_dir_read( dir, &str ) )
+    for( dir=tl_dir_iterate_utf8("."); dir->has_data(dir); dir->next(dir) )
     {
-        tl_string_to_utf8( &str, buffer, sizeof(buffer) );
+        tl_string_to_utf8( dir->get_value( dir ), buffer, sizeof(buffer) );
         puts( buffer );
     }
 
-    tl_string_cleanup( &str );
-    tl_dir_close( dir );
+    dir->destroy( dir );
 
     /* test filesystem functions */
     if( tl_fs_exists_utf8( "FOO" )           ) return EXIT_FAILURE;
