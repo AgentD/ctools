@@ -234,6 +234,17 @@ int tl_hashmap_remove( tl_hashmap* map, const void* key, void* object );
  */
 int tl_hashmap_is_empty( const tl_hashmap* map );
 
+/**
+ * \brief Get an iterator that iterates over a hash map
+ *
+ * \memberof tl_hashmap
+ *
+ * \param map A pointer to a hash map
+ *
+ * \return A pointer to an iterator or NULL on failure
+ */
+tl_iterator* tl_hashmap_get_iterator( tl_hashmap* map );
+
 #ifdef __cplusplus
 }
 #endif
