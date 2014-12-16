@@ -57,7 +57,7 @@ int tl_fs_get_wd( tl_string* path )
     tl_string_clear( path );
     length = GetCurrentDirectoryW( length, NULL );
 
-    if( !tl_array_resize( &path->vec, length+1 ) )
+    if( !tl_array_resize( &path->vec, length+1, 1 ) )
         return TL_FS_SYS_ERROR;
 
     if( !GetCurrentDirectoryW( length, path->vec.data ) )
@@ -89,7 +89,7 @@ int tl_fs_get_user_dir( tl_string* path )
     if( GetUserProfileDirectoryW( token, &dummy, &size ) )
         goto fail;
 
-    if( !tl_array_resize( &path->vec, size+1 ) )
+    if( !tl_array_resize( &path->vec, size+1, 1 ) )
         goto fail;
 
     /* retrieve */
