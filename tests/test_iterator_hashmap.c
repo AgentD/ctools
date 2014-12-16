@@ -94,6 +94,55 @@ int main( void )
                      100, dummy_hash, dummy_compare,
                      NULL, NULL );
 
+    /* process empty hashmap */
+    it = tl_hashmap_get_iterator( &map );
+    if( it->has_data(it) || it->get_key(it) || it->get_value(it) )
+        return EXIT_FAILURE;
+    it->reset( it );
+    if( it->has_data(it) || it->get_key(it) || it->get_value(it) )
+        return EXIT_FAILURE;
+    it->next( it );
+    if( it->has_data(it) || it->get_key(it) || it->get_value(it) )
+        return EXIT_FAILURE;
+    it->remove( it );
+    if( it->has_data(it) || it->get_key(it) || it->get_value(it) )
+        return EXIT_FAILURE;
+    it->destroy( it );
+
+    /* process hashmap with single entry */
+    i = 10; b = 1337;
+    tl_hashmap_insert( &map, &i, &b );
+
+    it = tl_hashmap_get_iterator( &map );
+    if( !it->has_data(it) || !it->get_key(it) || !it->get_value(it) )
+        return EXIT_FAILURE;
+    i = *((int*)it->get_key( it ));
+    b = *((int*)it->get_value( it ));
+    if( i!=10 || b!=1337 )
+        return EXIT_FAILURE;
+    it->next( it );
+    if( it->has_data(it) || it->get_key(it) || it->get_value(it) )
+        return EXIT_FAILURE;
+    it->reset( it );
+    if( !it->has_data(it) || !it->get_key(it) || !it->get_value(it) )
+        return EXIT_FAILURE;
+    i = *((int*)it->get_key( it ));
+    b = *((int*)it->get_value( it ));
+    if( i!=10 || b!=1337 )
+        return EXIT_FAILURE;
+    it->remove( it );
+    if( it->has_data(it) || it->get_key(it) || it->get_value(it) )
+        return EXIT_FAILURE;
+    it->next( it );
+    if( it->has_data(it) || it->get_key(it) || it->get_value(it) )
+        return EXIT_FAILURE;
+    it->reset( it );
+    if( it->has_data(it) || it->get_key(it) || it->get_value(it) )
+        return EXIT_FAILURE;
+    it->destroy( it );
+    tl_hashmap_clear( &map );
+
+    /* process filled hashmap */
     for( i=0; i<100; ++i )
     {
         for( j=0; j<100; ++j )
