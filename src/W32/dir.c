@@ -110,20 +110,47 @@ static void dir_iterator_remove( tl_iterator* this )
 
 int tl_dir_scan( const tl_string* path, tl_array* list )
 {
-    tl_iterator* dir;
+    WIN32_FIND_DATAW ent;
+    unsigned int c;
+    tl_string str;
+    HANDLE hnd;
+    WCHAR* ptr;
 
-    if( !path ) return TL_FS_NOT_EXIST;
-    if( !list ) return 0;
+    if( !path || !tl_fs_exists( path ) ) return TL_FS_NOT_EXIST;
+    if( !list                          ) return 0;
 
-    dir = tl_dir_iterate( path );
+    tl_string_init( &str );
+    tl_string_copy( &str, path );
 
-    while( dir->has_data( dir ) )
+    do
     {
-        tl_array_append( list, dir->get_value( dir ) );
-        dir->next( dir );
+        c = tl_string_last( &str );
+        if( c=='/' || c=='\\' )
+            tl_string_drop_last( &str );
+    }
+    while( c=='/' || c=='\\' );
+
+    tl_string_append_utf8( &str, "\\*" );
+
+    if( (hnd=FindFirstFileW(str.vec.data,&ent)) != INVALID_HANDLE_VALUE )
+    {
+        do
+        {
+            ptr = ent.cFileName;
+
+            if( ptr[0]!='.' || (ptr[1]!='\0'&&(ptr[1]!='.'||ptr[2]!='\0')) )
+            {
+                tl_string_clear( &str );
+                tl_string_append_utf16( &str, ent.cFileName );
+                tl_array_append( list, &str );
+            }
+        }
+        while( FindNextFileW( hnd, &ent ) );
+
+        FindClose( hnd );
     }
 
-    dir->destroy( dir );
+    tl_string_cleanup( &str );
     return 0;
 }
 
