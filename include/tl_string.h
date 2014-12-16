@@ -386,6 +386,16 @@ unsigned int tl_string_last( const tl_string* str );
  */
 void tl_string_drop_last( tl_string* str );
 
+/**
+ * \brief Get an allocator for tl_string objects
+ *
+ * \memberof tl_string
+ * \static
+ *
+ * \return A unique pointer to a global allocator implementation
+ */
+tl_allocator* tl_string_get_allocator( void );
+
 #ifdef __cplusplus
 }
 #endif

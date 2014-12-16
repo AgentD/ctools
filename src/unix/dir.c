@@ -110,15 +110,19 @@ int tl_dir_scan_utf8( const char* path, tl_array* list )
         return errno_to_fs( errno );
 
     /* read contents */
+    tl_string_init( &str );
+
     while( (ent=readdir( dir )) )
     {
         if( strcmp( ent->d_name, "." )!=0 && strcmp( ent->d_name, ".." )!=0 )
         {
-            tl_string_init( &str );
             tl_string_append_utf8( &str, ent->d_name );
             tl_array_append( list, &str );
+            tl_string_clear( &str );
         }
     }
+
+    tl_string_cleanup( &str );
 
     /* cleanup */
     closedir( dir );

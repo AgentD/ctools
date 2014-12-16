@@ -59,7 +59,7 @@ int main( void )
     /* print contents of working directory */
     puts( "********************************" );
 
-    tl_array_init( &strlist, sizeof(tl_string), NULL );
+    tl_array_init( &strlist, sizeof(tl_string), tl_string_get_allocator( ) );
     tl_dir_scan_utf8( ".", &strlist );
     tl_array_stable_sort( &strlist, tl_string_compare );
 
@@ -69,8 +69,6 @@ int main( void )
                            buffer, sizeof(buffer) );
 
         puts( buffer );
-
-        tl_string_cleanup( (tl_string*)tl_array_at( &strlist, i ) );
     }
 
     tl_array_cleanup( &strlist );

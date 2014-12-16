@@ -23,7 +23,8 @@ extern "C" {
  * function appends to the array, on failure it does not alter the array.
  *
  * \param path The path of the directory to scan
- * \param list A pointer to a tl_array of tl_string to append the entries to
+ * \param list A pointer to a tl_array of tl_string to append the entries to,
+ *             assumed to have a propper allocator set
  *
  * \return Zero on success, TL_FS_ACCESS if the calling process does not have
  *         the neccessarry permissions, TL_FS_NOT_EXIST if the path does not

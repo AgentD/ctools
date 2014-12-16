@@ -1,8 +1,10 @@
+#include "tl_allocator.h"
 #include "tl_string.h"
 #include "tl_utf16.h"
 #include "tl_utf8.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 
 
@@ -19,6 +21,43 @@
 #define BOM2 0xFFFE
 
 
+
+static int stralloc_copy( tl_allocator* alc, void* dst, const void* src )
+{
+    tl_string *d = (tl_string*)dst, *s = (tl_string*)src;
+    (void)alc;
+
+    memcpy( dst, src, sizeof(tl_string) );
+    d->vec.data = malloc( d->vec.used * d->vec.unitsize );
+
+    if( !d->vec.data )
+        return 0;
+
+    d->vec.reserved = d->vec.used;
+    memcpy( d->vec.data, s->vec.data, d->vec.used * d->vec.unitsize );
+    return 1;
+}
+
+static int stralloc_init( tl_allocator* alc, void* ptr )
+{
+    (void)alc;
+    return tl_string_init( ptr );
+}
+
+static void stralloc_cleanup( tl_allocator* alc, void* ptr )
+{
+    (void)alc;
+    tl_string_cleanup( ptr );
+}
+
+static tl_allocator stralloc =
+{
+    stralloc_copy,
+    stralloc_init,
+    stralloc_cleanup
+};
+
+/****************************************************************************/
 
 int tl_string_init( tl_string* this )
 {
@@ -464,5 +503,10 @@ void tl_string_drop_last( tl_string* this )
         if( this->surrogates > this->charcount )
             this->surrogates = this->charcount;
     }
+}
+
+tl_allocator* tl_string_get_allocator( void )
+{
+    return &stralloc;
 }
 

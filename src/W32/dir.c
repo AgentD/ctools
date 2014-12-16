@@ -111,7 +111,6 @@ static void dir_iterator_remove( tl_iterator* this )
 int tl_dir_scan( const tl_string* path, tl_array* list )
 {
     tl_iterator* dir;
-    tl_string str;
 
     if( !path ) return TL_FS_NOT_EXIST;
     if( !list ) return 0;
@@ -120,12 +119,7 @@ int tl_dir_scan( const tl_string* path, tl_array* list )
 
     while( dir->has_data( dir ) )
     {
-        tl_string_init( &str );
-
-        if( !tl_string_copy( &str, dir->get_value( dir ) ) )
-            break;
-
-        tl_array_append( list, &str );
+        tl_array_append( list, dir->get_value( dir ) );
         dir->next( dir );
     }
 
