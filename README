@@ -1,0 +1,111 @@
+
+  About
+  *****
+
+ This is small utility library for C programs, containing generic
+ implementations of commonly used container structures, data structures,
+ algorithms and operating system abstraction (filesystem access et cetera).
+
+
+ At the moment, the following things are implemented:
+  - tl_array, a resizeable array
+  - tl_hashmap, a seperate-chaining based hash map
+  - tl_list, a doubly linked list
+  - tl_queue, a linked list based, double ended queue
+  - tl_rbtree, a red-black tree
+  - tl_stack, an array based stack data structure
+  - tl_string, a UTF-16 dynamic string implementation
+  - various sorting algorithm implementations
+  - abstract filesystem and directory access functions
+  - abstract iterator for containers
+  - abstract allocator allowing containers to make deep-copies of
+    complex objects or using custom allocation
+  - some UTF-8 and UTF-16 string utilities
+
+
+  Compiling
+  *********
+
+ The library uses a CMake based build system.
+
+ On UNIX(R) like systems, run the following to create a build directory,
+ generate make files and build the library:
+
+    $ mkdir build
+    $ cd build
+    $ cmake ..
+    $ make
+
+ To cross compile the library from UNIX(R) like systems for 32 bit Windows(R)
+ using the provided toolchain file, run the following instead:
+
+    $ mkdir build
+    $ cd build
+    $ cmake .. -DCMAKE_TOOLCHAIN_FILE=../CMake/mingw.cmake
+    $ make
+
+ For 64 bit Windows(R), use '-DCMAKE_TOOLCHAIN_FILE=../CMake/mingw64.cmake'.
+
+ To generate the doxygen API reference, run the following in the build
+ directory after generating the Makefile:
+
+    $ make doc
+
+ This generates a HTML reference in <build_directory>/doxydoc/html, man pages
+ for section 3 under <build_directory>/doxydoc/man and LaTeX input files in
+ <build_directory>/doxydoc/latex.
+
+ To run the unit tests, run the following:
+
+    $ make test
+
+
+
+
+ To compile the library on Windows(R), start the CMake gui, set the input
+ directory to the root source directory containing the CMakeLists.txt file
+ and set an output directory of your choice. Click 'configure', select a
+ build system, click 'configure' again, then click 'generate'.
+
+ Use the generated build system files in the target directory (e.g. MSVC
+ solution) to compile the library.
+
+
+  Directory Hirarchy
+  ******************
+
+ The root directory contains the following files and directories:
+  - CMake/              Containing misc. CMake files (e.g. toolchain files)
+  - include/            Contains library headers
+  - src/                Contains library source
+  - tests/              Contains unit tests
+  - CMakeLists.txt      CMake build system input file
+  - Doxyfile.in         Doxygen input file consumed by build system
+  - LICENSE             License file
+  - README              The file you are reading right now
+
+
+
+  License
+  *******
+
+ Copyright (C) 2015 - David Oberhollenzer
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+
