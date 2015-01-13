@@ -183,3 +183,19 @@ unsigned int tl_utf8_estimate_utf16_length( const uint16_t* in,
     return count;
 }
 
+unsigned long tl_utf8_hash( const char* str )
+{
+    unsigned long hash = 5381;
+    int c;
+
+    if( str )
+    {
+        while( (c = *((unsigned char*)(str++))) != 0 )
+        {
+            hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+        }
+    }
+
+    return hash;
+}
+

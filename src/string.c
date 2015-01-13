@@ -529,6 +529,41 @@ void tl_string_drop_last( tl_string* this )
     }
 }
 
+int tl_string_compare( const tl_string* this, const tl_string* other )
+{
+    if( !this && !other ) return  0;    /* both are "empty" => equal */
+    if( !this           ) return -1;    /* a is "empty", b is not => a < b */
+    if( !other          ) return  1;    /* b is "empty", a is not => a > b */
+
+    /*
+        if a is at least as long as b and has a surrogate pair before b does,
+        a must be larger than b
+     */
+    if( (this->charcount >= other->charcount) &&
+        (this->surrogates < other->surrogates) )
+    {
+        return 1;
+    }
+
+    /*
+        if b is at least as long as a and has a surrogate pair before a does,
+        a must be smaller than b
+     */
+    if( (this->charcount <= other->charcount) &&
+        (this->surrogates > other->surrogates) )
+    {
+        return -1;
+    }
+
+    return tl_utf16_compare( (const uint16_t*)this->vec.data,
+                             (const uint16_t*)other->vec.data );
+}
+
+unsigned long tl_string_hash( const tl_string* this )
+{
+    return tl_utf16_hash( this ? (const uint16_t*)this->vec.data : NULL );
+}
+
 tl_allocator* tl_string_get_allocator( void )
 {
     return &stralloc;

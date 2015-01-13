@@ -105,6 +105,17 @@ unsigned int tl_utf8_encode( char* utf8, unsigned int cp );
 unsigned int tl_utf8_estimate_utf16_length( const uint16_t* utf16,
                                             size_t charcount );
 
+/**
+ * \brief Compute a hash function of a UTF-8 string
+ *
+ * \note This function runs in linear time
+ *
+ * \param str A pointer to a null-terminated UTF-8
+ *
+ * \return A hash value computed using a djb2 implementation
+ */
+unsigned long tl_utf8_hash( const char* str );
+
 #ifdef __cplusplus
 }
 #endif

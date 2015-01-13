@@ -412,6 +412,38 @@ unsigned int tl_string_last( const tl_string* str );
 void tl_string_drop_last( tl_string* str );
 
 /**
+ * \brief Compare two strings
+ *
+ * \memberof tl_string
+ *
+ * This function compares two UTF-16 strings codepoint by codepoint.
+ *
+ * \note NULL pointers are treated as empty strings and always smaller than
+ *       non-null strings. If both are NULL, they are reported as equal.
+ *
+ * \param a A pointer to the first string
+ * \param b A pointer to the second string
+ *
+ * \return A positive value if the first string is lexicographically
+ *         larger than the second, a negative value if the second is larger
+ *         than the first and zero if they are equal.
+ */
+int tl_string_compare( const tl_string* a, const tl_string* b );
+
+/**
+ * \brief Compute a hash function of a string
+ *
+ * \memberof tl_string
+ *
+ * \note This function runs in linear time
+ *
+ * \param str A pointer to a string
+ *
+ * \return A hash value computed using a djb2 implementation
+ */
+unsigned long tl_string_hash( const tl_string* str );
+
+/**
  * \brief Get an allocator for tl_string objects
  *
  * \memberof tl_string

@@ -136,3 +136,43 @@ size_t tl_utf16_estimate_utf8_length( const char* str, size_t chars )
     return count;
 }
 
+int tl_utf16_compare( const uint16_t* a, const uint16_t* b )
+{
+    if( !a && !b ) return  0;    /* both are "empty" => equal */
+    if( !a       ) return -1;    /* a is "empty", b is not => a < b */
+    if( !b       ) return  1;    /* b is "empty", a is not => a > b */
+
+    while( (*a) && (*b) )
+    {
+        if(  IS_SURROGATE( *a ) && !IS_SURROGATE( *b ) ) return 1;
+        if( !IS_SURROGATE( *a ) &&  IS_SURROGATE( *b ) ) return -1;
+
+        if( (*a) < (*b) ) return -1;
+        if( (*a) > (*b) ) return 1;
+
+        ++a;
+        ++b;
+    }
+
+    if(  (*a) && !(*b) ) return  1;     /* b is prefix of a => a > b */
+    if( !(*a) &&  (*b) ) return -1;     /* a is prefix of b => a < b */
+
+    return 0;                           /* equal */
+}
+
+unsigned long tl_utf16_hash( const uint16_t* str )
+{
+    unsigned long hash = 5381;
+    int c;
+
+    if( str )
+    {
+        while( (c = *(str++)) != 0 )
+        {
+            hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+        }
+    }
+
+    return hash;
+}
+

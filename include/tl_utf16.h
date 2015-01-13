@@ -112,6 +112,34 @@ unsigned int tl_utf16_encode( uint16_t* utf16, unsigned int cp );
  */
 size_t tl_utf16_estimate_utf8_length( const char* utf8, size_t charcount );
 
+/**
+ * \brief Compare two UTF-16 strings
+ *
+ * This function compares two UTF-16 strings codepoint by codepoint.
+ *
+ * \note NULL pointers are treated as empty strings and always smaller than
+ *       non-null strings. If both are NULL, they are reported as equal.
+ *
+ * \param a A pointer to the first string
+ * \param b A pointer to the second string
+ *
+ * \return A positive value if the first string is lexicographically
+ *         larger than the second, a negative value if the second is larger
+ *         than the first and zero if they are equal.
+ */
+int tl_utf16_compare( const uint16_t* a, const uint16_t* b );
+
+/**
+ * \brief Compute a hash function of a UTF-16 string
+ *
+ * \note This function runs in linear time
+ *
+ * \param str A pointer to a null-terminated UTF-16
+ *
+ * \return A hash value computed using a djb2 implementation
+ */
+unsigned long tl_utf16_hash( const uint16_t* str );
+
 #ifdef __cplusplus
 }
 #endif

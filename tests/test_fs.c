@@ -9,27 +9,6 @@
 
 
 
-int tl_string_compare( const void* a, const void* b )
-{
-    const tl_string *stra = a, *strb = b;
-    size_t i = 0;
-
-    while( i<stra->vec.used && i<strb->vec.used )
-    {
-        if( ((uint16_t*)stra->vec.data)[i] < ((uint16_t*)strb->vec.data)[i] )
-            return -1;
-
-        if( ((uint16_t*)stra->vec.data)[i] > ((uint16_t*)strb->vec.data)[i] )
-            return 1;
-
-        ++i;
-    }
-
-    return ((uint16_t*)stra->vec.data)[i] - ((uint16_t*)strb->vec.data)[i];
-}
-
-
-
 int main( void )
 {
     char buffer[128];
@@ -61,7 +40,7 @@ int main( void )
 
     tl_array_init( &strlist, sizeof(tl_string), tl_string_get_allocator( ) );
     tl_dir_scan_utf8( ".", &strlist );
-    tl_array_stable_sort( &strlist, tl_string_compare );
+    tl_array_stable_sort( &strlist, (tl_compare)tl_string_compare );
 
     for( i=0; i<strlist.used; ++i )
     {
