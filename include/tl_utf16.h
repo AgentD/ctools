@@ -19,6 +19,14 @@ extern "C" {
 /**
  * \brief Count the number of characters (code points) in an UTF-16 string
  *
+ * An UTF-16 string may contain surrogate pairs, combining two double-byte
+ * characters to a single character, which means that the number of characters
+ * in an UTF-16 string can be lower than the number of non-null double-byte
+ * sequences in the string.
+ *
+ * This function counts the number of characters in an UTF-16 string, counting
+ * surrogate pairs a single character.
+ *
  * \note This function runs in linear time
  *
  * \param str A pointer to a null-terminated UTF-16 string

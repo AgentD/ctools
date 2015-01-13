@@ -15,7 +15,9 @@
 /**
  * \struct tl_hashmap_entry
  *
- * \brief A hash map entry base structure
+ * \brief A hash map entry base structure used by tl_hashmap
+ *
+ * \see tl_hashmap
  */
 struct tl_hashmap_entry
 {
@@ -27,6 +29,22 @@ struct tl_hashmap_entry
  * \struct tl_hashmap
  *
  * \brief A seperate-chaining based hash map
+ *
+ * A hash map allows mapping arbitrary key objects to arbitrary value objects
+ * in constant best case and linear worst case time. A hash value is computed
+ * from the key object from which an array index is computed at which the
+ * element is stored. This allows constant time mapping of the key object to
+ * the array slot. The array slot itself contains a linked list of value
+ * objects for which the key have colliding hash values, this means in
+ * addition to the hash lookup, the keys of all entries with colliding hashes
+ * have to be compared to the reference key lineary to find the matching key,
+ * providing roughly constant access time of objects by key.
+ * In a worst case scenario, i.e. if all keys have the same hash, the hash map
+ * degenerates to a linked list with linear access time.
+ *
+ * A hash map is preferable over a red-black tree if computing of hashes can
+ * be done fast, but comparing the actual key objects is expensive, to reduce
+ * the number of key comparisons (For instance, if the key is a string).
  */
 struct tl_hashmap
 {
@@ -49,7 +67,7 @@ struct tl_hashmap
     /** \brief The size of a value object */
     size_t objsize;
 
-    /** \brief The number of hashmap bins */
+    /** \brief The number of hash map bins */
     size_t bincount;
 
     /** \brief A function used to compute the hash value of a key object */
@@ -72,11 +90,11 @@ extern "C" {
 #endif
 
 /**
- * \brief Initialize a hashmap
+ * \brief Initialize a hash map
  *
  * \memberof tl_hashmap
  *
- * \param map        A pointer to a hashmap
+ * \param map        A pointer to a hash map
  * \param keysize    The size of a key object
  * \param objsize    The size of a value object
  * \param bincount   The number of slots to create in the map
@@ -98,7 +116,9 @@ int tl_hashmap_init( tl_hashmap* map, size_t keysize, size_t objsize,
  *
  * \memberof tl_hashmap
  *
- * \param map A pointer to a hashmap
+ * \note This function runs in linear time
+ *
+ * \param map A pointer to a hash map
  */
 void tl_hashmap_cleanup( tl_hashmap* map );
 
@@ -107,7 +127,9 @@ void tl_hashmap_cleanup( tl_hashmap* map );
  *
  * \memberof tl_hashmap
  *
- * \param map   A pointer to a hashmap
+ * \note This function runs in constant time
+ *
+ * \param map   A pointer to a hash map
  * \param entry A pointer to a entry
  *
  * \return A pointer to the key, or NULL if one of the pointers was NULL
@@ -120,7 +142,9 @@ void* tl_hashmap_entry_get_key( const tl_hashmap* map,
  *
  * \memberof tl_hashmap
  *
- * \param map   A pointer to a hashmap
+ * \note This function runs in constant time
+ *
+ * \param map   A pointer to a hash map
  * \param entry A pointer to a entry
  *
  * \return A pointer to the value, or NULL if one of the pointers was NULL
@@ -132,6 +156,8 @@ void* tl_hashmap_entry_get_value( const tl_hashmap* map,
  * \brief Get a pointer to a hash map bin head
  *
  * \memberof tl_hashmap
+ *
+ * \note This function runs in constant time
  *
  * \param map   A pointer to a hash map
  * \param index The index of the bin
@@ -145,6 +171,8 @@ tl_hashmap_entry* tl_hashmap_get_bin( const tl_hashmap* map, size_t index );
  * \brief Overwrite a hash map with a copy of another hash map
  *
  * \memberof tl_hashmap
+ *
+ * \note This function runs in linear time
  *
  * \param dst A pointer to the destination hash map. Previous contents
  *            are discarded.
@@ -160,6 +188,8 @@ int tl_hashmap_copy( tl_hashmap* dst, const tl_hashmap* src );
  *
  * \memberof tl_hashmap
  *
+ * \note This function runs in linear time
+ *
  * \param map A pointer to a hashmap
  */
 void tl_hashmap_clear( tl_hashmap* map );
@@ -168,6 +198,8 @@ void tl_hashmap_clear( tl_hashmap* map );
  * \brief Add an object to a hashmap
  *
  * \memberof tl_hashmap
+ *
+ * \note This function runs in constant time
  *
  * This function does NOT fail if the entry already exits. If a new entry with
  * an equivalent key is added, it will override the existing one and once
@@ -186,6 +218,10 @@ int tl_hashmap_insert( tl_hashmap* map, const void* key, const void* object );
  *
  * \memberof tl_hashmap
  *
+ * \note This function runs roughly in constant time (constant bin lookup,
+ *       small linear iterating over keys with the same hash) or linear in
+ *       worst case if all keys generate the same hash value
+ *
  * \param map    A pointer to a hash map
  * \param key    A pointer to the key of the entry to overwrite
  * \param object A pointer to the value to write over the existing one
@@ -200,6 +236,10 @@ int tl_hashmap_set( tl_hashmap* map, const void* key, const void* object );
  *
  * \memberof tl_hashmap
  *
+ * \note This function runs roughly in constant time (constant bin lookup,
+ *       small linear iterating over keys with the same hash) or linear in
+ *       worst case if all keys generate the same hash value
+ *
  * \param map A pointer to a hashmap
  * \param key A pointer to the key object to look for
  *
@@ -208,11 +248,15 @@ int tl_hashmap_set( tl_hashmap* map, const void* key, const void* object );
 void* tl_hashmap_at( const tl_hashmap* map, const void* key );
 
 /**
- * \brief Remove an object stored in a hashmap
+ * \brief Remove an object stored in a hash map
  *
  * \memberof tl_hashmap
  *
- * \param map    A pointer to a hashmap
+ * \note This function runs roughly in constant time (constant bin lookup,
+ *       small linear iterating over keys with the same hash) or linear in
+ *       worst case if all keys generate the same hash value
+ *
+ * \param map    A pointer to a hash map
  * \param key    A pointer to the key object to look for
  * \param object If not NULL, the object stored in the map is memcopied to
  *               this location.

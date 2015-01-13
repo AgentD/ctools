@@ -20,7 +20,7 @@
  */
 struct tl_string
 {
-    /** \brief A null-terimated UTF-16 string */
+    /** \brief Contains the data of a null-terimated UTF-16 string */
     tl_array vec;
 
     /**

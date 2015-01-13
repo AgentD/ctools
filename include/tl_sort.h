@@ -42,14 +42,16 @@ void tl_insertionsort( void* data, size_t elements, size_t size,
  * The implementation of this function uses an optimized quicksort with a
  * fallback to insetion sort for small arrays, based on the paper "Engineering
  * a Sort Function" by JON L. BENTLEY and M. DOUGLAS McILROY. A similar
- * implementation is also used by *BSD based operating systems.
+ * implementation is also used as a qsort implementation in the C library of
+ * BSD based operating systems.
  *
  * Quicksort has linearithmic best and average case time complexity and
  * quadratic worst case time complexity with logarithmic memory overhead.
  *
- * For most cases, quicksort is faster than heapsort due to caching effects.
- * In some cases however, quicksort can degenerate to quadratic time. When
- * guaranteed linearithmic time is needed, heapsort can be used instead.
+ * For most cases, quicksort is faster than heapsort due to more efficient
+ * caching caused by the memory access paterns of quicksort. In some cases
+ * however, quicksort can degenerate to quadratic time. When guaranteed
+ * linearithmic time is needed, heapsort can be used instead.
  *
  * \param data     A pointer to the array to sort
  * \param elements The number of elements to sort
@@ -67,9 +69,10 @@ void tl_quicksort( void* data, size_t elements, size_t size, tl_compare cmp );
  * Heapsort is guaranteed to always run in linearithmic time with constant
  * memory overhead.
  *
- * For most cases, heapsort is slower than quicksort due to caching effects.
- * In some cases however, quicksort can degenerate to quadratic time. When
- * guaranteed linearithmic time is needed, heapsort can be used instead.
+ * For most cases, heapsort is slower than quicksort due to the difference in
+ * memory access patterns, causing more cache misses in heapsort. In some
+ * cases however, quicksort can degenerate to quadratic time. When guaranteed
+ * linearithmic time is needed, heapsort can be used instead.
  *
  * \param data     A pointer to the array to sort
  * \param elements The number of elements to sort

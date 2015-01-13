@@ -15,7 +15,9 @@
 /**
  * \struct tl_list_node
  *
- * \brief A node in a doubly linked list
+ * \brief A node in a doubly linked list, used by tl_list
+ *
+ * \see tl_list
  */
 struct tl_list_node
 {
@@ -30,6 +32,12 @@ struct tl_list_node
  * \struct tl_list
  *
  * \brief A doubly linked list container
+ *
+ * The data structure manages a doubly linked list structure.
+ *
+ * The linked list array offers linear element access by index, constant
+ * element access time at the beginning or end of the list and constant
+ * insertion and removal at the beginning or end of the list.
  */
 struct tl_list
 {

@@ -18,8 +18,11 @@
  * \brief A dynamically resizing array container
  *
  * The data structure manages a dynamically allocated array. The array size is
- * doubled when adding an element to a full array. And cut in half if after
+ * doubled when adding an element to a full array and cut in half if after
  * removing an element the array is less than a quarter filled.
+ *
+ * The dynamic array offers constant element access by index, constant
+ * amortized insertion and removal (linear worst case).
  */
 struct tl_array
 {

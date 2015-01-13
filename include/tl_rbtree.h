@@ -16,6 +16,8 @@
  * \struct tl_rbtree_node
  *
  * \brief A node in a red-black tree
+ *
+ * \see tl_rbtree
  */
 struct tl_rbtree_node
 {
@@ -33,6 +35,13 @@ struct tl_rbtree_node
  * \struct tl_rbtree
  *
  * \brief A red-black tree implementation
+ *
+ * The red-black tree allows mapping arbitrary key objects with arbitrary
+ * comparison mechanisms to arbitrary value objects. The tree is self
+ * balancing, ensuring a maximum depth of log(N)+1.
+ *
+ * Accessing, inserting or removing elements is guaranteed to run in
+ * logarithmic time.
  */
 struct tl_rbtree
 {
@@ -138,6 +147,8 @@ void tl_rbtree_cleanup( tl_rbtree* tree );
  * \brief Overwrite a red-black tree with a copy of another red-black tree
  *
  * \memberof tl_rbtree
+ *
+ * \note This function runs in logarithmic time
  *
  * \param dst A pointer to the destination tree. Previous contents are
  *            discarded.
