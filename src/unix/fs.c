@@ -191,7 +191,7 @@ done:
     return 1;
 }
 
-uint64_t tl_fs_get_file_size_utf8( const char* path )
+tl_u64 tl_fs_get_file_size_utf8( const char* path )
 {
     struct stat sb;
 
@@ -220,5 +220,5 @@ UTF8_CONVERT_WRAPPER( int, tl_fs_is_symlink, 0 )
 UTF8_CONVERT_WRAPPER( int, tl_fs_cwd, TL_FS_NOT_EXIST )
 UTF8_CONVERT_WRAPPER( int, tl_fs_mkdir, TL_FS_NOT_DIR )
 UTF8_CONVERT_WRAPPER( int, tl_fs_delete, 0 )
-UTF8_CONVERT_WRAPPER( uint64_t, tl_fs_get_file_size, 0 )
+UTF8_CONVERT_WRAPPER( tl_u64, tl_fs_get_file_size, 0 )
 

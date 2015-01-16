@@ -36,7 +36,7 @@
 
 
 
-size_t tl_utf16_charcount( const uint16_t* str )
+size_t tl_utf16_charcount( const tl_u16* str )
 {
     size_t count = 0;
 
@@ -60,7 +60,7 @@ size_t tl_utf16_charcount( const uint16_t* str )
     return count;
 }
 
-size_t tl_utf16_strlen( const uint16_t* str, size_t chars )
+size_t tl_utf16_strlen( const tl_u16* str, size_t chars )
 {
     size_t i, count = 0;
 
@@ -81,7 +81,7 @@ size_t tl_utf16_strlen( const uint16_t* str, size_t chars )
     return count;
 }
 
-unsigned int tl_utf16_decode( const uint16_t* utf16, unsigned int* count )
+unsigned int tl_utf16_decode( const tl_u16* utf16, unsigned int* count )
 {
     if( count )
         *count = 0;
@@ -103,7 +103,7 @@ unsigned int tl_utf16_decode( const uint16_t* utf16, unsigned int* count )
     return utf16[0];
 }
 
-unsigned int tl_utf16_encode( uint16_t* utf16, unsigned int cp )
+unsigned int tl_utf16_encode( tl_u16* utf16, unsigned int cp )
 {
     if( !utf16 )
         return 0;
@@ -136,7 +136,7 @@ size_t tl_utf16_estimate_utf8_length( const char* str, size_t chars )
     return count;
 }
 
-int tl_utf16_compare( const uint16_t* a, const uint16_t* b )
+int tl_utf16_compare( const tl_u16* a, const tl_u16* b )
 {
     if( !a && !b ) return  0;    /* both are "empty" => equal */
     if( !a       ) return -1;    /* a is "empty", b is not => a < b */
@@ -160,7 +160,7 @@ int tl_utf16_compare( const uint16_t* a, const uint16_t* b )
     return 0;                           /* equal */
 }
 
-unsigned long tl_utf16_hash( const uint16_t* str )
+unsigned long tl_utf16_hash( const tl_u16* str )
 {
     unsigned long hash = 5381;
     int c;

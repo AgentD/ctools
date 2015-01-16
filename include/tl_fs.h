@@ -205,14 +205,14 @@ int tl_fs_delete_utf8( const char* path );
  *
  * \return The size of the file in bytes
  */
-uint64_t tl_fs_get_file_size( const tl_string* path );
+tl_u64 tl_fs_get_file_size( const tl_string* path );
 
 /**
  * \copydoc tl_fs_get_file_size
  *
  * \param path A C-style UTF8 string of a file path
  */
-uint64_t tl_fs_get_file_size_utf8( const char* path );
+tl_u64 tl_fs_get_file_size_utf8( const char* path );
 
 #ifdef __cplusplus
 }

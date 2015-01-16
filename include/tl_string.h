@@ -189,7 +189,7 @@ unsigned int tl_string_at( const tl_string* str, size_t index );
  *
  * \return A pointer to a null-terminated UTF-16 string
  */
-uint16_t* tl_string_cstr( tl_string* str );
+tl_u16* tl_string_cstr( tl_string* str );
 
 /**
  * \brief Append a unicode code point value to a string object
@@ -250,7 +250,7 @@ int tl_string_append_latin1( tl_string* str, const char* latin1 );
  *
  * \return Non-zero on success, zero if out of memory (or str==NULL)
  */
-int tl_string_append_utf16( tl_string* str, const uint16_t* utf16 );
+int tl_string_append_utf16( tl_string* str, const tl_u16* utf16 );
 
 /**
  * \brief Append a number of UTF-8 or ASCII characters to a string object
@@ -301,7 +301,7 @@ int tl_string_append_latin1_count( tl_string* str, const char* latin1,
  * \param count The number of characters to read from the string (surrogate
  *              pairs count as one character)
  */
-int tl_string_append_utf16_count( tl_string* str, const uint16_t* utf16,
+int tl_string_append_utf16_count( tl_string* str, const tl_u16* utf16,
                                   size_t count );
 
 /**

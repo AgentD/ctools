@@ -58,7 +58,7 @@ extern "C" {
  *
  * \return The number of characters (code points) in the string
  */
-size_t tl_utf16_charcount( const uint16_t* str );
+size_t tl_utf16_charcount( const tl_u16* str );
 
 /**
  * \brief Count the number of code units in an UTF-16 string
@@ -70,7 +70,7 @@ size_t tl_utf16_charcount( const uint16_t* str );
  *
  * \return The number of code points read from the string
  */
-size_t tl_utf16_strlen( const uint16_t* str, size_t chars );
+size_t tl_utf16_strlen( const tl_u16* str, size_t chars );
 
 /**
  * \brief Decode a unicode code point from an UTF-16 representation
@@ -83,7 +83,7 @@ size_t tl_utf16_strlen( const uint16_t* str, size_t chars );
  *
  * \return The decoded unicode code point
  */
-unsigned int tl_utf16_decode( const uint16_t* utf16, unsigned int* count );
+unsigned int tl_utf16_decode( const tl_u16* utf16, unsigned int* count );
 
 /**
  * \brief Encode a unicode code point in UTF-16
@@ -96,7 +96,7 @@ unsigned int tl_utf16_decode( const uint16_t* utf16, unsigned int* count );
  *
  * \return The number of code units written to the buffer
  */
-unsigned int tl_utf16_encode( uint16_t* utf16, unsigned int cp );
+unsigned int tl_utf16_encode( tl_u16* utf16, unsigned int cp );
 
 /**
  * \brief Estimate the number of bytes required to encode
@@ -127,7 +127,7 @@ size_t tl_utf16_estimate_utf8_length( const char* utf8, size_t charcount );
  *         larger than the second, a negative value if the second is larger
  *         than the first and zero if they are equal.
  */
-int tl_utf16_compare( const uint16_t* a, const uint16_t* b );
+int tl_utf16_compare( const tl_u16* a, const tl_u16* b );
 
 /**
  * \brief Compute a hash function of a UTF-16 string
@@ -138,7 +138,7 @@ int tl_utf16_compare( const uint16_t* a, const uint16_t* b );
  *
  * \return A hash value computed using a djb2 implementation
  */
-unsigned long tl_utf16_hash( const uint16_t* str );
+unsigned long tl_utf16_hash( const tl_u16* str );
 
 #ifdef __cplusplus
 }

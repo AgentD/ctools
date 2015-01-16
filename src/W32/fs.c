@@ -235,7 +235,7 @@ int tl_fs_delete( const tl_string* path )
     return errno_to_fs( GetLastError( ) );
 }
 
-uint64_t tl_fs_get_file_size( const tl_string* path )
+tl_u64 tl_fs_get_file_size( const tl_string* path )
 {
     WIN32_FIND_DATAW entw;
     HANDLE hnd;
@@ -261,8 +261,8 @@ uint64_t tl_fs_get_file_size( const tl_string* path )
 
     FindClose( hnd );
 
-    return (uint64_t)entw.nFileSizeHigh * (MAXDWORD+1) +
-           (uint64_t)entw.nFileSizeLow;
+    return (tl_u64)entw.nFileSizeHigh * (MAXDWORD+1) +
+           (tl_u64)entw.nFileSizeLow;
 }
 
 /****************************************************************************/
@@ -286,5 +286,5 @@ UTF8_WRAPPER( int, tl_fs_is_symlink, 0 )
 UTF8_WRAPPER( int, tl_fs_mkdir, TL_FS_NOT_DIR )
 UTF8_WRAPPER( int, tl_fs_cwd, TL_FS_NOT_DIR )
 UTF8_WRAPPER( int, tl_fs_delete, TL_FS_NOT_DIR )
-UTF8_WRAPPER( uint64_t, tl_fs_get_file_size, 0 )
+UTF8_WRAPPER( tl_u64, tl_fs_get_file_size, 0 )
 

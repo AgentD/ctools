@@ -85,11 +85,11 @@ static tl_allocator stralloc =
 
 int tl_string_init( tl_string* this )
 {
-    uint16_t null = 0;
+    tl_u16 null = 0;
 
     if( this )
     {
-        tl_array_init( &(this->vec), sizeof(uint16_t), NULL );
+        tl_array_init( &(this->vec), sizeof(tl_u16), NULL );
         this->charcount = 0;
         this->surrogates = 0;
 
@@ -136,7 +136,7 @@ void tl_string_clear( tl_string* this )
     if( this )
     {
         tl_array_resize( &(this->vec), 1, 0 );
-        *((uint16_t*)this->vec.data) = 0;
+        *((tl_u16*)this->vec.data) = 0;
 
         this->charcount = 0;
         this->surrogates = 0;
@@ -150,17 +150,17 @@ int tl_string_is_empty( const tl_string* this )
 
 unsigned int tl_string_at( const tl_string* this, size_t index )
 {
-    const uint16_t* ptr;
+    const tl_u16* ptr;
     size_t i;
 
     if( this && (index < this->charcount) )
     {
         /* direct mapping of character index to array index */
         if( index < this->surrogates )
-            return ((const uint16_t*)this->vec.data)[ index ];
+            return ((const tl_u16*)this->vec.data)[ index ];
 
         /* linearly search to target character index */
-        ptr = ((const uint16_t*)this->vec.data) + this->surrogates;
+        ptr = ((const tl_u16*)this->vec.data) + this->surrogates;
         i = this->surrogates;
 
         while( i<index )
@@ -179,14 +179,14 @@ unsigned int tl_string_at( const tl_string* this, size_t index )
     return 0;
 }
 
-uint16_t* tl_string_cstr( tl_string* this )
+tl_u16* tl_string_cstr( tl_string* this )
 {
     return this ? this->vec.data : NULL;
 }
 
 int tl_string_append_code_point( tl_string* this, unsigned int cp )
 {
-    uint16_t val[2];
+    tl_u16 val[2];
 
     if( !this )
         return 0;
@@ -234,7 +234,7 @@ int tl_string_append_latin1( tl_string* this, const char* latin1 )
     return tl_string_append_latin1_count( this, latin1, strlen( latin1 ) );
 }
 
-int tl_string_append_utf16( tl_string* this, const uint16_t* str )
+int tl_string_append_utf16( tl_string* this, const tl_u16* str )
 {
     if( !this ) return 0;
     if( !str  ) return 1;
@@ -247,7 +247,7 @@ int tl_string_append_utf8_count( tl_string* this, const char* utf8,
 {
     unsigned int cp, i, len;
     size_t u8len, j;
-    uint16_t* dst;
+    tl_u16* dst;
 
     if( !this           ) return 0;
     if( !utf8 || !count ) return 1;
@@ -262,7 +262,7 @@ int tl_string_append_utf8_count( tl_string* this, const char* utf8,
     if( !tl_array_resize( &this->vec, this->vec.used + u8len, 0 ) )
         return 0;
 
-    dst = (uint16_t*)this->vec.data + i;
+    dst = (tl_u16*)this->vec.data + i;
 
     for( j=0; j<count; ++j, ++this->charcount )
     {
@@ -297,7 +297,7 @@ int tl_string_append_latin1_count( tl_string* this, const char* latin1,
                                    size_t count )
 {
     unsigned char* str = (unsigned char*)latin1;
-    uint16_t* dst;
+    tl_u16* dst;
     size_t i;
 
     if( !this ) return 0;
@@ -308,7 +308,7 @@ int tl_string_append_latin1_count( tl_string* this, const char* latin1,
     if( !tl_array_resize( &this->vec, this->vec.used + count, 0 ) )
         return 0;
 
-    dst = (uint16_t*)this->vec.data + i;
+    dst = (tl_u16*)this->vec.data + i;
 
     for( i=0; i<count; ++i )
         *(dst++) = *(str++);
@@ -322,11 +322,11 @@ int tl_string_append_latin1_count( tl_string* this, const char* latin1,
     return 1;
 }
 
-int tl_string_append_utf16_count( tl_string* this, const uint16_t* str,
+int tl_string_append_utf16_count( tl_string* this, const tl_u16* str,
                                   size_t count )
 {
     size_t i, total;
-    uint16_t* dst;
+    tl_u16* dst;
 
     if( !this          ) return 0;
     if( !str || !count ) return 1;
@@ -341,7 +341,7 @@ int tl_string_append_utf16_count( tl_string* this, const uint16_t* str,
     if( !tl_array_resize( &this->vec, this->vec.used + total, 0 ) )
         return 0;
 
-    dst = (uint16_t*)this->vec.data + i;
+    dst = (tl_u16*)this->vec.data + i;
 
     for( i=0; i<count; ++i )
     {
@@ -452,7 +452,7 @@ size_t tl_string_utf8_len( const tl_string* this )
 size_t tl_string_to_utf8( const tl_string* this, char* buffer, size_t size )
 {
     unsigned int cp, len;
-    const uint16_t* in;
+    const tl_u16* in;
     char data[4];
     size_t i;
 
@@ -496,11 +496,11 @@ size_t tl_string_to_utf8( const tl_string* this, char* buffer, size_t size )
 unsigned int tl_string_last( const tl_string* this )
 {
     unsigned int cp = 0;
-    uint16_t* ptr;
+    tl_u16* ptr;
 
     if( this && this->charcount )
     {
-        ptr = (uint16_t*)this->vec.data + this->vec.used - 2;
+        ptr = (tl_u16*)this->vec.data + this->vec.used - 2;
         cp = *ptr;
         return IS_SURROGATE(cp) ? (cp+(ptr[-1]<<10)+SURROGATE_OFFSET) : cp;
     }
@@ -514,13 +514,13 @@ void tl_string_drop_last( tl_string* this )
 
     if( this && this->charcount )
     {
-        cp = ((uint16_t*)this->vec.data)[this->vec.used - 2];
+        cp = ((tl_u16*)this->vec.data)[this->vec.used - 2];
 
         tl_array_resize( &this->vec,
                          this->vec.used - (IS_SURROGATE(cp) ? 2 : 1),
                          0 );
 
-        ((uint16_t*)this->vec.data)[ this->vec.used - 1 ] = '\0';
+        ((tl_u16*)this->vec.data)[ this->vec.used - 1 ] = '\0';
 
         --this->charcount;
 
@@ -555,13 +555,13 @@ int tl_string_compare( const tl_string* this, const tl_string* other )
         return -1;
     }
 
-    return tl_utf16_compare( (const uint16_t*)this->vec.data,
-                             (const uint16_t*)other->vec.data );
+    return tl_utf16_compare( (const tl_u16*)this->vec.data,
+                             (const tl_u16*)other->vec.data );
 }
 
 unsigned long tl_string_hash( const tl_string* this )
 {
-    return tl_utf16_hash( this ? (const uint16_t*)this->vec.data : NULL );
+    return tl_utf16_hash( this ? (const tl_u16*)this->vec.data : NULL );
 }
 
 tl_allocator* tl_string_get_allocator( void )
