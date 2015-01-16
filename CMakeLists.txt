@@ -96,6 +96,7 @@ add_library( ctools STATIC src/array.c
                            src/utf8.c
                            src/utf16.c
                            src/allocator.c
+                           src/blob.c
                            ${CTOOLS_SYSDEP} )
 
 #----------------------------------------------------------------------
@@ -113,6 +114,7 @@ add_executable( test_fs tests/test_fs.c )
 add_executable( test_hashmap tests/test_hashmap.c )
 add_executable( test_iterator tests/test_iterator.c )
 add_executable( test_iterator_hashmap tests/test_iterator_hashmap.c )
+add_executable( test_blob tests/test_blob.c )
 
 target_link_libraries( test_array ctools  )
 target_link_libraries( test_list ctools )
@@ -126,6 +128,7 @@ target_link_libraries( test_fs ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( test_hashmap ctools )
 target_link_libraries( test_iterator ctools )
 target_link_libraries( test_iterator_hashmap ctools )
+target_link_libraries( test_blob ctools )
 
 enable_testing( )
 add_test( test_array ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_array )
@@ -141,6 +144,7 @@ add_test( test_hashmap ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_hashmap )
 add_test( test_iterator ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_iterator )
 add_test( test_iterator_hashmap
           ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_iterator_hashmap )
+add_test( test_blob ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_blob )
 
 #----------------------------------------------------------------------
 # generate Doxygen API reference
