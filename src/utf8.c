@@ -157,7 +157,7 @@ unsigned int tl_utf8_encode( char* utf8, unsigned int cp )
     return 4;
 }
 
-unsigned int tl_utf8_estimate_utf16_length( const uint16_t* in,
+unsigned int tl_utf8_estimate_utf16_length( const tl_u16* in,
                                             size_t charcount )
 {
     size_t i, count;

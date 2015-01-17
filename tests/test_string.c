@@ -5,7 +5,7 @@
 
 
 
-const uint16_t utf16[7] =
+const tl_u16 utf16[7] =
 {
     0x00E4,         /* 'ä' */
     0x00F6,         /* 'ö' */
@@ -29,7 +29,7 @@ int main( void )
     tl_string_init( &str );
     if( str.charcount || str.surrogates ) return EXIT_FAILURE;
     if( str.vec.used!=1 ) return EXIT_FAILURE;
-    if( *((uint16_t*)tl_array_at( &(str.vec), 0 ))!=0 ) return EXIT_FAILURE;
+    if( *((tl_u16*)tl_array_at( &(str.vec), 0 ))!=0 ) return EXIT_FAILURE;
     if( *tl_string_cstr( &str ) != 0 ) return EXIT_FAILURE;
 
     if( tl_string_characters( &str ) ) return EXIT_FAILURE;
@@ -43,8 +43,8 @@ int main( void )
     tl_string_append_code_point( &str, '!' );
     if( str.charcount!=1 || str.surrogates!=1 ) return EXIT_FAILURE;
     if( str.vec.used!=2 ) return EXIT_FAILURE;
-    if( *((uint16_t*)tl_array_at( &(str.vec), 0 ))!='!' ) return EXIT_FAILURE;
-    if( *((uint16_t*)tl_array_at( &(str.vec), 1 ))!=0 ) return EXIT_FAILURE;
+    if( *((tl_u16*)tl_array_at( &(str.vec), 0 ))!='!' ) return EXIT_FAILURE;
+    if( *((tl_u16*)tl_array_at( &(str.vec), 1 ))!=0 ) return EXIT_FAILURE;
     if( tl_string_cstr( &str )[0] != '!' ) return EXIT_FAILURE;
     if( tl_string_cstr( &str )[1] !=  0  ) return EXIT_FAILURE;
     if( tl_string_utf8_len( &str ) != 1  ) return EXIT_FAILURE;
@@ -64,7 +64,7 @@ int main( void )
         if( tl_string_at( &str, 0 )!='!' ) return EXIT_FAILURE;
         if( tl_string_utf8_len( &str )!=(i+1) ) return EXIT_FAILURE;
 
-        if( *((uint16_t*)tl_array_at( &(str.vec), 0 ))!='!' )
+        if( *((tl_u16*)tl_array_at( &(str.vec), 0 ))!='!' )
             return EXIT_FAILURE;
         if( tl_string_cstr( &str )[0] != '!' )
             return EXIT_FAILURE;
@@ -73,13 +73,13 @@ int main( void )
         {
             if( tl_string_at( &str, j )!=('!'+j-1) )
                 return EXIT_FAILURE;
-            if( *((uint16_t*)tl_array_at( &(str.vec), j ))!=('!'+j-1) )
+            if( *((tl_u16*)tl_array_at( &(str.vec), j ))!=('!'+j-1) )
                 return EXIT_FAILURE;
             if( tl_string_cstr( &str )[j] != ('!'+j-1) )
                 return EXIT_FAILURE;
         }
 
-        if( *((uint16_t*)tl_array_at(&(str.vec), j)) ) return EXIT_FAILURE;
+        if( *((tl_u16*)tl_array_at(&(str.vec), j)) ) return EXIT_FAILURE;
         if( tl_string_cstr(&str)[j]                  ) return EXIT_FAILURE;
 
         tl_string_append_code_point( &str, '!'+i );
@@ -89,7 +89,7 @@ int main( void )
     tl_string_clear( &str );
     if( str.charcount || str.surrogates ) return EXIT_FAILURE;
     if( str.vec.used!=1 ) return EXIT_FAILURE;
-    if( *((uint16_t*)tl_array_at( &(str.vec), 0 ))!=0 ) return EXIT_FAILURE;
+    if( *((tl_u16*)tl_array_at( &(str.vec), 0 ))!=0 ) return EXIT_FAILURE;
     if( *tl_string_cstr( &str ) != 0 ) return EXIT_FAILURE;
 
     if( tl_string_characters( &str ) ) return EXIT_FAILURE;
@@ -109,9 +109,9 @@ int main( void )
     if( tl_string_is_empty( &str ) ) return EXIT_FAILURE;
     if( tl_string_utf8_len( &str )!=6 ) return EXIT_FAILURE;
 
-    if( *((uint16_t*)tl_array_at(&(str.vec),0))!=0xFFFD ) return EXIT_FAILURE;
-    if( *((uint16_t*)tl_array_at(&(str.vec),1))!=0xFFFD ) return EXIT_FAILURE;
-    if( *((uint16_t*)tl_array_at(&(str.vec),2))!=0      ) return EXIT_FAILURE;
+    if( *((tl_u16*)tl_array_at(&(str.vec),0))!=0xFFFD ) return EXIT_FAILURE;
+    if( *((tl_u16*)tl_array_at(&(str.vec),1))!=0xFFFD ) return EXIT_FAILURE;
+    if( *((tl_u16*)tl_array_at(&(str.vec),2))!=0      ) return EXIT_FAILURE;
     if( tl_string_cstr( &str )[0] != 0xFFFD ) return EXIT_FAILURE;
     if( tl_string_cstr( &str )[1] != 0xFFFD ) return EXIT_FAILURE;
     if( tl_string_cstr( &str )[2] != 0      ) return EXIT_FAILURE;

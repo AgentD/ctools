@@ -39,7 +39,7 @@
 
 static void fix_string( tl_string* path )
 {
-    uint16_t* ptr;
+    tl_u16* ptr;
     size_t i = 0;
 
     path->charcount = 0;

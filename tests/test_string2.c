@@ -4,7 +4,7 @@
 
 
 
-int match( const uint16_t* str1, const char* str2 )
+int match( const tl_u16* str1, const char* str2 )
 {
     while( *str1 && *str2 )
     {
