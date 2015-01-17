@@ -91,7 +91,8 @@ INLINE void tl_insertionsort( void* data, size_t n, size_t size,
 void tl_quicksort( void* data, size_t n, size_t size, tl_compare cmp )
 {
     char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
-    int d, r;
+    ptrdiff_t r;
+    size_t d;
 
 recursion:
     /* for small arrays, use insertion sort */

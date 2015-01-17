@@ -246,8 +246,8 @@ int tl_string_append_utf16( tl_string* this, const tl_u16* str )
 int tl_string_append_utf8_count( tl_string* this, const char* utf8,
                                  size_t count )
 {
-    unsigned int cp, i, len;
-    size_t u8len, j;
+    unsigned int cp, len;
+    size_t u8len, i, j;
     tl_u16* dst;
 
     if( !this           ) return 0;

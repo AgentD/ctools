@@ -102,8 +102,8 @@ TLAPI unsigned int tl_utf8_encode( char* utf8, unsigned int cp );
  * \return The number of bytes required, not including a possible
  *         null-terminator
  */
-TLAPI unsigned int tl_utf8_estimate_utf16_length( const tl_u16* utf16,
-                                                  size_t charcount );
+TLAPI size_t tl_utf8_estimate_utf16_length( const tl_u16* utf16,
+                                            size_t charcount );
 
 /**
  * \brief Compute a hash function of a UTF-8 string

@@ -74,7 +74,7 @@ const char* tl_fs_get_dir_sep( void )
 
 int tl_fs_get_wd( tl_string* path )
 {
-    size_t length = 0;
+    DWORD length = 0;
 
     if( !path )
         return 1;
@@ -262,7 +262,7 @@ tl_u64 tl_fs_get_file_size( const tl_string* path )
 
     FindClose( hnd );
 
-    return (tl_u64)entw.nFileSizeHigh * (MAXDWORD+1) +
+    return (tl_u64)entw.nFileSizeHigh * ((tl_u64)MAXDWORD+1) +
            (tl_u64)entw.nFileSizeLow;
 }
 
