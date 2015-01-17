@@ -58,8 +58,8 @@ extern "C" {
  * \param size     The size of a single element
  * \param cmp      A function used for comparing two elements
  */
-void tl_insertionsort( void* data, size_t elements, size_t size,
-                       tl_compare cmp );
+TLAPI void tl_insertionsort( void* data, size_t elements, size_t size,
+                             tl_compare cmp );
 
 /**
  * \brief Sort an array of elements using the quicksort algorithm
@@ -83,7 +83,8 @@ void tl_insertionsort( void* data, size_t elements, size_t size,
  * \param size     The size of a single element
  * \param cmp      A function used for comparing two elements
  */
-void tl_quicksort( void* data, size_t elements, size_t size, tl_compare cmp );
+TLAPI void tl_quicksort( void* data, size_t elements, size_t size,
+                         tl_compare cmp );
 
 /**
  * \brief Sort an array of elements using the heapsort algorithm
@@ -104,7 +105,8 @@ void tl_quicksort( void* data, size_t elements, size_t size, tl_compare cmp );
  * \param size     The size of a single element
  * \param cmp      A function used for comparing two elements
  */
-void tl_heapsort( void* data, size_t elements, size_t size, tl_compare cmp );
+TLAPI void tl_heapsort( void* data, size_t elements, size_t size,
+                        tl_compare cmp );
 
 /**
  * \brief Sort an array of elements using the merge sort algorithm
@@ -124,7 +126,8 @@ void tl_heapsort( void* data, size_t elements, size_t size, tl_compare cmp );
  *
  * \return Non-zero on success, zero if there is not enough memory
  */
-int tl_mergesort( void* data, size_t elements, size_t size, tl_compare cmp );
+TLAPI int tl_mergesort( void* data, size_t elements, size_t size,
+                        tl_compare cmp );
 
 /**
  * \brief Sort an array of elements using an in-place merge sort
@@ -140,8 +143,8 @@ int tl_mergesort( void* data, size_t elements, size_t size, tl_compare cmp );
  * \param size     The size of a single element
  * \param cmp      A function used for comparing two elements
  */
-void tl_mergesort_inplace( void* data, size_t elements,
-                           size_t size, tl_compare cmp );
+TLAPI void tl_mergesort_inplace( void* data, size_t elements,
+                                 size_t size, tl_compare cmp );
 
 #ifdef __cplusplus
 }

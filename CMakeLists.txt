@@ -3,7 +3,7 @@ project( ctools C )
 cmake_minimum_required( VERSION 2.6 )
 
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib" )
-set( CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib" )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 set( PROJECT_BRIEF "A collection of tools and utillities for C programs" )
@@ -13,6 +13,11 @@ set( PROJECT_BRIEF "A collection of tools and utillities for C programs" )
 #----------------------------------------------------------------------
 
 option( ALLIGN "Add padding to container structures and allign data addresses" ON )
+option( SHARED "Build a dynamic instead of a static library" OFF )
+
+if( SHARED )
+  add_definitions( -DTL_SHARED )
+endif( )
 
 if( ALLIGN )
   add_definitions( -DTL_ALLIGN_MEMORY )
@@ -85,19 +90,33 @@ elseif( WIN32 )
   set( CTOOLS_SYSLIBS userenv )
 endif( )
 
-add_library( ctools STATIC src/array.c
-                           src/list.c
-                           src/stack.c
-                           src/queue.c
-                           src/rbtree.c
-                           src/string.c
-                           src/sort.c
-                           src/hashmap.c
-                           src/utf8.c
-                           src/utf16.c
-                           src/allocator.c
-                           src/blob.c
-                           ${CTOOLS_SYSDEP} )
+if( SHARED )
+  set( TYPE SHARED )
+else( )
+  set( TYPE STATIC )
+endif( )
+
+add_library( ctools ${TYPE} src/array.c
+                            src/list.c
+                            src/stack.c
+                            src/queue.c
+                            src/rbtree.c
+                            src/string.c
+                            src/sort.c
+                            src/hashmap.c
+                            src/utf8.c
+                            src/utf16.c
+                            src/allocator.c
+                            src/blob.c
+                            ${CTOOLS_SYSDEP} )
+
+if( SHARED )
+  target_link_libraries( ctools ${CTOOLS_SYSLIBS} )
+
+  if( WIN32 )
+    set_target_properties( ctools PROPERTIES PREFIX "" )
+  endif( )
+endif( )
 
 #----------------------------------------------------------------------
 # Configure tests

@@ -58,7 +58,7 @@ extern "C" {
  *
  * \return A null terminated ASCII string containing the directory seperator
  */
-const char* tl_fs_get_dir_sep( void );
+TLAPI const char* tl_fs_get_dir_sep( void );
 
 /**
  * \brief Determine whether a path actually exists
@@ -67,14 +67,14 @@ const char* tl_fs_get_dir_sep( void );
  *
  * \return Non-zero if the path exists
  */
-int tl_fs_exists( const tl_string* path );
+TLAPI int tl_fs_exists( const tl_string* path );
 
 /**
  * \copydoc tl_fs_exists
  *
  * \param path A C-style UTF8 string of the path to check
  */
-int tl_fs_exists_utf8( const char* path );
+TLAPI int tl_fs_exists_utf8( const char* path );
 
 /**
  * \brief Determine whether a path names a directory or a file
@@ -83,14 +83,14 @@ int tl_fs_exists_utf8( const char* path );
  *
  * \return Non-zero if the path exists and is a directory, zero otherwise
  */
-int tl_fs_is_directory( const tl_string* path );
+TLAPI int tl_fs_is_directory( const tl_string* path );
 
 /**
  * \copydoc tl_fs_is_directory
  *
  * \param path A C-style UTF8 string of the path to check
  */
-int tl_fs_is_directory_utf8( const char* path );
+TLAPI int tl_fs_is_directory_utf8( const char* path );
 
 /**
  * \brief Determine whether a path names a symbolic link
@@ -99,14 +99,14 @@ int tl_fs_is_directory_utf8( const char* path );
  *
  * \return Non-zero if the path exists and is a symbolic link, zero otherwise
  */
-int tl_fs_is_symlink( const tl_string* path );
+TLAPI int tl_fs_is_symlink( const tl_string* path );
 
 /**
  * \copydoc tl_fs_is_symlink
  *
  * \param path A C-style UTF8 string of the path to check
  */
-int tl_fs_is_symlink_utf8( const char* path );
+TLAPI int tl_fs_is_symlink_utf8( const char* path );
 
 /**
  * \brief Create a directory
@@ -122,14 +122,14 @@ int tl_fs_is_symlink_utf8( const char* path );
  *         of the path does not exist, TL_FS_NOT_DIR if an element of the path
  *         is not a directory
  */
-int tl_fs_mkdir( const tl_string* path );
+TLAPI int tl_fs_mkdir( const tl_string* path );
 
 /**
  * \copydoc tl_fs_mkdir
  *
  * \param path A C-style UTF8 string of the path to create
  */
-int tl_fs_mkdir_utf8( const char* path );
+TLAPI int tl_fs_mkdir_utf8( const char* path );
 
 /**
  * \brief Change the calling processes working directory
@@ -141,14 +141,14 @@ int tl_fs_mkdir_utf8( const char* path );
  *         does not exist, TL_FS_NOT_DIR if an element of the path is not a
  *         directory
  */
-int tl_fs_cwd( const tl_string* path );
+TLAPI int tl_fs_cwd( const tl_string* path );
 
 /**
  * \copydoc tl_fs_cwd
  *
  * \param path A C-style UTF8 string of the new working directory
  */
-int tl_fs_cwd_utf8( const char* path );
+TLAPI int tl_fs_cwd_utf8( const char* path );
 
 /**
  * \brief Get the working directory of the calling process
@@ -157,7 +157,7 @@ int tl_fs_cwd_utf8( const char* path );
  *
  * \return Non-zero on success, zero on failure
  */
-int tl_fs_get_wd( tl_string* path );
+TLAPI int tl_fs_get_wd( tl_string* path );
 
 /**
  * \brief Get the user home directory
@@ -173,7 +173,7 @@ int tl_fs_get_wd( tl_string* path );
  *
  * \return Non-zero on success, zero on failure
  */
-int tl_fs_get_user_dir( tl_string* path );
+TLAPI int tl_fs_get_user_dir( tl_string* path );
 
 /**
  * \brief Delete a file, directory or symlink
@@ -188,7 +188,7 @@ int tl_fs_get_user_dir( tl_string* path );
  *         the propper permissions, TL_FS_NOT_EMPTY if trying to delete a non
  *         empty directory.
  */
-int tl_fs_delete( const tl_string* path );
+TLAPI int tl_fs_delete( const tl_string* path );
 
 /**
  * \copydoc tl_fs_delete
@@ -196,7 +196,7 @@ int tl_fs_delete( const tl_string* path );
  * \param path A C-style UTF8 string of a file, directory or symlink path
  *             to delete
  */
-int tl_fs_delete_utf8( const char* path );
+TLAPI int tl_fs_delete_utf8( const char* path );
 
 /**
  * \brief Determine the size of a file in bytes
@@ -205,14 +205,14 @@ int tl_fs_delete_utf8( const char* path );
  *
  * \return The size of the file in bytes
  */
-tl_u64 tl_fs_get_file_size( const tl_string* path );
+TLAPI tl_u64 tl_fs_get_file_size( const tl_string* path );
 
 /**
  * \copydoc tl_fs_get_file_size
  *
  * \param path A C-style UTF8 string of a file path
  */
-tl_u64 tl_fs_get_file_size_utf8( const char* path );
+TLAPI tl_u64 tl_fs_get_file_size_utf8( const char* path );
 
 #ifdef __cplusplus
 }

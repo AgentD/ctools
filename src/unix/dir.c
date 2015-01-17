@@ -22,6 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#define TL_EXPORT
 #include "tl_iterator.h"
 #include "tl_dir.h"
 #include "tl_fs.h"

@@ -50,7 +50,7 @@ extern "C" {
  *
  * \return The numer of characters (code points) in the string
  */
-size_t tl_utf8_charcount( const char* utf8 );
+TLAPI size_t tl_utf8_charcount( const char* utf8 );
 
 /**
  * \brief Count the number of bytes in an UTF-8 string
@@ -62,7 +62,7 @@ size_t tl_utf8_charcount( const char* utf8 );
  *
  * \return The number of bytes read from the string
  */
-size_t tl_utf8_strlen( const char* utf8, size_t chars );
+TLAPI size_t tl_utf8_strlen( const char* utf8, size_t chars );
 
 /**
  * \brief Decode an UTF-8 encoded unicode code point
@@ -75,7 +75,7 @@ size_t tl_utf8_strlen( const char* utf8, size_t chars );
  *
  * \return The decoded unicode code point
  */
-unsigned int tl_utf8_decode( const char* utf8, unsigned int* bytecount );
+TLAPI unsigned int tl_utf8_decode(const char* utf8, unsigned int* bytecount);
 
 /**
  * \brief Get the UTF-8 encoding of a unicode code point
@@ -88,7 +88,7 @@ unsigned int tl_utf8_decode( const char* utf8, unsigned int* bytecount );
  * \return The number of bytes required, not including a possible
  *         null-terminator
  */
-unsigned int tl_utf8_encode( char* utf8, unsigned int cp );
+TLAPI unsigned int tl_utf8_encode( char* utf8, unsigned int cp );
 
 /**
  * \brief Estimate the number of bytes required to encode
@@ -102,8 +102,8 @@ unsigned int tl_utf8_encode( char* utf8, unsigned int cp );
  * \return The number of bytes required, not including a possible
  *         null-terminator
  */
-unsigned int tl_utf8_estimate_utf16_length( const uint16_t* utf16,
-                                            size_t charcount );
+TLAPI unsigned int tl_utf8_estimate_utf16_length( const uint16_t* utf16,
+                                                  size_t charcount );
 
 /**
  * \brief Compute a hash function of a UTF-8 string
@@ -114,7 +114,7 @@ unsigned int tl_utf8_estimate_utf16_length( const uint16_t* utf16,
  *
  * \return A hash value computed using a djb2 implementation
  */
-unsigned long tl_utf8_hash( const char* str );
+TLAPI unsigned long tl_utf8_hash( const char* str );
 
 #ifdef __cplusplus
 }

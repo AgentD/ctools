@@ -64,8 +64,8 @@ extern "C" {
  * \param element_size The size of an element in the queue
  * \param alloc        A pointer to an allocator or NULL if not used
  */
-void tl_queue_init( tl_queue* queue, size_t element_size,
-                    tl_allocator* alloc );
+TLAPI void tl_queue_init( tl_queue* queue, size_t element_size,
+                          tl_allocator* alloc );
 
 /**
  * \brief Free all the memory used by a queue and reset it
@@ -74,7 +74,7 @@ void tl_queue_init( tl_queue* queue, size_t element_size,
  *
  * \param queue A pointer to a queue
  */
-void tl_queue_cleanup( tl_queue* queue );
+TLAPI void tl_queue_cleanup( tl_queue* queue );
 
 /**
  * \brief Insert an element at the front end of a queue
@@ -87,7 +87,7 @@ void tl_queue_cleanup( tl_queue* queue );
  * \return Non-zero on success, zero if one of the pointers is NULL or out of
  *         memory
  */
-int tl_queue_insert_front( tl_queue* queue, const void* element );
+TLAPI int tl_queue_insert_front( tl_queue* queue, const void* element );
 
 /**
  * \brief Insert an element at the back end of a queue
@@ -100,7 +100,7 @@ int tl_queue_insert_front( tl_queue* queue, const void* element );
  * \return Non-zero on success, zero if one of the pointers is NULL or out of
  *         memory
  */
-int tl_queue_insert_back( tl_queue* queue, const void* element );
+TLAPI int tl_queue_insert_back( tl_queue* queue, const void* element );
 
 /**
  * \brief Get a pointer to the element at the front end of a queue
@@ -111,7 +111,7 @@ int tl_queue_insert_back( tl_queue* queue, const void* element );
  *
  * \return A pointer to the data or NULL if the queue is empty
  */
-void* tl_queue_peek_front( const tl_queue* queue );
+TLAPI void* tl_queue_peek_front( const tl_queue* queue );
 
 /**
  * \brief Get a pointer to the element at the back end of a queue
@@ -122,7 +122,7 @@ void* tl_queue_peek_front( const tl_queue* queue );
  *
  * \return A pointer to the data or NULL if the queue is empty
  */
-void* tl_queue_peek_back( const tl_queue* queue );
+TLAPI void* tl_queue_peek_back( const tl_queue* queue );
 
 /**
  * \brief Remove an element at the front end of a queue
@@ -133,7 +133,7 @@ void* tl_queue_peek_back( const tl_queue* queue );
  * \param data  If not NULL, the data is copied to the location pointed to
  *              before removing it of the queue
  */
-void tl_queue_remove_front( tl_queue* queue, void* data );
+TLAPI void tl_queue_remove_front( tl_queue* queue, void* data );
 
 /**
  * \brief Remove an element at the back end of a queue
@@ -144,7 +144,7 @@ void tl_queue_remove_front( tl_queue* queue, void* data );
  * \param data  If not NULL, the data is copied to the location pointed to
  *              before removing it of the queue
  */
-void tl_queue_remove_back( tl_queue* queue, void* data );
+TLAPI void tl_queue_remove_back( tl_queue* queue, void* data );
 
 /**
  * \brief Determine if a queue is empty
@@ -155,7 +155,7 @@ void tl_queue_remove_back( tl_queue* queue, void* data );
  *
  * \return Non-zero if the queue is empty, zero if not
  */
-int tl_queue_is_empty( const tl_queue* queue );
+TLAPI int tl_queue_is_empty( const tl_queue* queue );
 
 /**
  * \brief Get the number of elements currently stored in a queue
@@ -166,7 +166,7 @@ int tl_queue_is_empty( const tl_queue* queue );
  *
  * \return The number of elements currently stored in the given queue
  */
-size_t tl_queue_size( const tl_queue* queue );
+TLAPI size_t tl_queue_size( const tl_queue* queue );
 
 /**
  * \brief Remove all elements of a queue
@@ -175,7 +175,7 @@ size_t tl_queue_size( const tl_queue* queue );
  *
  * \param queue A pointer to a queue
  */
-void tl_queue_flush( tl_queue* queue );
+TLAPI void tl_queue_flush( tl_queue* queue );
 
 #ifdef __cplusplus
 }

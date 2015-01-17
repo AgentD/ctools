@@ -101,9 +101,9 @@ extern "C" {
  * \param blocksize The size of an individual element
  * \param count     The number of elements in the buffer
  */
-void tl_allocator_copy( tl_allocator* alloc,
-                        void* dst, const void* src,
-                        size_t blocksize, size_t count );
+TLAPI void tl_allocator_copy( tl_allocator* alloc,
+                              void* dst, const void* src,
+                              size_t blocksize, size_t count );
 
 /**
  * \brief Initialize a block of memory
@@ -118,8 +118,8 @@ void tl_allocator_copy( tl_allocator* alloc,
  * \param blocksize The size of an individual element
  * \param count     The number of elements in the buffer
  */
-void tl_allocator_init( tl_allocator* alloc, void* block,
-                        size_t blocksize, size_t count );
+TLAPI void tl_allocator_init( tl_allocator* alloc, void* block,
+                              size_t blocksize, size_t count );
 
 /**
  * \brief Perform cleanup operations on a block of memory
@@ -134,8 +134,8 @@ void tl_allocator_init( tl_allocator* alloc, void* block,
  * \param blocksize The size of an individual element
  * \param count     The number of elements in the buffer
  */
-void tl_allocator_cleanup( tl_allocator* alloc, void* block,
-                           size_t blocksize, size_t count );
+TLAPI void tl_allocator_cleanup( tl_allocator* alloc, void* block,
+                                 size_t blocksize, size_t count );
 
 #ifdef __cplusplus
 }

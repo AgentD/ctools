@@ -58,7 +58,7 @@ extern "C" {
  *
  * \return The number of characters (code points) in the string
  */
-size_t tl_utf16_charcount( const tl_u16* str );
+TLAPI size_t tl_utf16_charcount( const tl_u16* str );
 
 /**
  * \brief Count the number of code units in an UTF-16 string
@@ -70,7 +70,7 @@ size_t tl_utf16_charcount( const tl_u16* str );
  *
  * \return The number of code points read from the string
  */
-size_t tl_utf16_strlen( const tl_u16* str, size_t chars );
+TLAPI size_t tl_utf16_strlen( const tl_u16* str, size_t chars );
 
 /**
  * \brief Decode a unicode code point from an UTF-16 representation
@@ -83,7 +83,7 @@ size_t tl_utf16_strlen( const tl_u16* str, size_t chars );
  *
  * \return The decoded unicode code point
  */
-unsigned int tl_utf16_decode( const tl_u16* utf16, unsigned int* count );
+TLAPI unsigned int tl_utf16_decode(const tl_u16* utf16, unsigned int* count);
 
 /**
  * \brief Encode a unicode code point in UTF-16
@@ -96,7 +96,7 @@ unsigned int tl_utf16_decode( const tl_u16* utf16, unsigned int* count );
  *
  * \return The number of code units written to the buffer
  */
-unsigned int tl_utf16_encode( tl_u16* utf16, unsigned int cp );
+TLAPI unsigned int tl_utf16_encode( tl_u16* utf16, unsigned int cp );
 
 /**
  * \brief Estimate the number of bytes required to encode
@@ -110,7 +110,8 @@ unsigned int tl_utf16_encode( tl_u16* utf16, unsigned int cp );
  * \return The number of bytes required, not including a possible
  *         null-terminator
  */
-size_t tl_utf16_estimate_utf8_length( const char* utf8, size_t charcount );
+TLAPI size_t tl_utf16_estimate_utf8_length( const char* utf8,
+                                            size_t charcount );
 
 /**
  * \brief Compare two UTF-16 strings
@@ -127,7 +128,7 @@ size_t tl_utf16_estimate_utf8_length( const char* utf8, size_t charcount );
  *         larger than the second, a negative value if the second is larger
  *         than the first and zero if they are equal.
  */
-int tl_utf16_compare( const tl_u16* a, const tl_u16* b );
+TLAPI int tl_utf16_compare( const tl_u16* a, const tl_u16* b );
 
 /**
  * \brief Compute a hash function of a UTF-16 string
@@ -138,7 +139,7 @@ int tl_utf16_compare( const tl_u16* a, const tl_u16* b );
  *
  * \return A hash value computed using a djb2 implementation
  */
-unsigned long tl_utf16_hash( const tl_u16* str );
+TLAPI unsigned long tl_utf16_hash( const tl_u16* str );
 
 #ifdef __cplusplus
 }

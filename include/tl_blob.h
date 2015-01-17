@@ -105,7 +105,7 @@ extern "C" {
  *
  * \return Non-zero on succes, zero if out of memory or blob is NULL
  */
-int tl_blob_init( tl_blob* blob, size_t size, const void* data );
+TLAPI int tl_blob_init( tl_blob* blob, size_t size, const void* data );
 
 /**
  * \brief Free all memory used by a blob object
@@ -114,7 +114,7 @@ int tl_blob_init( tl_blob* blob, size_t size, const void* data );
  *
  * \param blob A pointer to the blob object
  */
-void tl_blob_cleanup( tl_blob* blob );
+TLAPI void tl_blob_cleanup( tl_blob* blob );
 
 /**
  * \brief Initialize a blob with the contents of an other blob
@@ -126,7 +126,7 @@ void tl_blob_cleanup( tl_blob* blob );
  *
  * \return Non-zero on success, zero if out of memory or dst or src is NULL.
  */
-int tl_blob_copy( tl_blob* dst, const tl_blob* src );
+TLAPI int tl_blob_copy( tl_blob* dst, const tl_blob* src );
 
 /**
  * \brief Initialize a blob with the contents of an other blob
@@ -142,8 +142,8 @@ int tl_blob_copy( tl_blob* dst, const tl_blob* src );
  *
  * \return Non-zero on success, zero if out of memory or dst or src is NULL
  */
-int tl_blob_copy_range( tl_blob* dst, const tl_blob* src,
-                        size_t offset, size_t size );
+TLAPI int tl_blob_copy_range( tl_blob* dst, const tl_blob* src,
+                              size_t offset, size_t size );
 
 /**
  * \brief Append a blob object to an other blob object
@@ -155,7 +155,7 @@ int tl_blob_copy_range( tl_blob* dst, const tl_blob* src,
  *
  * \return Non-zero on success, zero if out of memory or if src or dst is NULL
  */
-int tl_blob_append( tl_blob* dst, const tl_blob* src );
+TLAPI int tl_blob_append( tl_blob* dst, const tl_blob* src );
 
 /**
  * \brief Append a range of a blob object to an other blob object
@@ -172,8 +172,8 @@ int tl_blob_append( tl_blob* dst, const tl_blob* src );
  * \return Non-zero on success, zero if out of memory or if src or
  *         blob is NULL.
  */
-int tl_blob_append_range( tl_blob* blob, const tl_blob* src,
-                          size_t offset, size_t size );
+TLAPI int tl_blob_append_range( tl_blob* blob, const tl_blob* src,
+                                size_t offset, size_t size );
 
 /**
  * \brief Append a raw data block to a blob
@@ -187,7 +187,7 @@ int tl_blob_append_range( tl_blob* blob, const tl_blob* src,
  *
  * \return Non-zero on success, zero if out of memory or blob is NULL.
  */
-int tl_blob_append_raw( tl_blob* blob, const void* src, size_t size );
+TLAPI int tl_blob_append_raw( tl_blob* blob, const void* src, size_t size );
 
 /**
  * \brief Split a blob object
@@ -203,7 +203,7 @@ int tl_blob_append_raw( tl_blob* blob, const void* src, size_t size );
  * \return Non-zero on success, zero if insufficient memory or if dst or src
  *         is NULL.
  */
-int tl_blob_split( tl_blob* dst, tl_blob* src, size_t offset );
+TLAPI int tl_blob_split( tl_blob* dst, tl_blob* src, size_t offset );
 
 /**
  * \brief Cut a rangeof bytes out of a blob
@@ -221,8 +221,8 @@ int tl_blob_split( tl_blob* dst, tl_blob* src, size_t offset );
  * \return Non-zero on success, zero if out of memory or if dst or src
  *         is NULL.
  */
-int tl_blob_cut_range( tl_blob* dst, tl_blob* src,
-                       size_t offset, size_t length );
+TLAPI int tl_blob_cut_range( tl_blob* dst, tl_blob* src,
+                             size_t offset, size_t length );
 
 /**
  * \brief Insert a block of data into a blob at a specific offset
@@ -238,8 +238,8 @@ int tl_blob_cut_range( tl_blob* dst, tl_blob* src,
  *
  * \return Non-zero on success, zero if out of memory or blob is NULL
  */
-int tl_blob_insert_raw( tl_blob* blob, const void* src,
-                        size_t offset, size_t length );
+TLAPI int tl_blob_insert_raw( tl_blob* blob, const void* src,
+                              size_t offset, size_t length );
 
 /**
  * \brief Insert a range of a blob into a blob at a specific offset
@@ -257,8 +257,8 @@ int tl_blob_insert_raw( tl_blob* blob, const void* src,
  *
  * \return Non-zero on success, zero if out of memory or blob is NULL
  */
-int tl_blob_insert( tl_blob* dst, const tl_blob* src,
-                    size_t dstoffset, size_t srcoffset, size_t length );
+TLAPI int tl_blob_insert( tl_blob* dst, const tl_blob* src,
+                          size_t dstoffset, size_t srcoffset, size_t length );
 
 /**
  * \brief Remove a range of elements from a blob
@@ -269,7 +269,7 @@ int tl_blob_insert( tl_blob* dst, const tl_blob* src,
  * \param offset An offset into the source blob
  * \param length The number of bytes to remove, starting at the offset
  */
-void tl_blob_remove( tl_blob* blob, size_t offset, size_t length );
+TLAPI void tl_blob_remove( tl_blob* blob, size_t offset, size_t length );
 
 /**
  * \brief Truncate to blob
@@ -280,7 +280,7 @@ void tl_blob_remove( tl_blob* blob, size_t offset, size_t length );
  * \param offset The offset to truncate the blob to. Everything starting
  *               at this offset is removed.
  */
-void tl_blob_truncate( tl_blob* blob, size_t offset );
+TLAPI void tl_blob_truncate( tl_blob* blob, size_t offset );
 
 /**
  * \brief Try to determine the encoding of the data in a blob
@@ -291,7 +291,7 @@ void tl_blob_truncate( tl_blob* blob, size_t offset );
  *
  * \return A TL_BLOB_ENCODING enumerator value
  */
-int tl_blob_guess_encoding( tl_blob* blob );
+TLAPI int tl_blob_guess_encoding( tl_blob* blob );
 
 /**
  * \brief Encode a blob using base64
@@ -306,7 +306,7 @@ int tl_blob_guess_encoding( tl_blob* blob );
  * \return Non-zero on success, zero if there is not enough memory or
  *         dst or src are NULL
  */
-int tl_blob_encode_base64( tl_blob* dst, const tl_blob* src, int alt );
+TLAPI int tl_blob_encode_base64( tl_blob* dst, const tl_blob* src, int alt );
 
 /**
  * \brief Decode base64 encoded data from a blob
@@ -322,8 +322,8 @@ int tl_blob_encode_base64( tl_blob* dst, const tl_blob* src, int alt );
  * \return Non-zero on success, zero if not enough memory or
  *         if dst or src is NULL
  */
-int tl_blob_decode_base64( tl_blob* dst, const tl_blob* src,
-                           int ignoregarbage );
+TLAPI int tl_blob_decode_base64( tl_blob* dst, const tl_blob* src,
+                                 int ignoregarbage );
 
 /**
  * \brief Byteswap a UTF-32 or UTF-16 blob
@@ -335,7 +335,7 @@ int tl_blob_decode_base64( tl_blob* dst, const tl_blob* src,
  * \param encoding A TL_BLOB_ENCODING enumerator value specifying the current
  *                 encoding.
  */
-void tl_blob_unicode_byteswap( tl_blob* blob, int encoding );
+TLAPI void tl_blob_unicode_byteswap( tl_blob* blob, int encoding );
 
 #ifdef __cplusplus
 }

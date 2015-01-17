@@ -109,9 +109,9 @@ extern "C" {
  *
  * \return A pointer to a new tree node that has to be freed using free( )
  */
-tl_rbtree_node* tl_rbtree_node_create( const tl_rbtree* tree,
-                                       const void* key,
-                                       const void* value );
+TLAPI tl_rbtree_node* tl_rbtree_node_create( const tl_rbtree* tree,
+                                             const void* key,
+                                             const void* value );
 
 /**
  * \brief Get a pointer to the key field of a red-black tree node
@@ -124,12 +124,12 @@ tl_rbtree_node* tl_rbtree_node_create( const tl_rbtree* tree,
  * \return A pointer to the key field, or NULL if one of the given pointers
  *         is NULL
  */
-void* tl_rbtree_node_get_key( const tl_rbtree* tree,
-                              const tl_rbtree_node* node );
+TLAPI void* tl_rbtree_node_get_key( const tl_rbtree* tree,
+                                    const tl_rbtree_node* node );
 
 /**
  * \brief Get a pointer to the value field of a red-black tree node
-*
+ *
  * \memberof tl_rbtree_node
  *
  * \param tree A pointer to a red-black tree to get key and value size from
@@ -138,8 +138,8 @@ void* tl_rbtree_node_get_key( const tl_rbtree* tree,
  * \return A pointer to the value field, or NULL if one of the given pointers
  *         is NULL
  */
-void* tl_rbtree_node_get_value( const tl_rbtree* tree,
-                                const tl_rbtree_node* node );
+TLAPI void* tl_rbtree_node_get_value( const tl_rbtree* tree,
+                                      const tl_rbtree_node* node );
 
 
 
@@ -155,9 +155,9 @@ void* tl_rbtree_node_get_value( const tl_rbtree* tree,
  * \param keyalloc   A pointer to an allocator for keys or NULL if not used
  * \param valalloc   A pointer to an allocator for values or NULL if not used
  */
-void tl_rbtree_init( tl_rbtree* tree, size_t keysize, size_t valuesize,
-                     tl_compare comparefun, tl_allocator* keyalloc,
-                     tl_allocator* valalloc );
+TLAPI void tl_rbtree_init( tl_rbtree* tree, size_t keysize, size_t valuesize,
+                           tl_compare comparefun, tl_allocator* keyalloc,
+                           tl_allocator* valalloc );
 
 /**
  * \brief Free the memory used by a red-black tree and reset it
@@ -166,7 +166,7 @@ void tl_rbtree_init( tl_rbtree* tree, size_t keysize, size_t valuesize,
  *
  * \param tree A pointer to a red-black tree
  */
-void tl_rbtree_cleanup( tl_rbtree* tree );
+TLAPI void tl_rbtree_cleanup( tl_rbtree* tree );
 
 /**
  * \brief Overwrite a red-black tree with a copy of another red-black tree
@@ -182,7 +182,7 @@ void tl_rbtree_cleanup( tl_rbtree* tree );
  * \return Non-zero on success, zero if one of the pointers is NULL or out of
  *         memory
  */
-int tl_rbtree_copy( tl_rbtree* dst, const tl_rbtree* src );
+TLAPI int tl_rbtree_copy( tl_rbtree* dst, const tl_rbtree* src );
 
 /**
  * \brief Insert a key-value pair into a red-black tree
@@ -198,7 +198,8 @@ int tl_rbtree_copy( tl_rbtree* dst, const tl_rbtree* src );
  * \return Non-zero on success, zero on failure (out of memory, invalid
  *         arguments)
  */
-int tl_rbtree_insert( tl_rbtree* tree, const void* key, const void* value );
+TLAPI int tl_rbtree_insert( tl_rbtree* tree, const void* key,
+                            const void* value );
 
 /**
  * \brief Find a value in a red-black tree
@@ -212,7 +213,7 @@ int tl_rbtree_insert( tl_rbtree* tree, const void* key, const void* value );
  *
  * \return A pointer to the value if found, NULL otherwise
  */
-void* tl_rbtree_at( const tl_rbtree* tree, const void* key );
+TLAPI void* tl_rbtree_at( const tl_rbtree* tree, const void* key );
 
 /**
  * \brief Overwrite the value of an existing node in a red-black tree
@@ -228,7 +229,8 @@ void* tl_rbtree_at( const tl_rbtree* tree, const void* key );
  * \return Non-zero on success, zero if one of the keys is NULL or the node
  *         could not be found.
  */
-int tl_rbtree_set( tl_rbtree* tree, const void* key, const void* value );
+TLAPI int tl_rbtree_set( tl_rbtree* tree, const void* key,
+                         const void* value );
 
 /**
  * \brief Get the minimum (i.e. left most) node of a red-black tree
@@ -244,7 +246,8 @@ int tl_rbtree_set( tl_rbtree* tree, const void* key, const void* value );
  *
  * \return Zero if the tree is empty, non-zero otherwise
  */
-int tl_rbtree_get_min( const tl_rbtree* tree, void** key, void** value );
+TLAPI int tl_rbtree_get_min( const tl_rbtree* tree,
+                             void** key, void** value );
 
 /**
  * \brief Get the maximum (i.e. right most) node of a red-black tree
@@ -260,7 +263,8 @@ int tl_rbtree_get_min( const tl_rbtree* tree, void** key, void** value );
  *
  * \return Zero if the tree is empty, non-zero otherwise
  */
-int tl_rbtree_get_max( const tl_rbtree* tree, void** key, void** value );
+TLAPI int tl_rbtree_get_max( const tl_rbtree* tree,
+                             void** key, void** value );
 
 /**
  * \brief Remove the minimum (i.e. left most) node of a red-black tree
@@ -271,7 +275,7 @@ int tl_rbtree_get_max( const tl_rbtree* tree, void** key, void** value );
  *
  * \param tree A pointer to a red-black tree
  */
-void tl_rbtree_remove_min( tl_rbtree* tree );
+TLAPI void tl_rbtree_remove_min( tl_rbtree* tree );
 
 /**
  * \brief Remove the maximum (i.e. right most) node of a red-black tree
@@ -282,7 +286,7 @@ void tl_rbtree_remove_min( tl_rbtree* tree );
  *
  * \param tree A pointer to a red-black tree
  */
-void tl_rbtree_remove_max( tl_rbtree* tree );
+TLAPI void tl_rbtree_remove_max( tl_rbtree* tree );
 
 /**
  * \brief Remove an object from an rb-tree
@@ -299,7 +303,7 @@ void tl_rbtree_remove_max( tl_rbtree* tree );
  *
  * \return Non-zero if the value was removed, zero if it was not found
  */
-int tl_rbtree_remove( tl_rbtree* tree, const void* key, void* value );
+TLAPI int tl_rbtree_remove( tl_rbtree* tree, const void* key, void* value );
 
 /**
  * \brief Returns non-zero if a given rb-tree contains no nodes
@@ -312,7 +316,7 @@ int tl_rbtree_remove( tl_rbtree* tree, const void* key, void* value );
  *
  * \return Non-zero if the tree is empty, zero if it contains nodes
  */
-int tl_rbtree_is_empty( const tl_rbtree* tree );
+TLAPI int tl_rbtree_is_empty( const tl_rbtree* tree );
 
 /**
  * \brief Remove all nodes from a red-black tree
@@ -323,7 +327,7 @@ int tl_rbtree_is_empty( const tl_rbtree* tree );
  *
  * \param tree A pointer to an red-black tree
  */
-void tl_rbtree_clear( tl_rbtree* tree );
+TLAPI void tl_rbtree_clear( tl_rbtree* tree );
 
 #ifdef __cplusplus
 }

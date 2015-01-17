@@ -55,14 +55,14 @@ extern "C" {
  *         the neccessarry permissions, TL_FS_NOT_EXIST if the path does not
  *         exist, TL_FS_NOT_DIR if the path points to a file
  */
-int tl_dir_scan( const tl_string* path, tl_array* list );
+TLAPI int tl_dir_scan( const tl_string* path, tl_array* list );
 
 /**
  * \copydoc tl_dir_scan
  *
  * \param path A c-style utf8 string path of the directory to scan
  */
-int tl_dir_scan_utf8( const char* path, tl_array* list );
+TLAPI int tl_dir_scan_utf8( const char* path, tl_array* list );
 
 /**
  * \brief Iterate over the contents of a directory
@@ -74,14 +74,14 @@ int tl_dir_scan_utf8( const char* path, tl_array* list );
  *
  * \return A pointer to an iterator object on success, NULL on failure
  */
-tl_iterator* tl_dir_iterate( const tl_string* path );
+TLAPI tl_iterator* tl_dir_iterate( const tl_string* path );
 
 /**
  * \copydoc tl_iterate_directory
  *
  * \param path A C-style UTF8 string of a directory path to read from
  */
-tl_iterator* tl_dir_iterate_utf8( const char* path );
+TLAPI tl_iterator* tl_dir_iterate_utf8( const char* path );
 
 #ifdef __cplusplus
 }

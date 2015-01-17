@@ -45,6 +45,18 @@
     typedef uint64_t tl_u64;
 #endif
 
+#if defined(_WIN32) && defined(TL_SHARED)
+    #ifdef TL_EXPORT
+        #define TLAPI __declspec(dllexport)
+    #else
+        #define TLAPI __declspec(dllimport)
+    #endif
+#endif
+
+#ifndef TLAPI
+    #define TLAPI
+#endif
+
 
 
 typedef struct tl_array tl_array;

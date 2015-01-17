@@ -82,7 +82,8 @@ extern "C" {
  * \param elementsize The size of a single element
  * \param alloc       A pointer to an allocator or NULL if not used
  */
-void tl_array_init( tl_array* vec, size_t elementsize, tl_allocator* alloc );
+TLAPI void tl_array_init( tl_array* vec, size_t elementsize,
+                          tl_allocator* alloc );
 
 /**
  * \brief Free the memory used by a array and reset its fields
@@ -91,7 +92,7 @@ void tl_array_init( tl_array* vec, size_t elementsize, tl_allocator* alloc );
  *
  * \param vec A pointer to a dynamic array
  */
-void tl_array_cleanup( tl_array* vec );
+TLAPI void tl_array_cleanup( tl_array* vec );
 
 /**
  * \brief Generate a dynamic array from an existing array
@@ -107,7 +108,7 @@ void tl_array_cleanup( tl_array* vec );
  * \return Non-zero on success, zero on failure (out of memory or
  *         invalid arguments)
  */
-int tl_array_from_array( tl_array* vec, const void* data, size_t count );
+TLAPI int tl_array_from_array(tl_array* vec, const void* data, size_t count);
 
 /**
  * \brief Copy the contents of an array to an array
@@ -120,7 +121,7 @@ int tl_array_from_array( tl_array* vec, const void* data, size_t count );
  * \param data A pointer to an array, large enough to hold at
  *             least as many elements as the array contains.
  */
-void tl_array_to_array( const tl_array* vec, void* data );
+TLAPI void tl_array_to_array( const tl_array* vec, void* data );
 
 /**
  * \brief Copy the data of a source array to a destination array
@@ -134,7 +135,7 @@ void tl_array_to_array( const tl_array* vec, void* data );
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-int tl_array_copy( tl_array* dst, const tl_array* src );
+TLAPI int tl_array_copy( tl_array* dst, const tl_array* src );
 
 /**
  * \brief Copy a sub range of an array to a destination array
@@ -151,8 +152,8 @@ int tl_array_copy( tl_array* dst, const tl_array* src );
  * \return Non-zero on success, zero on failure (out of memory or index out
  *         of bounds)
  */
-int tl_array_copy_range( tl_array* dst, const tl_array* src,
-                         size_t start, size_t count );
+TLAPI int tl_array_copy_range( tl_array* dst, const tl_array* src,
+                               size_t start, size_t count );
 
 /**
  * \brief Append an array to another array
@@ -166,7 +167,7 @@ int tl_array_copy_range( tl_array* dst, const tl_array* src,
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-int tl_array_concat( tl_array* dst, const tl_array* src );
+TLAPI int tl_array_concat( tl_array* dst, const tl_array* src );
 
 /**
  * \brief Make sure the size of an array matches a given size
@@ -186,7 +187,7 @@ int tl_array_concat( tl_array* dst, const tl_array* src );
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-int tl_array_resize( tl_array* vec, size_t size, int initialize );
+TLAPI int tl_array_resize( tl_array* vec, size_t size, int initialize );
 
 /**
  * \brief Make sure an array has at least a certain capacity
@@ -204,7 +205,7 @@ int tl_array_resize( tl_array* vec, size_t size, int initialize );
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-int tl_array_reserve( tl_array* vec, size_t size );
+TLAPI int tl_array_reserve( tl_array* vec, size_t size );
 
 /**
  * \brief Remove elements from an array
@@ -217,7 +218,7 @@ int tl_array_reserve( tl_array* vec, size_t size );
  * \param index The index of the first element to remove
  * \param count The number of elements to remove
  */
-void tl_array_remove( tl_array* vec, size_t index, size_t count );
+TLAPI void tl_array_remove( tl_array* vec, size_t index, size_t count );
 
 /**
  * \brief Check if an array is empty
@@ -230,7 +231,7 @@ void tl_array_remove( tl_array* vec, size_t index, size_t count );
  *
  * \return Zero if the array contains elements, zero if it is empty
  */
-int tl_array_is_empty( const tl_array* vec );
+TLAPI int tl_array_is_empty( const tl_array* vec );
 
 /**
  * \brief Get a pointer to an element in a array
@@ -244,7 +245,7 @@ int tl_array_is_empty( const tl_array* vec );
  *
  * \return A pointer to an element, or NULL if index out of bounds
  */
-void* tl_array_at( const tl_array* vec, size_t index );
+TLAPI void* tl_array_at( const tl_array* vec, size_t index );
 
 /**
  * \brief Overwrite an element in an array
@@ -260,7 +261,7 @@ void* tl_array_at( const tl_array* vec, size_t index );
  * \return Non-zero on success, zero on failure (out memory or index out
  *         of bounds)
  */
-int tl_array_set( tl_array* vec, size_t index, const void* element );
+TLAPI int tl_array_set( tl_array* vec, size_t index, const void* element );
 
 /**
  * \brief Append an element to an array
@@ -274,7 +275,7 @@ int tl_array_set( tl_array* vec, size_t index, const void* element );
  *
  * \return Non-zero on success, zero on failure (read: out memory)
  */
-int tl_array_append( tl_array* vec, const void* element );
+TLAPI int tl_array_append( tl_array* vec, const void* element );
 
 /**
  * \brief Insert an element at the beginning of an array
@@ -288,7 +289,7 @@ int tl_array_append( tl_array* vec, const void* element );
  *
  * \return Non-zero on success, zero on failure (read: out memory)
  */
-int tl_array_prepend( tl_array* vec, const void* element );
+TLAPI int tl_array_prepend( tl_array* vec, const void* element );
 
 /**
  * \brief Insert elements into an array
@@ -305,8 +306,8 @@ int tl_array_prepend( tl_array* vec, const void* element );
  * \return Non-zero on success, zero on failure (out memory or index
  *         out of bounds)
  */
-int tl_array_insert( tl_array* vec, size_t index,
-                     const void* element, size_t count );
+TLAPI int tl_array_insert( tl_array* vec, size_t index,
+                           const void* element, size_t count );
 
 /**
  * \brief Append an array of elements to an array
@@ -322,7 +323,8 @@ int tl_array_insert( tl_array* vec, size_t index,
  * \return Non-zero on succes, zero if out of memory or either of the input
  *         pointers was NULL
  */
-int tl_array_append_array( tl_array* vec, const void* data, size_t count );
+TLAPI int tl_array_append_array( tl_array* vec, const void* data,
+                                 size_t count );
 
 /**
  * \brief Insert an element into a sorted array at the right position
@@ -337,8 +339,8 @@ int tl_array_append_array( tl_array* vec, const void* data, size_t count );
  *
  * \return Non-zero on success, zero on failure (out of memory)
  */
-int tl_array_insert_sorted( tl_array* vec, tl_compare cmp,
-                            const void* element );
+TLAPI int tl_array_insert_sorted( tl_array* vec, tl_compare cmp,
+                                  const void* element );
 
 /**
  * \brief Remove the first element of an array
@@ -349,7 +351,7 @@ int tl_array_insert_sorted( tl_array* vec, tl_compare cmp,
  *
  * \param vec A pointer to an array
  */
-void tl_array_remove_first( tl_array* vec );
+TLAPI void tl_array_remove_first( tl_array* vec );
 
 /**
  * \brief Remove the last element of a array
@@ -360,7 +362,7 @@ void tl_array_remove_first( tl_array* vec );
  *
  * \param vec A pointer to an array
  */
-void tl_array_remove_last( tl_array* vec );
+TLAPI void tl_array_remove_last( tl_array* vec );
 
 /**
  * \brief Remove all elements of an array
@@ -371,7 +373,7 @@ void tl_array_remove_last( tl_array* vec );
  *
  * \param vec A pointer to an array
  */
-void tl_array_clear( tl_array* vec );
+TLAPI void tl_array_clear( tl_array* vec );
 
 /**
  * \brief Sort a dynamic array in ascending order
@@ -386,7 +388,7 @@ void tl_array_clear( tl_array* vec );
  * \param arr A pointer to an array
  * \param cmp A function used to compare two elements, determining the order
  */
-void tl_array_sort( tl_array* arr, tl_compare cmp );
+TLAPI void tl_array_sort( tl_array* arr, tl_compare cmp );
 
 /**
  * \brief Sort a dynamic array in ascending order in a stable manner
@@ -402,7 +404,7 @@ void tl_array_sort( tl_array* arr, tl_compare cmp );
  * \param arr A pointer to an array
  * \param cmp A function used to compare two elements, determining the order
  */
-void tl_array_stable_sort( tl_array* arr, tl_compare cmp );
+TLAPI void tl_array_stable_sort( tl_array* arr, tl_compare cmp );
 
 /**
  * \brief Search an element in a sorted array
@@ -418,7 +420,8 @@ void tl_array_stable_sort( tl_array* arr, tl_compare cmp );
  *
  * \return A pointer to the element if found, NULL otherwise
  */
-void* tl_array_search( const tl_array* arr, tl_compare cmp, const void* key );
+TLAPI void* tl_array_search( const tl_array* arr, tl_compare cmp,
+                             const void* key );
 
 /**
  * \brief Search an element in an unsorted array
@@ -433,8 +436,8 @@ void* tl_array_search( const tl_array* arr, tl_compare cmp, const void* key );
  *
  * \return A pointer to the element if found, NULL otherwise
  */
-void* tl_array_search_unsorted( const tl_array* arr, tl_compare cmp,
-                                const void* key );
+TLAPI void* tl_array_search_unsorted( const tl_array* arr, tl_compare cmp,
+                                      const void* key );
 
 /**
  * \brief Shrink the reserved elements to one half if an array is
@@ -446,7 +449,7 @@ void* tl_array_search_unsorted( const tl_array* arr, tl_compare cmp,
  *
  * \param arr A pointer to a dynamic array
  */
-void tl_array_try_shrink( tl_array* arr );
+TLAPI void tl_array_try_shrink( tl_array* arr );
 
 /**
  * \brief Get an iterator to the first element
@@ -460,7 +463,7 @@ void tl_array_try_shrink( tl_array* arr );
  *
  * \return A pointer to an iterator or NULL on failure
  */
-tl_iterator* tl_array_first( tl_array* arr );
+TLAPI tl_iterator* tl_array_first( tl_array* arr );
 
 /**
  * \brief Get an iterator to the last element that moves backwards throug
@@ -474,7 +477,7 @@ tl_iterator* tl_array_first( tl_array* arr );
  *
  * \return A pointer to an iterator or NULL on failure
  */
-tl_iterator* tl_array_last( tl_array* arr );
+TLAPI tl_iterator* tl_array_last( tl_array* arr );
 
 #ifdef __cplusplus
 }
