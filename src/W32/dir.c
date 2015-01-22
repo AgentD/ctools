@@ -24,6 +24,7 @@
  */
 #define TL_EXPORT
 #include "tl_iterator.h"
+#include "tl_array.h"
 #include "tl_dir.h"
 #include "tl_fs.h"
 #include "os.h"
@@ -49,7 +50,7 @@ static void dir_iterator_reset( tl_iterator* super )
     WCHAR* str;
 
     FindClose( this->hnd );
-    this->hnd = FindFirstFileW( this->path.vec.data, &this->ent );
+    this->hnd = FindFirstFileW( this->path.blob.data, &this->ent );
 
     tl_string_clear( &this->current );
 
@@ -157,7 +158,7 @@ int tl_dir_scan( const tl_string* path, tl_array* list )
 
     tl_string_append_utf8( &str, "\\*" );
 
-    if( (hnd=FindFirstFileW(str.vec.data,&ent)) != INVALID_HANDLE_VALUE )
+    if( (hnd=FindFirstFileW(str.blob.data,&ent)) != INVALID_HANDLE_VALUE )
     {
         do
         {
@@ -229,7 +230,7 @@ tl_iterator* tl_dir_iterate( const tl_string* path )
     tl_string_append_utf8( &this->path, "\\*" );
 
     /* open */
-    this->hnd = FindFirstFileW( this->path.vec.data, &this->ent );
+    this->hnd = FindFirstFileW( this->path.blob.data, &this->ent );
 
     if( this->hnd == INVALID_HANDLE_VALUE )
     {

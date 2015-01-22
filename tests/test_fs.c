@@ -28,7 +28,7 @@ int main( void )
     tl_string_cleanup( &str );
     printf( "User home directory: '%s'\n", buffer );
 
-    tl_string_clear( &str );
+    tl_string_init( &str );
     tl_fs_get_wd( &str );
     tl_string_to_utf8( &str, buffer, sizeof(buffer) );
     printf( "Current working directory: '%s'\n", buffer );

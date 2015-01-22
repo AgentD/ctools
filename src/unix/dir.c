@@ -24,6 +24,7 @@
  */
 #define TL_EXPORT
 #include "tl_iterator.h"
+#include "tl_array.h"
 #include "tl_dir.h"
 #include "tl_fs.h"
 #include "os.h"

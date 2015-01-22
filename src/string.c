@@ -53,13 +53,12 @@ static int stralloc_copy( tl_allocator* alc, void* dst, const void* src )
     (void)alc;
 
     memcpy( dst, src, sizeof(tl_string) );
-    d->vec.data = malloc( d->vec.used * d->vec.unitsize );
+    d->blob.data = malloc( d->blob.size );
 
-    if( !d->vec.data )
+    if( !d->blob.data )
         return 0;
 
-    d->vec.reserved = d->vec.used;
-    memcpy( d->vec.data, s->vec.data, d->vec.used * d->vec.unitsize );
+    memcpy( d->blob.data, s->blob.data, d->blob.size );
     return 1;
 }
 
@@ -88,24 +87,20 @@ int tl_string_init( tl_string* this )
 {
     tl_u16 null = 0;
 
-    if( this )
+    if( this && tl_blob_init( &(this->blob), 2, &null ) )
     {
-        tl_array_init( &(this->vec), sizeof(tl_u16), NULL );
         this->charcount = 0;
         this->surrogates = 0;
-
-        if( tl_array_append( &(this->vec), &null ) )
-            return 1;
     }
 
-    return 0;
+    return 1;
 }
 
 void tl_string_cleanup( tl_string* this )
 {
     if( this )
     {
-        tl_array_cleanup( &(this->vec) );
+        tl_blob_cleanup( &(this->blob) );
 
         this->charcount = 0;
         this->surrogates = 0;
@@ -114,11 +109,19 @@ void tl_string_cleanup( tl_string* this )
 
 int tl_string_copy( tl_string* this, const tl_string* src )
 {
-    if( !tl_array_copy( &this->vec, &src->vec ) )
-        return 0;
+    tl_blob dst;
 
-    this->charcount  = src->charcount;
-    this->surrogates = src->surrogates;
+    if( this )
+    {
+        if( !tl_blob_copy( &dst, &src->blob ) )
+            return 0;
+
+        tl_blob_cleanup( &(this->blob) );
+
+        this->blob       = dst;
+        this->charcount  = src->charcount;
+        this->surrogates = src->surrogates;
+    }
     return 1;
 }
 
@@ -129,15 +132,15 @@ size_t tl_string_characters( const tl_string* this )
 
 size_t tl_string_length( const tl_string* this )
 {
-    return this ? (this->vec.used - 1) : 0;
+    return this ? (this->blob.size - 2)/2 : 0;
 }
 
 void tl_string_clear( tl_string* this )
 {
     if( this )
     {
-        tl_array_resize( &(this->vec), 1, 0 );
-        *((tl_u16*)this->vec.data) = 0;
+        tl_blob_truncate( &(this->blob), 2 );
+        *((tl_u16*)this->blob.data) = 0;
 
         this->charcount = 0;
         this->surrogates = 0;
@@ -158,10 +161,10 @@ unsigned int tl_string_at( const tl_string* this, size_t index )
     {
         /* direct mapping of character index to array index */
         if( index < this->surrogates )
-            return ((const tl_u16*)this->vec.data)[ index ];
+            return ((const tl_u16*)this->blob.data)[ index ];
 
         /* linearly search to target character index */
-        ptr = ((const tl_u16*)this->vec.data) + this->surrogates;
+        ptr = ((const tl_u16*)this->blob.data) + this->surrogates;
         i = this->surrogates;
 
         while( i<index )
@@ -182,7 +185,7 @@ unsigned int tl_string_at( const tl_string* this, size_t index )
 
 tl_u16* tl_string_cstr( tl_string* this )
 {
-    return this ? this->vec.data : NULL;
+    return this ? this->blob.data : NULL;
 }
 
 int tl_string_append_code_point( tl_string* this, unsigned int cp )
@@ -199,7 +202,7 @@ int tl_string_append_code_point( tl_string* this, unsigned int cp )
     {
         val[0] = cp;
 
-        if( !tl_array_insert( &(this->vec), this->vec.used - 1, val, 1 ) )
+        if( !tl_blob_insert_raw( &(this->blob), val, this->blob.size-2, 2 ) )
             return 0;
 
         /* no surrogates yet? */
@@ -211,7 +214,7 @@ int tl_string_append_code_point( tl_string* this, unsigned int cp )
         val[0] = LEAD_OFFSET + (cp >> 10);
         val[1] = 0xDC00 + (cp & 0x3FF);
 
-        if( !tl_array_insert( &(this->vec), this->vec.used - 1, val, 2 ) )
+        if( !tl_blob_insert_raw( &(this->blob), val, this->blob.size-2, 4 ) )
             return 0;
     }
 
@@ -258,12 +261,12 @@ int tl_string_append_utf8_count( tl_string* this, const char* utf8,
         return 1;
 
     /* resize array */
-    i = this->vec.used - 1;
+    i = this->blob.size/2 - 1;
 
-    if( !tl_array_resize( &this->vec, this->vec.used + u8len, 0 ) )
+    if( !tl_blob_append_raw( &this->blob, NULL, u8len*2 ) )
         return 0;
 
-    dst = (tl_u16*)this->vec.data + i;
+    dst = (tl_u16*)this->blob.data + i;
 
     for( j=0; j<count; ++j, ++this->charcount )
     {
@@ -304,12 +307,12 @@ int tl_string_append_latin1_count( tl_string* this, const char* latin1,
     if( !this ) return 0;
     if( !str  ) return 1;
 
-    i = this->vec.used - 1;
+    i = this->blob.size/2 - 1;
 
-    if( !tl_array_resize( &this->vec, this->vec.used + count, 0 ) )
+    if( !tl_blob_append_raw( &this->blob, NULL, count*2 ) )
         return 0;
 
-    dst = (tl_u16*)this->vec.data + i;
+    dst = (tl_u16*)this->blob.data + i;
 
     for( i=0; i<count; ++i )
         *(dst++) = *(str++);
@@ -337,12 +340,12 @@ int tl_string_append_utf16_count( tl_string* this, const tl_u16* str,
     if( !total )
         return 1;
 
-    i = this->vec.used - 1;
+    i = this->blob.size/2 - 1;
 
-    if( !tl_array_resize( &this->vec, this->vec.used + total, 0 ) )
+    if( !tl_blob_append_raw( &this->blob, NULL, total*2 ) )
         return 0;
 
-    dst = (tl_u16*)this->vec.data + i;
+    dst = (tl_u16*)this->blob.data + i;
 
     for( i=0; i<count; ++i )
     {
@@ -447,7 +450,7 @@ size_t tl_string_utf8_len( const tl_string* this )
     if( !this || !this->charcount )
         return 0;
 
-    return tl_utf8_estimate_utf16_length( this->vec.data, this->charcount );
+    return tl_utf8_estimate_utf16_length( this->blob.data, this->charcount );
 }
 
 size_t tl_string_to_utf8( const tl_string* this, char* buffer, size_t size )
@@ -466,7 +469,7 @@ size_t tl_string_to_utf8( const tl_string* this, char* buffer, size_t size )
         return 0;
     }
 
-    for( in=this->vec.data, i=0; i<this->charcount; ++i, size-=len )
+    for( in=this->blob.data, i=0; i<this->charcount; ++i, size-=len )
     {
         /* decode input */
         if( IS_SURROGATE(*in) )
@@ -501,7 +504,7 @@ unsigned int tl_string_last( const tl_string* this )
 
     if( this && this->charcount )
     {
-        ptr = (tl_u16*)this->vec.data + this->vec.used - 2;
+        ptr = (tl_u16*)this->blob.data + this->blob.size/2 - 2;
         cp = *ptr;
         return IS_SURROGATE(cp) ? (cp+(ptr[-1]<<10)+SURROGATE_OFFSET) : cp;
     }
@@ -515,13 +518,12 @@ void tl_string_drop_last( tl_string* this )
 
     if( this && this->charcount )
     {
-        cp = ((tl_u16*)this->vec.data)[this->vec.used - 2];
+        cp = ((tl_u16*)this->blob.data)[this->blob.size/2 - 2];
 
-        tl_array_resize( &this->vec,
-                         this->vec.used - (IS_SURROGATE(cp) ? 2 : 1),
-                         0 );
+        tl_blob_truncate( &this->blob,
+                          this->blob.size - (IS_SURROGATE(cp) ? 4 : 2) );
 
-        ((tl_u16*)this->vec.data)[ this->vec.used - 1 ] = '\0';
+        ((tl_u16*)this->blob.data)[ this->blob.size/2 - 1 ] = '\0';
 
         --this->charcount;
 
@@ -556,13 +558,13 @@ int tl_string_compare( const tl_string* this, const tl_string* other )
         return -1;
     }
 
-    return tl_utf16_compare( (const tl_u16*)this->vec.data,
-                             (const tl_u16*)other->vec.data );
+    return tl_utf16_compare( (const tl_u16*)this->blob.data,
+                             (const tl_u16*)other->blob.data );
 }
 
 unsigned long tl_string_hash( const tl_string* this )
 {
-    return tl_utf16_hash( this ? (const tl_u16*)this->vec.data : NULL );
+    return tl_utf16_hash( this ? (const tl_u16*)this->blob.data : NULL );
 }
 
 tl_allocator* tl_string_get_allocator( void )

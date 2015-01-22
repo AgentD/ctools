@@ -33,7 +33,7 @@
 
 
 
-#include "tl_array.h"
+#include "tl_blob.h"
 #include "tl_predef.h"
 
 
@@ -46,7 +46,7 @@
 struct tl_string
 {
     /** \brief Contains the data of a null-terimated UTF-16 string */
-    tl_array vec;
+    tl_blob blob;
 
     /**
      * \brief The number of characters stored in a string
