@@ -31,6 +31,77 @@
 #ifndef TL_ALLOCATOR_H
 #define TL_ALLOCATOR_H
 
+/**
+ * \page interfaces Interfaces
+ *
+ * \section tl_allocator Allocator interface
+ *
+ * The tl_allocator interface allows implementing custom initialization,
+ * cleanup and copy behaviour for various containers. The containers allocate
+ * and free memory using malloc/realloc and free, but use the allocator
+ * implementation to perform in place initialization, cleanup and copy of the
+ * objects. The allocator can then implement, for instance deep copy
+ * mechanisms.
+ *
+ * Here is an example of what an simple alloctor implementation for C-strings,
+ * used for storing strings in a tl_array, might look like:
+ * \code{.c}
+ * int copy_inplace( tl_allocator* alc, void* dst, const void* src )
+ * {
+ *     *((char**)dst) = strdup( *((char**)src) );
+ *     return *((char**)dst) != NULL;
+ * }
+ *
+ * int init( tl_allocator* alc, void* ptr )
+ * {
+ *     *((char**)ptr) = strdup( "" );
+ *     return *((char**)ptr) != NULL;
+ * }
+ *
+ * void cleanup( tl_allocator* alc, void* ptr )
+ * {
+ *     free( *((char**)ptr) );
+ * }
+ *
+ * ....
+ *
+ * tl_allocator aloc;
+ *
+ * aloc.copy_inplace = copy_inplace;
+ * aloc.init = init;
+ * aloc.cleanup = cleanup;
+ * ....
+ * tl_array array;
+ *
+ * tl_array_init( &array, sizeof(char*), &aloc );
+ *
+ * tl_array_append( &array, "Hello World" );
+ *
+ * tl_array_cleanup( &array );
+ * \endcode
+ * In this example, the tl_array holds an array of char pointers. When
+ * the array needs to initialize a newly allocated object, but knows that is
+ * not going to copy anything over the object, it calls the allocater init
+ * function that sets the pointer to point to a new, empty string.
+ *
+ * When the array frees a memory region, it calls the cleanup function of the
+ * allocator that then frees the coresponding string data.
+ *
+ * The copy_inplace function is called when creating a copy of an input
+ * element to an uninitialized block of memory, which, in this case copies the
+ * string pointer to by the input element and writes the new pointer to the
+ * output element.
+ *
+ * When the string literal "Hello World" is added to the array, the allocator
+ * actually creates a mutable copy that the pointer in the array points to.
+ *
+ * The wrapper functions \ref tl_allocator_copy, \ref tl_allocator_init and
+ * \ref tl_allocator_cleanup can be used as an alternative to calling the
+ * allocator methods directly. Those functions provide a default
+ * implementations using memcpy and memset if the pointer to the allocator
+ * is NULL.
+ */
+
 
 
 #include "tl_predef.h"

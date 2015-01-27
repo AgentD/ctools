@@ -31,6 +31,21 @@
 #ifndef TOOLS_STRING_H
 #define TOOLS_STRING_H
 
+/**
+ * \page stringproc String processing functions
+ *
+ * \section tl_string The tl_string structure
+ *
+ * The tl_string structure can be used for storing and processing UTF-16
+ * strings. The data structure internally uses a tl_blob to store the string
+ * data, so while there are functions to append data from various encodings,
+ * it is very inefficient as the string has to be resized every time
+ *
+ * A data structure for efficiently building strings is under construction.
+ * The intended copy-on-write behaviour of strings is also still under
+ * construction.
+ */
+
 
 
 #include "tl_blob.h"

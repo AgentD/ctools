@@ -31,6 +31,42 @@
 #ifndef TL_UTF16_H
 #define TL_UTF16_H
 
+/**
+ * \page stringproc String processing functions
+ *
+ * \section UTF-16 UTF-16 helper functions
+ *
+ * UTF-16 is an encoding scheme that can store arbitrary unicode codepoints in
+ * a string of 16-bit characters. UTF-16 can encode all codepoints of the
+ * basic multilingual plane, however unicode has later been extended, and thus
+ * has been UTF-16, introducing surrogate pairs that allow encoding higher
+ * code points in a tuple of UTF-16 characters.
+ *
+ * UTF-16 has advantages over UTF-8 if it is known that a text will contain
+ * lots of non-ASCII characters (e.g. languages that don't use roman letters),
+ * because in those cases UTF-8 will have varying length characters, needing
+ * linear time lookup while UTF-16 will still provide constant size
+ * characters, allowing constant time lookup of characters by index.
+ *
+ * Since the number of code units in a string can be more than the number of
+ * codepoints in a string, the following two functions are provided:
+ * \li \ref tl_utf16_charcount Count the number of codepoints in a string
+ * \li \ref tl_utf16_strlen Iterate over a number of codepoints and count how
+ *     many code units they use.
+ *
+ * Codepoints can be extracted or stored in a UTF-16 string using
+ * \ref tl_utf16_decode and \ref tl_utf16_encode.
+ *
+ * The function \ref tl_utf16_estimate_utf8_length is provided to determine
+ * the number of bytes required to store a UTF-16 string in UTF-8 encoding.
+ *
+ * A hash function for arbitrary UTF-16 strings is provided by
+ * \ref tl_utf16_hash.
+ *
+ * A strcmp like function for comparing UTF-16 strings is provided by
+ * \ref tl_utf16_compare.
+ */
+
 
 
 #include "tl_predef.h"

@@ -31,6 +31,36 @@
 #ifndef TOOLS_FILESYSTEM_H
 #define TOOLS_FILESYSTEM_H
 
+/**
+ * \page filesystem Filesystem
+ *
+ * \section fs Filesystem access functions
+ *
+ * There are a number of functions abstracting access to the operating systems
+ * filesystem hirarchy beyond what the C standard library provides.
+ *
+ * Functions that take an input string, representing a file or directory exist
+ * in two verstion, one taking a pointer to a tl_string and one taking a
+ * pointer to a null-terminated C-string using UTF-8 encoding. The later has
+ * the same name as the former, but with the suffix _utf8 added.
+ *
+ * The functions that obtain a string from the operating system only exist in
+ * a verstion that accepts a pointer to a tl_string to manipulate.
+ *
+ * Here is a brief list of the functions available:
+ * \li \ref tl_fs_get_wd get the current working directory
+ * \li \ref tl_fs_get_user_dir get the users home directory
+ * \li \ref tl_fs_get_dir_sep get the character sequence used to seperate
+ *                            directory names
+ * \li \ref tl_fs_exists Check if a file or directory exists
+ * \li \ref tl_fs_is_directory Check if a path points to a file or a directory
+ * \li \ref tl_fs_is_symlink Check if a path points to a symlink
+ * \li \ref tl_fs_get_file_size Query the size of a file in bytes
+ * \li \ref tl_fs_mkdir Create a new directory
+ * \li \ref tl_fs_cwd Change the current working directory
+ * \li \ref tl_fs_delete Delete a file or directory
+ */
+
 
 
 #include "tl_predef.h"

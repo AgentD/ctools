@@ -31,6 +31,34 @@
 #ifndef TOOLS_LIST_H
 #define TOOLS_LIST_H
 
+/**
+ * \page containers Containers
+ *
+ * \section tl_list Double ended linked list
+ *
+ * The tl_list data structure implements a double ended, linked list.
+ *
+ * Elements can be appended or prepended to a list or inserted at an arbitrary
+ * location.
+ *
+ * Appending or prepending an element is done in constant time. Removing or
+ * accessing from the beginning or the end is also done in constant time.
+ * Accessing, removing or inserting an element at a specific index other than
+ * the beginning is done in linear time, but takes a maximum of
+ * \f$\sim\frac{N}{2}\f$ steps as the container can start iterating elements
+ * from the end that the index is closest to.
+ *
+ * The tl_list allows using a tl_allocator implementation for handling
+ * objects with custom allocation, copy and deallocation mechanics.
+ *
+ * To sumarize:
+ * \li Random access is done in linear time
+ * \li Random insertion or deletion is done in linear time
+ * \li Accessing or removing the first or last element is done in
+ *     constant time
+ * \li Appending or prepending is done in constant time
+ */
+
 
 
 #include "tl_predef.h"

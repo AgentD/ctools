@@ -31,6 +31,58 @@
 #ifndef TOOLS_SORT_H
 #define TOOLS_SORT_H
 
+/**
+ * \page sorting Sorting Algorithms
+ *
+ * A number of sorting algorithm implementations are provided. Some are suited
+ * better for some tasks than others, depending on the particular needs.
+ *
+ * When chosing a sorting algorithm for a task, consider the
+ * following questions:
+ * \li Do elements that are equal have to be in the same order after sorting?
+ *     Or in other words, does the sorting algorithm have to be stable?
+ * \li How much memory overhead can I afford?
+ * \li Do I need to an absolute guarantee on the run time of the algorithm?
+ * \li Is the input small enought that I can afford quadratic run time?
+ *
+ * Depending on the answers to those questions, a sorting algorithm can be
+ * chosen. The following algorithms are implemented:
+ * \li \ref tl_insertionsort implements insertion sort, a stable sorting
+ *     algorithm with no memory overhead that runs in \f$\mathcal{O}(N^2)\f$
+ *     time. A good choice for small input sizes. Used as a fallback by the
+ *     quicksort implementation.
+ * \li \ref tl_quicksort implements the quicksort algorithm, a very fast,
+ *     non stable sorting algorithm that runs in \f$\mathcal{O}(N\log{N})\f$
+ *     time, but can under some circumstances degenerate to
+ *     \f$\mathcal{O}(N^2)\f$. The algorithm is recursive and needs aditional
+ *     memory for the calling stack in the order of
+ *     \f$\mathcal{O}(\log{N})\f$.
+ * \li \ref tl_heapsort implements the heap sort algorihtm, a non stable
+ *     sorting algorithm that is guaranteed to always run in
+ *     \f$\mathcal{O}(N\log{N})\f$ with no memory overhead, but at average
+ *     a little slower than quicksort.
+ * \li \ref tl_mergesort implements the mergesort algorithm, a stable sorting
+ *     algorithm that is guaranteed to always run in
+ *     \f$\mathcal{O}(N\log{N})\f$ time but needs \f$\mathcal{O}(N)\f$
+ *     aditional memory.
+ * \li \ref tl_mergesort_inplace implements an in-place variant of mergesort.
+ *     It is still stable and only has a memory overhead of
+ *     \f$\mathcal{O}(\log{N})\f$ due to recursion, but has a run time in the
+ *     order of \f$\mathcal{O}(N\log{N}\log{N})\f$
+ *
+ * The container data structures like tl_array or tl_list offer interface
+ * functions for stable and non stable sorting of the contents of the
+ * containers. Those functions internally try to use an ideal match for all
+ * cases.
+ *
+ * The tl_array container uses \ref tl_heapsort for non stable sorting and
+ * \ref tl_mergesort for stable sorting with a fallback to
+ * \ref tl_mergesort_inplace if \ref tl_mergesort fails to allocate the
+ * memory it needs.
+ *
+ * The tl_list container internally implements a list based merge sort.
+ */
+
 
 
 #include "tl_predef.h"

@@ -24,12 +24,19 @@
  */
 
 /**
- * \file tl_interfaces.h
+ * \file tl_predef.h
  *
  * \brief Forward declarations and callback types
  */
 #ifndef TOOLS_PREDEF_H
 #define TOOLS_PREDEF_H
+
+/**
+ * \mainpage C-Tools, a collection of utilities for C programs
+ *
+ * This is the official documentation and reference manual for the C-Tools
+ * library, containing a small collection of utilities for C programs.
+ */
 
 
 

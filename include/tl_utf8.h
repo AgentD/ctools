@@ -31,6 +31,32 @@
 #ifndef TL_UTF8_H
 #define TL_UTF8_H
 
+/**
+ * \page stringproc String processing functions
+ *
+ * \section UTF-8 UTF-8 helper functions
+ *
+ * UTF-8 is an encoding scheme that can store arbitrary unicode codepoints in
+ * a normal C-style character string in an ASCII backwards compatible way,
+ * using multibyte sequences with a length depending on the value of the
+ * codepoint.
+ *
+ * Since the number of chars in a string is not neccessarily equal to the
+ * number of codepoints in a string, the following two functions are provided:
+ * \li \ref tl_utf8_charcount Count the number of codepoints in a string
+ * \li \ref tl_utf8_strlen Iterate over a number of codepoints and count how
+ *     many characters they use.
+ *
+ * Codepoints can be extracted or stored in a UTF-8 string using
+ * \ref tl_utf8_decode and \ref tl_utf8_encode.
+ *
+ * The function \ref tl_utf8_estimate_utf16_length is provided to determine
+ * the number of bytes required to store a UTF-8 string in UTF-16 encoding.
+ *
+ * A hash function for arbitrary C strings (not neccessarily UTF-8 encoded) is
+ * provided by \ref tl_utf8_hash.
+ */
+
 
 
 #include "tl_predef.h"

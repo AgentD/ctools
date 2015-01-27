@@ -31,6 +31,23 @@
 #ifndef TL_BLOB_H
 #define TL_BLOB_H
 
+/**
+ * \page util Miscellaneous Utilities
+ *
+ * \section tl_blob The tl_blob structure
+ *
+ * The tl_blob data structure allows managing a blob of bytes and allows
+ * various encoding transformation operations, i.e. guessing the encoding
+ * of using \ref tl_blob_guess_encoding base64 encoding of the blob data
+ * using \ref tl_blob_encode_base64 and \ref tl_blob_decode_base64, et
+ * cetera.
+ *
+ * The tl_blob data structure also has various operations for inserting,
+ * removing or appending data ranges, however those are way less efficient
+ * than using a tl_array since they always resize the blob memory and always
+ * need linear time.
+ */
+
 
 
 #include "tl_predef.h"
@@ -289,7 +306,7 @@ TLAPI void tl_blob_truncate( tl_blob* blob, size_t offset );
  *
  * \param blob A pointer to the blob object
  *
- * \return A TL_BLOB_ENCODING enumerator value
+ * \return A \ref TL_BLOB_ENCODING enumerator value
  */
 TLAPI int tl_blob_guess_encoding( tl_blob* blob );
 
@@ -332,8 +349,8 @@ TLAPI int tl_blob_decode_base64( tl_blob* dst, const tl_blob* src,
  *
  * \param blob     A pointer to a blob containing UTF-16 or UTF-32
  *                 encoded data
- * \param encoding A TL_BLOB_ENCODING enumerator value specifying the current
- *                 encoding.
+ * \param encoding A \ref TL_BLOB_ENCODING enumerator value specifying the
+ *                 current encoding.
  */
 TLAPI void tl_blob_unicode_byteswap( tl_blob* blob, int encoding );
 

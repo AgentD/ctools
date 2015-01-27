@@ -31,6 +31,19 @@
 #ifndef TOOLS_RBTREE_H
 #define TOOLS_RBTREE_H
 
+/**
+ * \page kvcontainers Key-Value-Containers
+ *
+ * \section tl_rbtree Red-black tree
+ *
+ * The tl_rbtree data structure implements a red-black tree, allowing a
+ * mapping of arbitrary key-objects to arbitrary value objects.
+ *
+ * A red-black tree is a self-balancing binary tree data structure. Insertion,
+ * deletion and lookup are guaranteed to always run in
+ * \f$\mathcal{O}(\log{n})\f$ time.
+ */
+
 
 
 #include "tl_predef.h"

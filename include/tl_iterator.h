@@ -31,6 +31,45 @@
 #ifndef TOOLS_ITERATOR_H
 #define TOOLS_ITERATOR_H
 
+/**
+ * \page interfaces Interfaces
+ *
+ * \section tl_iterator Iterator interface
+ *
+ * The tl_iterator interface is used the implement the iterator pattern.
+ * Various containers or other data structures can return an implementation of
+ * an iterator that can be used as an abstract means of iterating over a set
+ * of objects.
+ *
+ * An iterator initially points to the first element in a set an can then be
+ * advanced to the next element in the set. The method has_data can be used to
+ * check if the iterator currently points to a valid object. An iterator can
+ * be arbitrarily reset to the beginning at all times.
+ *
+ * The element that the an iterator points to can be removed, which
+ * automatically shifts the iterator to the next element. Every element in the
+ * set the iterator processes is treated as a key-value pair, where the value
+ * is the actual object and the key depends on the implementation of the
+ * iterator.
+ *
+ * Here is an example illustrating the usage of an iterator to add 42 to all
+ * members of a tl_array holding integers:
+ * \code{.c}
+ * tl_iterator* it = tl_array_first( &array );
+ *
+ * while( it->has_data( it ) )
+ * {
+ *     int* i = it->get_value( it );
+ *
+ *     *i += 42;
+ *
+ *     it->next( it );
+ * }
+ *
+ * it->destroy( it );
+ * \endcode
+ */
+
 
 
 #include "tl_predef.h"

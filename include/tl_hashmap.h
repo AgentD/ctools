@@ -31,6 +31,36 @@
 #ifndef TL_HASHMAP_H
 #define TL_HASHMAP_H
 
+/**
+ * \page kvcontainers Key-Value-Containers
+ *
+ * \section tl_hashmap Hash map
+ *
+ * The tl_hashmap data structure implements a seperate chaining based hashamp,
+ * allowing a mapping of arbitrary key-objects to arbitrary value objects.
+ *
+ * A fixed number of bins is allocated for the value objects. The target
+ * bin for an object is determined by computing a hash of the key object
+ * modulo the number of bins. If a hash colision occours, i.e. multiple
+ * keys map to the same bin, the bin stores a linked list of entries with the
+ * same key.
+ *
+ * Idealy, if hash collisions are evenly distributed across the bins, key
+ * lookup can be done in sub-linear time. In a worst case scenario, where all
+ * objects are mapped to the same bin, the hash map degenerates to a lineked
+ * list with linear object lookup. When searching for a specific key within
+ * a bin, the individual keys are compared. For determining the bin, only the
+ * hash value is considered.
+ *
+ * A hash map has some advantages over a red-black tree, especially if
+ * comparing key-objects is rather expensive, since the hash map provides an
+ * idealy constant number of key comparisons, while a red-black tree will
+ * always perform a number of key comparions in the order of
+ * \f$\mathcal{O}(\log{n})\f$.
+ * An example where a hash map is preferable could be an asociative array that
+ * maps strings to objects.
+ */
+
 
 
 #include "tl_predef.h"

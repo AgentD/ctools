@@ -31,6 +31,27 @@
 #ifndef TOOLS_DIR
 #define TOOLS_DIR
 
+/**
+ * \page filesystem Filesystem
+ *
+ * \section dir Directory scanning and iterating
+ *
+ * A platform dependend imeplementation of the tl_iterator interface is
+ * provided for iterating directory contents on operating systems filesystem
+ * hirarchy.
+ *
+ * The function tl_dir_iterate accepts a tl_string pointing to the target path
+ * and returns a tl_iterator implementation. The function tl_dir_iterate_utf8
+ * function does the same but accepts a pointer to a C-string holding the
+ * UTF-8 encoded directory location.
+ *
+ * The function tl_dir_scan can be used to load the contents of a directory
+ * directly into a tl_array of tl_string instances (with the proper
+ * tl_allocator set). Again, the tl_dir_scan function takes a tl_string as
+ * input, but there is a tl_dir_scan_utf8 function that accepts plain old
+ * C-strings.
+ */
+
 
 
 #include "tl_predef.h"

@@ -31,6 +31,18 @@
 #ifndef TOOLS_QUEUE_H
 #define TOOLS_QUEUE_H
 
+/**
+ * \page collection Abstract Collections
+ *
+ * \section tl_queue Double Ended Queue
+ *
+ * The tl_queue data structure implements a first-in-first-out queue.
+ *
+ * At the moment, the queue is implemented using the tl_list data structure,
+ * but is intended to use an abstract interface allowing an abstract
+ * implementation. However, this is currently under construction.
+ */
+
 
 
 #include "tl_predef.h"

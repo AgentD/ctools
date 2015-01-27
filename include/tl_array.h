@@ -31,6 +31,35 @@
 #ifndef TOOLS_ARRAY_H
 #define TOOLS_ARRAY_H
 
+/**
+ * \page containers Containers
+ *
+ * \section tl_array Dynamic array
+ *
+ * The tl_array data structure implements a dynamically resizeable array,
+ * allowing random access to objects by index in constant time.
+ *
+ * Elements can be appended to an array or inserted at an arbitrary location.
+ * When the array space runs out, the tl_array tries to double the size of
+ * the array. When removing elements causes an array to be less than a quarter
+ * filled, the tl_array tries to shrink the array size to a quarter to
+ * conserve memory.
+ *
+ * The tl_array allows using a tl_allocator implementation for handling
+ * objects with custom allocation, copy and deallocation mechanics.
+ *
+ * \note Never keep points to elements inside a tl_array. When the array is
+ *       resized, its memory location can change, rendering the pointer
+ *       invalid.
+ *
+ * To sumarize:
+ * \li Random access is done in constant time
+ * \li Appending is done in constant amortized time, linear at worst
+ * \li Removing from the end is done in constant amortized time,
+ *     linear at worst
+ * \li Random insertion or deletion is done in linear time
+ */
+
 
 
 #include "tl_predef.h"
