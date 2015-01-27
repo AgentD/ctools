@@ -37,10 +37,9 @@
  * \section tl_queue Double Ended Queue
  *
  * The tl_queue data structure implements a first-in-first-out queue.
- *
- * At the moment, the queue is implemented using the tl_list data structure,
- * but is intended to use an abstract interface allowing an abstract
- * implementation. However, this is currently under construction.
+ * The queue uses the abstract tl_container interface for accessing the
+ * underlying container, so different containers can be used for implementing
+ * the queue behaviour.
  */
 
 

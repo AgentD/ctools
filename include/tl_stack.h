@@ -37,10 +37,9 @@
  * \section tl_stack Stack
  *
  * The tl_stack data structure implements a last-in-first-out stack.
- *
- * At the moment, the stack is implemented using the tl_array data structure,
- * but is intended to use an abstract interface allowing an abstract
- * implementation. However, this is currently under construction.
+ * The stack uses the abstract tl_container interface for accessing the
+ * underlying container, so different containers can be used for implementing
+ * the stack behaviour.
  */
 
 
