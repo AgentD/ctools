@@ -45,8 +45,6 @@
 
 
 
-
-#include "tl_array.h"
 #include "tl_predef.h"
 
 
@@ -58,8 +56,14 @@
  */
 struct tl_stack
 {
+    /** \brief The container interface to use to access the container */
+    tl_container* ct;
+
     /** \brief The underlying container used to implement a stack */
-    tl_array vec;
+    void* container;
+
+    /** \brief The size of an element */
+    size_t unitsize;
 };
 
 
@@ -73,12 +77,15 @@ extern "C" {
  *
  * \memberof tl_stack
  *
- * \param stack        A pointer to an uninitialized stack
- * \param element_size The size of an element
- * \param alloc        A pointer to an allocator or NULL if not used
+ * \param stack    A pointer to an uninitialized stack
+ * \param ct       A pointer to a container interface to use
+ * \param unitsize The size of an element in bytes
+ * \param alloc    A pointer to an allocator or NULL if not used
+ *
+ * \return Non-zero on success, zero on failure.
  */
-TLAPI void tl_stack_init( tl_stack* stack, size_t element_size,
-                          tl_allocator* alloc );
+TLAPI int tl_stack_init( tl_stack* stack, tl_container* ct,
+                         size_t unitsize, tl_allocator* alloc );
 
 /**
  * \brief Cleanup a stack, freeing all its memory and resetting it

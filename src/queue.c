@@ -23,86 +23,110 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #define TL_EXPORT
+#include "tl_container.h"
 #include "tl_queue.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 
 
-void tl_queue_init( tl_queue* this, size_t element_size,
-                    tl_allocator* alloc )
+int tl_queue_init( tl_queue* this, tl_container* ct,
+                   size_t unitsize, tl_allocator* alloc )
 {
-    if( this )
-        tl_list_init( &(this->list), element_size, alloc );
+    if( !this || !ct || !unitsize )
+        return 0;
+
+    this->ct = ct;
+    this->unitsize = unitsize;
+    this->container = malloc( ct->size );
+
+    if( !this->container )
+        return 0;
+
+    this->ct->init( this->container, this->unitsize, alloc );
+    return 1;
 }
 
 void tl_queue_cleanup( tl_queue* this )
 {
     if( this )
-        tl_list_cleanup( &(this->list) );
+    {
+        this->ct->cleanup( this->container );
+        free( this->container );
+        memset( this, 0, sizeof(tl_queue) );
+    }
 }
 
 int tl_queue_insert_front( tl_queue* this, const void* element )
 {
-    return (this && element) ? tl_list_prepend(&(this->list), element) : 0;
+    return (this && element) ? this->ct->prepend(this->container,element) : 0;
 }
 
 int tl_queue_insert_back( tl_queue* this, const void* element )
 {
-    return (this && element) ? tl_list_append(&(this->list), element) : 0;
+    return (this && element) ? this->ct->append(this->container,element) : 0;
 }
 
 void* tl_queue_peek_front( const tl_queue* this )
 {
-    return this ? tl_list_node_get_data( this->list.first ) : NULL;
+    return this ? this->ct->get_first( this->container ) : NULL;
 }
 
 void* tl_queue_peek_back( const tl_queue* this )
 {
-    return this ? tl_list_node_get_data( this->list.last ) : NULL;
+    return this ? this->ct->get_last( this->container ) : NULL;
 }
 
 void tl_queue_remove_front( tl_queue* this, void* data )
 {
+    void* ptr;
+
     if( this )
     {
         if( data )
         {
-            memcpy( data, tl_list_node_get_data( this->list.first ),
-                    this->list.unitsize );
+            ptr = this->ct->get_first( this->container );
+
+            if( ptr )
+                memcpy( data, ptr, this->unitsize );
         }
 
-        tl_list_remove_first( &(this->list) );
+        this->ct->remove_first( this->container );
     }
 }
 
 void tl_queue_remove_back( tl_queue* this, void* data )
 {
+    void* ptr;
+
     if( this )
     {
         if( data )
         {
-            memcpy( data, tl_list_node_get_data( this->list.last ),
-                    this->list.unitsize );
+            ptr = this->ct->get_last( this->container );
+
+            if( ptr )
+                memcpy( data, ptr, this->unitsize );
         }
 
-        tl_list_remove_last( &(this->list) );
+        this->ct->remove_last( this->container );
     }
 }
 
 int tl_queue_is_empty( const tl_queue* this )
 {
-    return (!this || this->list.size==0);
+    return (!this || this->ct->get_size( this->container )==0);
 }
 
 size_t tl_queue_size( const tl_queue* this )
 {
-    return this ? this->list.size : 0;
+    return this ? this->ct->get_size( this->container ) : 0;
 }
 
 void tl_queue_flush( tl_queue* this )
 {
     if( this )
-        tl_list_clear( &(this->list) );
+        this->ct->clear( this->container );
 }
 

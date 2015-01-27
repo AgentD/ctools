@@ -46,7 +46,6 @@
 
 
 #include "tl_predef.h"
-#include "tl_list.h"
 
 
 
@@ -57,8 +56,14 @@
  */
 struct tl_queue
 {
-    /** \brief The underlying container used to implement the queue */
-    tl_list list;
+    /** \brief The container interface to use to access the container */
+    tl_container* ct;
+
+    /** \brief The underlying container used to implement a stack */
+    void* container;
+
+    /** \brief The size of an element */
+    size_t unitsize;
 };
 
 
@@ -72,12 +77,15 @@ extern "C" {
  *
  * \memberof tl_queue
  *
- * \param queue        A pointer to a previously uninitialized queue
- * \param element_size The size of an element in the queue
- * \param alloc        A pointer to an allocator or NULL if not used
+ * \param queue    A pointer to a previously uninitialized queue
+ * \param ct       A pointer to a container interface to use
+ * \param unitsize The size of an element in bytes
+ * \param alloc    A pointer to an allocator or NULL if not used
+ *
+ * \return Non-zero on success, zero on failure.
  */
-TLAPI void tl_queue_init( tl_queue* queue, size_t element_size,
-                          tl_allocator* alloc );
+TLAPI int tl_queue_init( tl_queue* queue, tl_container* ct,
+                         size_t unitsize, tl_allocator* alloc );
 
 /**
  * \brief Free all the memory used by a queue and reset it

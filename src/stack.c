@@ -23,22 +23,39 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #define TL_EXPORT
+#include "tl_container.h"
 #include "tl_stack.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 
 
-void tl_stack_init( tl_stack* this, size_t element_size, tl_allocator* alloc )
+int tl_stack_init( tl_stack* this, tl_container* ct,
+                   size_t unitsize, tl_allocator* alloc )
 {
-    if( this )
-        tl_array_init( &(this->vec), element_size, alloc );
+    if( !this || !ct || !unitsize )
+        return 0;
+
+    this->ct = ct;
+    this->unitsize = unitsize;
+    this->container = malloc( ct->size );
+
+    if( !this->container )
+        return 0;
+
+    this->ct->init( this->container, this->unitsize, alloc );
+    return 1;
 }
 
 void tl_stack_cleanup( tl_stack* this )
 {
     if( this )
-        tl_array_cleanup( &(this->vec) );
+    {
+        this->ct->cleanup( this->container );
+        free( this->container );
+        memset( this, 0, sizeof(tl_stack) );
+    }
 }
 
 int tl_stack_push( tl_stack* this, const void* element )
@@ -46,40 +63,42 @@ int tl_stack_push( tl_stack* this, const void* element )
     if( !this || !element )
         return 0;
 
-    return tl_array_append( &(this->vec), element );
+    return this->ct->append( this->container, element );
 }
 
 void* tl_stack_top( const tl_stack* this )
 {
-    if( !this || !this->vec.used )
+    if( !this )
         return NULL;
 
-    return tl_array_at( &(this->vec), this->vec.used-1 );
+    return this->ct->get_last( this->container );
 }
 
 void tl_stack_pop( tl_stack* this, void* data )
 {
-    if( !this || !this->vec.used )
+    void* ptr;
+
+    if( !this )
         return;
 
     if( data )
     {
-        memcpy( data,
-                tl_array_at( &(this->vec), this->vec.used-1 ),
-                this->vec.unitsize );
+        ptr = this->ct->get_last( this->container );
+
+        if( ptr )
+            memcpy( data, ptr, this->unitsize );
     }
 
-    this->vec.used -= 1;
-    tl_array_try_shrink( &(this->vec) );
+    this->ct->remove_last( this->container );
 }
 
 int tl_stack_is_empty( const tl_stack* this )
 {
-    return (!this || this->vec.used==0);
+    return (!this || this->ct->get_size( this->container )==0);
 }
 
 size_t tl_stack_size( const tl_stack* this )
 {
-    return this ? this->vec.used : 0;
+    return this ? this->ct->get_size( this->container ) : 0;
 }
 
