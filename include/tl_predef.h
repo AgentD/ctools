@@ -80,6 +80,7 @@ typedef struct tl_allocator tl_allocator;
 typedef struct tl_iterator tl_iterator;
 typedef struct tl_blob tl_blob;
 typedef struct tl_iostream tl_iostream;
+typedef struct tl_server tl_server;
 
 
 
