@@ -81,6 +81,7 @@ typedef struct tl_iterator tl_iterator;
 typedef struct tl_blob tl_blob;
 typedef struct tl_iostream tl_iostream;
 typedef struct tl_server tl_server;
+typedef struct tl_net_addr tl_net_addr;
 
 
 
