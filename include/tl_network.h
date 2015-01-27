@@ -110,7 +110,7 @@ extern "C" {
  *
  * \return Non-zero on success, zero on failure
  */
-int tl_network_resolve_name( const char* hostname, tl_net_addr* addr );
+TLAPI int tl_network_resolve_name( const char* hostname, tl_net_addr* addr );
 
 /**
  * \brief Create a server instance
@@ -120,7 +120,7 @@ int tl_network_resolve_name( const char* hostname, tl_net_addr* addr );
  *
  * \return A pointer to a new server instance or NULL on failure
  */
-tl_server* tl_network_create_server( int protocol, tl_u16 port );
+TLAPI tl_server* tl_network_create_server( int protocol, tl_u16 port );
 
 /**
  * \brief Create a connection to a server
@@ -130,7 +130,7 @@ tl_server* tl_network_create_server( int protocol, tl_u16 port );
  *
  * \return A pointer to a tl_iostream instance or NULL on failure
  */
-tl_iostream* tl_network_create_client( const tl_net_addr* peer );
+TLAPI tl_iostream* tl_network_create_client( const tl_net_addr* peer );
 
 #ifdef __cplusplus
 }
