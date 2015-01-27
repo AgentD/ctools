@@ -508,6 +508,50 @@ TLAPI tl_iterator* tl_array_first( tl_array* arr );
  */
 TLAPI tl_iterator* tl_array_last( tl_array* arr );
 
+/**
+ * \brief Get the number of elements currently in a dynamic array
+ *
+ * \memberof tl_array
+ *
+ * \param arr A pointer to a dynamic array
+ *
+ * \return The number of elements in the array
+ */
+TLAPI size_t tl_array_get_size( const tl_array* arr );
+
+/**
+ * \brief Get a pointer to the first element in a dynamic array
+ *
+ * \memberof tl_array
+ *
+ * \param arr A pointer to a dynamic array
+ *
+ * \return A pointer to the first element or NULL if empty
+ */
+TLAPI void* tl_array_get_first( tl_array* arr );
+
+/**
+ * \brief Get a pointer to the last element in a dynamic array
+ *
+ * \memberof tl_array
+ *
+ * \param arr A pointer to a dynamic array
+ *
+ * \return A pointer to the last element or NULL if empty
+ */
+TLAPI void* tl_array_get_last( tl_array* arr );
+
+/**
+ * \brief Get a pointer to the abstract container implementation for tl_array
+ *
+ * \memberof tl_array
+ *
+ * \static
+ *
+ * \return A pointer to a tl_container implementation
+ */
+TLAPI tl_container* tl_array_get_interface( void );
+
 #ifdef __cplusplus
 }
 #endif

@@ -23,6 +23,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #define TL_EXPORT
+#include "tl_container.h"
 #include "tl_allocator.h"
 #include "tl_iterator.h"
 #include "tl_list.h"
@@ -52,6 +53,29 @@ typedef struct
     int forward;        /* nonzero: from head to tail. zero: reverse */
 }
 tl_list_iterator;
+
+static tl_container interface =
+{
+    sizeof(tl_list),
+    (void(*)(void*,size_t,tl_allocator*))tl_list_init,
+    (void(*)(void*))tl_list_cleanup,
+    (void(*)(void*))tl_list_clear,
+    (int(*)(void*,const void*,size_t))tl_list_from_array,
+    (void(*)(const void*,void*))tl_list_to_array,
+    (void*(*)(void*))tl_list_get_first,
+    (void*(*)(void*))tl_list_get_last,
+    (tl_iterator*(*)(void*))tl_list_first,
+    (tl_iterator*(*)(void*))tl_list_last,
+    (void(*)(void*))tl_list_remove_first,
+    (void(*)(void*))tl_list_remove_last,
+    (int(*)(void*,const void*))tl_list_append,
+    (int(*)(void*,const void*))tl_list_prepend,
+    (void*(*)(const void*,size_t))tl_list_at,
+    (int(*)( void*,size_t,const void* ))tl_list_set,
+    (int(*)(void*,size_t,const void*,size_t))tl_list_insert,
+    (void(*)(void*,size_t,size_t))tl_list_remove,
+    (size_t(*)(const void*))tl_list_get_size
+};
 
 
 
@@ -413,7 +437,7 @@ int tl_list_concat( tl_list* this, const tl_list* src )
     return tl_list_join( this, &temp, this->size );
 }
 
-int tl_list_remove( tl_list* this, size_t index, size_t count )
+void tl_list_remove( tl_list* this, size_t index, size_t count )
 {
     tl_list_node* old;
     tl_list_node* n;
@@ -421,7 +445,7 @@ int tl_list_remove( tl_list* this, size_t index, size_t count )
     size_t i;
 
     if( !this || index>=this->size )
-        return 0;
+        return;
 
     count = (count > this->size) ? this->size : count;
 
@@ -463,7 +487,7 @@ int tl_list_remove( tl_list* this, size_t index, size_t count )
     else
     {
         if( !(n = tl_list_node_from_index( this, index )) )
-            return 0;
+            return;
 
         for( i=0; i<count && n; ++i )
         {
@@ -488,8 +512,6 @@ int tl_list_remove( tl_list* this, size_t index, size_t count )
         this->first = NULL;
         this->last  = NULL;
     }
-
-    return 1;
 }
 
 int tl_list_is_empty( const tl_list* this )
@@ -791,5 +813,25 @@ tl_iterator* tl_list_first( tl_list* this )
 tl_iterator* tl_list_last( tl_list* this )
 {
     return this ? tl_list_iterator_create( this, 0 ) : NULL;
+}
+
+size_t tl_list_get_size( const tl_list* this )
+{
+    return this ? this->size : 0;
+}
+
+void* tl_list_get_first( tl_list* this )
+{
+    return this ? tl_list_node_get_data( this->first ) : NULL;
+}
+
+void* tl_list_get_last( tl_list* this )
+{
+    return this ? tl_list_node_get_data( this->last ) : NULL;
+}
+
+tl_container* tl_list_get_interface( void )
+{
+    return &interface;
 }
 

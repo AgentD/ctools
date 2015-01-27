@@ -70,6 +70,9 @@
  */
 struct tl_container
 {
+    /** \brief The size of the container object */
+    size_t size;
+
     /**
      * \brief Initialize a container
      *

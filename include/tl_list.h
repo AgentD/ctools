@@ -298,7 +298,7 @@ TLAPI int tl_list_concat( tl_list* dst, const tl_list* src );
  * \param index The index of the first element to remove
  * \param count The number of elements to remove
  */
-TLAPI int tl_list_remove( tl_list* list, size_t index, size_t count );
+TLAPI void tl_list_remove( tl_list* list, size_t index, size_t count );
 
 /**
  * \brief Check if a list is empty
@@ -518,6 +518,50 @@ TLAPI tl_iterator* tl_list_first( tl_list* list );
  * \return A pointer to an iterator or NULL on failure
  */
 TLAPI tl_iterator* tl_list_last( tl_list* list );
+
+/**
+ * \brief Get the number of elements currently in a list
+ *
+ * \memberof tl_list
+ *
+ * \param list A pointer to a list
+ *
+ * \return The number of elements currently in the list
+ */
+TLAPI size_t tl_list_get_size( const tl_list* list );
+
+/**
+ * \brief Get a pointer to the first element in a list
+ *
+ * \memberof tl_list
+ *
+ * \param list A pointer to a list
+ *
+ * \return A pointer to the first element or NULL if empty
+ */
+TLAPI void* tl_list_get_first( tl_list* list );
+
+/**
+ * \brief Get a pointer to the last element in a list
+ *
+ * \memberof tl_list
+ *
+ * \param list A pointer to a list
+ *
+ * \return A pointer to the last element or NULL if empty
+ */
+TLAPI void* tl_list_get_last( tl_list* list );
+
+/**
+ * \brief Get a pointer to the abstract container implementation for tl_list
+ *
+ * \memberof tl_list
+ *
+ * \static
+ *
+ * \return A pointer to a tl_container implementation
+ */
+TLAPI tl_container* tl_list_get_interface( void );
 
 #ifdef __cplusplus
 }
