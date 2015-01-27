@@ -55,7 +55,7 @@
 
 
 /**
- * \struct tl_server
+ * \interface tl_server
  *
  * \brief An interface that abstracts stream or packet based one-to-many
  *        communication on the "one" end.

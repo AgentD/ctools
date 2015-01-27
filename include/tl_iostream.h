@@ -67,7 +67,7 @@
 
 
 /**
- * \struct tl_iostream
+ * \interface tl_iostream
  *
  * \brief Represents a stream or packet based I/O device or an end-to-end
  *        connection between two processes.
