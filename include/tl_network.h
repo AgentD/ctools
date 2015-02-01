@@ -61,7 +61,9 @@ typedef enum
     TL_TCP_IPV4 = 1,  /**< \brief TCP over IPv4 */
     TL_UDP_IPV4 = 2,  /**< \brief UDP over IPv4 */
     TL_TCP_IPV6 = 3,  /**< \brief TCP over IPv6 */
-    TL_UDP_IPV6 = 4   /**< \brief UDP over IPv6 */
+    TL_UDP_IPV6 = 4,  /**< \brief UDP over IPv6 */
+    TL_TCP_ANY = 5,   /**< \brief TCP over any network layer */
+    TL_UDP_ANY = 6    /**< \brief UDP over any network layer */
 }
 TL_NETWORK_PROTOCOL;
 
@@ -106,7 +108,8 @@ extern "C" {
  * \param addr     A pointer to a tl_net_addr structure to write the resolved
  *                 address to. The protocol field from the structure is used
  *                 to determine for which layer 3 protocol to obtain
- *                 an address.
+ *                 an address. This can be NULL to check if a host name can
+ *                 be resolved.
  *
  * \return Non-zero on success, zero on failure
  */
