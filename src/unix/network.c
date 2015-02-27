@@ -36,22 +36,6 @@
 
 
 
-static int change_network( int proto, int family )
-{
-    switch( proto )
-    {
-    case TL_TCP_IPV6:
-    case TL_TCP_IPV4:
-    case TL_TCP_ANY:
-        return family==AF_INET6 ? TL_TCP_IPV6 : TL_TCP_IPV4;
-    case TL_UDP_IPV4:
-    case TL_UDP_IPV6:
-    case TL_UDP_ANY:
-        return family==AF_INET6 ? TL_UDP_IPV6 : TL_UDP_IPV4;
-    }
-    return 0;
-}
-
 static void convert_ipv6( struct in6_addr* v6, tl_net_addr* addr )
 {
     addr->addr.ipv6[7] = (v6->s6_addr[ 0]<<8) | v6->s6_addr[ 1];
@@ -64,17 +48,48 @@ static void convert_ipv6( struct in6_addr* v6, tl_net_addr* addr )
     addr->addr.ipv6[0] = (v6->s6_addr[14]<<8) | v6->s6_addr[15];
 }
 
-static int resolve_hostname( const char* hostname, int ai_family,
+/****************************************************************************/
+
+int tl_network_resolve_name( const char* hostname, int proto,
                              tl_net_addr* addr )
 {
-    struct addrinfo* info;
-    struct addrinfo hints;
-    struct addrinfo* p;
-    struct in6_addr v6;
-    struct in_addr v4;
+    struct addrinfo hints, *info, *p;
+    struct in6_addr addr6;
+    struct in_addr addr4;
+
+    if( !hostname )
+        return 0;
+
+    /* check if hostname is actually a numeric IPv4 address */
+    if( inet_pton( AF_INET, hostname, &addr4 )>0 &&
+        (proto==TL_IPV4 || proto==TL_ANY) )
+    {
+        if( addr )
+        {
+            addr->addr.ipv4 = ntohl( addr4.s_addr );
+            addr->net = TL_IPV4;
+        }
+        return 1;
+    }
+
+    /* check if hostname is acutally a numeric IPv6 address */
+    if( inet_pton( AF_INET6, hostname, &addr6 )>0 &&
+        (proto==TL_IPV6 || proto==TL_ANY) )
+    {
+        if( addr )
+        {
+            convert_ipv6( &addr6, addr );
+            addr->net = TL_IPV6;
+        }
+        return 1;
+    }
+
+    /* try to resolve hostname */
+    proto =  (proto==TL_IPV6) ? AF_INET6 : 
+            ((proto==TL_IPV4) ? AF_INET : AF_UNSPEC);
 
     memset( &hints, 0, sizeof(hints) );
-    hints.ai_family = ai_family;
+    hints.ai_family = proto;
 
     if( getaddrinfo( hostname, NULL, &hints, &info )!=0 )
         return 0;
@@ -84,7 +99,7 @@ static int resolve_hostname( const char* hostname, int ai_family,
         if( p->ai_family!=AF_INET && p->ai_family!=AF_INET6 )
             continue;
 
-        if( ai_family!=AF_UNSPEC && p->ai_family!=ai_family )
+        if( proto!=AF_UNSPEC && p->ai_family!=proto )
             continue;
 
         break;
@@ -100,77 +115,45 @@ static int resolve_hostname( const char* hostname, int ai_family,
     {
         if( p->ai_family==AF_INET6 )
         {
-            v6 = ((struct sockaddr_in6*)p->ai_addr)->sin6_addr;
-            convert_ipv6( &v6, addr );
+            addr6 = ((struct sockaddr_in6*)p->ai_addr)->sin6_addr;
+            convert_ipv6( &addr6, addr );
         }
         else
         {
-            v4 = ((struct sockaddr_in*)p->ai_addr)->sin_addr;
-            addr->addr.ipv4 = ntohl( v4.s_addr );
+            addr4 = ((struct sockaddr_in*)p->ai_addr)->sin_addr;
+            addr->addr.ipv4 = ntohl( addr4.s_addr );
         }
 
-        addr->protocol = change_network( addr->protocol, p->ai_family );
+        addr->net = p->ai_family==AF_INET6 ? TL_IPV6 : TL_IPV4;
     }
 
     freeaddrinfo( info );
     return 1;
 }
 
-/****************************************************************************/
-
-int tl_network_resolve_name( const char* hostname, tl_net_addr* addr )
+tl_server* tl_network_create_server( int net, int proto, tl_u16 port )
 {
-    struct in6_addr addr6;
-    struct in_addr addr4;
-    int use_ipv6 = 0;
-    int use_ipv4 = 0;
+    if( net!=TL_IPV4 && net!=TL_IPV6 )
+        return NULL;
 
-    if( !hostname )
-        return 0;
+    if( proto!=TL_TCP && proto!=TL_UDP )
+        return NULL;
 
-    while( isspace( *hostname ) )
-        ++hostname;
+    (void)port;
+    return NULL;
+}
 
-    if( addr )
-    {
-        use_ipv6 = addr->protocol==TL_TCP_IPV6 || addr->protocol==TL_UDP_IPV6;
-        use_ipv4 = addr->protocol==TL_TCP_IPV4 || addr->protocol==TL_UDP_IPV4;
-    }
+tl_iostream* tl_network_create_client( const tl_net_addr* peer )
+{
+    if( !peer )
+        return NULL;
 
-    /* check if hostname is actually a numeric IPv4  address */
-    if( inet_pton( AF_INET, hostname, &addr4 )>0 )
-    {
-        if( use_ipv6 )
-            return 0;
+    if( peer->net!=TL_IPV4 && peer->net!=TL_IPV6 )
+        return NULL;
 
-        if( addr )
-        {
-            addr->addr.ipv4 = ntohl( addr4.s_addr );
-            addr->protocol = change_network( addr->protocol, AF_INET );
-        }
-        return 1;
-    }
+    if( peer->transport!=TL_TCP && peer->transport!=TL_UDP )
+        return NULL;
 
-    /* check if hostname is acutally a numeric IPv6 address */
-    if( inet_pton( AF_INET6, hostname, &addr6 )>0 )
-    {
-        if( use_ipv4 )
-            return 0;
-
-        if( addr )
-        {
-            convert_ipv6( &addr6, addr );
-            addr->protocol = change_network( addr->protocol, AF_INET6 );
-        }
-        return 1;
-    }
-
-    /* try to resolve hostname */
-    if( use_ipv6 )
-        return resolve_hostname( hostname, AF_INET6, addr );
-    else if( use_ipv4 )
-        return resolve_hostname( hostname, AF_INET, addr );
-
-    return resolve_hostname( hostname, AF_UNSPEC, addr );
+    return NULL;
 }
 

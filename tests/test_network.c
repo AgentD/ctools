@@ -10,27 +10,24 @@ int main( void )
     tl_net_addr addr;
 
     /* resolve IPv4 addresses */
-    addr.protocol = TL_TCP_ANY;
-    if( !tl_network_resolve_name( "127.0.0.1", &addr ) )
+    if( !tl_network_resolve_name( "127.0.0.1", TL_ANY, &addr ) )
         return EXIT_FAILURE;
-    if( addr.protocol!=TL_TCP_IPV4 )
+    if( addr.net!=TL_IPV4 )
         return EXIT_FAILURE;
     if( addr.addr.ipv4!=0x7F000001 )
         return EXIT_FAILURE;
 
-    addr.protocol = TL_TCP_ANY;
-    if( !tl_network_resolve_name( "192.168.1.1", &addr ) )
+    if( !tl_network_resolve_name( "192.168.1.1", TL_ANY, &addr ) )
         return EXIT_FAILURE;
-    if( addr.protocol!=TL_TCP_IPV4 )
+    if( addr.net!=TL_IPV4 )
         return EXIT_FAILURE;
     if( addr.addr.ipv4!=0xC0A80101 )
         return EXIT_FAILURE;
 
     /* resolve IPv6 addresses */
-    addr.protocol = TL_TCP_ANY;
-    if( !tl_network_resolve_name( "::1", &addr ) )
+    if( !tl_network_resolve_name( "::1", TL_ANY, &addr ) )
         return EXIT_FAILURE;
-    if( addr.protocol!=TL_TCP_IPV6 )
+    if( addr.net!=TL_IPV6 )
         return EXIT_FAILURE;
     if( addr.addr.ipv6[7]!=0x0000 ) return EXIT_FAILURE;
     if( addr.addr.ipv6[6]!=0x0000 ) return EXIT_FAILURE;
@@ -41,10 +38,9 @@ int main( void )
     if( addr.addr.ipv6[1]!=0x0000 ) return EXIT_FAILURE;
     if( addr.addr.ipv6[0]!=0x0001 ) return EXIT_FAILURE;
 
-    addr.protocol = TL_TCP_ANY;
-    if( !tl_network_resolve_name( "FE80::0202:B3FF:FE1E:8329", &addr ) )
+    if( !tl_network_resolve_name("FE80::0202:B3FF:FE1E:8329",TL_ANY,&addr) )
         return EXIT_FAILURE;
-    if( addr.protocol!=TL_TCP_IPV6 )
+    if( addr.net!=TL_IPV6 )
         return EXIT_FAILURE;
     if( addr.addr.ipv6[7]!=0xFE80 ) return EXIT_FAILURE;
     if( addr.addr.ipv6[6]!=0x0000 ) return EXIT_FAILURE;
@@ -56,29 +52,25 @@ int main( void )
     if( addr.addr.ipv6[0]!=0x8329 ) return EXIT_FAILURE;
 
     /* resolve hostname */
-    addr.protocol = TL_TCP_IPV4;
-    if( !tl_network_resolve_name( "localhost", &addr ) )
+    if( !tl_network_resolve_name( "localhost", TL_IPV4, &addr ) )
         return EXIT_FAILURE;
-    if( addr.protocol!=TL_TCP_IPV4 )
+    if( addr.net!=TL_IPV4 )
         return EXIT_FAILURE;
 
-    addr.protocol = TL_TCP_IPV6;
-    if( !tl_network_resolve_name( "localhost", &addr ) )
+    if( !tl_network_resolve_name( "localhost", TL_IPV6, &addr ) )
         return EXIT_FAILURE;
-    if( addr.protocol!=TL_TCP_IPV6 )
+    if( addr.net!=TL_IPV6 )
         return EXIT_FAILURE;
 
     /* resolve DNS name */
-    addr.protocol = TL_TCP_IPV4;
-    if( !tl_network_resolve_name( "www.example.com", &addr ) )
+    if( !tl_network_resolve_name( "www.example.com", TL_IPV4, &addr ) )
         return EXIT_FAILURE;
-    if( addr.protocol!=TL_TCP_IPV4 )
+    if( addr.net!=TL_IPV4 )
         return EXIT_FAILURE;
 
-    addr.protocol = TL_TCP_IPV6;
-    if( !tl_network_resolve_name( "www.example.com", &addr ) )
+    if( !tl_network_resolve_name( "www.example.com", TL_IPV6, &addr ) )
         return EXIT_FAILURE;
-    if( addr.protocol!=TL_TCP_IPV6 )
+    if( addr.net!=TL_IPV6 )
         return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
