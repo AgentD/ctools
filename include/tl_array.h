@@ -541,17 +541,6 @@ TLAPI void* tl_array_get_first( tl_array* arr );
  */
 TLAPI void* tl_array_get_last( tl_array* arr );
 
-/**
- * \brief Get a pointer to the abstract container implementation for tl_array
- *
- * \memberof tl_array
- *
- * \static
- *
- * \return A pointer to a tl_container implementation
- */
-TLAPI tl_container* tl_array_get_interface( void );
-
 #ifdef __cplusplus
 }
 #endif

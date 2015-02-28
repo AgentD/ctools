@@ -552,17 +552,6 @@ TLAPI void* tl_list_get_first( tl_list* list );
  */
 TLAPI void* tl_list_get_last( tl_list* list );
 
-/**
- * \brief Get a pointer to the abstract container implementation for tl_list
- *
- * \memberof tl_list
- *
- * \static
- *
- * \return A pointer to a tl_container implementation
- */
-TLAPI tl_container* tl_list_get_interface( void );
-
 #ifdef __cplusplus
 }
 #endif

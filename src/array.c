@@ -23,7 +23,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #define TL_EXPORT
-#include "tl_container.h"
 #include "tl_allocator.h"
 #include "tl_iterator.h"
 #include "tl_array.h"
@@ -42,30 +41,6 @@ typedef struct
     int forward;        /* non-zero if running forward, zero if backward */
 }
 tl_array_iterator;
-
-static tl_container interface =
-{
-    sizeof(tl_array),
-    (void(*)(void*,size_t,tl_allocator*))tl_array_init,
-    (void(*)(void*))tl_array_cleanup,
-    (void(*)(void*))tl_array_clear,
-    (int(*)(void*,const void*,size_t))tl_array_from_array,
-    (void(*)(const void*,void*))tl_array_to_array,
-    (void*(*)(void*))tl_array_get_first,
-    (void*(*)(void*))tl_array_get_last,
-    (tl_iterator*(*)(void*))tl_array_first,
-    (tl_iterator*(*)(void*))tl_array_last,
-    (void(*)(void*))tl_array_remove_first,
-    (void(*)(void*))tl_array_remove_last,
-    (int(*)(void*,const void*))tl_array_append,
-    (int(*)(void*,const void*))tl_array_prepend,
-    (void*(*)(const void*,size_t))tl_array_at,
-    (int(*)( void*,size_t,const void* ))tl_array_set,
-    (int(*)(void*,size_t,const void*,size_t))tl_array_insert,
-    (void(*)(void*,size_t,size_t))tl_array_remove,
-    (size_t(*)(const void*))tl_array_get_size
-};
-
 
 
 
@@ -635,10 +610,5 @@ void* tl_array_get_last( tl_array* this )
 {
     return (this && this->used) ?
            ((char*)this->data + this->unitsize*(this->used-1)) : NULL;
-}
-
-tl_container* tl_array_get_interface( void )
-{
-    return &interface;
 }
 

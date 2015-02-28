@@ -23,7 +23,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #define TL_EXPORT
-#include "tl_container.h"
 #include "tl_allocator.h"
 #include "tl_iterator.h"
 #include "tl_list.h"
@@ -53,29 +52,6 @@ typedef struct
     int forward;        /* nonzero: from head to tail. zero: reverse */
 }
 tl_list_iterator;
-
-static tl_container interface =
-{
-    sizeof(tl_list),
-    (void(*)(void*,size_t,tl_allocator*))tl_list_init,
-    (void(*)(void*))tl_list_cleanup,
-    (void(*)(void*))tl_list_clear,
-    (int(*)(void*,const void*,size_t))tl_list_from_array,
-    (void(*)(const void*,void*))tl_list_to_array,
-    (void*(*)(void*))tl_list_get_first,
-    (void*(*)(void*))tl_list_get_last,
-    (tl_iterator*(*)(void*))tl_list_first,
-    (tl_iterator*(*)(void*))tl_list_last,
-    (void(*)(void*))tl_list_remove_first,
-    (void(*)(void*))tl_list_remove_last,
-    (int(*)(void*,const void*))tl_list_append,
-    (int(*)(void*,const void*))tl_list_prepend,
-    (void*(*)(const void*,size_t))tl_list_at,
-    (int(*)( void*,size_t,const void* ))tl_list_set,
-    (int(*)(void*,size_t,const void*,size_t))tl_list_insert,
-    (void(*)(void*,size_t,size_t))tl_list_remove,
-    (size_t(*)(const void*))tl_list_get_size
-};
 
 
 
@@ -828,10 +804,5 @@ void* tl_list_get_first( tl_list* this )
 void* tl_list_get_last( tl_list* this )
 {
     return this ? tl_list_node_get_data( this->last ) : NULL;
-}
-
-tl_container* tl_list_get_interface( void )
-{
-    return &interface;
 }
 

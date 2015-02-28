@@ -101,8 +101,6 @@ endif( )
 
 add_library( ctools ${TYPE} src/array.c
                             src/list.c
-                            src/stack.c
-                            src/queue.c
                             src/rbtree.c
                             src/string.c
                             src/sort.c
@@ -126,8 +124,6 @@ endif( )
 #----------------------------------------------------------------------
 add_executable( test_array tests/test_array.c )
 add_executable( test_list tests/test_list.c )
-add_executable( test_stack tests/test_stack.c )
-add_executable( test_queue tests/test_queue.c )
 add_executable( test_rbtree tests/test_rbtree.c )
 add_executable( test_sort tests/test_sort.c )
 add_executable( test_string tests/test_string.c )
@@ -141,8 +137,6 @@ add_executable( test_network tests/test_network.c )
 
 target_link_libraries( test_array ctools  )
 target_link_libraries( test_list ctools )
-target_link_libraries( test_stack ctools )
-target_link_libraries( test_queue ctools )
 target_link_libraries( test_rbtree ctools )
 target_link_libraries( test_sort ctools )
 target_link_libraries( test_string ctools )
@@ -157,8 +151,6 @@ target_link_libraries( test_network ctools )
 enable_testing( )
 add_test( test_array ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_array )
 add_test( test_list ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_list )
-add_test( test_stack ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_stack )
-add_test( test_queue ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_queue )
 add_test( test_rbtree ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_rbtree )
 add_test( test_sort ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_sort )
 add_test( test_string ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_string )
