@@ -61,9 +61,10 @@ int tl_network_resolve_name( const char* hostname, int proto,
         return 0;
 
     /* check if hostname is actually a numeric IPv4 address */
-    if( inet_pton( AF_INET, hostname, &addr4 )>0 &&
-        (proto==TL_IPV4 || proto==TL_ANY) )
+    if( inet_pton( AF_INET, hostname, &addr4 )>0 )
     {
+        if( proto!=TL_IPV4 && proto!=TL_ANY )
+            return 0;
         if( addr )
         {
             addr->addr.ipv4 = ntohl( addr4.s_addr );
@@ -73,9 +74,10 @@ int tl_network_resolve_name( const char* hostname, int proto,
     }
 
     /* check if hostname is acutally a numeric IPv6 address */
-    if( inet_pton( AF_INET6, hostname, &addr6 )>0 &&
-        (proto==TL_IPV6 || proto==TL_ANY) )
+    if( inet_pton( AF_INET6, hostname, &addr6 )>0 )
     {
+        if( proto!=TL_IPV6 && proto!=TL_ANY )
+            return 0;
         if( addr )
         {
             convert_ipv6( &addr6, addr );
