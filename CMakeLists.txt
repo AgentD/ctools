@@ -88,9 +88,10 @@ if( UNIX )
 elseif( WIN32 )
   set( CTOOLS_SYSDEP src/W32/os.c
                      src/W32/fs.c
-                     src/W32/dir.c )
+                     src/W32/dir.c
+                     src/W32/network.c )
 
-  set( CTOOLS_SYSLIBS userenv )
+  set( CTOOLS_SYSLIBS userenv ws2_32 )
 endif( )
 
 if( SHARED )
@@ -146,7 +147,7 @@ target_link_libraries( test_hashmap ctools )
 target_link_libraries( test_iterator ctools )
 target_link_libraries( test_iterator_hashmap ctools )
 target_link_libraries( test_blob ctools )
-target_link_libraries( test_network ctools )
+target_link_libraries( test_network ctools ${CTOOLS_SYSLIBS} )
 
 enable_testing( )
 add_test( test_array ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_array )
