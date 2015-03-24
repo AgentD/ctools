@@ -67,16 +67,6 @@
 
 
 
-#define TL_FS_ACCESS 0x01
-#define TL_FS_EXISTS 0x02
-#define TL_FS_NO_SPACE 0x03
-#define TL_FS_NOT_EXIST 0x03
-#define TL_FS_NOT_DIR 0x04
-#define TL_FS_NOT_EMPTY 0x05
-#define TL_FS_SYS_ERROR 0x06
-
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif

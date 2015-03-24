@@ -49,11 +49,6 @@
 
 
 
-#define TL_IO_ACCESS (-6)
-#define TL_IO_IN_USE (-7)
-
-
-
 /**
  * \interface tl_server
  *
@@ -71,14 +66,14 @@ struct tl_server
     void(* destroy )( tl_server* server );
 
     /**
-     * \brief Startup a server
+     * \brief Start a server
      *
      * \param server A pointer to the server object
      *
-     * \return Zero on success, TL_IO_MEMORY if out of memory, TL_IO_ACCESS if
-     *         the calling process does not have the propper permissions,
-     *         TL_IO_IN_USE if there is already a server running at the same
-     *         source address.
+     * \return Zero on success, TL_IO_ACCESS if the calling process does not
+     *         have the propper permissions, TL_IO_IN_USE if there is already
+     *         a server running at the same source address, TL_IO_INTERNAL if
+     *         an internal error occoured.
      */
     int(* start )( tl_server* server );
 

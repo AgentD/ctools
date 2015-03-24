@@ -66,6 +66,25 @@
 
 
 
+#define TL_IO_NOT_SUPPORTED (-1)
+#define TL_IO_CLOSED (-2)
+#define TL_IO_TIMEOUT (-3)
+#define TL_IO_INTERNAL (-4)
+#define TL_IO_ACCESS (-5)
+#define TL_IO_IN_USE (-6)
+
+#define TL_FS_ACCESS (-1)
+#define TL_FS_EXISTS (-2)
+#define TL_FS_NO_SPACE (-3)
+#define TL_FS_NOT_EXIST (-4)
+#define TL_FS_NOT_DIR (-5)
+#define TL_FS_NOT_EMPTY (-6)
+#define TL_FS_SYS_ERROR (-7)
+
+
+
+
+
 typedef struct tl_array tl_array;
 typedef struct tl_list_node tl_list_node;
 typedef struct tl_list tl_list;

@@ -112,14 +112,18 @@ extern "C" {
 #endif
 
 /**
- * \brief Resolve a host name to an address
+ * \brief Resolve a host name string to an address
  *
- * \param hostname The host name to resolve to an address
- * \param proto    A \ref TL_NETWORK_PROTOCOL enumerator specifying a prefered
+ * This function takes a string that may contain a host name, a string
+ * representation of a network address, a DNS name or similar and tries
+ * to resolve it to a tl_net_addr network address.
+ *
+ * \param hostname The string to resolve to an address
+ * \param proto    A \ref TL_NETWORK_PROTOCOL value specifying a prefered
  *                 protocol address to fetch.
  * \param addr     A pointer to a tl_net_addr structure to write the resolved
- *                 address to. This can be NULL to check if a host name can
- *                 be resolved.
+ *                 address and address type to. This can be NULL to check if
+ *                 a host name \em can be resolved.
  *
  * \return Non-zero on success, zero on failure
  */
