@@ -74,6 +74,19 @@ else( )
 endif( )
 
 #----------------------------------------------------------------------
+# Hardware specifics
+#----------------------------------------------------------------------
+include( TestBigEndian )
+
+test_big_endian( IS_BIG_ENDIAN )
+
+if( ${IS_BIG_ENDIAN} )
+  add_definitions( -DMACHINE_BIG_ENDIAN )
+else( )
+  add_definitions( -DMACHINE_LIL_ENDIAN )
+endif( )
+
+#----------------------------------------------------------------------
 # Configure targets
 #----------------------------------------------------------------------
 include_directories( ${CMAKE_SOURCE_DIR}/include/ )

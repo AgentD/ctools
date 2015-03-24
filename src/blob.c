@@ -243,49 +243,59 @@ int tl_blob_guess_encoding( tl_blob* this )
     /* try UTF-32 variants */
     if( count>=4 && (this->size % 4)==0 )
     {
-        if( ptr[0]==0x00 && ptr[1]==0x00 && ptr[2]==0xFE && ptr[3]==0xFF )
-            return TL_BLOB_UTF32_BE;
-
-        if( ptr[0]==0xFF && ptr[1]==0xFE && ptr[2]==0x00 && ptr[3]==0x00 )
-            return TL_BLOB_UTF32_LE;
+        a = *((tl_u32*)ptr);
+    #ifdef MACHINE_BIG_ENDIAN
+        if( a == 0x0000FEFF ) return TL_BLOB_UTF32_BE;
+        if( a == 0xFFFE0000 ) return TL_BLOB_UTF32_LE;
+    #else
+        if( a == 0xFFFE0000 ) return TL_BLOB_UTF32_BE;
+        if( a == 0x0000FEFF ) return TL_BLOB_UTF32_LE;
+    #endif
     }
 
     /* try UTF-16 variants */
     if( count>=2 && (this->size % 2)==0 )
     {
-        if( ptr[0]==0xFE && ptr[1]==0xFF )
-            return TL_BLOB_UTF16_BE;
-
-        if( ptr[0]==0xFF && ptr[1]==0xFE )
-            return TL_BLOB_UTF16_LE;
+        a = *((tl_u16*)ptr);
+    #ifdef MACHINE_BIG_ENDIAN
+        if( a == 0xFEFF ) return TL_BLOB_UTF16_BE;
+        if( a == 0xFFFE ) return TL_BLOB_UTF16_LE;
+    #else
+        if( a == 0xFFFE ) return TL_BLOB_UTF16_BE;
+        if( a == 0xFEFF ) return TL_BLOB_UTF16_LE;
+    #endif
 
         for( i=0; (i+3)<count; i+=2 )
         {
-            a = (((unsigned int)ptr[i  ])<<8) | ((unsigned int)ptr[i+1]);
-            b = (((unsigned int)ptr[i+2])<<8) | ((unsigned int)ptr[i+3]);
-
+            a = ((tl_u16*)ptr)[0];
+            b = ((tl_u16*)ptr)[1];
+        #ifdef MACHINE_BIG_ENDIAN
             if( a>=0xD800 && a<=0xDBFF && b>=0xDC00 && b<=0xDFFF )
                 return TL_BLOB_UTF16_BE;
-
-            a = (((unsigned int)ptr[i+1])<<8) | ((unsigned int)ptr[i  ]);
-            b = (((unsigned int)ptr[i+3])<<8) | ((unsigned int)ptr[i+2]);
-
+        #else
             if( a>=0xD800 && a<=0xDBFF && b>=0xDC00 && b<=0xDFFF )
                 return TL_BLOB_UTF16_LE;
+        #endif
+            a = ((a<<8) & 0xFF00) | ((a>>8) & 0xFF);
+            b = ((b<<8) & 0xFF00) | ((b>>8) & 0xFF);
+        #ifdef MACHINE_BIG_ENDIAN
+            if( a>=0xD800 && a<=0xDBFF && b>=0xDC00 && b<=0xDFFF )
+                return TL_BLOB_UTF16_LE;
+        #else
+            if( a>=0xD800 && a<=0xDBFF && b>=0xDC00 && b<=0xDFFF )
+                return TL_BLOB_UTF16_BE;
+        #endif
         }
     }
 
     /* try base64 */
     for( i=0; i<count; ++i )
     {
-        if( isspace( ptr[i] ) || ptr[i]=='=' )
-            continue;
-
-        if( isupper( ptr[i] ) || islower( ptr[i] ) || isdigit( ptr[i] ) )
-            continue;
-
-        if( ptr[i]!='-' && ptr[i]!='_' && ptr[i]!='+' && ptr[i]!='/' )
+        if( !isalnum(ptr[i]) && !isspace(ptr[i]) && ptr[i]!='=' &&
+            ptr[i]!='-' && ptr[i]!='_' && ptr[i]!='+' && ptr[i]!='/' )
+        {
             break;
+        }
     }
 
     if( i>=count )
@@ -380,10 +390,10 @@ int tl_blob_encode_base64( tl_blob* this, const tl_blob* input, int use_alt )
 int tl_blob_decode_base64( tl_blob* this, const tl_blob* input,
                            int ignoregarbage )
 {
-    int group[4], index;
-    unsigned char* dst;
+    unsigned char c, group[4], *dst;
+    size_t size, outsize, i;
     const char* src;
-    size_t size, i;
+    int index;
 
     if( !this || !input )
         return 0;
@@ -394,50 +404,35 @@ int tl_blob_decode_base64( tl_blob* this, const tl_blob* input,
 
     for( i=0; i<input->size; ++i, ++src )
     {
-        if( isupper(*src) || islower(*src) || isdigit(*src) )
-            ++size;
-        else if( *src=='-' || *src=='_' || *src=='+' || *src=='/' )
+        if( isalnum(*src)||*src=='-'||*src=='_'||*src=='+'||*src=='/' )
             ++size;
         else if( *src=='=' )
         {
-            /* allow "=" or "==" padding at the end */
-            if( (size % 4)!=2 && (size % 4)!=3 )
-                return 0;
-
+            if( (size % 4)==3 )
+                break;
             if( (size % 4)==2 )
             {
                 for( ++src, ++i; i<input->size; ++i, ++src )
                 {
                     if( *src=='=' )
-                        break;
-                    if( !isspace( *src ) && !ignoregarbage )
-                        return 0;
-                }
-                if( i>=input->size )
-                    return 0;
-            }
-
-            if( !ignoregarbage )
-            {
-                for( ++src, ++i; i<input->size; ++i, ++src )
-                {
-                    if( !isspace( *src ) )
+                        goto done;
+                    if( !ignoregarbage && !isspace(*src) )
                         return 0;
                 }
             }
-            break;
+            return 0;
         }
         else if( !isspace(*src) && !ignoregarbage )
             return 0;
     }
-
+done:
     if( (size % 4)==1 )
         return 0;
 
-    size = ((size % 4) ? (size % 4)-1 : 0) + 3 * (size / 4);
+    outsize = ((size % 4) ? (size % 4)-1 : 0) + 3 * (size / 4);
 
     /* initialize destination blob */
-    if( !tl_blob_init( this, size, NULL ) )
+    if( !tl_blob_init( this, outsize, NULL ) )
         return 0;
 
     /* convert */
@@ -445,14 +440,16 @@ int tl_blob_decode_base64( tl_blob* this, const tl_blob* input,
     dst = this->data;
     index = 0;
 
-    for( i=0; i<input->size; ++i, ++src )
+    for( i=0; i<size; ++i, ++src )
     {
-             if( isupper(*src)          ) group[ index++ ] = *src - 'A';
-        else if( islower(*src)          ) group[ index++ ] = *src - 'a' + 26;
-        else if( isdigit(*src)          ) group[ index++ ] = *src - '0' + 52;
-        else if( *src=='+' || *src=='-' ) group[ index++ ] = 62;
-        else if( *src=='/' || *src=='_' ) group[ index++ ] = 63;
-
+        c = *src;
+             if( isupper(c)       ) c = c - 'A';
+        else if( islower(c)       ) c = c - 'a' + 26;
+        else if( isdigit(c)       ) c = c - '0' + 52;
+        else if( c=='+' || c=='-' ) c = 62;
+        else if( c=='/' || c=='_' ) c = 63;
+        else                        continue;
+        group[ index++ ] = c;
         if( index==4 )
         {
             *(dst++) = ((group[0]<<2) & 0xFC) | ((group[1]>>4) & 0x03);
@@ -476,7 +473,7 @@ int tl_blob_decode_base64( tl_blob* this, const tl_blob* input,
 void tl_blob_unicode_byteswap( tl_blob* this, int encoding )
 {
     unsigned char* ptr;
-    unsigned char temp;
+    unsigned int a;
     size_t i;
 
     if( !this )
@@ -488,22 +485,19 @@ void tl_blob_unicode_byteswap( tl_blob* this, int encoding )
     {
         for( i=0; i<this->size; i+=2, ptr+=2 )
         {
-            temp = ptr[0];
-            ptr[0] = ptr[1];
-            ptr[1] = temp;
+            a = *((tl_u16*)ptr);
+            a = ((a<<8)&0xFF00)|((a>>8)&0xFF);
+            *((tl_u16*)ptr) = a;
         }
     }
     else if( encoding==TL_BLOB_UTF32_LE || encoding==TL_BLOB_UTF32_BE )
     {
         for( i=0; i<this->size; i+=4, ptr+=4 )
         {
-            temp = ptr[0];
-            ptr[0] = ptr[3];
-            ptr[3] = temp;
-
-            temp = ptr[1];
-            ptr[1] = ptr[2];
-            ptr[2] = temp;
+            a = *((tl_u32*)ptr);
+            a = ((a>>24) & 0xFF) | ((a<<8) & 0x00FF0000) |
+                ((a>>8) & 0x0000FF00) | ((a<<24) & 0xFF000000);
+            *((tl_u32*)ptr) = a;
         }
     }
 }
