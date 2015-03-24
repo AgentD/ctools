@@ -11,9 +11,7 @@
   - tl_array, a resizeable array
   - tl_hashmap, a seperate-chaining based hash map
   - tl_list, a doubly linked list
-  - tl_queue, a linked list based, double ended queue
   - tl_rbtree, a red-black tree
-  - tl_stack, an array based stack data structure
   - tl_string, a UTF-16 dynamic string implementation
   - various sorting algorithm implementations
   - abstract filesystem and directory access functions
