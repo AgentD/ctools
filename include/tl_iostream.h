@@ -72,28 +72,24 @@ struct tl_iostream
      * destroys the stream objects, thus shutting down connections in an
      * orderly manner and freeing all memory used by the stream object.
      *
-     * The initial, default timeout behaviour depends on the underlying
-     * implementation.
-     *
      * \param stream A pointer to a stream object
      */
     void (* destroy )( tl_iostream* stream );
 
     /**
-     * \brief Set the blocking and timeout behaviour of the read operation
+     * \brief Set the blocking and timeout behaviour of the stream
+     *
+     * The initial, default timeout behaviour depends on the underlying
+     * implementation.
      *
      * \param stream  A pointer to the stream object
      * \param timeout A timeout value in milli seconds, 0 for infinite
-     * \param block   Non zero if reading should block if not enough data is
-     *                available, or return immediately with less than the
-     *                requested bytes instead.
      *
      * \return Zero on success, TL_IO_NOT_SUPPORTED if the operation is not
      *         supported by the implementation, TL_IO_INTERNAL if an internal
      *         error occoured.
      */
-    int (* set_read_timeout )( tl_iostream* stream, unsigned int timeout,
-                               int block );
+    int (* set_timeout )( tl_iostream* stream, unsigned int timeout );
 
     /**
      * \brief Write a raw block of data to a stream
@@ -101,17 +97,28 @@ struct tl_iostream
      * \param stream A pointer to the stream object
      * \param buffer A pointer to the data block to write
      * \param size   The number of bytes to send
+     * \param actual If not NULL, returns the number of bytes actually written
+     *
+     * \return Zero on success, TL_IO_CLOSED if the connection was closed,
+     *         TL_IO_TIMEOUT if a timeout occoured or TL_IO_INTERNAL if an
+     *         internal error occoured.
      */
-    void (* write_raw )( tl_iostream* stream, const void* buffer,
-                         size_t size );
+    int (* write_raw )( tl_iostream* stream, const void* buffer,
+                        size_t size, size_t* actual );
 
     /**
      * \brief Write a blob to a stream
      *
      * \param stream A pointer to the stream object
      * \param blob   A pointer to a blob object to write
+     * \param actual If not NULL, returns the number of bytes actually written
+     *
+     * \return Zero on success, TL_IO_CLOSED if the connection was closed,
+     *         TL_IO_TIMEOUT if a timeout occoured or TL_IO_INTERNAL if an
+     *         internal error occoured.
      */
-    void (* write )( tl_iostream* stream, const tl_blob* blob );
+    int (* write )( tl_iostream* stream, const tl_blob* blob,
+                    size_t* actual );
 
     /**
      * \brief Read a raw block of data from a stream
@@ -131,9 +138,10 @@ struct tl_iostream
      *
      * \return Zero on success, TL_IO_CLOSED if the connection was closed,
      *         TL_IO_TIMEOUT if a timeout occoured, TL_IO_INTERNAL if an
-     +         internal error occoured.
+     *         internal error occoured.
      */
-    int (* read_raw )( tl_iostream* stream, void* buffer, size_t size );
+    int (* read_raw )( tl_iostream* stream, void* buffer, size_t size,
+                       size_t* actual );
 
     /**
      * \brief Read a blob of data from a stream
