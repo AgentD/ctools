@@ -30,7 +30,19 @@
 #include "tl_string.h"
 #include "tl_fs.h"
 
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <netdb.h>
+
+#include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <errno.h>
 
@@ -51,6 +63,29 @@ int errno_to_fs( int code );
  * \return A buffer holding an UTF-8 version. Must be freed using free( ).
  */
 char* to_utf8( const tl_string* in );
+
+/**
+ * \brief Convert an in6_addr structure to a tl_net_addr
+ *
+ * \param v6   Pointer to input data
+ * \param addr Pointer to output structure
+ */
+void convert_ipv6( const struct in6_addr* v6, tl_net_addr* addr );
+
+/**
+ * \brief Convert a tl_net_addr structure to an in6_addr
+ *
+ * \param addr Pointer to input data
+ * \param v6   Pointer to output structure
+ */
+void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 );
+
+/**
+ * \brief Create a tl_iostream implementation that manages a connected socket
+ *
+ * \param sockfd A socket file descriptor
+ */
+tl_iostream* sock_stream_create( int sockfd );
 
 #ifdef __cplusplus
 }

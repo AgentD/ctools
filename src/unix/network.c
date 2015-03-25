@@ -24,31 +24,11 @@
  */
 #define TL_EXPORT
 #include "tl_network.h"
-
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#include <arpa/inet.h>
-#include <netdb.h>
-
-#include <string.h>
-#include <ctype.h>
+#include "tl_iostream.h"
+#include "tl_blob.h"
+#include "os.h"
 
 
-
-static void convert_ipv6( struct in6_addr* v6, tl_net_addr* addr )
-{
-    addr->addr.ipv6[7] = (v6->s6_addr[ 0]<<8) | v6->s6_addr[ 1];
-    addr->addr.ipv6[6] = (v6->s6_addr[ 2]<<8) | v6->s6_addr[ 3];
-    addr->addr.ipv6[5] = (v6->s6_addr[ 4]<<8) | v6->s6_addr[ 5];
-    addr->addr.ipv6[4] = (v6->s6_addr[ 6]<<8) | v6->s6_addr[ 7];
-    addr->addr.ipv6[3] = (v6->s6_addr[ 8]<<8) | v6->s6_addr[ 9];
-    addr->addr.ipv6[2] = (v6->s6_addr[10]<<8) | v6->s6_addr[11];
-    addr->addr.ipv6[1] = (v6->s6_addr[12]<<8) | v6->s6_addr[13];
-    addr->addr.ipv6[0] = (v6->s6_addr[14]<<8) | v6->s6_addr[15];
-}
-
-/****************************************************************************/
 
 int tl_network_resolve_name( const char* hostname, int proto,
                              tl_net_addr* addr )
@@ -147,15 +127,75 @@ tl_server* tl_network_create_server( int net, int proto, tl_u16 port )
 
 tl_iostream* tl_network_create_client( const tl_net_addr* peer )
 {
+    int sockfd, family, type, size, proto;
+    struct sockaddr_in v4addr;
+    struct sockaddr_in6 v6addr;
+    struct sockaddr* addr;
+    tl_iostream* stream;
+
     if( !peer )
         return NULL;
 
-    if( peer->net!=TL_IPV4 && peer->net!=TL_IPV6 )
+    /* translate transport protocol data */
+    if( peer->transport==TL_TCP )
+    {
+        type = SOCK_STREAM;
+        proto = IPPROTO_TCP;
+    }
+    else if( peer->transport==TL_UDP )
+    {
+        type = SOCK_DGRAM;
+        proto = IPPROTO_UDP;
+    }
+    else
+    {
+        return NULL;
+    }
+
+    /* translate network protocol data */
+    if( peer->net==TL_IPV4 )
+    {
+        memset( &v4addr, 0, sizeof(v4addr) );
+        v4addr.sin_family      = AF_INET;
+        v4addr.sin_addr.s_addr = htonl(peer->addr.ipv4);
+        v4addr.sin_port        = htons(peer->port);
+        family                 = PF_INET;
+        addr                   = (struct sockaddr*)&v4addr;
+        size                   = sizeof(v4addr);
+    }
+    else if( peer->net==TL_IPV6 )
+    {
+        memset( &v6addr, 0, sizeof(v6addr) );
+        convert_in6addr( peer, &(v6addr.sin6_addr) );
+        v6addr.sin6_family = AF_INET6;
+        v6addr.sin6_port   = htons(peer->port);
+        family             = PF_INET6;
+        addr               = (struct sockaddr*)&v6addr;
+        size               = sizeof(v6addr);
+    }
+    else
+    {
+        return NULL;
+    }
+
+    /* create and connect socket */
+    sockfd = socket( family, type, proto );
+
+    if( sockfd < 0 )
         return NULL;
 
-    if( peer->transport!=TL_TCP && peer->transport!=TL_UDP )
+    if( connect( sockfd, addr, size ) < 0 )
+    {
+        close( sockfd );
         return NULL;
+    }
 
-    return NULL;
+    /* create stream object */
+    stream = sock_stream_create( sockfd );
+
+    if( !stream )
+        close( sockfd );
+
+    return stream;
 }
 
