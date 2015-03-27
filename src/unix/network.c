@@ -113,16 +113,82 @@ int tl_network_resolve_name( const char* hostname, int proto,
     return 1;
 }
 
-tl_server* tl_network_create_server( int net, int proto, tl_u16 port )
+tl_server* tl_network_create_server( int net, int proto, tl_u16 port,
+                                     unsigned int backlog )
 {
-    if( net!=TL_IPV4 && net!=TL_IPV6 )
+    int sockfd, family, type, size, ipproto;
+    struct sockaddr_in v4addr;
+    struct sockaddr_in6 v6addr;
+    struct sockaddr* addr;
+    tl_server* server;
+    int val;
+
+    /* translate transport protocol data */
+    if( proto==TL_TCP )
+    {
+        type = SOCK_STREAM;
+        ipproto = IPPROTO_TCP;
+    }
+    else if( proto==TL_UDP )
+    {
+        type = SOCK_DGRAM;
+        ipproto = IPPROTO_UDP;
+    }
+    else
+    {
+        return NULL;
+    }
+
+    /* translate network protocol data */
+    if( net==TL_IPV4 )
+    {
+        memset( &v4addr, 0, sizeof(v4addr) );
+        v4addr.sin_family      = AF_INET;
+        v4addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        v4addr.sin_port        = htons(port);
+        family                 = PF_INET;
+        addr                   = (struct sockaddr*)&v4addr;
+        size                   = sizeof(v4addr);
+    }
+    else if( net==TL_IPV6 )
+    {
+        memset( &v6addr, 0, sizeof(v6addr) );
+        v6addr.sin6_family = AF_INET6;
+        v6addr.sin6_addr   = in6addr_any;
+        v6addr.sin6_port   = htons(port);
+        family             = PF_INET6;
+        addr               = (struct sockaddr*)&v6addr;
+        size               = sizeof(v6addr);
+    }
+    else
+    {
+        return NULL;
+    }
+
+    /* create and bind socket */
+    sockfd = socket( family, type, ipproto );
+
+    if( sockfd < 0 )
         return NULL;
 
-    if( proto!=TL_TCP && proto!=TL_UDP )
-        return NULL;
+    val = 1;
+    setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val) );
+    val = 1;
+    setsockopt( sockfd, SOL_SOCKET, SO_REUSEPORT, &val, sizeof(val) );
 
-    (void)port;
-    return NULL;
+    if( bind( sockfd, addr, size ) < 0 )
+    {
+        close( sockfd );
+        return NULL;
+    }
+
+    /* create the server */
+    server = tcp_server_create( sockfd, backlog );
+
+    if( !server )
+        close( sockfd );
+
+    return server;
 }
 
 tl_iostream* tl_network_create_client( const tl_net_addr* peer )

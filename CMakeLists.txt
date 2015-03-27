@@ -96,7 +96,8 @@ if( UNIX )
                      src/unix/fs.c
                      src/unix/dir.c
                      src/unix/network.c
-                     src/unix/sockstream.c )
+                     src/unix/sockstream.c
+                     src/unix/tcpserver.c )
 
   add_definitions( -D_POSIX_SOURCE=1 )
 elseif( WIN32 )
@@ -148,8 +149,8 @@ add_executable( test_hashmap tests/test_hashmap.c )
 add_executable( test_iterator tests/test_iterator.c )
 add_executable( test_iterator_hashmap tests/test_iterator_hashmap.c )
 add_executable( test_blob tests/test_blob.c )
-add_executable( test_network tests/test_network.c )
-add_executable( test_network2 tests/test_network2.c )
+add_executable( test_namelookup tests/test_namelookup.c )
+add_executable( test_tcp tests/test_tcp.c )
 
 target_link_libraries( test_array ctools  )
 target_link_libraries( test_list ctools )
@@ -162,8 +163,8 @@ target_link_libraries( test_hashmap ctools )
 target_link_libraries( test_iterator ctools )
 target_link_libraries( test_iterator_hashmap ctools )
 target_link_libraries( test_blob ctools )
-target_link_libraries( test_network ctools ${CTOOLS_SYSLIBS} )
-target_link_libraries( test_network2 ctools ${CTOOLS_SYSLIBS} )
+target_link_libraries( test_namelookup ctools ${CTOOLS_SYSLIBS} )
+target_link_libraries( test_tcp ctools ${CTOOLS_SYSLIBS} )
 
 enable_testing( )
 add_test( test_array ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_array )
@@ -178,8 +179,8 @@ add_test( test_iterator ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_iterator )
 add_test( test_iterator_hashmap
           ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_iterator_hashmap )
 add_test( test_blob ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_blob )
-add_test( test_network ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_network )
-add_test( test_network2 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_network2 )
+add_test( test_namelookup ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_namelookup )
+add_test( test_tcp ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_tcp )
 
 #----------------------------------------------------------------------
 # generate Doxygen API reference

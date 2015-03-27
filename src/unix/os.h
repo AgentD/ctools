@@ -87,6 +87,14 @@ void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 );
  */
 tl_iostream* sock_stream_create( int sockfd );
 
+/**
+ * \brief Create a tl_server implementation instance that offers a TCP server
+ *
+ * \param sockfd  A server socket file descriptor
+ * \param backlog The connection backlog for the listen syscall
+ */
+tl_server* tcp_server_create( int sockfd, unsigned int backlog );
+
 #ifdef __cplusplus
 }
 #endif

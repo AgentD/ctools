@@ -133,13 +133,15 @@ TLAPI int tl_network_resolve_name( const char* hostname, int proto,
 /**
  * \brief Create a server instance
  *
- * \param net   A \ref TL_NETWORK_PROTOCOL identifier
- * \param proto A \ref TL_TRANSPORT_PROTOCOL identifier
- * \param port  The port number to bind to
+ * \param net     A \ref TL_NETWORK_PROTOCOL identifier
+ * \param proto   A \ref TL_TRANSPORT_PROTOCOL identifier
+ * \param port    The port number to bind to
+ * \param backlog The maximum number of incomming connections kept waiting
  *
  * \return A pointer to a new server instance or NULL on failure
  */
-TLAPI tl_server* tl_network_create_server( int net, int proto, tl_u16 port );
+TLAPI tl_server* tl_network_create_server( int net, int proto, tl_u16 port,
+                                           unsigned int backlog );
 
 /**
  * \brief Create a connection to a server

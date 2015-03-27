@@ -66,29 +66,6 @@ struct tl_server
     void(* destroy )( tl_server* server );
 
     /**
-     * \brief Start a server
-     *
-     * \param server A pointer to the server object
-     *
-     * \return Zero on success, TL_IO_ACCESS if the calling process does not
-     *         have the propper permissions, TL_IO_IN_USE if there is already
-     *         a server running at the same source address, TL_IO_INTERNAL if
-     *         an internal error occoured.
-     */
-    int(* start )( tl_server* server );
-
-    /**
-     * \brief Stop a running server
-     *
-     * All existing connections are closed and shut down orderly. The existing
-     * I/O stream objects are still valid after a call to this, but are no
-     * longer able to send or receive data.
-     *
-     * \param server A pointer to a server object
-     */
-    void(* stop )( tl_server* server );
-
-    /**
      * \brife Wait until a client connects
      *
      * For connection based network protocols, this function simply waits for
