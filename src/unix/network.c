@@ -30,6 +30,58 @@
 
 
 
+static int create_socket(const tl_net_addr* peer, void* addrbuffer, int* size)
+{
+    struct sockaddr_in6* v6addr = addrbuffer;
+    struct sockaddr_in* v4addr = addrbuffer;
+    int family, type, proto;
+
+    if( !peer )
+        return -1;
+
+    if( peer->net==TL_IPV4 )
+    {
+        memset( v4addr, 0, sizeof(struct sockaddr_in) );
+        v4addr->sin_addr.s_addr = htonl( peer->addr.ipv4 );
+        v4addr->sin_port        = htons( peer->port );
+        v4addr->sin_family      = AF_INET;
+        family                  = PF_INET;
+        *size                   = sizeof(struct sockaddr_in);
+    }
+    else if( peer->net==TL_IPV6 )
+    {
+        memset( v6addr, 0, sizeof(struct sockaddr_in6) );
+        convert_in6addr( peer, &(v6addr->sin6_addr) );
+        v6addr->sin6_port   = htons( peer->port );
+        v6addr->sin6_family = AF_INET6;
+        family              = PF_INET6;
+        *size               = sizeof(struct sockaddr_in6);
+    }
+    else
+    {
+        return -1;
+    }
+
+    if( peer->transport==TL_TCP )
+    {
+        type = SOCK_STREAM;
+        proto = IPPROTO_TCP;
+    }
+    else if( peer->transport==TL_UDP )
+    {
+        type = SOCK_DGRAM;
+        proto = IPPROTO_UDP;
+    }
+    else
+    {
+        return -1;
+    }
+
+    return socket( family, type, proto );
+}
+
+/****************************************************************************/
+
 int tl_network_resolve_name( const char* hostname, int proto,
                              tl_net_addr* addr )
 {
@@ -116,152 +168,63 @@ int tl_network_resolve_name( const char* hostname, int proto,
 tl_server* tl_network_create_server( int net, int proto, tl_u16 port,
                                      unsigned int backlog )
 {
-    int sockfd, family, type, size, ipproto;
-    struct sockaddr_in v4addr;
-    struct sockaddr_in6 v6addr;
-    struct sockaddr* addr;
+    int sockfd, size;
+    unsigned char addrbuffer[128];
     tl_server* server;
+    tl_net_addr addr;
     int val;
 
-    /* translate transport protocol data */
-    if( proto==TL_TCP )
-    {
-        type = SOCK_STREAM;
-        ipproto = IPPROTO_TCP;
-    }
-    else if( proto==TL_UDP )
-    {
-        type = SOCK_DGRAM;
-        ipproto = IPPROTO_UDP;
-    }
-    else
-    {
-        return NULL;
-    }
+    addr.net = net;
+    addr.transport = proto;
+    addr.port = port;
 
-    /* translate network protocol data */
-    if( net==TL_IPV4 )
-    {
-        memset( &v4addr, 0, sizeof(v4addr) );
-        v4addr.sin_family      = AF_INET;
-        v4addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        v4addr.sin_port        = htons(port);
-        family                 = PF_INET;
-        addr                   = (struct sockaddr*)&v4addr;
-        size                   = sizeof(v4addr);
-    }
-    else if( net==TL_IPV6 )
-    {
-        memset( &v6addr, 0, sizeof(v6addr) );
-        v6addr.sin6_family = AF_INET6;
-        v6addr.sin6_addr   = in6addr_any;
-        v6addr.sin6_port   = htons(port);
-        family             = PF_INET6;
-        addr               = (struct sockaddr*)&v6addr;
-        size               = sizeof(v6addr);
-    }
+    if( net==TL_IPV6 )
+        convert_ipv6( &in6addr_any, &addr );
+    else if( net==TL_IPV4 )
+        addr.addr.ipv4 = INADDR_ANY;
     else
-    {
         return NULL;
-    }
 
-    /* create and bind socket */
-    sockfd = socket( family, type, ipproto );
+    sockfd = create_socket( &addr, (void*)addrbuffer, &size );
 
     if( sockfd < 0 )
         return NULL;
 
-    val = 1;
-    setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val) );
-    val = 1;
-    setsockopt( sockfd, SOL_SOCKET, SO_REUSEPORT, &val, sizeof(val) );
+    val=1; setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val) );
+    val=1; setsockopt( sockfd, SOL_SOCKET, SO_REUSEPORT, &val, sizeof(val) );
 
-    if( bind( sockfd, addr, size ) < 0 )
-    {
-        close( sockfd );
-        return NULL;
-    }
+    if( bind( sockfd, (void*)addrbuffer, size ) < 0 )
+        goto fail;
 
-    /* create the server */
-    server = tcp_server_create( sockfd, backlog );
-
-    if( !server )
-        close( sockfd );
+    if( !(server = tcp_server_create( sockfd, backlog )) )
+        goto fail;
 
     return server;
+fail:
+    close( sockfd );
+    return NULL;
 }
 
 tl_iostream* tl_network_create_client( const tl_net_addr* peer )
 {
-    int sockfd, family, type, size, proto;
-    struct sockaddr_in v4addr;
-    struct sockaddr_in6 v6addr;
-    struct sockaddr* addr;
+    unsigned char addrbuffer[128];
     tl_iostream* stream;
+    int sockfd, size;
 
-    if( !peer )
-        return NULL;
-
-    /* translate transport protocol data */
-    if( peer->transport==TL_TCP )
-    {
-        type = SOCK_STREAM;
-        proto = IPPROTO_TCP;
-    }
-    else if( peer->transport==TL_UDP )
-    {
-        type = SOCK_DGRAM;
-        proto = IPPROTO_UDP;
-    }
-    else
-    {
-        return NULL;
-    }
-
-    /* translate network protocol data */
-    if( peer->net==TL_IPV4 )
-    {
-        memset( &v4addr, 0, sizeof(v4addr) );
-        v4addr.sin_family      = AF_INET;
-        v4addr.sin_addr.s_addr = htonl(peer->addr.ipv4);
-        v4addr.sin_port        = htons(peer->port);
-        family                 = PF_INET;
-        addr                   = (struct sockaddr*)&v4addr;
-        size                   = sizeof(v4addr);
-    }
-    else if( peer->net==TL_IPV6 )
-    {
-        memset( &v6addr, 0, sizeof(v6addr) );
-        convert_in6addr( peer, &(v6addr.sin6_addr) );
-        v6addr.sin6_family = AF_INET6;
-        v6addr.sin6_port   = htons(peer->port);
-        family             = PF_INET6;
-        addr               = (struct sockaddr*)&v6addr;
-        size               = sizeof(v6addr);
-    }
-    else
-    {
-        return NULL;
-    }
-
-    /* create and connect socket */
-    sockfd = socket( family, type, proto );
+    sockfd = create_socket( peer, addrbuffer, &size );
 
     if( sockfd < 0 )
         return NULL;
 
-    if( connect( sockfd, addr, size ) < 0 )
-    {
-        close( sockfd );
-        return NULL;
-    }
+    if( connect( sockfd, (void*)addrbuffer, size ) < 0 )
+        goto fail;
 
-    /* create stream object */
-    stream = sock_stream_create( sockfd );
-
-    if( !stream )
-        close( sockfd );
+    if( !(stream = sock_stream_create( sockfd )) )
+        goto fail;
 
     return stream;
+fail:
+    close( sockfd );
+    return NULL;
 }
 

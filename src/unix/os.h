@@ -27,7 +27,9 @@
 
 
 
+#include "tl_iostream.h"
 #include "tl_string.h"
+#include "tl_array.h"
 #include "tl_fs.h"
 
 #include <sys/types.h>

@@ -22,6 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#define TL_EXPORT
 #include "os.h"
 #include "tl_server.h"
 #include <sys/select.h>
