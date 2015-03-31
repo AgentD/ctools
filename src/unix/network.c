@@ -165,27 +165,14 @@ int tl_network_resolve_name( const char* hostname, int proto,
     return 1;
 }
 
-tl_server* tl_network_create_server( int net, int proto, tl_u16 port,
+tl_server* tl_network_create_server( const tl_net_addr* addr,
                                      unsigned int backlog )
 {
-    int sockfd, size;
     unsigned char addrbuffer[128];
+    int sockfd, size, val;
     tl_server* server;
-    tl_net_addr addr;
-    int val;
 
-    addr.net = net;
-    addr.transport = proto;
-    addr.port = port;
-
-    if( net==TL_IPV6 )
-        convert_ipv6( &in6addr_any, &addr );
-    else if( net==TL_IPV4 )
-        addr.addr.ipv4 = INADDR_ANY;
-    else
-        return NULL;
-
-    sockfd = create_socket( &addr, (void*)addrbuffer, &size );
+    sockfd = create_socket( addr, (void*)addrbuffer, &size );
 
     if( sockfd < 0 )
         return NULL;
@@ -226,5 +213,33 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
 fail:
     close( sockfd );
     return NULL;
+}
+
+int tl_network_get_special_address( tl_net_addr* addr, int type, int net )
+{
+    if( !addr )
+        return 0;
+
+    addr->net = net;
+
+    if( net==TL_IPV4 )
+    {
+        switch( type )
+        {
+        case TL_LOOPBACK:   addr->addr.ipv4 = INADDR_LOOPBACK;  return 1;
+        case TL_BROADCAST:  addr->addr.ipv4 = INADDR_BROADCAST; return 1;
+        case TL_ALL:        addr->addr.ipv4 = INADDR_ANY;       return 1;
+        }
+    }
+    else if( net==TL_IPV6 )
+    {
+        switch( type )
+        {
+        case TL_LOOPBACK:  convert_ipv6( &in6addr_loopback, addr ); return 1;
+        case TL_ALL:       convert_ipv6( &in6addr_any,      addr ); return 1;
+        }
+    }
+
+    return 0;
 }
 

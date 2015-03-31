@@ -21,58 +21,64 @@ static int test_transmission( tl_iostream* up, tl_iostream* down,
     return 1;
 }
 
-int main( void )
+static int run_test( tl_net_addr* peer, tl_net_addr* accept )
 {
     tl_iostream *a_down, *b_down, *a, *b;
     tl_server* server;
-    tl_net_addr peer;
 
-    /* create server */
-    server = tl_network_create_server( TL_IPV4, TL_TCP, 15000, 10 );
+    if( !(server = tl_network_create_server( accept, 10 )) )
+        return 0;
 
-    if( !server )
-        return EXIT_FAILURE;
+    if( !(a = tl_network_create_client( peer )) )
+        return 0;
 
-    /* setup client connection data */
-    peer.transport = TL_TCP;
-    peer.port = 15000;
-    if( !tl_network_resolve_name( "127.0.0.1", TL_IPV4, &peer ) )
-        return EXIT_FAILURE;
+    if( !(a_down = server->wait_for_client( server, 1000 )) )
+        return 0;
 
-    /* first client connection */
-    a = tl_network_create_client( &peer );
-    if( !a )
-        return EXIT_FAILURE;
+    if( !(b = tl_network_create_client( peer )) )
+        return 0;
 
-    a_down = server->wait_for_client( server, 1000 );
-    if( !a_down )
-        return EXIT_FAILURE;
+    if( !(b_down = server->wait_for_client( server, 1000 )) )
+        return 0;
 
-    /* connect second client */
-    b = tl_network_create_client( &peer );
-    if( !b )
-        return EXIT_FAILURE;
+    if( !test_transmission( a, a_down, "Hello From A" ) ) return 0;
+    if( !test_transmission( b, b_down, "Hello From B" ) ) return 0;
+    if( !test_transmission( a_down, a, "Greetings For A" ) ) return 0;
+    if( !test_transmission( b_down, b, "Greetings For B" ) ) return 0;
 
-    b_down = server->wait_for_client( server, 1000 );
-    if( !b_down )
-        return EXIT_FAILURE;
-
-    /* test transmission */
-    if( !test_transmission( a, a_down, "Hello From A" ) )
-        return EXIT_FAILURE;
-    if( !test_transmission( b, b_down, "Hello From B" ) )
-        return EXIT_FAILURE;
-    if( !test_transmission( a_down, a, "Greetings For A" ) )
-        return EXIT_FAILURE;
-    if( !test_transmission( b_down, b, "Greetings For B" ) )
-        return EXIT_FAILURE;
-
-    /* cleanup */
     a->destroy( a );
     b->destroy( b );
     a_down->destroy( a_down );
     b_down->destroy( b_down );
     server->destroy( server );
+    return 1;
+}
+
+int main( void )
+{
+    tl_net_addr accept;
+    tl_net_addr peer;
+
+    accept.transport = peer.transport = TL_TCP;
+    accept.port = peer.port = 15000;
+
+    /* test with IPv4 */
+    if( !tl_network_get_special_address( &accept, TL_ANY, TL_IPV4 ) )
+        return EXIT_FAILURE;
+    if( !tl_network_get_special_address( &peer, TL_LOOPBACK, TL_IPV4 ) )
+        return EXIT_FAILURE;
+
+    if( !run_test( &peer, &accept ) )
+        return EXIT_FAILURE;
+
+    /* test with IPv6 */
+    if( !tl_network_get_special_address( &accept, TL_LOOPBACK, TL_IPV6 ) )
+        return EXIT_FAILURE;
+    if( !tl_network_get_special_address( &peer, TL_LOOPBACK, TL_IPV6 ) )
+        return EXIT_FAILURE;
+
+    if( !run_test( &peer, &accept ) )
+        return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 

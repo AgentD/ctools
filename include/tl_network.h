@@ -76,6 +76,36 @@ typedef enum
 }
 TL_TRANSPORT_PROTOCOL;
 
+typedef enum
+{
+    /**
+     * \brief Address that sends to the local host only
+     *
+     * Typically used with tl_network_create_server to listen to only accept
+     * local connections only, or with tl_network_create_client to connect to
+     * the local machine via the loopback device.
+     */
+    TL_LOOPBACK = 0,
+
+    /**
+     * \brief Address that sends to all devices
+     *
+     * Typically used with tl_network_create_server on a not connection
+     * oriented protocol (e.g. UDP) to receive broadcast packets, or with
+     * tl_network_create_client to send broadcast packets.
+     */
+    TL_BROADCAST = 1,
+
+    /**
+     * \brief Used to accept connections from all source address
+     *
+     * Typically used with tl_network_create_server to accept connections from
+     * all possible source addresses.
+     */
+    TL_ALL = 2
+}
+TL_SPECIAL_ADDRESS;
+
 
 
 /**
@@ -133,14 +163,13 @@ TLAPI int tl_network_resolve_name( const char* hostname, int proto,
 /**
  * \brief Create a server instance
  *
- * \param net     A \ref TL_NETWORK_PROTOCOL identifier
- * \param proto   A \ref TL_TRANSPORT_PROTOCOL identifier
- * \param port    The port number to bind to
- * \param backlog The maximum number of incomming connections kept waiting
+ * \param addr    Specifyes from what addresses to accept connections, on
+ *                what port to listen and what protocols to use.
+ * \param backlog The maximum number of incomming connections kept waiting.
  *
  * \return A pointer to a new server instance or NULL on failure
  */
-TLAPI tl_server* tl_network_create_server( int net, int proto, tl_u16 port,
+TLAPI tl_server* tl_network_create_server( const tl_net_addr* addr,
                                            unsigned int backlog );
 
 /**
@@ -152,6 +181,23 @@ TLAPI tl_server* tl_network_create_server( int net, int proto, tl_u16 port,
  * \return A pointer to a tl_iostream instance or NULL on failure
  */
 TLAPI tl_iostream* tl_network_create_client( const tl_net_addr* peer );
+
+/**
+ * \brief Get a special network address
+ *
+ * Fields of the address structure other than "net" and "addr" are left
+ * untouched.
+ *
+ * \param addr A pointer to a tl_net_addr to write the address to
+ * \param type A \ref TL_SPECIAL_ADDRESS identifyer
+ * \param net  A \ref TL_NETWORK_PROTOCOL also written to the address
+ *             structure
+ *
+ * \return Non-zero on success, zero on failure (addr is NULL,
+ *         unknown protocol, or the special address is not support)
+ */
+TLAPI int tl_network_get_special_address( tl_net_addr* addr, int type,
+                                          int net );
 
 #ifdef __cplusplus
 }

@@ -73,7 +73,7 @@ static void winsock_release( void )
 
 /****************************************************************************/
 
-static void convert_ipv6( IN6_ADDR* v6, tl_net_addr* addr )
+static void convert_ipv6( const IN6_ADDR* v6, tl_net_addr* addr )
 {
     addr->addr.ipv6[7] = (v6->u.Byte[ 0]<<8) | v6->u.Byte[ 1];
     addr->addr.ipv6[6] = (v6->u.Byte[ 2]<<8) | v6->u.Byte[ 3];
@@ -273,15 +273,13 @@ fail:
     return 0;
 }
 
-tl_server* tl_network_create_server( int net, int proto, tl_u16 port )
+tl_server* tl_network_create_server( const tl_net_addr* addr,
+                                     unsigned int backlog )
 {
-    if( net!=TL_IPV4 && net!=TL_IPV6 )
+    if( !addr )
         return NULL;
 
-    if( proto!=TL_TCP && proto!=TL_UDP )
-        return NULL;
-
-    (void)port;
+    (void)backlog;
     return NULL;
 }
 
@@ -297,5 +295,33 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
         return NULL;
 
     return NULL;
+}
+
+int tl_network_get_special_address( tl_net_addr* addr, int type, int net )
+{
+    if( !addr )
+        return 0;
+
+    addr->net = net;
+
+    if( net==TL_IPV4 )
+    {
+        switch( type )
+        {
+        case TL_LOOPBACK:   addr->addr.ipv4 = INADDR_LOOPBACK;  return 1;
+        case TL_BROADCAST:  addr->addr.ipv4 = INADDR_BROADCAST; return 1;
+        case TL_ALL:        addr->addr.ipv4 = INADDR_ANY;       return 1;
+        }
+    }
+    else if( net==TL_IPV6 )
+    {
+        switch( type )
+        {
+        case TL_LOOPBACK:  convert_ipv6( &in6addr_loopback, addr ); return 1;
+        case TL_ALL:       convert_ipv6( &in6addr_any,      addr ); return 1;
+        }
+    }
+
+    return 0;
 }
 
