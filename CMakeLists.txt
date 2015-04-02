@@ -92,14 +92,20 @@ endif( )
 include_directories( ${CMAKE_SOURCE_DIR}/include/ )
 
 if( UNIX )
+  find_package( Threads )
+
   set( CTOOLS_SYSDEP src/unix/os.c
                      src/unix/fs.c
                      src/unix/dir.c
                      src/unix/network.c
                      src/unix/sockstream.c
-                     src/unix/tcpserver.c )
+                     src/unix/tcpserver.c
+                     src/unix/udpstream.c
+                     src/unix/udpserver.c )
 
   add_definitions( -D_POSIX_SOURCE=1 )
+
+  set( CTOOLS_SYSLIBS ${CMAKE_THREAD_LIBS_INIT} )
 elseif( WIN32 )
   set( CTOOLS_SYSDEP src/W32/os.c
                      src/W32/fs.c
@@ -151,6 +157,7 @@ add_executable( test_iterator_hashmap tests/test_iterator_hashmap.c )
 add_executable( test_blob tests/test_blob.c )
 add_executable( test_namelookup tests/test_namelookup.c )
 add_executable( test_tcp tests/test_tcp.c )
+add_executable( test_udp tests/test_udp.c )
 
 target_link_libraries( test_array ctools  )
 target_link_libraries( test_list ctools )
@@ -165,6 +172,7 @@ target_link_libraries( test_iterator_hashmap ctools )
 target_link_libraries( test_blob ctools )
 target_link_libraries( test_namelookup ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( test_tcp ctools ${CTOOLS_SYSLIBS} )
+target_link_libraries( test_udp ctools ${CTOOLS_SYSLIBS} )
 
 enable_testing( )
 add_test( test_array ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_array )
@@ -181,6 +189,7 @@ add_test( test_iterator_hashmap
 add_test( test_blob ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_blob )
 add_test( test_namelookup ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_namelookup )
 add_test( test_tcp ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_tcp )
+add_test( test_udp ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_udp )
 
 #----------------------------------------------------------------------
 # generate Doxygen API reference

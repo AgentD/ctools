@@ -183,9 +183,15 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
     if( bind( sockfd, (void*)addrbuffer, size ) < 0 )
         goto fail;
 
-    if( !(server = tcp_server_create( sockfd, backlog )) )
-        goto fail;
+    switch( addr->transport )
+    {
+    case TL_TCP: server = tcp_server_create( sockfd, backlog ); break;
+    case TL_UDP: server = udp_server_create( sockfd );          break;
+    default:     server = NULL;                                 break;
+    }
 
+    if( !server )
+        goto fail;
     return server;
 fail:
     close( sockfd );
