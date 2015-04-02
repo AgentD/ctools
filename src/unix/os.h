@@ -161,6 +161,13 @@ void udp_stream_add_data( udp_stream* stream, void* buffer, size_t size );
  */
 tl_server* udp_server_create( int sockfd );
 
+/** \brief Simple write_raw wrapper for stream blob read */
+int stream_read_blob( tl_iostream* stream, tl_blob* blob, size_t maximum );
+
+/** \brief Simple write_raw wrapper for stream blob write */
+int stream_write_blob( tl_iostream* stream, const tl_blob* blob,
+                       size_t* actual );
+
 /** \brief Initialize a monitor object */
 int pt_monitor_init( pt_monitor* monitor );
 

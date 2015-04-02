@@ -70,30 +70,30 @@ static int udp_stream_write_raw( tl_iostream* super, const void* buffer,
 {
     udp_stream* this = (udp_stream*)super;
     udp_server* p = this->parent;
-    ssize_t result = 0;
+    ssize_t result;
 
-    /* sanity check */
+    if( actual )
+        *actual = 0;
+
     if( !this || !buffer )
         return TL_IO_INTERNAL;
 
     if( !p )
         return TL_IO_CLOSED;
 
-    if( !size )
-        goto done;
+    if( size )
+    {
+        pt_monitor_lock( &(p->monitor) );
+        result = sendto( p->socket, buffer, size, 0,
+                         (void*)this->address, this->addrlen );
+        pt_monitor_unlock( &(p->monitor) );
 
-    /* send via parent socket */
-    pt_monitor_lock( &(p->monitor) );
-    result = sendto( p->socket, buffer, size, 0,
-                     (void*)this->address, this->addrlen );
-    pt_monitor_unlock( &(p->monitor) );
+        if( result < 0 )
+            return TL_IO_INTERNAL;
+        if( actual )
+            *actual = result;
+    }
 
-    /* return result status */
-    if( result < 0 )
-        return TL_IO_INTERNAL;
-done:
-    if( actual )
-        *actual = result;
     return 0;
 }
 
@@ -137,28 +137,6 @@ done:
     return result;
 }
 
-static int udp_stream_write( tl_iostream* this, const tl_blob* blob,
-                             size_t* actual )
-{
-    if( !blob )
-        return TL_IO_INTERNAL;
-
-    return udp_stream_write_raw( this, blob->data, blob->size, actual );
-}
-
-static int udp_stream_read( tl_iostream* this, tl_blob* blob,
-                            size_t maximum )
-{
-    int status = TL_IO_INTERNAL;
-
-    if( tl_blob_init( blob, maximum, NULL ) )
-    {
-        status = udp_stream_read_raw(this, blob->data, maximum, &blob->size);
-        tl_blob_truncate( blob, blob->size );
-    }
-    return status;
-}
-
 /****************************************************************************/
 
 void udp_stream_add_data( udp_stream* this, void* buffer, size_t size )
@@ -193,10 +171,10 @@ udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen )
 
     this->parent       = parent;
     this->addrlen      = addrlen;
-    super->read        = udp_stream_read;
     super->read_raw    = udp_stream_read_raw;
-    super->write       = udp_stream_write;
     super->write_raw   = udp_stream_write_raw;
+    super->write       = stream_write_blob;
+    super->read        = stream_read_blob;
     super->set_timeout = udp_stream_set_timeout;
     super->destroy     = udp_stream_destroy;
     return this;

@@ -95,6 +95,27 @@ void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 )
     v6->s6_addr[15] =  addr->addr.ipv6[0]     & 0xFF;
 }
 
+int stream_write_blob( tl_iostream* this, const tl_blob* blob,
+                       size_t* actual )
+{
+    if( !blob )
+        return TL_IO_INTERNAL;
+
+    return this->write_raw( this, blob->data, blob->size, actual );
+}
+
+int stream_read_blob( tl_iostream* this, tl_blob* blob, size_t maximum )
+{
+    int status;
+
+    if( !tl_blob_init( blob, maximum, NULL ) )
+        return TL_IO_INTERNAL;
+
+    status = this->read_raw( this, blob->data, maximum, &blob->size );
+    tl_blob_truncate( blob, blob->size );
+    return status;
+}
+
 /****************************************************************************/
 
 int pt_monitor_init( pt_monitor* this )
