@@ -76,13 +76,20 @@ typedef enum
 }
 TL_TRANSPORT_PROTOCOL;
 
+/**
+ * \enum TL_SPECIAL_ADDRESS
+ *
+ * \brief Various constants for special network addresses
+ *
+ * \see tl_network_get_special_address
+ */
 typedef enum
 {
     /**
      * \brief Address that sends to the local host only
      *
-     * Typically used with tl_network_create_server to listen to only accept
-     * local connections only, or with tl_network_create_client to connect to
+     * Typically used with tl_network_create_server to accept local
+     * connections only, or with tl_network_create_client to connect to
      * the local machine via the loopback device.
      */
     TL_LOOPBACK = 0,
