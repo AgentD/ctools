@@ -24,54 +24,9 @@
  */
 #define TL_EXPORT
 #include "tl_network.h"
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <winsock2.h>
-#include <in6addr.h>
-#include <ws2tcpip.h>
-
-#ifdef _MSC_VER
-    #include <intrin.h>
-
-    #pragma intrinsic (_InterlockedIncrement)
-    #pragma intrinsic (_InterlockedDecrement)
-
-    static volatile LONG refcount = 0;
-#else
-    static volatile int refcount = 0;
-#endif
+#include "os.h"
 
 
-
-static int winsock_acquire( void )
-{
-    WORD version = MAKEWORD(2, 2);
-    WSADATA data;
-
-#ifdef _MSC_VER
-    if( _InterlockedIncrement( &refcount )>1 )
-        return 1;
-#else
-    if( __sync_fetch_and_add( &refcount, 1 )>0 )
-        return 1;
-#endif
-
-    return WSAStartup( version, &data )==0;
-}
-
-static void winsock_release( void )
-{
-#ifdef _MSC_VER
-    if( _InterlockedDecrement( &refcount ) == 0 )
-        WSACleanup( );
-#else
-    if( __sync_fetch_and_sub( &refcount, 1 )==1 )
-        WSACleanup( );
-#endif
-}
-
-/****************************************************************************/
 
 static void convert_ipv6( const IN6_ADDR* v6, tl_net_addr* addr )
 {
@@ -83,6 +38,26 @@ static void convert_ipv6( const IN6_ADDR* v6, tl_net_addr* addr )
     addr->addr.ipv6[2] = (v6->u.Byte[10]<<8) | v6->u.Byte[11];
     addr->addr.ipv6[1] = (v6->u.Byte[12]<<8) | v6->u.Byte[13];
     addr->addr.ipv6[0] = (v6->u.Byte[14]<<8) | v6->u.Byte[15];
+}
+
+static void convert_in6addr( const tl_net_addr* addr, IN6_ADDR* v6 )
+{
+    v6->u.Byte[ 0] = (addr->addr.ipv6[7]>>8) & 0xFF;
+    v6->u.Byte[ 1] =  addr->addr.ipv6[7]     & 0xFF;
+    v6->u.Byte[ 2] = (addr->addr.ipv6[6]>>8) & 0xFF;
+    v6->u.Byte[ 3] =  addr->addr.ipv6[6]     & 0xFF;
+    v6->u.Byte[ 4] = (addr->addr.ipv6[5]>>8) & 0xFF;
+    v6->u.Byte[ 5] =  addr->addr.ipv6[5]     & 0xFF;
+    v6->u.Byte[ 6] = (addr->addr.ipv6[4]>>8) & 0xFF;
+    v6->u.Byte[ 7] =  addr->addr.ipv6[4]     & 0xFF;
+    v6->u.Byte[ 8] = (addr->addr.ipv6[3]>>8) & 0xFF;
+    v6->u.Byte[ 9] =  addr->addr.ipv6[3]     & 0xFF;
+    v6->u.Byte[10] = (addr->addr.ipv6[2]>>8) & 0xFF;
+    v6->u.Byte[11] =  addr->addr.ipv6[2]     & 0xFF;
+    v6->u.Byte[12] = (addr->addr.ipv6[1]>>8) & 0xFF;
+    v6->u.Byte[13] =  addr->addr.ipv6[1]     & 0xFF;
+    v6->u.Byte[14] = (addr->addr.ipv6[0]>>8) & 0xFF;
+    v6->u.Byte[15] =  addr->addr.ipv6[0]     & 0xFF;
 }
 
 static int parse_ipv4( const char* s, void* a0 )
@@ -177,6 +152,57 @@ static int parse_ipv6( const char* s, void* a0 )
     }
 
     return need_v4 ? parse_ipv4( s, a-4 ) : 1;
+}
+
+static SOCKET create_socket( const tl_net_addr* peer, void* addrbuffer,
+                             int* size )
+{
+    struct sockaddr_in6* v6addr = addrbuffer;
+    struct sockaddr_in* v4addr = addrbuffer;
+    int family, type, proto;
+
+    if( !peer )
+        return INVALID_SOCKET;
+
+    if( peer->net==TL_IPV4 )
+    {
+        memset( v4addr, 0, sizeof(struct sockaddr_in) );
+        v4addr->sin_addr.s_addr = htonl( peer->addr.ipv4 );
+        v4addr->sin_port        = htons( peer->port );
+        v4addr->sin_family      = AF_INET;
+        family                  = PF_INET;
+        *size                   = sizeof(struct sockaddr_in);
+    }
+    else if( peer->net==TL_IPV6 )
+    {
+        memset( v6addr, 0, sizeof(struct sockaddr_in6) );
+        convert_in6addr( peer, &(v6addr->sin6_addr) );
+        v6addr->sin6_port   = htons( peer->port );
+        v6addr->sin6_family = AF_INET6;
+        family              = PF_INET6;
+        *size               = sizeof(struct sockaddr_in6);
+    }
+    else
+    {
+        return -1;
+    }
+
+    if( peer->transport==TL_TCP )
+    {
+        type = SOCK_STREAM;
+        proto = IPPROTO_TCP;
+    }
+    else if( peer->transport==TL_UDP )
+    {
+        type = SOCK_DGRAM;
+        proto = IPPROTO_UDP;
+    }
+    else
+    {
+        return -1;
+    }
+
+    return socket( family, type, proto );
 }
 
 /****************************************************************************/
@@ -276,24 +302,72 @@ fail:
 tl_server* tl_network_create_server( const tl_net_addr* addr,
                                      unsigned int backlog )
 {
-    if( !addr )
-        return NULL;
+    unsigned char addrbuffer[128];
+    tl_server* server;
+    SOCKET sockfd;
+    BOOL val;
+    int size;
 
-    (void)backlog;
+    winsock_acquire( );
+
+    sockfd = create_socket( addr, (void*)addrbuffer, &size );
+
+    if( sockfd == INVALID_SOCKET )
+    {
+        winsock_release( );
+        return NULL;
+    }
+
+    val = TRUE;
+    setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR,
+                (const char*)&val, sizeof(val) );
+
+    if( bind( sockfd, (void*)addrbuffer, size ) < 0 )
+        goto fail;
+
+    switch( addr->transport )
+    {
+    case TL_TCP: server = tcp_server_create( sockfd, backlog ); break;
+    case TL_UDP: server = NULL;                                 break;
+    default:     server = NULL;                                 break;
+    }
+
+    if( !server )
+        goto fail;
+    return server;
+fail:
+    closesocket( sockfd );
+    winsock_release( );
     return NULL;
 }
 
 tl_iostream* tl_network_create_client( const tl_net_addr* peer )
 {
-    if( !peer )
-        return NULL;
+    unsigned char addrbuffer[128];
+    tl_iostream* stream;
+    SOCKET sockfd;
+    int size;
 
-    if( peer->net!=TL_IPV4 && peer->net!=TL_IPV6 )
-        return NULL;
+    winsock_acquire( );
 
-    if( peer->transport!=TL_TCP && peer->transport!=TL_UDP )
-        return NULL;
+    sockfd = create_socket( peer, addrbuffer, &size );
 
+    if( sockfd == INVALID_SOCKET )
+    {
+        winsock_release( );
+        return NULL;
+    }
+
+    if( connect( sockfd, (void*)addrbuffer, size ) == SOCKET_ERROR )
+        goto fail;
+
+    if( !(stream = sock_stream_create( sockfd )) )
+        goto fail;
+
+    return stream;
+fail:
+    closesocket( sockfd );
+    winsock_release( );
     return NULL;
 }
 

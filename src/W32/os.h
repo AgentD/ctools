@@ -27,12 +27,18 @@
 
 
 
+#include "tl_iostream.h"
 #include "tl_string.h"
 #include "tl_fs.h"
 
 #include <stdlib.h>
 #include <stdio.h>
+
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <winsock2.h>
+#include <in6addr.h>
+#include <ws2tcpip.h>
 
 
 
@@ -42,6 +48,37 @@ extern "C" {
 
 /** \brief Translate a GetLastError value to an TL_FS_* error code */
 int errno_to_fs( int code );
+
+/**
+ * \brief Acquire Winsock API
+ *
+ * Atomically increments an internal reference count. On the first call,
+ * (i.e. refcount was 0), WSAStartup is called to initialize the winsock API.
+ *
+ * \return Non-zero on success, zero on failure
+ */
+int winsock_acquire( void );
+
+/**
+ * \brief Release Winsock API
+ *
+ * Atomically decrements an internal reference count. If the reference count
+ * reaches 0, WSACleanup is called to cleanup the winsock internal state.
+ */
+void winsock_release( void );
+
+/** \brief Create a stream operating on a winsock socket */
+tl_iostream* sock_stream_create( SOCKET sockfd );
+
+/** \brief Create a winsock based TCP server implementation */
+tl_server* tcp_server_create( SOCKET sockfd, unsigned int backlog );
+
+/** \brief Blobl wrapper for tl_stream write_raw */
+int stream_write_blob( tl_iostream* stream, const tl_blob* blob,
+                       size_t* actual );
+
+/** \brief Blobl wrapper for tl_stream read_raw */
+int stream_read_blob( tl_iostream* stream, tl_blob* blob, size_t maximum );
 
 #ifdef __cplusplus
 }

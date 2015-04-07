@@ -110,7 +110,9 @@ elseif( WIN32 )
   set( CTOOLS_SYSDEP src/W32/os.c
                      src/W32/fs.c
                      src/W32/dir.c
-                     src/W32/network.c )
+                     src/W32/network.c
+                     src/W32/sockstream.c
+                     src/W32/tcpserver.c )
 
   set( CTOOLS_SYSLIBS userenv ws2_32 )
 endif( )

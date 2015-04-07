@@ -25,6 +25,17 @@
 #define TL_EXPORT
 #include "os.h"
 
+#ifdef _MSC_VER
+    #include <intrin.h>
+
+    #pragma intrinsic (_InterlockedIncrement)
+    #pragma intrinsic (_InterlockedDecrement)
+
+    static volatile LONG refcount = 0;
+#else
+    static volatile int refcount = 0;
+#endif
+
 
 
 int errno_to_fs( int code )
@@ -54,5 +65,53 @@ int errno_to_fs( int code )
     }
 
     return code==0 ? 0 : TL_FS_SYS_ERROR;
+}
+
+int winsock_acquire( void )
+{
+    WORD version = MAKEWORD(2, 2);
+    WSADATA data;
+
+#ifdef _MSC_VER
+    if( _InterlockedIncrement( &refcount )>1 )
+        return 1;
+#else
+    if( __sync_fetch_and_add( &refcount, 1 )>0 )
+        return 1;
+#endif
+
+    return WSAStartup( version, &data )==0;
+}
+
+void winsock_release( void )
+{
+#ifdef _MSC_VER
+    if( _InterlockedDecrement( &refcount ) == 0 )
+        WSACleanup( );
+#else
+    if( __sync_fetch_and_sub( &refcount, 1 )==1 )
+        WSACleanup( );
+#endif
+}
+
+int stream_write_blob( tl_iostream* this, const tl_blob* blob,
+                       size_t* actual )
+{
+    if( !blob )
+        return TL_IO_INTERNAL;
+
+    return this->write_raw( this, blob->data, blob->size, actual );
+}
+
+int stream_read_blob( tl_iostream* this, tl_blob* blob, size_t maximum )
+{
+    int status;
+
+    if( !tl_blob_init( blob, maximum, NULL ) )
+        return TL_IO_INTERNAL;
+
+    status = this->read_raw( this, blob->data, maximum, &blob->size );
+    tl_blob_truncate( blob, blob->size );
+    return status;
 }
 
