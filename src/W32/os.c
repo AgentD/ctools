@@ -36,6 +36,8 @@
     static volatile int refcount = 0;
 #endif
 
+CRITICAL_SECTION udp_server_mutex;
+
 
 
 int errno_to_fs( int code )
@@ -80,6 +82,8 @@ int winsock_acquire( void )
         return 1;
 #endif
 
+    InitializeCriticalSection( &udp_server_mutex );
+
     return WSAStartup( version, &data )==0;
 }
 
@@ -87,11 +91,13 @@ void winsock_release( void )
 {
 #ifdef _MSC_VER
     if( _InterlockedDecrement( &refcount ) == 0 )
-        WSACleanup( );
 #else
     if( __sync_fetch_and_sub( &refcount, 1 )==1 )
-        WSACleanup( );
 #endif
+    {
+        DeleteCriticalSection( &udp_server_mutex );
+        WSACleanup( );
+    }
 }
 
 int stream_write_blob( tl_iostream* this, const tl_blob* blob,
@@ -113,5 +119,38 @@ int stream_read_blob( tl_iostream* this, tl_blob* blob, size_t maximum )
     status = this->read_raw( this, blob->data, maximum, &blob->size );
     tl_blob_truncate( blob, blob->size );
     return status;
+}
+
+/****************************************************************************/
+
+int monitor_init( monitor_t* this )
+{
+    this->cond = CreateEvent( NULL, FALSE, FALSE, NULL );
+
+    if( !this->cond )
+        return 0;
+
+    InitializeCriticalSection( &(this->mutex) );
+    this->timeout = INFINITE;
+    return 1;
+}
+
+void monitor_cleanup( monitor_t* this )
+{
+    CloseHandle( this->cond );
+    DeleteCriticalSection( &(this->mutex) );
+}
+
+int monitor_wait( monitor_t* this )
+{
+    DWORD status, timeout;
+
+    timeout = this->timeout ? this->timeout : INFINITE;
+
+    LeaveCriticalSection( &(this->mutex) );
+    status = WaitForMultipleObjects( 1, &(this->cond), FALSE, timeout );
+    EnterCriticalSection( &(this->mutex) );
+
+    return status!=WAIT_TIMEOUT && status!=WAIT_FAILED;
 }
 
