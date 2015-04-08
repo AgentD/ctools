@@ -45,6 +45,99 @@
  * \li \ref tl_network_resolve_name
  * \li \ref tl_network_create_server
  * \li \ref tl_network_create_client
+ *
+ * \subsection names Name Resolution
+ *
+ * Checking if a DNS name can be resolved:
+ * \code{.c}
+ * if( tl_network_resolve_name( "www.example.com", TL_IPV4, NULL ) )
+ *     puts( "Found an IPv4 address for this domain!" );
+ *
+ * if( tl_network_resolve_name( "www.example.com", TL_IPV6, NULL ) )
+ *     puts( "Found an IPv6 address for this domain!" );
+ * \endcode
+ *
+ * Resolving DNS names or host names:
+ * \code{.c}
+ * tl_net_addr addr;
+ *
+ * tl_network_resolve_name( "www.example.com", TL_ANY, &addr );
+ * tl_network_resolve_name( "localhost", TL_ANY, &addr );
+ * \endcode
+ *
+ * Converting an IP address string to an address structure:
+ * \code{.c}
+ * tl_net_addr addr;
+ *
+ * tl_network_resolve_name( "127.0.0.1", TL_ANY, &addr );
+ * tl_network_resolve_name( "::1", TL_ANY, &addr );
+ * \endcode
+ *
+ * \subsection netserver Network Server Objects
+ *
+ * Creating a TCP server:
+ * \code{.c}
+ * tl_net_addr addr;
+ * tl_server* srv;
+ * int run = 1;
+ *
+ * tl_network_get_special_address( &addr, TL_ALL, TL_IPV4 );
+ * addr.transport = TL_TCP;
+ * addr.port = 15000;
+ * srv = tl_network_create_server( &addr, 10 );
+ *
+ * while( run )
+ * {
+ *     tl_iostream* client = srv->wait_for_client( srv, 0 );
+ *
+ *     handle_client( client );
+ * }
+ * \endcode
+ *
+ * Creating a UDP server:
+ * \code{.c}
+ * tl_net_addr addr;
+ * tl_server* srv;
+ * int run = 1;
+ *
+ * tl_network_get_special_address( &addr, TL_ALL, TL_IPV4 );
+ * addr.transport = TL_UDP;
+ * addr.port = 15000;
+ * srv = tl_network_create_server( &addr, 10 );
+ *
+ * while( run )
+ * {
+ *     tl_iostream* client = srv->wait_for_client( srv, 0 );
+ *
+ *     handle_client( client );
+ * }
+ * \endcode
+ *
+ * \subsection netclient Network Client Objects
+ *
+ * Creating a TCP client:
+ * \code{.c}
+ * tl_net_addr addr;
+ * tl_iostream* str;
+ *
+ * tl_network_resolve_name( "www.example.com", TL_ANY, &addr );
+ * addr.transport = TL_TCP;
+ * addr.port = 80;
+ *
+ * str = tl_network_create_client( &addr );
+ * \endcode
+ *
+ * Creating a UDP client:
+ * \code{.c}
+ * tl_net_addr addr;
+ * tl_iostream* str;
+ *
+ * tl_network_resolve_name( "8.8.8.8", TL_IPV4, &addr );
+ * addr.transport = TL_UDP;
+ * addr.port = 53;
+ *
+ * str = tl_network_create_client( &addr );
+ * \endcode
  */
 
 #include "tl_predef.h"

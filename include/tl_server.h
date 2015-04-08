@@ -41,6 +41,21 @@
  * communications are abstracted in the form of tl_iostream instances that the
  * server creates when a new client connects or (for non-connection based
  * communications) when the first data from a particular client is received.
+ *
+ * Usage example:
+ * \code{.c}
+ * tl_server* srv = function_that_creates_a_server( );
+ * int run = 1;
+ *
+ * while( run )
+ * {
+ *     tl_iostream* client = srv->wait_for_client( srv, 0 );
+ *
+ *     handle_client( client );
+ * }
+ *
+ * srv->destroy( destroy );
+ * \endcode
  */
 
 
