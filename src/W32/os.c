@@ -100,27 +100,6 @@ void winsock_release( void )
     }
 }
 
-int stream_write_blob( tl_iostream* this, const tl_blob* blob,
-                       size_t* actual )
-{
-    if( !blob )
-        return TL_IO_INTERNAL;
-
-    return this->write_raw( this, blob->data, blob->size, actual );
-}
-
-int stream_read_blob( tl_iostream* this, tl_blob* blob, size_t maximum )
-{
-    int status;
-
-    if( !tl_blob_init( blob, maximum, NULL ) )
-        return TL_IO_INTERNAL;
-
-    status = this->read_raw( this, blob->data, maximum, &blob->size );
-    tl_blob_truncate( blob, blob->size );
-    return status;
-}
-
 /****************************************************************************/
 
 int monitor_init( monitor_t* this )

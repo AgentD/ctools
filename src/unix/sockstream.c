@@ -145,10 +145,8 @@ tl_iostream* sock_stream_create( int sockfd )
     this->socket       = sockfd;
     super->destroy     = cl_stream_destroy;
     super->set_timeout = cl_stream_set_timeout;
-    super->write_raw   = cl_stream_write_raw;
-    super->read_raw    = cl_stream_read_raw;
-    super->write       = stream_write_blob;
-    super->read        = stream_read_blob;
+    super->write       = cl_stream_write_raw;
+    super->read        = cl_stream_read_raw;
     return super;
 }
 

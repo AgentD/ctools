@@ -11,9 +11,9 @@ static int test_transmission( tl_iostream* up, tl_iostream* down,
     size_t actual, len = strlen(message)+1;
     char buffer[ 128 ];
 
-    if( up->write_raw( up, message, len, &actual )!=0 || actual!=len )
+    if( up->write( up, message, len, &actual )!=0 || actual!=len )
         return 0;
-    if( down->read_raw( down, buffer, sizeof(buffer), &actual )!=0 )
+    if( down->read( down, buffer, sizeof(buffer), &actual )!=0 )
         return 0;
     if( actual!=len || strcmp( buffer, message )!=0 )
         return 0;

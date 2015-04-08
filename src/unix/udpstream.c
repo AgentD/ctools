@@ -171,10 +171,8 @@ udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen )
 
     this->parent       = parent;
     this->addrlen      = addrlen;
-    super->read_raw    = udp_stream_read_raw;
-    super->write_raw   = udp_stream_write_raw;
-    super->write       = stream_write_blob;
-    super->read        = stream_read_blob;
+    super->read        = udp_stream_read_raw;
+    super->write       = udp_stream_write_raw;
     super->set_timeout = udp_stream_set_timeout;
     super->destroy     = udp_stream_destroy;
     return this;

@@ -77,7 +77,7 @@ struct tl_iostream
     void (* destroy )( tl_iostream* stream );
 
     /**
-     * \brief Set the blocking and timeout behaviour of the stream
+     * \brief Set the timeout behaviour of the stream
      *
      * The initial, default timeout behaviour depends on the underlying
      * implementation.
@@ -103,33 +103,17 @@ struct tl_iostream
      *         TL_IO_TIMEOUT if a timeout occoured or TL_IO_INTERNAL if an
      *         internal error occoured.
      */
-    int (* write_raw )( tl_iostream* stream, const void* buffer,
-                        size_t size, size_t* actual );
-
-    /**
-     * \brief Write a blob to a stream
-     *
-     * \param stream A pointer to the stream object
-     * \param blob   A pointer to a blob object to write
-     * \param actual If not NULL, returns the number of bytes actually written
-     *
-     * \return Zero on success, TL_IO_CLOSED if the connection was closed,
-     *         TL_IO_TIMEOUT if a timeout occoured or TL_IO_INTERNAL if an
-     *         internal error occoured.
-     */
-    int (* write )( tl_iostream* stream, const tl_blob* blob,
-                    size_t* actual );
+    int (* write )( tl_iostream* stream, const void* buffer,
+                    size_t size, size_t* actual );
 
     /**
      * \brief Read a raw block of data from a stream
      *
-     * Try to read up to the given number of bytes from the stream. If less
-     * than the requested data is available and the stream is blocking, it
-     * blocks until it either has enough data or a timeout occours. If the
-     * connection is non-blocking, it returns immediately with less than
-     * requested bytes. See also set_read_timeout on how to alter the timeout
-     * and blocking behaviour. The default timeout behaviour depends on the
-     * underlying implementation.
+     * Try to read up to the given number of bytes from the stream and may
+     * return less than the given number of bytes.
+     * The function may block if no data is available or a timeout occours.
+     * See also set_read_timeout on how to alter the timeout. The default
+     * timeout value depends on the underlying implementation.
      *
      * \param stream A pointer to the stream object
      * \param buffer A buffer to write the received data to
@@ -140,33 +124,51 @@ struct tl_iostream
      *         TL_IO_TIMEOUT if a timeout occoured, TL_IO_INTERNAL if an
      *         internal error occoured.
      */
-    int (* read_raw )( tl_iostream* stream, void* buffer, size_t size,
-                       size_t* actual );
-
-    /**
-     * \brief Read a blob of data from a stream
-     *
-     * Try to read up to a given maximum number of bytes from the stream. If
-     * less than the requested data is available and the stream is blocking,
-     * it blocks until it either has enough data or a timeout occours. If the
-     * connection is non-blocking, it returns immediately with less than
-     * requested bytes. See also set_read_timeout on how to alter the timeout
-     * and blocking behaviour. The default timeout behaviour depends on the
-     * underlying implementation.
-     *
-     * \param stream  A pointer to the stream object
-     * \param blob    A pointer to an uninitialized blob object to write
-     *                the data to.
-     * \param maximum The maximum number of bytes to read.
-     *
-     * \return Zero on success, TL_IO_CLOSED if the connection was closed,
-     *         TL_IO_TIMEOUT if a timeout occoured, TL_IO_INTERNAL if an
-     *         internal error occoured.
-     */
-    int (* read )( tl_iostream* stream, tl_blob* blob, size_t maximum );
+    int (* read )( tl_iostream* stream, void* buffer, size_t size,
+                   size_t* actual );
 };
 
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * \brief Write a blob to a stream
+ *
+ * \memberof tl_iostream
+ *
+ * \param stream A pointer to the stream object
+ * \param blob   A pointer to a blob object to write
+ * \param actual If not NULL, returns the number of bytes actually written
+ *
+ * \return Zero on success, TL_IO_CLOSED if the connection was closed,
+ *         TL_IO_TIMEOUT if a timeout occoured or TL_IO_INTERNAL if an
+ *         internal error occoured.
+ */
+TLAPI int tl_iostream_write_blob( tl_iostream* stream, const tl_blob* blob,
+                                  size_t* actual );
+/**
+ * \brief Read a blob of data from a stream
+ *
+ * \memberof tl_iostream
+ *
+ * \param stream  A pointer to the stream object
+ * \param blob    A pointer to an uninitialized blob object to write
+ *                the data to.
+ * \param maximum The maximum number of bytes to read.
+ *
+ * \return Zero on success, TL_IO_CLOSED if the connection was closed,
+ *         TL_IO_TIMEOUT if a timeout occoured, TL_IO_INTERNAL if an
+ *         internal error occoured.
+ */
+TLAPI int tl_iostream_read_blob( tl_iostream* stream, tl_blob* blob,
+                                 size_t maximum );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TOOL_IOSTREAM_H */
 

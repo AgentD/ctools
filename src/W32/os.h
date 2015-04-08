@@ -138,13 +138,6 @@ udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen );
  */
 void udp_stream_add_data( udp_stream* stream, void* buffer, size_t size );
 
-/** \brief Blob wrapper for tl_stream write_raw */
-int stream_write_blob( tl_iostream* stream, const tl_blob* blob,
-                       size_t* actual );
-
-/** \brief Blob wrapper for tl_stream read_raw */
-int stream_read_blob( tl_iostream* stream, tl_blob* blob, size_t maximum );
-
 /** \brief Initialize a monitor object */
 int monitor_init( monitor_t* monitor );
 
