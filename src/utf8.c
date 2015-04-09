@@ -51,13 +51,16 @@ size_t tl_utf8_strlen( const char* utf8, size_t chars )
     const unsigned char* str = (const unsigned char*)utf8;
     size_t i=0, count = 0;
 
-    while( i < chars )
+    for( i=0; i<chars; ++i )
     {
-        if( ((*str) & 0xC0) != 0x80 )
-            ++i;
-
-        ++count;
         ++str;
+        ++count;
+
+        while( ((*str) & 0xC0) == 0x80 )
+        {
+            ++str;
+            ++count;
+        }
     }
 
     return count;
