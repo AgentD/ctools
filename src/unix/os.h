@@ -97,15 +97,6 @@ extern "C" {
 int errno_to_fs( int code );
 
 /**
- * \brief Convert a tl_string to an UTF-8 string
- *
- * \param in A pointer to convert
- *
- * \return A buffer holding an UTF-8 version. Must be freed using free( ).
- */
-char* to_utf8( const tl_string* in );
-
-/**
  * \brief Convert an in6_addr structure to a tl_net_addr
  *
  * \param v6   Pointer to input data

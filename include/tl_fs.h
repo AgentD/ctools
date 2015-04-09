@@ -39,14 +39,6 @@
  * There are a number of functions abstracting access to the operating systems
  * filesystem hirarchy beyond what the C standard library provides.
  *
- * Functions that take an input string, representing a file or directory exist
- * in two verstion, one taking a pointer to a tl_string and one taking a
- * pointer to a null-terminated C-string using UTF-8 encoding. The later has
- * the same name as the former, but with the suffix _utf8 added.
- *
- * The functions that obtain a string from the operating system only exist in
- * a verstion that accepts a pointer to a tl_string to manipulate.
- *
  * Here is a brief list of the functions available:
  * \li \ref tl_fs_get_wd get the current working directory
  * \li \ref tl_fs_get_user_dir get the users home directory
@@ -87,14 +79,7 @@ TLAPI const char* tl_fs_get_dir_sep( void );
  *
  * \return Non-zero if the path exists
  */
-TLAPI int tl_fs_exists( const tl_string* path );
-
-/**
- * \copydoc tl_fs_exists
- *
- * \param path A C-style UTF8 string of the path to check
- */
-TLAPI int tl_fs_exists_utf8( const char* path );
+TLAPI int tl_fs_exists( const char* path );
 
 /**
  * \brief Determine whether a path names a directory or a file
@@ -103,14 +88,7 @@ TLAPI int tl_fs_exists_utf8( const char* path );
  *
  * \return Non-zero if the path exists and is a directory, zero otherwise
  */
-TLAPI int tl_fs_is_directory( const tl_string* path );
-
-/**
- * \copydoc tl_fs_is_directory
- *
- * \param path A C-style UTF8 string of the path to check
- */
-TLAPI int tl_fs_is_directory_utf8( const char* path );
+TLAPI int tl_fs_is_directory( const char* path );
 
 /**
  * \brief Determine whether a path names a symbolic link
@@ -119,14 +97,7 @@ TLAPI int tl_fs_is_directory_utf8( const char* path );
  *
  * \return Non-zero if the path exists and is a symbolic link, zero otherwise
  */
-TLAPI int tl_fs_is_symlink( const tl_string* path );
-
-/**
- * \copydoc tl_fs_is_symlink
- *
- * \param path A C-style UTF8 string of the path to check
- */
-TLAPI int tl_fs_is_symlink_utf8( const char* path );
+TLAPI int tl_fs_is_symlink( const char* path );
 
 /**
  * \brief Create a directory
@@ -142,14 +113,7 @@ TLAPI int tl_fs_is_symlink_utf8( const char* path );
  *         of the path does not exist, TL_FS_NOT_DIR if an element of the path
  *         is not a directory
  */
-TLAPI int tl_fs_mkdir( const tl_string* path );
-
-/**
- * \copydoc tl_fs_mkdir
- *
- * \param path A C-style UTF8 string of the path to create
- */
-TLAPI int tl_fs_mkdir_utf8( const char* path );
+TLAPI int tl_fs_mkdir( const char* path );
 
 /**
  * \brief Change the calling processes working directory
@@ -161,14 +125,7 @@ TLAPI int tl_fs_mkdir_utf8( const char* path );
  *         does not exist, TL_FS_NOT_DIR if an element of the path is not a
  *         directory
  */
-TLAPI int tl_fs_cwd( const tl_string* path );
-
-/**
- * \copydoc tl_fs_cwd
- *
- * \param path A C-style UTF8 string of the new working directory
- */
-TLAPI int tl_fs_cwd_utf8( const char* path );
+TLAPI int tl_fs_cwd( const char* path );
 
 /**
  * \brief Get the working directory of the calling process
@@ -208,15 +165,7 @@ TLAPI int tl_fs_get_user_dir( tl_string* path );
  *         the propper permissions, TL_FS_NOT_EMPTY if trying to delete a non
  *         empty directory.
  */
-TLAPI int tl_fs_delete( const tl_string* path );
-
-/**
- * \copydoc tl_fs_delete
- *
- * \param path A C-style UTF8 string of a file, directory or symlink path
- *             to delete
- */
-TLAPI int tl_fs_delete_utf8( const char* path );
+TLAPI int tl_fs_delete( const char* path );
 
 /**
  * \brief Determine the size of a file in bytes
@@ -225,14 +174,7 @@ TLAPI int tl_fs_delete_utf8( const char* path );
  *
  * \return The size of the file in bytes
  */
-TLAPI tl_u64 tl_fs_get_file_size( const tl_string* path );
-
-/**
- * \copydoc tl_fs_get_file_size
- *
- * \param path A C-style UTF8 string of a file path
- */
-TLAPI tl_u64 tl_fs_get_file_size_utf8( const char* path );
+TLAPI tl_u64 tl_fs_get_file_size( const char* path );
 
 #ifdef __cplusplus
 }

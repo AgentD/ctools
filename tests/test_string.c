@@ -5,214 +5,212 @@
 
 
 
-const tl_u16 utf16[7] =
+const tl_u16 utf16[12] =
 {
-    0x00E4,         /* 'ä' */
-    0x00F6,         /* 'ö' */
-    0xD800, 0xDC00, /* LINEAR B SYLLABLE B008 A */
-    0xDC00,         /* rouge trail surrogate */
-    0xD800,         /* rouge lead surrogate */
-    0x0000          /* terminator */
+    'A',
+    'B',
+    0xFFFF,
+    0xD800, 0xDC00,
+    0xD83D, 0xDF10,
+    0xD83D, 0xDE1C,
+    'B',
+    'A',
+    0
 };
 
-const char* utf8str = "\x24\xC2\xA2\xE2\x82\xAC\xF0\xA4\xAD\xA2";
+const unsigned int utf32[9] =
+{
+    'A',
+    'B',
+    0x0000FFFF,
+    0x00010000,
+    0x0001F710,
+    0x0001F61C,
+    'B',
+    'A',
+    0
+};
+
+const unsigned char utf8str[] =
+{
+    'A',
+    'B',
+    0xEF, 0xBF, 0xBF,
+    0xF0, 0x90, 0x80, 0x80,
+    0xF0, 0x9F, 0x9C, 0x90,
+    0xF0, 0x9F, 0x98, 0x9C,
+    'B',
+    'A',
+    0
+};
+
 
 
 
 int main( void )
 {
-    char buffer[ 128 ];
+    tl_u16 buffer[ 16 ];
+    unsigned char* ptr;
+    size_t i, j, len;
     tl_string str;
-    size_t i, j;
 
     /* initialized string is supposed to be empty */
     tl_string_init( &str );
-    if( str.charcount || str.surrogates ) return EXIT_FAILURE;
-    if( str.blob.size!=2 ) return EXIT_FAILURE;
-    if( ((tl_u16*)str.blob.data)[0]!=0 ) return EXIT_FAILURE;
+    if( str.charcount || str.mbseq ) return EXIT_FAILURE;
+    if( str.data.used!=1 ) return EXIT_FAILURE;
+    if( ((char*)str.data.data)[0]!=0 ) return EXIT_FAILURE;
     if( *tl_string_cstr( &str ) != 0 ) return EXIT_FAILURE;
 
     if( tl_string_characters( &str ) ) return EXIT_FAILURE;
     if( tl_string_length( &str ) ) return EXIT_FAILURE;
     if( !tl_string_is_empty( &str ) ) return EXIT_FAILURE;
     if( tl_string_at( &str, 0 ) ) return EXIT_FAILURE;
-    if( tl_string_utf8_len( &str )!=0 ) return EXIT_FAILURE;
-    if( tl_string_utf8_len( NULL )!=0 ) return EXIT_FAILURE;
+    if( tl_string_utf16_len( &str )!=0 ) return EXIT_FAILURE;
+    if( tl_string_utf16_len( NULL )!=0 ) return EXIT_FAILURE;
 
-    /* append codepoints <= 0xFFFF */
-    tl_string_append_code_point( &str, '!' );
-    if( str.charcount!=1 || str.surrogates!=1 ) return EXIT_FAILURE;
-    if( str.blob.size!=4 ) return EXIT_FAILURE;
-    if( ((tl_u16*)str.blob.data)[0]!='!' ) return EXIT_FAILURE;
-    if( ((tl_u16*)str.blob.data)[1]!=0 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[0] != '!' ) return EXIT_FAILURE;
+    /* append codepoints <= 0x7F */
+    tl_string_append_code_point( &str, '\n' );
+    if( str.charcount!=1 || str.mbseq!=1 ) return EXIT_FAILURE;
+    if( str.data.used!=2 ) return EXIT_FAILURE;
+    if( ((char*)str.data.data)[0]!='\n' ) return EXIT_FAILURE;
+    if( ((char*)str.data.data)[1]!=0 ) return EXIT_FAILURE;
+    if( tl_string_cstr( &str )[0] != '\n' ) return EXIT_FAILURE;
     if( tl_string_cstr( &str )[1] !=  0  ) return EXIT_FAILURE;
-    if( tl_string_utf8_len( &str ) != 1  ) return EXIT_FAILURE;
+    if( tl_string_utf16_len( &str ) != 1  ) return EXIT_FAILURE;
 
     if( tl_string_characters( &str ) != 1 ) return EXIT_FAILURE;
     if( tl_string_length( &str ) != 1 ) return EXIT_FAILURE;
     if( tl_string_is_empty( &str ) ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 0 )!='!' ) return EXIT_FAILURE;
+    if( tl_string_at( &str, 0 )!='\n' ) return EXIT_FAILURE;
 
-    for( i=0; i<90; ++i )
+    for( i=0; i<100; ++i )
     {
-        if( str.charcount!=(i+1)||str.surrogates!=(i+1) ) return EXIT_FAILURE;
-        if( str.blob.size!=(i+2)*2 ) return EXIT_FAILURE;
+        if( str.charcount!=(i+1)||str.mbseq!=(i+1) ) return EXIT_FAILURE;
+        if( str.data.used!=(i+2) ) return EXIT_FAILURE;
         if( tl_string_characters( &str ) != (i+1) ) return EXIT_FAILURE;
         if( tl_string_length( &str ) != (i+1) ) return EXIT_FAILURE;
         if( tl_string_is_empty( &str ) ) return EXIT_FAILURE;
-        if( tl_string_at( &str, 0 )!='!' ) return EXIT_FAILURE;
-        if( tl_string_utf8_len( &str )!=(i+1) ) return EXIT_FAILURE;
+        if( tl_string_at( &str, 0 )!='\n' ) return EXIT_FAILURE;
+        if( tl_string_utf16_len( &str )!=(i+1) ) return EXIT_FAILURE;
 
-        if( ((tl_u16*)str.blob.data)[0]!='!' )
+        if( ((char*)str.data.data)[0]!='\n' )
             return EXIT_FAILURE;
-        if( tl_string_cstr( &str )[0] != '!' )
+        if( tl_string_cstr( &str )[0] != '\n' )
             return EXIT_FAILURE;
 
-        for( j=1; j<(str.blob.size/2-1); ++j )
+        for( j=1; j<(str.data.used-1); ++j )
         {
-            if( tl_string_at( &str, j )!=('!'+j-1) )
+            if( tl_string_at( &str, j )!=('\n'+j-1) )
                 return EXIT_FAILURE;
-            if( ((tl_u16*)str.blob.data)[j]!=('!'+j-1) )
+            if( ((unsigned char*)str.data.data)[j]!=('\n'+j-1) )
                 return EXIT_FAILURE;
-            if( tl_string_cstr( &str )[j] != ('!'+j-1) )
+            if( (unsigned int)tl_string_cstr( &str )[j] != ('\n'+j-1) )
                 return EXIT_FAILURE;
         }
 
-        if( ((tl_u16*)str.blob.data)[j] ) return EXIT_FAILURE;
-        if( tl_string_cstr(&str)[j]     ) return EXIT_FAILURE;
+        if( ((char*)str.data.data)[j] ) return EXIT_FAILURE;
+        if( tl_string_cstr(&str)[j]   ) return EXIT_FAILURE;
 
-        tl_string_append_code_point( &str, '!'+i );
+        tl_string_append_code_point( &str, '\n'+i );
     }
 
     /* clear string */
     tl_string_clear( &str );
-    if( str.charcount || str.surrogates ) return EXIT_FAILURE;
-    if( str.blob.size!=2 ) return EXIT_FAILURE;
-    if( ((tl_u16*)str.blob.data)[0]!=0 ) return EXIT_FAILURE;
+    if( str.charcount || str.mbseq ) return EXIT_FAILURE;
+    if( str.data.used!=1 ) return EXIT_FAILURE;
+    if( ((char*)str.data.data)[0]!=0 ) return EXIT_FAILURE;
     if( *tl_string_cstr( &str ) != 0 ) return EXIT_FAILURE;
 
     if( tl_string_characters( &str ) ) return EXIT_FAILURE;
     if( tl_string_length( &str ) ) return EXIT_FAILURE;
     if( !tl_string_is_empty( &str ) ) return EXIT_FAILURE;
-    if( tl_string_utf8_len( &str )!=0 ) return EXIT_FAILURE;
+    if( tl_string_utf16_len( &str )!=0 ) return EXIT_FAILURE;
 
     /* append invalid codepoints */
     tl_string_append_code_point( &str, 0xD8FF );
     tl_string_append_code_point( &str, 0x00110000 );
 
-    if( str.charcount!=2 || str.surrogates!=2 ) return EXIT_FAILURE;
-    if( str.blob.size!=6 ) return EXIT_FAILURE;
+    if( str.charcount || str.mbseq ) return EXIT_FAILURE;
+    if( str.data.used!=1 ) return EXIT_FAILURE;
 
-    if( tl_string_characters( &str )!=2 ) return EXIT_FAILURE;
-    if( tl_string_length( &str )!=2 ) return EXIT_FAILURE;
-    if( tl_string_is_empty( &str ) ) return EXIT_FAILURE;
-    if( tl_string_utf8_len( &str )!=6 ) return EXIT_FAILURE;
+    if( tl_string_characters( &str ) ) return EXIT_FAILURE;
+    if( tl_string_length( &str ) ) return EXIT_FAILURE;
+    if( !tl_string_is_empty( &str ) ) return EXIT_FAILURE;
+    if( tl_string_utf16_len( &str ) ) return EXIT_FAILURE;
 
-    if( ((tl_u16*)str.blob.data)[0]!=0xFFFD ) return EXIT_FAILURE;
-    if( ((tl_u16*)str.blob.data)[1]!=0xFFFD ) return EXIT_FAILURE;
-    if( ((tl_u16*)str.blob.data)[2]!=0      ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[0] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[1] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[2] != 0      ) return EXIT_FAILURE;
-
-    /* append codepoints that generate surrogates */
+    /* append codepoints that generate multi-byte sequences
+       and UTF-16 surrogate pairs */
     tl_string_clear( &str );
-    tl_string_append_code_point( &str, 'A' );
-    tl_string_append_code_point( &str, 'B' );
-    tl_string_append_code_point( &str, 0x0000FFFF );
-    tl_string_append_code_point( &str, 0x00010000 );
-    tl_string_append_code_point( &str, 0x0001F710 );
-    tl_string_append_code_point( &str, 0x0001F61C );
-    tl_string_append_code_point( &str, 'B' );
-    tl_string_append_code_point( &str, 'A' );
 
-    if( str.charcount!=8 || str.surrogates!=3 ) return EXIT_FAILURE;
-    if( str.blob.size!=24 ) return EXIT_FAILURE;
-    if( tl_string_length( &str )!=11 ) return EXIT_FAILURE;
-    if( tl_string_utf8_len( &str )!=19 ) return EXIT_FAILURE;
+    for( i=0, j=0xFFFFFFFF; utf32[i]; ++i )
+    {
+        if( utf32[i]>0x7F && i<j )
+            j = i;
+        tl_string_append_code_point( &str, utf32[i] );
+    }
 
-    if( tl_string_cstr( &str )[ 0] != 'A'    ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 1] != 'B'    ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 2] != 0xFFFF ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 3] != 0xD800 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 4] != 0xDC00 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 5] != 0xD83D ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 6] != 0xDF10 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 7] != 0xD83D ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 8] != 0xDE1C ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 9] != 'B'    ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[10] != 'A'    ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[11] != 0      ) return EXIT_FAILURE;
+    len = strlen((const char*)utf8str);
+    if( str.charcount!=i || str.mbseq!=j ) return EXIT_FAILURE;
+    if( str.data.used!=(len+1) ) return EXIT_FAILURE;
+    if( tl_string_length( &str )!=len ) return EXIT_FAILURE;
+    if( tl_string_utf16_len(&str)!=(sizeof(utf16)/2-1) ) return EXIT_FAILURE;
 
-    if( tl_string_at( &str, 0 ) != 'A'      ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 1 ) != 'B'      ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 2 ) != 0x00FFFF ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 3 ) != 0x010000 ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 4 ) != 0x01F710 ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 5 ) != 0x01F61C ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 6 ) != 'B'      ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 7 ) != 'A'      ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 8 ) != 0        ) return EXIT_FAILURE;
+    ptr = (unsigned char*)tl_string_cstr( &str );
+    if( memcmp( ptr, utf8str, len+1 )!=0 )
+        return EXIT_FAILURE;
+
+    for( i=0; i<=str.charcount; ++i )
+        if( tl_string_at( &str, i ) != utf32[i] )
+            return EXIT_FAILURE;
+
+    /* convert to UTF-16 */
+    if( tl_string_to_utf16( &str, buffer, sizeof(buffer)/2 )!=
+        (sizeof(utf16)/2-1) )
+        return EXIT_FAILURE;
+
+    if( memcmp( buffer, utf16, sizeof(utf16) )!=0 )
+        return EXIT_FAILURE;
+
+    if( tl_string_to_utf16( &str, buffer, 5 )!=3 )
+        return EXIT_FAILURE;
+
+    if( tl_string_to_utf16( NULL, buffer, 1000 )!=0 || buffer[0]!='\0' )
+        return EXIT_FAILURE;
+
+    if( tl_string_to_utf16( &str, NULL, 1000 )!=0 )
+        return EXIT_FAILURE;
+
+    if( tl_string_to_utf16( &str, buffer, 1 )!=0 || buffer[0]!='\0' )
+        return EXIT_FAILURE;
 
     /* append UTF-8 */
     tl_string_clear( &str );
-    tl_string_append_utf8( &str, utf8str );
+    tl_string_append_utf8( &str, (const char*)utf8str );
 
-    if( str.charcount!=4 || str.surrogates!=3 ) return EXIT_FAILURE;
-    if( str.blob.size!=12 ) return EXIT_FAILURE;
-    if( tl_string_length( &str )!=5 ) return EXIT_FAILURE;
-    if( tl_string_utf8_len( &str )!=10 ) return EXIT_FAILURE;
+    if( str.charcount!=8 || str.mbseq!=2 ) return EXIT_FAILURE;
+    if( str.data.used!=20 ) return EXIT_FAILURE;
+    if( tl_string_length( &str )!=19 ) return EXIT_FAILURE;
+    if( tl_string_utf16_len( &str )!=11 ) return EXIT_FAILURE;
 
-    if( tl_string_cstr( &str )[ 0] != 0x0024 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 1] != 0x00A2 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 2] != 0x20AC ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 3] != 0xD852 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 4] != 0xDF62 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 5] != 0x0000 ) return EXIT_FAILURE;
-
-    if( tl_string_at( &str, 0 ) != 0x0024  ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 1 ) != 0x00A2  ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 2 ) != 0x20AC  ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 3 ) != 0x24B62 ) return EXIT_FAILURE;
-    if( tl_string_at( &str, 4 ) != 0       ) return EXIT_FAILURE;
-
-    /* convert to UTF-8 */
-    if( tl_string_to_utf8( &str, buffer, sizeof(buffer) )!=4 )
+    len = strlen( (const char*)utf8str );
+    if( memcmp( tl_string_cstr(&str), utf8str, len+1 )!=0 )
         return EXIT_FAILURE;
 
-    if( strcmp( buffer, utf8str )!=0 )
-        return EXIT_FAILURE;
-
-    if( tl_string_to_utf8( &str, buffer, 10 )!=3 )
-        return EXIT_FAILURE;
-
-    if( tl_string_to_utf8( NULL, buffer, 10 )!=0 || buffer[0]!='\0' )
-        return EXIT_FAILURE;
-
-    if( tl_string_to_utf8( NULL, buffer, 10 )!=0 || buffer[0]!='\0' )
-        return EXIT_FAILURE;
-
-    if( tl_string_to_utf8( &str, NULL, 10 )!=0 )
-        return EXIT_FAILURE;
-
-    if( tl_string_to_utf8( &str, buffer, 1 )!=0 || buffer[0]!='\0' )
-        return EXIT_FAILURE;
+    for( i=0; i<=str.charcount; ++i )
+    {
+        if( tl_string_at( &str, i ) != utf32[i] )
+            return EXIT_FAILURE;
+    }
 
     /* append UTF-8 substring */
     tl_string_clear( &str );
     tl_string_append_utf8_count( &str,
                                  "\xE2\x82\xAC\xF0\xA4\xAD\xA2\xC2\xA2", 2 );
 
-    if( str.charcount!=2 || str.surrogates!=1 ) return EXIT_FAILURE;
-    if( str.blob.size!=8 ) return EXIT_FAILURE;
-    if( tl_string_length( &str )!=3 ) return EXIT_FAILURE;
-    if( tl_string_utf8_len( &str )!=7 ) return EXIT_FAILURE;
-
-    if( tl_string_cstr( &str )[ 0] != 0x20AC ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 1] != 0xD852 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 2] != 0xDF62 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 3] != 0x0000 ) return EXIT_FAILURE;
+    if( str.charcount!=2 || str.mbseq!=0 ) return EXIT_FAILURE;
+    if( str.data.used!=8 ) return EXIT_FAILURE;
+    if( tl_string_length( &str )!=7 ) return EXIT_FAILURE;
+    if( tl_string_utf16_len( &str )!=3 ) return EXIT_FAILURE;
 
     if( tl_string_at( &str, 0 ) != 0x20AC  ) return EXIT_FAILURE;
     if( tl_string_at( &str, 1 ) != 0x24B62 ) return EXIT_FAILURE;
@@ -224,34 +222,18 @@ int main( void )
     tl_string_init( &str );
 
     tl_string_append_utf16( &str, utf16 );
-    if( str.charcount!=5 || str.surrogates!=2 ) return EXIT_FAILURE;
-    if( str.blob.size!=14 ) return EXIT_FAILURE;
+    if( str.charcount!=(sizeof(utf32)/sizeof(utf32[0])-1) || str.mbseq!=2 )
+        return EXIT_FAILURE;
+    if( str.data.used!=sizeof(utf8str) )
+        return EXIT_FAILURE;
+    if( strcmp( tl_string_cstr( &str ), (const char*)utf8str )!=0 )
+        return EXIT_FAILURE;
 
-    if( tl_string_cstr( &str )[0] != 0x00E4 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[1] != 0x00F6 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[2] != 0xD800 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[3] != 0xDC00 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[4] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[5] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[6] != 0x0000 ) return EXIT_FAILURE;
-
-    tl_string_append_utf16( &str, utf16 );
-    if( str.charcount!=10 || str.surrogates!=2 ) return EXIT_FAILURE;
-    if( str.blob.size!=26 ) return EXIT_FAILURE;
-
-    if( tl_string_cstr( &str )[ 0] != 0x00E4 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 1] != 0x00F6 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 2] != 0xD800 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 3] != 0xDC00 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 4] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 5] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 6] != 0x00E4 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 7] != 0x00F6 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 8] != 0xD800 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[ 9] != 0xDC00 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[10] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[11] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[12] != 0x0000 ) return EXIT_FAILURE;
+    for( i=0; i<=str.charcount; ++i )
+    {
+        if( tl_string_at( &str, i ) != utf32[i] )
+            return EXIT_FAILURE;
+    }
 
     tl_string_cleanup( &str );
 
@@ -259,34 +241,12 @@ int main( void )
     tl_string_init( &str );
 
     tl_string_append_utf16_count( &str, utf16, 4 );
-    if( str.charcount!=4 || str.surrogates!=2 ) return EXIT_FAILURE;
-    if( str.blob.size!=12 ) return EXIT_FAILURE;
-    if( tl_string_utf8_len( &str )!=11 ) return EXIT_FAILURE;
+    if( str.charcount!=4 || str.mbseq!=2 ) return EXIT_FAILURE;
+    if( str.data.used!=10 ) return EXIT_FAILURE;
+    if( tl_string_utf16_len( &str )!=5 ) return EXIT_FAILURE;
 
-    if( tl_string_cstr( &str )[0] != 0x00E4 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[1] != 0x00F6 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[2] != 0xD800 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[3] != 0xDC00 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[4] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[5] != 0x0000 ) return EXIT_FAILURE;
-
-
-    tl_string_append_utf16_count( &str, utf16+2, 3 );
-    if( str.charcount!=7 || str.surrogates!=2 ) return EXIT_FAILURE;
-    if( str.blob.size!=20 ) return EXIT_FAILURE;
-    if( tl_string_utf8_len( &str )!=21 ) return EXIT_FAILURE;
-
-    if( tl_string_cstr( &str )[0] != 0x00E4 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[1] != 0x00F6 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[2] != 0xD800 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[3] != 0xDC00 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[4] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[5] != 0xD800 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[6] != 0xDC00 ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[7] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[8] != 0xFFFD ) return EXIT_FAILURE;
-    if( tl_string_cstr( &str )[9] != 0x0000 ) return EXIT_FAILURE;
-
+    if( memcmp( str.data.data, utf8str, 9 )!=0 )
+        return EXIT_FAILURE;
     tl_string_cleanup( &str );
 
     /* retrieve and remove end */

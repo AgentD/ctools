@@ -52,17 +52,6 @@ int errno_to_fs( int code )
     return code==0 ? 0 : TL_FS_SYS_ERROR;
 }
 
-char* to_utf8( const tl_string* in )
-{
-    size_t count = tl_string_utf8_len( in );
-    char* str = malloc( count + 1 );
-
-    if( str )
-        tl_string_to_utf8( in, str, count+1 );
-
-    return str;
-}
-
 void convert_ipv6( const struct in6_addr* v6, tl_net_addr* addr )
 {
     addr->addr.ipv6[7] = (v6->s6_addr[ 0]<<8) | v6->s6_addr[ 1];

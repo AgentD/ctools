@@ -36,7 +36,7 @@ typedef struct
     tl_iterator super;      /* inherits iterator interface */
     HANDLE hnd;             /* directory handle */
     WIN32_FIND_DATAW ent;   /* the current entry */
-    tl_string path;         /* original path for rewinding */
+    WCHAR* wpath;           /* original path for rewinding */
     tl_string current;      /* current entry name */
     int have_entry;         /* non-zero if we actually have an entry */
 }
@@ -50,7 +50,7 @@ static void dir_iterator_reset( tl_iterator* super )
     WCHAR* str;
 
     FindClose( this->hnd );
-    this->hnd = FindFirstFileW( this->path.blob.data, &this->ent );
+    this->hnd = FindFirstFileW( this->wpath, &this->ent );
 
     tl_string_clear( &this->current );
 
@@ -82,8 +82,8 @@ static void dir_iterator_destroy( tl_iterator* super )
     dir_iterator* this = (dir_iterator*)super;
 
     FindClose( this->hnd );
-    tl_string_cleanup( &this->path );
     tl_string_cleanup( &this->current );
+    free( this->wpath );
     free( this );
 }
 
@@ -134,7 +134,7 @@ static void dir_iterator_remove( tl_iterator* this )
 
 /****************************************************************************/
 
-int tl_dir_scan( const tl_string* path, tl_array* list )
+int tl_dir_scan( const char* path, tl_array* list )
 {
     WIN32_FIND_DATAW ent;
     unsigned int c;
@@ -145,8 +145,9 @@ int tl_dir_scan( const tl_string* path, tl_array* list )
     if( !path || !tl_fs_exists( path ) ) return TL_FS_NOT_EXIST;
     if( !list                          ) return 0;
 
+    /* paste path string */
     tl_string_init( &str );
-    tl_string_copy( &str, path );
+    tl_string_append_utf8( &str, path );
 
     do
     {
@@ -158,90 +159,76 @@ int tl_dir_scan( const tl_string* path, tl_array* list )
 
     tl_string_append_utf8( &str, "\\*" );
 
-    if( (hnd=FindFirstFileW(str.blob.data,&ent)) != INVALID_HANDLE_VALUE )
+    ptr = utf8_to_utf16( str.data.data );
+    if( !ptr )
+        goto out;
+
+    hnd = FindFirstFileW( ptr, &ent );
+    free( ptr );
+
+    if( hnd == INVALID_HANDLE_VALUE )
+        goto out;
+
+    do
     {
-        do
+        ptr = ent.cFileName;
+
+        if( ptr[0]!='.' || (ptr[1]!='\0'&&(ptr[1]!='.'||ptr[2]!='\0')) )
         {
-            ptr = ent.cFileName;
-
-            if( ptr[0]!='.' || (ptr[1]!='\0'&&(ptr[1]!='.'||ptr[2]!='\0')) )
-            {
-                tl_string_clear( &str );
-                tl_string_append_utf16( &str, ent.cFileName );
-                tl_array_append( list, &str );
-            }
+            tl_string_clear( &str );
+            tl_string_append_utf16( &str, ent.cFileName );
+            tl_array_append( list, &str );
         }
-        while( FindNextFileW( hnd, &ent ) );
-
-        FindClose( hnd );
     }
+    while( FindNextFileW( hnd, &ent ) );
 
+    FindClose( hnd );
+out:
     tl_string_cleanup( &str );
     return 0;
 }
 
-tl_iterator* tl_dir_iterate( const tl_string* path )
+tl_iterator* tl_dir_iterate( const char* path )
 {
     tl_iterator* super;
     dir_iterator* this;
     unsigned int c;
     WCHAR* str;
 
-    if( !path )
-        return NULL;
-
-    if( !(this = malloc(sizeof(dir_iterator))) )
+    if( !path || !(this = malloc(sizeof(dir_iterator))) )
         return NULL;
 
     super = (tl_iterator*)this;
-
-    if( !tl_string_init( &this->path ) )
-    {
-        free( this );
-        return NULL;
-    }
+    memset( this, 0, sizeof(*this) );
 
     if( !tl_string_init( &this->current ) )
+        goto fail;
+
+    tl_string_append_utf8( &this->current, path );
+
+    do
     {
-        tl_string_cleanup( &this->path );
-        free( this );
-        return NULL;
+        c = tl_string_last( &this->current );
+        if( c=='/' || c=='\\' )
+            tl_string_drop_last( &this->current );
     }
+    while( c=='/' || c=='\\' );
 
-    if( !tl_string_copy( &this->path, path ) )
-    {
-        tl_string_cleanup( &this->current );
-        tl_string_cleanup( &this->path );
-        free( this );
-        return NULL;
-    }
+    tl_string_append_utf8( &this->current, "\\*" );
 
-    /* remove trailing slashes */
-    while( 1 )
-    {
-        c = tl_string_last( &this->path );
-
-        if( c!='/' && c!='\\' )
-            break;
-
-        tl_string_drop_last( &this->path );
-    }
-
-    tl_string_append_utf8( &this->path, "\\*" );
+    if( !(this->wpath = utf8_to_utf16( tl_string_cstr( &this->current ) )) )
+        goto fail;
 
     /* open */
-    this->hnd = FindFirstFileW( this->path.blob.data, &this->ent );
+    this->hnd = FindFirstFileW( this->wpath, &this->ent );
 
     if( this->hnd == INVALID_HANDLE_VALUE )
-    {
-        tl_string_cleanup( &this->path );
-        free( this );
-        return NULL;
-    }
+        goto fail;
 
     this->have_entry = 1;
 
     /* search first valid entry */
+    tl_string_clear( &this->current );
 retry:
     str = this->ent.cFileName;
 
@@ -265,33 +252,10 @@ retry:
     super->reset     = dir_iterator_reset;
     super->remove    = dir_iterator_remove;
     return (tl_iterator*)this;
-}
-
-/****************************************************************************/
-
-int tl_dir_scan_utf8( const char* path, tl_array* list )
-{
-    tl_string str;
-    int status;
-
-    tl_string_init( &str );
-    tl_string_append_utf8( &str, path );
-    status = tl_dir_scan( &str, list );
-    tl_string_cleanup( &str );
-
-    return status;
-}
-
-tl_iterator* tl_dir_iterate_utf8( const char* path )
-{
-    tl_string str;
-    tl_iterator* dir;
-
-    tl_string_init( &str );
-    tl_string_append_utf8( &str, path );
-    dir = tl_dir_iterate( &str );
-    tl_string_cleanup( &str );
-
-    return dir;
+fail:
+    tl_string_cleanup( &this->current );
+    free( this->wpath );
+    free( this );
+    return NULL;
 }
 

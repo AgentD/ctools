@@ -119,7 +119,7 @@ static void dir_iterator_remove( tl_iterator* this )
 
 /****************************************************************************/
 
-int tl_dir_scan_utf8( const char* path, tl_array* list )
+int tl_dir_scan( const char* path, tl_array* list )
 {
     struct dirent* ent;
     tl_string str;
@@ -155,7 +155,7 @@ int tl_dir_scan_utf8( const char* path, tl_array* list )
     return 0;
 }
 
-tl_iterator* tl_dir_iterate_utf8( const char* path )
+tl_iterator* tl_dir_iterate( const char* path )
 {
     struct dirent* first;
     dir_iterator* it;
@@ -204,33 +204,5 @@ tl_iterator* tl_dir_iterate_utf8( const char* path )
     it->super.get_value = dir_iterator_get_value;
     it->super.remove    = dir_iterator_remove;
     return (tl_iterator*)it;
-}
-
-/****************************************************************************/
-
-int tl_dir_scan( const tl_string* path, tl_array* list )
-{
-    char* utf8 = to_utf8( path );
-    int status = TL_FS_SYS_ERROR;
-
-    if( utf8 )
-    {
-        status = tl_dir_scan_utf8( utf8, list );
-        free( utf8 );
-    }
-    return status;
-}
-
-tl_iterator* tl_dir_iterate( const tl_string* path )
-{
-    char* utf8 = to_utf8( path );
-    tl_iterator* dir = NULL;
-
-    if( utf8 )
-    {
-        dir = tl_dir_iterate_utf8( utf8 );
-        free( utf8 );
-    }
-    return dir;
 }
 

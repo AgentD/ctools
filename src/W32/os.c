@@ -69,6 +69,19 @@ int errno_to_fs( int code )
     return code==0 ? 0 : TL_FS_SYS_ERROR;
 }
 
+WCHAR* utf8_to_utf16( const char* utf8 )
+{
+    unsigned int length = MultiByteToWideChar(CP_UTF8,0,utf8,-1,NULL,0);
+    WCHAR* out = malloc( sizeof(WCHAR)*(length+1) );
+
+    if( out )
+    {
+        MultiByteToWideChar( CP_UTF8, 0, utf8, -1, out, length );
+        out[length] = '\0';
+    }
+    return out;
+}
+
 int winsock_acquire( void )
 {
     WORD version = MAKEWORD(2, 2);

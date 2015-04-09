@@ -40,16 +40,9 @@
  * provided for iterating directory contents on operating systems filesystem
  * hirarchy.
  *
- * The function tl_dir_iterate accepts a tl_string pointing to the target path
- * and returns a tl_iterator implementation. The function tl_dir_iterate_utf8
- * function does the same but accepts a pointer to a C-string holding the
- * UTF-8 encoded directory location.
- *
  * The function tl_dir_scan can be used to load the contents of a directory
  * directly into a tl_array of tl_string instances (with the proper
- * tl_allocator set). Again, the tl_dir_scan function takes a tl_string as
- * input, but there is a tl_dir_scan_utf8 function that accepts plain old
- * C-strings.
+ * tl_allocator set).
  */
 
 
@@ -76,14 +69,7 @@ extern "C" {
  *         the neccessarry permissions, TL_FS_NOT_EXIST if the path does not
  *         exist, TL_FS_NOT_DIR if the path points to a file
  */
-TLAPI int tl_dir_scan( const tl_string* path, tl_array* list );
-
-/**
- * \copydoc tl_dir_scan
- *
- * \param path A c-style utf8 string path of the directory to scan
- */
-TLAPI int tl_dir_scan_utf8( const char* path, tl_array* list );
+TLAPI int tl_dir_scan( const char* path, tl_array* list );
 
 /**
  * \brief Iterate over the contents of a directory
@@ -95,14 +81,7 @@ TLAPI int tl_dir_scan_utf8( const char* path, tl_array* list );
  *
  * \return A pointer to an iterator object on success, NULL on failure
  */
-TLAPI tl_iterator* tl_dir_iterate( const tl_string* path );
-
-/**
- * \copydoc tl_iterate_directory
- *
- * \param path A C-style UTF8 string of a directory path to read from
- */
-TLAPI tl_iterator* tl_dir_iterate_utf8( const char* path );
+TLAPI tl_iterator* tl_dir_iterate( const char* path );
 
 #ifdef __cplusplus
 }

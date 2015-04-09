@@ -26,7 +26,7 @@
 /**
  * \file tl_string.h
  *
- * \brief Contains a UTF-16 dynamic string
+ * \brief Contains a UTF-8 dynamic string
  */
 #ifndef TOOLS_STRING_H
 #define TOOLS_STRING_H
@@ -36,19 +36,14 @@
  *
  * \section tl_string The tl_string structure
  *
- * The tl_string structure can be used for storing and processing UTF-16
- * strings. The data structure internally uses a tl_blob to store the string
- * data, so while there are functions to append data from various encodings,
- * it is very inefficient as the string has to be resized every time
- *
- * A data structure for efficiently building strings is under construction.
- * The intended copy-on-write behaviour of strings is also still under
- * construction.
+ * The tl_string structure can be used for storing and processing UTF-8
+ * strings. The data structure internally uses a tl_array to store the string
+ * data. Substings can be added in various encodings.
  */
 
 
 
-#include "tl_blob.h"
+#include "tl_array.h"
 #include "tl_predef.h"
 
 
@@ -56,32 +51,32 @@
 /**
  * \struct tl_string
  *
- * \brief A dynamically resizeable UTF-16 string
+ * \brief A dynamically resizeable UTF-8 string
  */
 struct tl_string
 {
-    /** \brief Contains the data of a null-terimated UTF-16 string */
-    tl_blob blob;
+    /** \brief Contains the data of a null-terimated UTF-8 string */
+    tl_array data;
 
     /**
      * \brief The number of characters stored in a string
      *
-     * If the string contains surrogate pairs, this does not neccessarily have
-     * to match the number of elements in the underlying container.
+     * If the string contains multi byte sequences, this does not neccessarily
+     * have to match the number of elements in the underlying container.
      */
     size_t charcount;
 
     /**
-     * \brief The array index where the first surrogate pair is used
+     * \brief The array index where the first multi byte sequence is used
      *
-     * If the string contains surrogate pairs this points to the first
-     * surrogate, pair. Otherwise, it set to an out of bounds value.
+     * If the string contains multi byte sequences, this points to the first
+     * one. Otherwise, it set to an out of bounds value.
      *
      * A mapping from character index to array index below this value can
      * be done in constant time. Above this value, a linear search is
      * required.
      */
-    size_t surrogates;
+    size_t mbseq;
 };
 
 
@@ -204,7 +199,7 @@ TLAPI unsigned int tl_string_at( const tl_string* str, size_t index );
  *
  * \return A pointer to a null-terminated UTF-16 string
  */
-TLAPI tl_u16* tl_string_cstr( tl_string* str );
+TLAPI char* tl_string_cstr( tl_string* str );
 
 /**
  * \brief Append a unicode code point value to a string object
@@ -379,7 +374,7 @@ TLAPI int tl_string_append_int( tl_string* str, long value, int base );
  *
  * \return The number of characters required
  */
-TLAPI size_t tl_string_utf8_len( const tl_string* str );
+TLAPI size_t tl_string_utf16_len( const tl_string* str );
 
 /**
  * \brief Convert a tl_string to UTF-8
@@ -395,12 +390,12 @@ TLAPI size_t tl_string_utf8_len( const tl_string* str );
  *
  * \param str    A pointer to a string
  * \param buffer The destination buffer to write to
- * \param size   The number of characters available in the destination buffer
+ * \param size   The number of code units available in the destination buffer
  *
- * \return The number of characters written (exlcuding the null-terminator)
+ * \return The number of code units written (exlcuding the null-terminator)
  */
-TLAPI size_t tl_string_to_utf8( const tl_string* str, char* buffer,
-                                size_t size );
+TLAPI size_t tl_string_to_utf16( const tl_string* str, tl_u16* buffer,
+                                 size_t size );
 
 /**
  * \brief Get the last character of a string

@@ -11,7 +11,6 @@
 
 int main( void )
 {
-    char buffer[128];
     tl_iterator* dir;
     tl_array strlist;
     tl_string str;
@@ -24,80 +23,71 @@ int main( void )
     printf( "OS dir seperator: '%s'\n", tl_fs_get_dir_sep( ) );
 
     tl_fs_get_user_dir( &str );
-    tl_string_to_utf8( &str, buffer, sizeof(buffer) );
+    printf( "User home directory: '%s'\n", tl_string_cstr( &str ) );
     tl_string_cleanup( &str );
-    printf( "User home directory: '%s'\n", buffer );
 
     tl_string_init( &str );
     tl_fs_get_wd( &str );
-    tl_string_to_utf8( &str, buffer, sizeof(buffer) );
-    printf( "Current working directory: '%s'\n", buffer );
-
+    printf( "Current working directory: '%s'\n", tl_string_cstr( &str ) );
     tl_string_cleanup( &str );
 
     /* print contents of working directory */
     puts( "********************************" );
 
     tl_array_init( &strlist, sizeof(tl_string), tl_string_get_allocator( ) );
-    tl_dir_scan_utf8( ".", &strlist );
+    tl_dir_scan( ".", &strlist );
     tl_array_stable_sort( &strlist, (tl_compare)tl_string_compare );
 
     for( i=0; i<strlist.used; ++i )
     {
-        tl_string_to_utf8( (tl_string*)tl_array_at( &strlist, i ),
-                           buffer, sizeof(buffer) );
-
-        puts( buffer );
+        puts( tl_string_cstr( tl_array_at( &strlist, i ) ) );
     }
 
     tl_array_cleanup( &strlist );
 
     puts( "********************************" );
 
-    for( dir=tl_dir_iterate_utf8("."); dir->has_data(dir); dir->next(dir) )
-    {
-        tl_string_to_utf8( dir->get_value( dir ), buffer, sizeof(buffer) );
-        puts( buffer );
-    }
+    for( dir=tl_dir_iterate("."); dir->has_data(dir); dir->next(dir) )
+        puts( tl_string_cstr( dir->get_value( dir ) ) );
 
     dir->destroy( dir );
 
     /* test filesystem functions */
-    if( tl_fs_exists_utf8( "FOO" )           ) return EXIT_FAILURE;
-    if( tl_fs_is_directory_utf8( "FOO" )     ) return EXIT_FAILURE;
-    if( tl_fs_mkdir_utf8( "FOO" )!=0         ) return EXIT_FAILURE;
-    if( !tl_fs_exists_utf8( "FOO" )          ) return EXIT_FAILURE;
-    if( !tl_fs_is_directory_utf8( "FOO" )    ) return EXIT_FAILURE;
-    if( tl_fs_exists_utf8( "FOO/bar" )       ) return EXIT_FAILURE;
-    if( tl_fs_is_directory_utf8( "FOO/bar" ) ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO" )           ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO" )     ) return EXIT_FAILURE;
+    if( tl_fs_mkdir( "FOO" )!=0         ) return EXIT_FAILURE;
+    if( !tl_fs_exists( "FOO" )          ) return EXIT_FAILURE;
+    if( !tl_fs_is_directory( "FOO" )    ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO/bar" )       ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO/bar" ) ) return EXIT_FAILURE;
 
-    if( tl_fs_cwd_utf8( "FOO" )!=0           ) return EXIT_FAILURE;
-    if( tl_fs_exists_utf8( "FOO" )           ) return EXIT_FAILURE;
-    if( tl_fs_is_directory_utf8( "FOO" )     ) return EXIT_FAILURE;
-    if( tl_fs_get_file_size_utf8( "bar" )!=0 ) return EXIT_FAILURE;
+    if( tl_fs_cwd( "FOO" )!=0           ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO" )           ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO" )     ) return EXIT_FAILURE;
+    if( tl_fs_get_file_size( "bar" )!=0 ) return EXIT_FAILURE;
     f = fopen( "bar", "wb" );
-    if( tl_fs_get_file_size_utf8( "bar" )!=0 ) return EXIT_FAILURE;
+    if( tl_fs_get_file_size( "bar" )!=0 ) return EXIT_FAILURE;
     fwrite( "Hello World", 1, 11, f );
     fclose( f );
-    if( tl_fs_get_file_size_utf8("bar")!=11  ) return EXIT_FAILURE;
-    if( tl_fs_cwd_utf8( ".." )!=0            ) return EXIT_FAILURE;
-    if( !tl_fs_exists_utf8( "FOO" )          ) return EXIT_FAILURE;
-    if( !tl_fs_is_directory_utf8( "FOO" )    ) return EXIT_FAILURE;
-    if( !tl_fs_exists_utf8( "FOO/bar" )      ) return EXIT_FAILURE;
-    if( tl_fs_is_directory_utf8( "FOO/bar" ) ) return EXIT_FAILURE;
+    if( tl_fs_get_file_size("bar")!=11  ) return EXIT_FAILURE;
+    if( tl_fs_cwd( ".." )!=0            ) return EXIT_FAILURE;
+    if( !tl_fs_exists( "FOO" )          ) return EXIT_FAILURE;
+    if( !tl_fs_is_directory( "FOO" )    ) return EXIT_FAILURE;
+    if( !tl_fs_exists( "FOO/bar" )      ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO/bar" ) ) return EXIT_FAILURE;
 
-    if( tl_fs_delete_utf8( "FOO" )!=TL_FS_NOT_EMPTY )
+    if( tl_fs_delete( "FOO" )!=TL_FS_NOT_EMPTY )
         return EXIT_FAILURE;
 
-    if( tl_fs_delete_utf8( "FOO/bar" )!=0    ) return EXIT_FAILURE;
-    if( tl_fs_exists_utf8( "FOO/bar" )       ) return EXIT_FAILURE;
-    if( tl_fs_is_directory_utf8( "FOO/bar" ) ) return EXIT_FAILURE;
-    if( tl_fs_delete_utf8( "FOO" )!=0        ) return EXIT_FAILURE;
-    if( tl_fs_exists_utf8( "FOO" )           ) return EXIT_FAILURE;
-    if( tl_fs_is_directory_utf8( "FOO" )     ) return EXIT_FAILURE;
+    if( tl_fs_delete( "FOO/bar" )!=0    ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO/bar" )       ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO/bar" ) ) return EXIT_FAILURE;
+    if( tl_fs_delete( "FOO" )!=0        ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO" )           ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO" )     ) return EXIT_FAILURE;
 
 #if 0
-int tl_fs_is_symlink_utf8( const char* path );
+int tl_fs_is_symlink( const char* path );
 #endif
 
     return EXIT_SUCCESS;

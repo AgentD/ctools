@@ -93,6 +93,9 @@ extern "C" {
 /** \brief Translate a GetLastError value to an TL_FS_* error code */
 int errno_to_fs( int code );
 
+/** \brief Convert an UTF-8 string to UTF-16. Returned buffer must be freed */
+WCHAR* utf8_to_utf16( const char* utf8 );
+
 /**
  * \brief Acquire Winsock API
  *
