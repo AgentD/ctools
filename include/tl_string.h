@@ -189,7 +189,7 @@ TLAPI int tl_string_is_empty( const tl_string* str );
 TLAPI unsigned int tl_string_at( const tl_string* str, size_t index );
 
 /**
- * \brief Get a null-terminated UTF-16 string from a string object
+ * \brief Get a null-terminated UTF-8 string from a string object
  *
  * \memberof tl_string
  *
@@ -197,7 +197,7 @@ TLAPI unsigned int tl_string_at( const tl_string* str, size_t index );
  *
  * \param str A pointer to a string object
  *
- * \return A pointer to a null-terminated UTF-16 string
+ * \return A pointer to a null-terminated UTF-8 string
  */
 TLAPI char* tl_string_cstr( tl_string* str );
 
@@ -361,14 +361,14 @@ TLAPI int tl_string_append_uint( tl_string* str, unsigned long value,
 TLAPI int tl_string_append_int( tl_string* str, long value, int base );
 
 /**
- * \brief Determine how much space is needed to convert a tl_string to UTF-8
+ * \brief Determine how much space is needed to convert a tl_string to UTF-16
  *
  * \memberof tl_string
  *
  * \note This function runs in linear time
  *
  * This function computes the number of characters (excluding null-terminator)
- * are required to hold the UTF-8 version of a tl_string.
+ * are required to hold the UTF-16 version of a tl_string.
  *
  * \param str A pointer to a string
  *
@@ -377,16 +377,16 @@ TLAPI int tl_string_append_int( tl_string* str, long value, int base );
 TLAPI size_t tl_string_utf16_len( const tl_string* str );
 
 /**
- * \brief Convert a tl_string to UTF-8
+ * \brief Convert a tl_string to UTF-16
  *
  * \memberof tl_string
  *
- * This function attempts to convert a tl_string to an UTF-8 representation.
+ * This function attempts to convert a tl_string to an UTF-16 representation.
  * The resulting buffer will always be null-terminated and never contain an
- * unfinished UTF-8 character. If a character plus null-terminator would go
+ * unfinished UTF-16 character. If a character plus null-terminator would go
  * beyond the buffer size, conversion is aborted and a null-terminator is
- * added. If the input string pointer is NULL, a null-terminator is added
- * (given the buffer is not NULL and size is large enough).
+ * added. If the input string pointer is NULL, a null-terminator is always
+ * added if the buffer is at least one character long.
  *
  * \param str    A pointer to a string
  * \param buffer The destination buffer to write to
