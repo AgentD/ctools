@@ -120,6 +120,14 @@ void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 );
 tl_iostream* sock_stream_create( int sockfd );
 
 /**
+ * \brief Create a tl_iostream implementation that operates on a pipe
+ *
+ * \param readpipe  A file descriptor to read from
+ * \param writepipe A file descriptor to write to
+ */
+tl_iostream* pipe_stream_create( int readpipe, int writepipe );
+
+/**
  * \brief Create a tl_server implementation instance that offers a TCP server
  *
  * \param sockfd  A server socket file descriptor

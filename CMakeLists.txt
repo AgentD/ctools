@@ -98,12 +98,15 @@ if( UNIX )
                      src/unix/fs.c
                      src/unix/dir.c
                      src/unix/network.c
+                     src/unix/process.c
                      src/unix/sockstream.c
+                     src/unix/pipestream.c
                      src/unix/tcpserver.c
                      src/unix/udpstream.c
                      src/unix/udpserver.c )
 
   add_definitions( -D_POSIX_SOURCE=1 )
+  add_definitions( -D_POSIX_C_SOURCE=200112L )
 
   set( CTOOLS_SYSLIBS ${CMAKE_THREAD_LIBS_INIT} )
 elseif( WIN32 )
@@ -162,6 +165,8 @@ add_executable( test_blob tests/test_blob.c )
 add_executable( test_namelookup tests/test_namelookup.c )
 add_executable( test_tcp tests/test_tcp.c )
 add_executable( test_udp tests/test_udp.c )
+add_executable( test_process tests/test_process.c )
+add_executable( childproc tests/childproc.c )
 
 target_link_libraries( test_array ctools  )
 target_link_libraries( test_list ctools )
@@ -177,6 +182,8 @@ target_link_libraries( test_blob ctools )
 target_link_libraries( test_namelookup ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( test_tcp ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( test_udp ctools ${CTOOLS_SYSLIBS} )
+target_link_libraries( test_process ctools ${CTOOLS_SYSLIBS} )
+target_link_libraries( childproc ctools ${CTOOLS_SYSLIBS} )
 
 enable_testing( )
 add_test( test_array ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_array )
@@ -194,6 +201,8 @@ add_test( test_blob ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_blob )
 add_test( test_namelookup ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_namelookup )
 add_test( test_tcp ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_tcp )
 add_test( test_udp ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_udp )
+add_test( test_process ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_process
+          ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/childproc )
 
 #----------------------------------------------------------------------
 # generate Doxygen API reference
