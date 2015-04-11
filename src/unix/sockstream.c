@@ -62,10 +62,10 @@ static int cl_stream_set_timeout( tl_iostream* super, unsigned int timeout )
     return 0;
 fail:
     if( errno==EBADF || errno==ENOTSOCK )
-        return TL_IO_CLOSED;
+        return TL_ERR_CLOSED;
     if( errno==EINVAL || errno==ENODEV || errno==ENXIO )
-        return TL_IO_NOT_SUPPORTED;
-    return TL_IO_INTERNAL;
+        return TL_ERR_NOT_SUPPORTED;
+    return TL_ERR_INTERNAL;
 }
 
 static int cl_stream_write_raw( tl_iostream* super, const void* buffer,
@@ -78,7 +78,7 @@ static int cl_stream_write_raw( tl_iostream* super, const void* buffer,
         *actual = 0;
 
     if( !this || !buffer )
-        return TL_IO_INTERNAL;
+        return TL_ERR_INTERNAL;
 
     if( !size )
         return 0;
@@ -88,10 +88,10 @@ static int cl_stream_write_raw( tl_iostream* super, const void* buffer,
     if( bytes<0 )
     {
         if( errno==EAGAIN || errno==EWOULDBLOCK )
-            return TL_IO_TIMEOUT;
+            return TL_ERR_TIMEOUT;
         if( errno==EBADF || errno==EINVAL )
-            return TL_IO_CLOSED;
-        return TL_IO_INTERNAL;
+            return TL_ERR_CLOSED;
+        return TL_ERR_INTERNAL;
     }
 
     if( actual )
@@ -109,7 +109,7 @@ static int cl_stream_read_raw( tl_iostream* super, void* buffer,
         *actual = 0;
 
     if( !this || !buffer )
-        return TL_IO_INTERNAL;
+        return TL_ERR_INTERNAL;
 
     if( !size )
         return 0;
@@ -117,14 +117,14 @@ static int cl_stream_read_raw( tl_iostream* super, void* buffer,
     bytes = read( this->socket, buffer, size );
 
     if( bytes==0 )
-        return TL_IO_CLOSED;
+        return TL_ERR_CLOSED;
 
     if( bytes < 0 )
     {
         if( errno==EAGAIN || errno==EWOULDBLOCK )
-            return TL_IO_TIMEOUT;
+            return TL_ERR_TIMEOUT;
 
-        return TL_IO_INTERNAL;
+        return TL_ERR_INTERNAL;
     }
 
     if( actual )

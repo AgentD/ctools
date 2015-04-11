@@ -35,21 +35,21 @@ int errno_to_fs( int code )
     case EPERM:
     case EACCES:
     case EROFS:
-        return TL_FS_ACCESS;
+        return TL_ERR_ACCESS;
     case ENOENT:
-        return TL_FS_NOT_EXIST;
+        return TL_ERR_NOT_EXIST;
     case ENOTDIR:
-        return TL_FS_NOT_DIR;
+        return TL_ERR_NOT_DIR;
     case ENOSPC:
     case EDQUOT:
-        return TL_FS_NO_SPACE;
+        return TL_ERR_NO_SPACE;
     case EEXIST:
-        return TL_FS_EXISTS;
+        return TL_ERR_EXISTS;
     case ENOTEMPTY:
-        return TL_FS_NOT_EMPTY;
+        return TL_ERR_NOT_EMPTY;
     }
 
-    return code==0 ? 0 : TL_FS_SYS_ERROR;
+    return code==0 ? 0 : TL_ERR_INTERNAL;
 }
 
 void convert_ipv6( const struct in6_addr* v6, tl_net_addr* addr )

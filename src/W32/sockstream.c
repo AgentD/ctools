@@ -42,14 +42,14 @@ static int WSAHandleFuckup( void )
     int status = WSAGetLastError( );
 
     if( status==WSAETIMEDOUT || status==WSAEWOULDBLOCK )
-        return TL_IO_TIMEOUT;
+        return TL_ERR_TIMEOUT;
     if( status==WSAECONNRESET || status==WSAECONNABORTED ||
         status==WSAESHUTDOWN || status==WSAENOTSOCK ||
         status==WSAENOTCONN || status==WSAENETRESET )
     {
-        return TL_IO_CLOSED;
+        return TL_ERR_CLOSED;
     }
-    return TL_IO_INTERNAL;
+    return TL_ERR_INTERNAL;
 }
 
 
@@ -84,10 +84,10 @@ static int cl_stream_set_timeout( tl_iostream* super, unsigned int timeout )
 fail:
     status = WSAGetLastError( );
     if( status==WSAENOTCONN || status==WSAENOTSOCK || status==WSAENETRESET )
-        return TL_IO_CLOSED;
+        return TL_ERR_CLOSED;
     if( status==WSAENOPROTOOPT || status==WSAEINVAL )
-        return TL_IO_NOT_SUPPORTED;
-    return TL_IO_INTERNAL;
+        return TL_ERR_NOT_SUPPORTED;
+    return TL_ERR_INTERNAL;
 }
 
 static int cl_stream_write_raw( tl_iostream* super, const void* buffer,
@@ -100,7 +100,7 @@ static int cl_stream_write_raw( tl_iostream* super, const void* buffer,
         *actual = 0;
 
     if( !this || !buffer )
-        return TL_IO_INTERNAL;
+        return TL_ERR_INTERNAL;
 
     if( !size )
         return 0;
@@ -125,7 +125,7 @@ static int cl_stream_read_raw( tl_iostream* super, void* buffer,
         *actual = 0;
 
     if( !this || !buffer )
-        return TL_IO_INTERNAL;
+        return TL_ERR_INTERNAL;
 
     if( !size )
         return 0;
@@ -133,7 +133,7 @@ static int cl_stream_read_raw( tl_iostream* super, void* buffer,
     status = recv( this->socket, buffer, size, 0 );
 
     if( status==0 )
-        return TL_IO_CLOSED;
+        return TL_ERR_CLOSED;
 
     if( status<0 )
         return WSAHandleFuckup( );

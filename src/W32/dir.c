@@ -142,7 +142,7 @@ int tl_dir_scan( const char* path, tl_array* list )
     HANDLE hnd;
     WCHAR* ptr;
 
-    if( !path || !tl_fs_exists( path ) ) return TL_FS_NOT_EXIST;
+    if( !path || !tl_fs_exists( path ) ) return TL_ERR_NOT_EXIST;
     if( !list                          ) return 0;
 
     /* paste path string */

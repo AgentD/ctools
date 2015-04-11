@@ -76,10 +76,10 @@ static int udp_stream_write_raw( tl_iostream* super, const void* buffer,
         *actual = 0;
 
     if( !this || !buffer )
-        return TL_IO_INTERNAL;
+        return TL_ERR_INTERNAL;
 
     if( !p )
-        return TL_IO_CLOSED;
+        return TL_ERR_CLOSED;
 
     if( size )
     {
@@ -89,7 +89,7 @@ static int udp_stream_write_raw( tl_iostream* super, const void* buffer,
         monitor_unlock( &(p->monitor) );
 
         if( result < 0 )
-            return TL_IO_INTERNAL;
+            return TL_ERR_INTERNAL;
         if( actual )
             *actual = result;
     }
@@ -111,14 +111,14 @@ static int udp_stream_read_raw( tl_iostream* super, void* buffer,
     {
         if( !monitor_wait( &(this->monitor) ) )
         {
-            result = TL_IO_TIMEOUT;
+            result = TL_ERR_TIMEOUT;
             goto done;
         }
     }
 
     if( this->buffer.used==0 )
     {
-        result = TL_IO_INTERNAL;
+        result = TL_ERR_INTERNAL;
     }
     else
     {

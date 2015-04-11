@@ -106,12 +106,12 @@ TLAPI int tl_fs_is_symlink( const char* path );
  *
  * \note If the given directory already exists, this function reports success
  *
- * \return Zero on success, TL_FS_ACCESS if the calling process does not have
- *         the neccessarry permissions, TL_FS_EXISTS if the path already
- *         exists and is not a directory, TL_FS_NO_SPACE if there is not
- *         enough space on the target file system, TL_FS_NOT_EXIST if a part
- *         of the path does not exist, TL_FS_NOT_DIR if an element of the path
- *         is not a directory
+ * \return Zero on success, TL_ERR_ACCESS if the calling process does not have
+ *         the neccessarry permissions, TL_ERR_EXISTS if the path already
+ *         exists and is not a directory, TL_ERR_NO_SPACE if there is not
+ *         enough space on the target file system, TL_ERR_NOT_EXIST if a part
+ *         of the path does not exist, TL_ERR_NOT_DIR if an element of the
+ *         path is not a directory
  */
 TLAPI int tl_fs_mkdir( const char* path );
 
@@ -120,9 +120,9 @@ TLAPI int tl_fs_mkdir( const char* path );
  *
  * \param path The path to set as the new working directory
  *
- * \return Zero on success, TL_FS_ACCESS if the calling process does not have
- *         the neccessarry permissions, TL_FS_NOT_EXIST if a part of the path
- *         does not exist, TL_FS_NOT_DIR if an element of the path is not a
+ * \return Zero on success, TL_ERR_ACCESS if the calling process does not have
+ *         the neccessarry permissions, TL_ERR_NOT_EXIST if a part of the path
+ *         does not exist, TL_ERR_NOT_DIR if an element of the path is not a
  *         directory
  */
 TLAPI int tl_fs_cwd( const char* path );
@@ -161,8 +161,8 @@ TLAPI int tl_fs_get_user_dir( tl_string* path );
  *
  * \param path A path to a file, directory or symlink to delete
  *
- * \return Zero on success, TL_FS_ACCESS if the calling process does not have
- *         the propper permissions, TL_FS_NOT_EMPTY if trying to delete a non
+ * \return Zero on success, TL_ERR_ACCESS if the calling process does not have
+ *         the propper permissions, TL_ERR_NOT_EMPTY if trying to delete a non
  *         empty directory.
  */
 TLAPI int tl_fs_delete( const char* path );

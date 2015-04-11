@@ -76,7 +76,7 @@ int main( void )
     if( !tl_fs_exists( "FOO/bar" )      ) return EXIT_FAILURE;
     if( tl_fs_is_directory( "FOO/bar" ) ) return EXIT_FAILURE;
 
-    if( tl_fs_delete( "FOO" )!=TL_FS_NOT_EMPTY )
+    if( tl_fs_delete( "FOO" )!=TL_ERR_NOT_EMPTY )
         return EXIT_FAILURE;
 
     if( tl_fs_delete( "FOO/bar" )!=0    ) return EXIT_FAILURE;

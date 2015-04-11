@@ -183,7 +183,7 @@ int tl_fs_cwd( const char* path )
     int status;
 
     if( !path || !(wpath = utf8_to_utf16( path )) )
-        return TL_FS_NOT_DIR;
+        return TL_ERR_NOT_DIR;
 
     status = SetCurrentDirectoryW( wpath ) ? 0 : errno_to_fs(GetLastError());
 
@@ -198,13 +198,13 @@ int tl_fs_mkdir( const char* path )
     int status;
 
     if( !path || !(wpath = utf8_to_utf16( path )) )
-        return TL_FS_NOT_DIR;
+        return TL_ERR_NOT_DIR;
 
     attr = GetFileAttributesW( wpath );
 
     if( attr!=INVALID_FILE_ATTRIBUTES )
     {
-        status = (attr & FILE_ATTRIBUTE_DIRECTORY) ? 0 : TL_FS_EXISTS;
+        status = (attr & FILE_ATTRIBUTE_DIRECTORY) ? 0 : TL_ERR_EXISTS;
     }
     else if( CreateDirectoryW( wpath, NULL ) )
     {

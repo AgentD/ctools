@@ -68,22 +68,44 @@
 
 
 
-#define TL_IO_NOT_SUPPORTED (-1)
-#define TL_IO_CLOSED (-2)
-#define TL_IO_TIMEOUT (-3)
-#define TL_IO_INTERNAL (-4)
-#define TL_IO_ACCESS (-5)
-#define TL_IO_IN_USE (-6)
+/**
+ * \enum TL_ERROR_CODE
+ *
+ * \brief Potential error codes of system operations
+ */
+typedef enum
+{
+    /** \brief The operation is not supported by the implementation */
+    TL_ERR_NOT_SUPPORTED = -1,
 
-#define TL_FS_ACCESS (-1)
-#define TL_FS_EXISTS (-2)
-#define TL_FS_NO_SPACE (-3)
-#define TL_FS_NOT_EXIST (-4)
-#define TL_FS_NOT_DIR (-5)
-#define TL_FS_NOT_EMPTY (-6)
-#define TL_FS_SYS_ERROR (-7)
+    /** \brief An io_stream has already been closed by the other end */
+    TL_ERR_CLOSED = -2,
 
+    /** \brief The operation took to long to perform and was aborted */
+    TL_ERR_TIMEOUT = -3,
 
+    /** \brief An unexpected, system specific internal error occoured */
+    TL_ERR_INTERNAL = -4,
+
+    /** \brief The operation requires permissions the caller does not have */
+    TL_ERR_ACCESS = -5,
+
+    /** \brief An object cannot be created because it already exists */
+    TL_ERR_EXISTS = -6,
+
+    /** \brief Not enough persistent memory to perform an operation */
+    TL_ERR_NO_SPACE = -7,
+
+    /** \brief An object cannot be accessed because it does not exist */
+    TL_ERR_NOT_EXIST = -8,
+
+    /** \brief It was tried to execute a directory operation on a file */
+    TL_ERR_NOT_DIR = -9,
+
+    /** \brief A directory could not be deleted because it was empty */
+    TL_ERR_NOT_EMPTY = -10
+}
+TL_ERROR_CODE;
 
 
 

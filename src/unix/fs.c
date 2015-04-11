@@ -64,10 +64,10 @@ int tl_fs_mkdir( const char* path )
     struct stat sb;
 
     if( !path )
-        return TL_FS_NOT_DIR;
+        return TL_ERR_NOT_DIR;
 
     if( stat( path, &sb )==0 )
-        return S_ISDIR(sb.st_mode) ? 0 : TL_FS_EXISTS;
+        return S_ISDIR(sb.st_mode) ? 0 : TL_ERR_EXISTS;
 
     errno = 0;
     return mkdir( path, S_IRWXU )==0 ? 0 : errno_to_fs( errno );
@@ -76,7 +76,7 @@ int tl_fs_mkdir( const char* path )
 int tl_fs_cwd( const char* path )
 {
     if( !path )
-        return TL_FS_NOT_DIR;
+        return TL_ERR_NOT_DIR;
 
     errno = 0;
     return chdir( path )==0 ? 0 : errno_to_fs( errno );
@@ -119,7 +119,7 @@ int tl_fs_get_wd( tl_string* path )
         if( !(new = realloc( str, size )) )
         {
             free( str );
-            return TL_FS_SYS_ERROR;
+            return TL_ERR_INTERNAL;
         }
 
         str = new;

@@ -176,7 +176,7 @@ int tl_process_wait( tl_process* this, int* status,
     int result;
 
     if( !this )
-        return TL_IO_INTERNAL;
+        return TL_ERR_INTERNAL;
 
     while( timeout && kill( this->pid, 0 )==0 )
     {
@@ -192,9 +192,9 @@ int tl_process_wait( tl_process* this, int* status,
         result = pselect( 0, NULL, NULL, NULL, &ts, &mask );
 
         if( result==0 )
-            return TL_IO_TIMEOUT;
+            return TL_ERR_TIMEOUT;
         if( result==-1 && errno!=EINTR )
-            return TL_IO_INTERNAL;
+            return TL_ERR_INTERNAL;
         if( kill( this->pid, 0 )!=0 )
             break;
 

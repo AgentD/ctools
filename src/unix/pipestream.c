@@ -68,10 +68,10 @@ static int pipe_stream_write( tl_iostream* super, const void* buffer,
         *actual = 0;
 
     if( !this || !buffer )
-        return TL_IO_INTERNAL;
+        return TL_ERR_INTERNAL;
 
     if( this->writepipe<0 )
-        return TL_IO_NOT_SUPPORTED;
+        return TL_ERR_NOT_SUPPORTED;
 
     if( !size )
         return 0;
@@ -86,9 +86,9 @@ static int pipe_stream_write( tl_iostream* super, const void* buffer,
         result = select( this->writepipe+1, 0, &out_fds, 0, &tv );
 
         if( result<0 )
-            return TL_IO_INTERNAL;
+            return TL_ERR_INTERNAL;
         if( result==0 || !FD_ISSET(this->writepipe,&out_fds) )
-            return TL_IO_TIMEOUT;
+            return TL_ERR_TIMEOUT;
     }
 
     result = write( this->writepipe, buffer, size );
@@ -96,10 +96,10 @@ static int pipe_stream_write( tl_iostream* super, const void* buffer,
     if( result<0 )
     {
         if( errno==EAGAIN || errno==EWOULDBLOCK )
-            return TL_IO_TIMEOUT;
+            return TL_ERR_TIMEOUT;
         if( errno==EBADF || errno==EINVAL || errno==EPIPE )
-            return TL_IO_CLOSED;
-        return TL_IO_INTERNAL;
+            return TL_ERR_CLOSED;
+        return TL_ERR_INTERNAL;
     }
 
     if( actual )
@@ -119,10 +119,10 @@ static int pipe_stream_read( tl_iostream* super, void* buffer,
         *actual = 0;
 
     if( !this || !buffer )
-        return TL_IO_INTERNAL;
+        return TL_ERR_INTERNAL;
 
     if( this->readpipe<0 )
-        return TL_IO_NOT_SUPPORTED;
+        return TL_ERR_NOT_SUPPORTED;
 
     if( !size )
         return 0;
@@ -137,18 +137,18 @@ static int pipe_stream_read( tl_iostream* super, void* buffer,
         result = select( this->readpipe+1, &in_fds, 0, 0, &tv );
 
         if( result<0 )
-            return TL_IO_INTERNAL;
+            return TL_ERR_INTERNAL;
         if( result==0 || !FD_ISSET(this->readpipe, &in_fds) )
-            return TL_IO_TIMEOUT;
+            return TL_ERR_TIMEOUT;
     }
 
     result = read( this->readpipe, buffer, size );
 
     if( result==0 )
-        return TL_IO_CLOSED;
+        return TL_ERR_CLOSED;
 
     if( result<0 )
-        return TL_IO_INTERNAL;
+        return TL_ERR_INTERNAL;
 
     if( actual )
         *actual = result;

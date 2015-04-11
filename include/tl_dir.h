@@ -103,9 +103,9 @@ extern "C" {
  * \param list A pointer to a tl_array of tl_string to append the entries to,
  *             assumed to have a propper allocator set
  *
- * \return Zero on success, TL_FS_ACCESS if the calling process does not have
- *         the neccessarry permissions, TL_FS_NOT_EXIST if the path does not
- *         exist, TL_FS_NOT_DIR if the path points to a file
+ * \return Zero on success, TL_ERR_ACCESS if the calling process does not have
+ *         the neccessarry permissions, TL_ERR_NOT_EXIST if the path does not
+ *         exist, TL_ERR_NOT_DIR if the path points to a file
  */
 TLAPI int tl_dir_scan( const char* path, tl_array* list );
 
