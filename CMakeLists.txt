@@ -114,7 +114,9 @@ elseif( WIN32 )
                      src/W32/fs.c
                      src/W32/dir.c
                      src/W32/network.c
+                     src/W32/process.c
                      src/W32/sockstream.c
+                     src/W32/pipestream.c
                      src/W32/tcpserver.c
                      src/W32/udpstream.c
                      src/W32/udpserver.c )

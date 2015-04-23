@@ -150,6 +150,9 @@ void monitor_cleanup( monitor_t* monitor );
 /** \brief Wait for a monitor to receive a notification */
 int monitor_wait( monitor_t* monitor );
 
+/** \brief Create a stream object that uses pipe HANDLE objects */
+tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd );
+
 #define monitor_set_timeout( m, ms ) (m)->timeout = (ms);
 
 #define monitor_lock( m ) EnterCriticalSection( &((m)->mutex) )
