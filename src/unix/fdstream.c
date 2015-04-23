@@ -53,8 +53,9 @@ static void fd_stream_destroy( tl_iostream* super )
 
 static int fd_stream_set_timeout( tl_iostream* this, unsigned int timeout )
 {
-    if( this )
-        ((fd_stream*)this)->timeout = timeout;
+    if( !this )
+        return TL_ERR_ARG;
+    ((fd_stream*)this)->timeout = timeout;
     return 0;
 }
 
@@ -70,7 +71,7 @@ static int fd_stream_write( tl_iostream* super, const void* buffer,
         *actual = 0;
 
     if( !this || !buffer )
-        return TL_ERR_INTERNAL;
+        return TL_ERR_ARG;
 
     if( this->writefd<0 )
         return TL_ERR_NOT_SUPPORTED;
@@ -121,7 +122,7 @@ static int fd_stream_read( tl_iostream* super, void* buffer,
         *actual = 0;
 
     if( !this || !buffer )
-        return TL_ERR_INTERNAL;
+        return TL_ERR_ARG;
 
     if( this->readfd<0 )
         return TL_ERR_NOT_SUPPORTED;

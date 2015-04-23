@@ -176,7 +176,7 @@ int tl_process_wait( tl_process* this, int* status,
     int result;
 
     if( !this )
-        return TL_ERR_INTERNAL;
+        return TL_ERR_ARG;
 
     while( timeout && kill( this->pid, 0 )==0 )
     {

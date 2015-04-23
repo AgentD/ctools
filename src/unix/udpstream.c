@@ -74,10 +74,10 @@ static int udp_stream_write_raw( tl_iostream* super, const void* buffer,
 
     if( actual )
         *actual = 0;
-
     if( !this || !buffer )
-        return TL_ERR_INTERNAL;
-
+        return TL_ERR_ARG;
+    if( !size )
+        return 0;
     if( !p )
         return TL_ERR_CLOSED;
 
@@ -105,6 +105,10 @@ static int udp_stream_read_raw( tl_iostream* super, void* buffer,
 
     if( actual )
         *actual = 0;
+    if( !this || !buffer )
+        return TL_ERR_ARG;
+    if( !size )
+        return 0;
 
     pt_monitor_lock( &(this->monitor) );
     if( this->buffer.used==0 )

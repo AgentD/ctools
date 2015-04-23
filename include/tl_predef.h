@@ -103,7 +103,10 @@ typedef enum
     TL_ERR_NOT_DIR = -9,
 
     /** \brief A directory could not be deleted because it was empty */
-    TL_ERR_NOT_EMPTY = -10
+    TL_ERR_NOT_EMPTY = -10,
+
+    /** \brief A function was called with an invalid argument */
+    TL_ERR_ARG = -100
 }
 TL_ERROR_CODE;
 
