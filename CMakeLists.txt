@@ -99,8 +99,7 @@ if( UNIX )
                      src/unix/dir.c
                      src/unix/network.c
                      src/unix/process.c
-                     src/unix/sockstream.c
-                     src/unix/pipestream.c
+                     src/unix/fdstream.c
                      src/unix/tcpserver.c
                      src/unix/udpstream.c
                      src/unix/udpserver.c )
