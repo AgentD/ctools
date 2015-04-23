@@ -207,12 +207,9 @@ TLAPI int tl_process_wait( tl_process* proc, int* status,
  *
  * This function waits at least for the specified time.
  *
- * \static
- * \memberof tl_process
- *
  * \param ms A number of milliseconds to wait
  */
-TLAPI void tl_process_sleep( unsigned long ms );
+TLAPI void tl_sleep( unsigned long ms );
 
 #ifdef __cplusplus
 }

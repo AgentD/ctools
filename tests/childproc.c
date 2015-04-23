@@ -20,7 +20,7 @@ int main( int argc, char** argv )
     fprintf( stderr, "STDERR: %s", buffer );
     fflush( stderr );
 
-    tl_process_sleep( 100 );
+    tl_sleep( 100 );
     return 100;
 }
 
