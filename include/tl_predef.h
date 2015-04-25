@@ -129,6 +129,7 @@ typedef struct tl_iostream tl_iostream;
 typedef struct tl_server tl_server;
 typedef struct tl_net_addr tl_net_addr;
 typedef struct tl_process tl_process;
+typedef struct tl_option tl_option;
 
 
 
