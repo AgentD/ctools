@@ -99,8 +99,7 @@ if( UNIX )
                      src/unix/dir.c
                      src/unix/network.c
                      src/unix/process.c
-                     src/unix/sockstream.c
-                     src/unix/pipestream.c
+                     src/unix/fdstream.c
                      src/unix/tcpserver.c
                      src/unix/udpstream.c
                      src/unix/udpserver.c )
@@ -140,6 +139,7 @@ add_library( ctools ${TYPE} src/array.c
                             src/utf16.c
                             src/allocator.c
                             src/blob.c
+                            src/opt.c
                             ${CTOOLS_SYSDEP} )
 
 if( SHARED )
@@ -168,6 +168,7 @@ add_executable( test_namelookup tests/test_namelookup.c )
 add_executable( test_tcp tests/test_tcp.c )
 add_executable( test_udp tests/test_udp.c )
 add_executable( test_process tests/test_process.c )
+add_executable( test_opt tests/test_opt.c )
 add_executable( childproc tests/childproc.c )
 
 target_link_libraries( test_array ctools  )
@@ -185,6 +186,7 @@ target_link_libraries( test_namelookup ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( test_tcp ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( test_udp ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( test_process ctools ${CTOOLS_SYSLIBS} )
+target_link_libraries( test_opt ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( childproc ctools ${CTOOLS_SYSLIBS} )
 
 enable_testing( )
@@ -205,6 +207,7 @@ add_test( test_tcp ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_tcp )
 add_test( test_udp ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_udp )
 add_test( test_process ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_process
           ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/childproc )
+add_test( test_opt ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_opt )
 
 #----------------------------------------------------------------------
 # generate Doxygen API reference

@@ -125,9 +125,8 @@ int tl_dir_scan( const char* path, tl_array* list )
     tl_string str;
     DIR* dir;
 
-    /* sanity check */
-    if( !list ) return 1;
-    if( !path ) return 0;
+    if( !list || !path )
+        return TL_ERR_ARG;
 
     /* open directory */
     errno = 0;

@@ -57,9 +57,12 @@ static int WSAHandleFuckup( void )
 static void cl_stream_destroy( tl_iostream* super )
 {
     cl_stream* this = (cl_stream*)super;
-    closesocket( this->socket );
-    free( this );
-    winsock_release( );
+    if( this )
+    {
+        closesocket( this->socket );
+        free( this );
+        winsock_release( );
+    }
 }
 
 static int cl_stream_set_timeout( tl_iostream* super, unsigned int timeout )
@@ -67,6 +70,9 @@ static int cl_stream_set_timeout( tl_iostream* super, unsigned int timeout )
     cl_stream* this = (cl_stream*)super;
     int status;
     DWORD ms;
+
+    if( !this )
+        return TL_ERR_ARG;
 
     ms = timeout;
     status = setsockopt(this->socket,SOL_SOCKET,SO_RCVTIMEO,
@@ -98,10 +104,8 @@ static int cl_stream_write_raw( tl_iostream* super, const void* buffer,
 
     if( actual )
         *actual = 0;
-
     if( !this || !buffer )
-        return TL_ERR_INTERNAL;
-
+        return TL_ERR_ARG;
     if( !size )
         return 0;
 
@@ -123,10 +127,8 @@ static int cl_stream_read_raw( tl_iostream* super, void* buffer,
 
     if( actual )
         *actual = 0;
-
     if( !this || !buffer )
-        return TL_ERR_INTERNAL;
-
+        return TL_ERR_ARG;
     if( !size )
         return 0;
 

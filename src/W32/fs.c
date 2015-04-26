@@ -47,7 +47,7 @@ int tl_fs_get_wd( tl_string* path )
     WCHAR* wpath;
 
     if( !path )
-        return 1;
+        return 0;
 
     tl_string_clear( path );
     length = GetCurrentDirectoryW( 0, NULL );
@@ -80,7 +80,7 @@ int tl_fs_get_user_dir( tl_string* path )
     DWORD size = 0;
 
     if( !path )
-        return 1;
+        return 0;
 
     tl_string_clear( path );
 
@@ -182,8 +182,10 @@ int tl_fs_cwd( const char* path )
     WCHAR* wpath;
     int status;
 
-    if( !path || !(wpath = utf8_to_utf16( path )) )
-        return TL_ERR_NOT_DIR;
+    if( !path )
+        return TL_ERR_ARG;
+    if( !(wpath = utf8_to_utf16( path )) )
+        return TL_ERR_INTERNAL;
 
     status = SetCurrentDirectoryW( wpath ) ? 0 : errno_to_fs(GetLastError());
 
@@ -197,8 +199,10 @@ int tl_fs_mkdir( const char* path )
     DWORD attr;
     int status;
 
-    if( !path || !(wpath = utf8_to_utf16( path )) )
-        return TL_ERR_NOT_DIR;
+    if( !path )
+        return TL_ERR_ARG;
+    if( !(wpath = utf8_to_utf16( path )) )
+        return TL_ERR_INTERNAL;
 
     attr = GetFileAttributesW( wpath );
 
@@ -225,8 +229,10 @@ int tl_fs_delete( const char* path )
     WCHAR* wpath;
     DWORD attr;
 
-    if( !path || !(wpath = utf8_to_utf16( path )) )
+    if( !path )
         return 0;
+    if( !(wpath = utf8_to_utf16( path )) )
+        return TL_ERR_INTERNAL;
 
     attr = GetFileAttributesW( wpath );
 

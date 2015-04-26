@@ -31,7 +31,7 @@ int tl_iostream_write_blob( tl_iostream* this, const tl_blob* blob,
                             size_t* actual )
 {
     if( !this || !blob )
-        return TL_ERR_INTERNAL;
+        return TL_ERR_ARG;
 
     return this->write( this, blob->data, blob->size, actual );
 }
@@ -40,6 +40,9 @@ int tl_iostream_read_blob( tl_iostream* this, tl_blob* blob,
                            size_t maximum )
 {
     int status;
+
+    if( !this || !blob )
+        return TL_ERR_ARG;
 
     if( !tl_blob_init( blob, maximum, NULL ) )
         return TL_ERR_INTERNAL;

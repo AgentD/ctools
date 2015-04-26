@@ -41,7 +41,14 @@
  *
  * \section proc Process utilities
  *
+ * The tl_process structure encapsulates a child process and allows spawning
+ * and managing child processes, including accessing the client input/output
+ * streams via tl_iostream implementations. Refere to the tl_process_create
+ * function on how to create a process with given command line arguments and
+ * environment.
  *
+ * There are also other, minor process utility functions including:
+ * \li \ref tl_sleep for pausing the calling thread for a specified time
  */
 
 /**
@@ -98,8 +105,11 @@ extern "C" {
  * \memberof tl_process
  *
  * \param filename A path to an executable file
- * \param argv     A NULL-terminated array of process arguments
- * \param env      A NULL-terminated array of environment strings
+ * \param argv     A NULL-terminated array of process arguments. Must not
+ *                 be NULL.
+ * \param env      A NULL-terminated array of environment strings. The system
+ *                 might also append further environment strings. If NULL, the
+ *                 child process inherits the environment of the parent.
  * \param flags    A combination of \ref TL_PROCESS_FLAGS
  */
 TLAPI tl_process* tl_process_create( const char* filename,
@@ -207,12 +217,9 @@ TLAPI int tl_process_wait( tl_process* proc, int* status,
  *
  * This function waits at least for the specified time.
  *
- * \static
- * \memberof tl_process
- *
  * \param ms A number of milliseconds to wait
  */
-TLAPI void tl_process_sleep( unsigned long ms );
+TLAPI void tl_sleep( unsigned long ms );
 
 #ifdef __cplusplus
 }
