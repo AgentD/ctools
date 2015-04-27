@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 
-
 const char* args[] =
 {
     "argA",
@@ -15,136 +14,73 @@ const char* args[] =
 };
 
 
+static int receive_message( tl_iostream* stream, const char* message )
+{
+    size_t value, len = strlen(message);
+    char buffer[ 64 ];
+
+    if( stream->read( stream, buffer, len, &value )!=0 || value!=len )
+        return 0;
+    if( strncmp( buffer, message, len )!=0 )
+        return 0;
+#ifdef _WIN32
+    if( stream->read( stream, buffer, 2, &value )!=0 || value!=2 )
+        return 0;
+    return (buffer[0]=='\r' && buffer[1]=='\n');
+#else
+    if( stream->read( stream, buffer, 1, &value )!=0 || value!=1 )
+        return 0;
+    return buffer[0]=='\n';
+#endif
+}
+
+
+static int test_process( const char* path, int flags )
+{
+    tl_process* proc = tl_process_create( path, args, NULL, flags );
+    tl_iostream* err = tl_process_get_stderr( proc );
+    tl_iostream* io = tl_process_get_stdio( proc );
+    size_t value;
+    int i;
+
+    if( !proc || !io                                ) return 0;
+    if(  (flags & TL_STDERR_TO_STDOUT) && err!=NULL ) return 0;
+    if( !(flags & TL_STDERR_TO_STDOUT) && err==NULL ) return 0;
+
+    io->set_timeout( io, 5000 );
+    if( err )
+        err->set_timeout( err, 5000 );
+
+    io->write( io, "Hello, World!\n", 14, &value );
+    if( value!=14 )
+        return 0;
+
+    for( i=0; args[i]; ++i )
+    {
+        if( !receive_message( io, args[i] ) )
+            return 0;
+    }
+
+    if( !receive_message( io, "STDOUT: Hello, World!" ) )
+        return 0;
+    if( !receive_message( err ? err : io, "STDERR: Hello, World!" ) )
+        return 0;
+
+    tl_process_wait( proc, &i, 0 );
+    tl_process_destroy( proc );
+    return i==100;
+}
 
 int main( int argc, char** argv )
 {
-    char buffer[ 64 ];
-    size_t value, len;
-    tl_process* proc;
-    tl_iostream* err;
-    tl_iostream* io;
-    int flags, i;
+    int flags = TL_PIPE_STDIN|TL_PIPE_STDOUT|TL_PIPE_STDERR;
 
     if( argc<2 )
         return EXIT_FAILURE;
-
-    /* */
-    flags=TL_PIPE_STDIN|TL_PIPE_STDOUT|TL_PIPE_STDERR;
-    proc = tl_process_create( argv[1], args, NULL, flags );
-    io = tl_process_get_stdio( proc );
-    err = tl_process_get_stderr( proc );
-
-    io->set_timeout( io, 5000 );
-    err->set_timeout( err, 5000 );
-
-    io->write( io, "Hello, World!\n", 14, &value );
-
-    for( i=0; args[i]; ++i )
-    {
-        len = strlen( args[i] );
-#ifdef _WIN32
-        ++len;
-#endif
-        if( io->read( io, buffer, (len+1), &value )!=0 )
-            return EXIT_FAILURE;
-        if( value!=(len+1) )
-            return EXIT_FAILURE;
-#ifdef _WIN32
-        --len;
-#endif
-        if( strncmp( args[i], buffer, len )!=0 )
-            return EXIT_FAILURE;
-#ifdef _WIN32
-        if( buffer[len]!='\r' || buffer[len+1]!='\n' )
-            return EXIT_FAILURE;
-#else
-        if( buffer[len]!='\n' )
-            return EXIT_FAILURE;
-#endif
-    }
-
-#ifdef _WIN32
-    if( io->read( io, buffer, 23, &value )!=0 || value!=23 )
+    if( !test_process( argv[1], flags ) )
         return EXIT_FAILURE;
-    if( strncmp( buffer, "STDOUT: Hello, World!\r\n", 23 )!=0 )
+    if( !test_process( argv[1], flags|TL_STDERR_TO_STDOUT ) )
         return EXIT_FAILURE;
-
-    if( err->read( err, buffer, 23, &value )!=0 || value!=23 )
-        return EXIT_FAILURE;
-    if( strncmp( buffer, "STDERR: Hello, World!\r\n", 22 )!=0 )
-        return EXIT_FAILURE;
-#else
-    if( io->read( io, buffer, 22, &value )!=0 || value!=22 )
-        return EXIT_FAILURE;
-    if( strncmp( buffer, "STDOUT: Hello, World!\n", 22 )!=0 )
-        return EXIT_FAILURE;
-
-    if( err->read( err, buffer, 22, &value )!=0 || value!=22 )
-        return EXIT_FAILURE;
-    if( strncmp( buffer, "STDERR: Hello, World!\n", 22 )!=0 )
-        return EXIT_FAILURE;
-#endif
-
-    tl_process_wait( proc, &i, 0 );
-    if( i!=100 )
-        return EXIT_FAILURE;
-    tl_process_destroy( proc );
-
-    /* */
-    flags |= TL_STDERR_TO_STDOUT;
-    proc = tl_process_create( argv[1], args, NULL, flags );
-    io = tl_process_get_stdio( proc );
-    err = tl_process_get_stderr( proc );
-    if( err )
-        return EXIT_FAILURE;
-
-    io->set_timeout( io, 5000 );
-    io->write( io, "Hello, World!\n", 14, &value );
-
-    for( i=0; args[i]; ++i )
-    {
-        len = strlen( args[i] );
-#ifdef _WIN32
-        ++len;
-#endif
-        if( io->read( io, buffer, (len+1), &value )!=0 )
-            return EXIT_FAILURE;
-        if( value!=(len+1) )
-            return EXIT_FAILURE;
-#ifdef _WIN32
-        --len;
-#endif
-        if( strncmp( args[i], buffer, len )!=0 )
-            return EXIT_FAILURE;
-#ifdef _WIN32
-        if( buffer[len]!='\r' || buffer[len+1]!='\n' )
-            return EXIT_FAILURE;
-#else
-        if( buffer[len]!='\n' )
-            return EXIT_FAILURE;
-#endif
-    }
-
-#ifdef _WIN32
-    if( io->read( io, buffer, 46, &value )!=0 || value!=46 )
-        return EXIT_FAILURE;
-    if( strncmp( buffer, "STDOUT: Hello, World!\r\n", 23 )!=0 )
-        return EXIT_FAILURE;
-    if( strncmp( buffer+23, "STDERR: Hello, World!\r\n", 23 )!=0 )
-        return EXIT_FAILURE;
-#else
-    if( io->read( io, buffer, 44, &value )!=0 || value!=44 )
-        return EXIT_FAILURE;
-    if( strncmp( buffer, "STDOUT: Hello, World!\n", 22 )!=0 )
-        return EXIT_FAILURE;
-    if( strncmp( buffer+22, "STDERR: Hello, World!\n", 22 )!=0 )
-        return EXIT_FAILURE;
-#endif
-
-    tl_process_wait( proc, &i, 0 );
-    if( i!=100 )
-        return EXIT_FAILURE;
-    tl_process_destroy( proc );
     return EXIT_SUCCESS;
 }
 
