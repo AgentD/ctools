@@ -66,6 +66,7 @@ static int test_process( const char* path, int flags )
     if( !receive_message( err ? err : io, "STDERR: Hello, World!" ) )
         return 0;
 
+    tl_process_terminate( proc );
     tl_process_wait( proc, &i, 0 );
     tl_process_destroy( proc );
     return i==100;
