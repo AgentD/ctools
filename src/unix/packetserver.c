@@ -99,6 +99,8 @@ static int udp_send( tl_packetserver* super, const void* buffer,
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
     unsigned char addrbuf[ 64 ];
+    struct timeval tv;
+    fd_set out_fds;
     ssize_t result;
     int addrsize;
 
@@ -106,6 +108,21 @@ static int udp_send( tl_packetserver* super, const void* buffer,
     if( !super || !buffer || !address                   ) return TL_ERR_ARG;
     if( !encode_sockaddr( address, addrbuf, &addrsize ) ) return TL_ERR_ARG;
     if( !size                                           ) return 0;
+
+    if( this->timeout )
+    {
+        FD_ZERO( &out_fds );
+        FD_SET( this->sockfd, &out_fds );
+
+        tv.tv_sec = this->timeout/1000;
+        tv.tv_usec = (this->timeout - tv.tv_sec*1000)*1000;
+        result = select( this->sockfd+1, 0, &out_fds, 0, &tv );
+
+        if( result<0 )
+            return TL_ERR_INTERNAL;
+        if( result==0 || !FD_ISSET(this->sockfd,&out_fds) )
+            return TL_ERR_TIMEOUT;
+    }
 
     result = sendto(this->sockfd, buffer, size, 0, (void*)addrbuf, addrsize);
 
@@ -125,8 +142,11 @@ static void udp_destroy( tl_packetserver* super )
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
 
-    close( this->sockfd );
-    free( this );
+    if( this )
+    {
+        close( this->sockfd );
+        free( this );
+    }
 }
 
 /****************************************************************************/
