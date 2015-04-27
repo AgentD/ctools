@@ -140,6 +140,37 @@
  *
  * str = tl_network_create_client( &addr );
  * \endcode
+ *
+ * \subsection udpbroadcast Sending UDP broadcasts
+ *
+ * Here is a short example that sends a hello world message to the broadcast
+ * address and waits for answers, printing out all answers messages and
+ * source addresses:
+ * \code{.c}
+ * tl_packetserver* srv;
+ * tl_net_addr addr;
+ * char buffer[32];
+ * size_t len;
+ *
+ * tl_network_get_special_address( &addr, TL_ANY, TL_IPV4 );
+ * addr.transport = TL_UDP;
+ * addr.port = 15000;
+ * srv = tl_network_create_packet_server( &addr, TL_ALLOW_BROADCAST );
+ *
+ * tl_network_get_special_address( &addr, TL_BROADCAST, TL_IPV4 );
+ * srv->send( srv, "Hello, World!\n", &addr, 14, NULL );
+ *
+ * srv->set_timeout( srv, 1000 );
+ *
+ * while( srv->receive( srv, buffer, &addr, sizeof(buffer), &len )==0 )
+ * {
+ *     buffer[ len ] = '\0';
+ *     printf( "Response from IP 0x%04X\n", addr.addr.ipv4 );
+ *     printf( "Response message: '%s\n'", buffer );
+ * }
+ *
+ * srv->destroy( srv );
+ * \endcode
  */
 
 #include "tl_predef.h"
@@ -192,9 +223,8 @@ typedef enum
     /**
      * \brief Address that sends to all devices
      *
-     * Typically used with tl_network_create_server on a not connection
-     * oriented protocol (e.g. UDP) to receive broadcast packets, or with
-     * tl_network_create_client to send broadcast packets.
+     * Typically used with tl_packetserver on a not connection oriented
+     * protocol (e.g. UDP) to send broadcast packets.
      */
     TL_BROADCAST = 1,
 
@@ -336,6 +366,9 @@ TLAPI int tl_network_get_local_address( tl_iostream* stream,
 
 /**
  * \brief Create a low-level state-less, packet based server implementation
+ *
+ * \note Use pointers to tl_net_addr for functions that expect a pointer to
+ *       an address structure.
  *
  * \param addr  Specifies from what addresses to accept connections, on
  *              what port to listen and what protocols to use.
