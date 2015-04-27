@@ -30,83 +30,6 @@
 
 
 
-static int create_socket(const tl_net_addr* peer, void* addrbuffer, int* size)
-{
-    struct sockaddr_in6* v6addr = addrbuffer;
-    struct sockaddr_in* v4addr = addrbuffer;
-    int family, type, proto;
-
-    if( !peer )
-        return -1;
-
-    if( peer->net==TL_IPV4 )
-    {
-        memset( v4addr, 0, sizeof(struct sockaddr_in) );
-        v4addr->sin_addr.s_addr = htonl( peer->addr.ipv4 );
-        v4addr->sin_port        = htons( peer->port );
-        v4addr->sin_family      = AF_INET;
-        family                  = PF_INET;
-        *size                   = sizeof(struct sockaddr_in);
-    }
-    else if( peer->net==TL_IPV6 )
-    {
-        memset( v6addr, 0, sizeof(struct sockaddr_in6) );
-        convert_in6addr( peer, &(v6addr->sin6_addr) );
-        v6addr->sin6_port   = htons( peer->port );
-        v6addr->sin6_family = AF_INET6;
-        family              = PF_INET6;
-        *size               = sizeof(struct sockaddr_in6);
-    }
-    else
-    {
-        return -1;
-    }
-
-    if( peer->transport==TL_TCP )
-    {
-        type = SOCK_STREAM;
-        proto = IPPROTO_TCP;
-    }
-    else if( peer->transport==TL_UDP )
-    {
-        type = SOCK_DGRAM;
-        proto = IPPROTO_UDP;
-    }
-    else
-    {
-        return -1;
-    }
-
-    return socket( family, type, proto );
-}
-
-static int decode_sockaddr_in( const void* addr, size_t len,
-                               tl_net_addr* out )
-{
-    const struct sockaddr_in6* ipv6 = addr;
-    const struct sockaddr_in* ipv4 = addr;
-
-    if( len==sizeof(struct sockaddr_in) && ipv4->sin_family==AF_INET )
-    {
-        out->net       = TL_IPV4;
-        out->port      = ntohs( ipv4->sin_port );
-        out->addr.ipv4 = ntohl( ipv4->sin_addr.s_addr );
-        return 1;
-    }
-
-    if( len==sizeof(struct sockaddr_in6) && ipv6->sin6_family==AF_INET6 )
-    {
-        convert_ipv6( &(ipv6->sin6_addr), out );
-        out->net  = TL_IPV6;
-        out->port = ntohs( ipv6->sin6_port );
-        return 1;
-    }
-
-    return 0;
-}
-
-/****************************************************************************/
-
 int tl_network_resolve_name( const char* hostname, int proto,
                              tl_net_addr* addr )
 {
@@ -197,8 +120,10 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
     int sockfd, size, val;
     tl_server* server;
 
-    sockfd = create_socket( addr, (void*)addrbuffer, &size );
+    if( !encode_sockaddr( addr, (void*)addrbuffer, &size ) )
+        return 0;
 
+    sockfd = create_socket( addr->net, addr->transport );
     if( sockfd < 0 )
         return NULL;
 
@@ -229,8 +154,10 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
     tl_iostream* stream;
     int sockfd, size, flags;
 
-    sockfd = create_socket( peer, addrbuffer, &size );
+    if( !encode_sockaddr( peer, (void*)addrbuffer, &size ) )
+        return 0;
 
+    sockfd = create_socket( peer->net, peer->transport );
     if( sockfd < 0 )
         return NULL;
 

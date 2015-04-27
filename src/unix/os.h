@@ -187,6 +187,39 @@ void udp_stream_add_data( udp_stream* stream, void* buffer, size_t size );
  */
 tl_server* udp_server_create( int sockfd );
 
+/**
+ * \brief Convert a tl_net_addr structure to a sockaddr_in
+ *
+ * \param peer       The intput address
+ * \param addrbuffer A pointer to a buffer to write the sockaddr_in structure
+ *                   data to
+ * \param size       Returns the number of bytes written to the addrbuffer
+ *
+ * \return Non-zero on success, zero on failure
+ */
+int encode_sockaddr( const tl_net_addr* peer, void* addrbuffer, int* size );
+
+/**
+ * \brief Create a socket
+ *
+ * \param net       A TL_NETWORK_PROTOCOL value
+ * \param transport A TL_TRANSPORT_PROTOCOL value
+ *
+ * \return A socket file descriptor on success, -1 on failrue
+ */
+int create_socket( int net, int transport );
+
+/**
+ * \brief Decode a sockaddr_in or sockaddr_in6 structure to a tl_net_addr
+ *
+ * \param addr A pointer to the address structure
+ * \param len  The size of the address structure
+ * \param out  A pointer to the tl_net_addr structure to write to
+ *
+ * \return Non-zero on success, zero on failure
+ */
+int decode_sockaddr_in( const void* addr, size_t len, tl_net_addr* out );
+
 /** \brief Initialize a monitor object */
 int pt_monitor_init( pt_monitor* monitor );
 
