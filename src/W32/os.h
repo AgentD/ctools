@@ -42,22 +42,52 @@
 #include <in6addr.h>
 #include <ws2tcpip.h>
 
+#define WSTR_TYPE_MASK 0x0F
+#define WSTR_PIPE      0x00
+#define WSTR_FILE      0x01
+#define WSTR_SOCK      0x03
+#define WSTR_UDPBUF    0x04
+#define WSTR_UDP       0x10
+#define WSTR_TCP       0x20
+
 
 
 typedef struct udp_stream udp_stream;
 typedef struct udp_server udp_server;
+typedef struct pipestream pipestream;
+typedef struct monitor_t monitor_t;
+typedef struct sockstream sockstream;
+typedef struct w32stream w32stream;
 
-typedef struct
+struct monitor_t
 {
     CRITICAL_SECTION mutex;
     HANDLE cond;
     unsigned int timeout;
-}
-monitor_t;
+};
+
+struct w32stream
+{
+    tl_iostream super;
+    int flags;
+};
+
+struct pipestream
+{
+    w32stream super;
+    HANDLE rhnd;
+    HANDLE whnd;
+};
+
+struct sockstream
+{
+    w32stream super;
+    SOCKET socket;
+};
 
 struct udp_stream
 {
-    tl_iostream super;
+    w32stream super;
     monitor_t monitor;
     udp_stream* next;           /* linked list pointer */
     tl_array buffer;            /* incoming data waiting to be read */
@@ -115,7 +145,7 @@ int winsock_acquire( void );
 void winsock_release( void );
 
 /** \brief Create a stream operating on a winsock socket */
-tl_iostream* sock_stream_create( SOCKET sockfd );
+tl_iostream* sock_stream_create( SOCKET sockfd, int flags );
 
 /** \brief Create a winsock based TCP server implementation */
 tl_server* tcp_server_create( SOCKET sockfd, unsigned int backlog );

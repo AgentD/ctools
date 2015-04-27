@@ -28,14 +28,6 @@
 
 
 
-typedef struct
-{
-    tl_iostream super;
-    SOCKET socket;
-}
-cl_stream;
-
-
 
 static int WSAHandleFuckup( void )
 {
@@ -54,9 +46,9 @@ static int WSAHandleFuckup( void )
 
 
 
-static void cl_stream_destroy( tl_iostream* super )
+static void sockstream_destroy( tl_iostream* super )
 {
-    cl_stream* this = (cl_stream*)super;
+    sockstream* this = (sockstream*)super;
     if( this )
     {
         closesocket( this->socket );
@@ -65,9 +57,9 @@ static void cl_stream_destroy( tl_iostream* super )
     }
 }
 
-static int cl_stream_set_timeout( tl_iostream* super, unsigned int timeout )
+static int sockstream_set_timeout( tl_iostream* super, unsigned int timeout )
 {
-    cl_stream* this = (cl_stream*)super;
+    sockstream* this = (sockstream*)super;
     int status;
     DWORD ms;
 
@@ -96,10 +88,10 @@ fail:
     return TL_ERR_INTERNAL;
 }
 
-static int cl_stream_write_raw( tl_iostream* super, const void* buffer,
-                                size_t size, size_t* actual )
+static int sockstream_write_raw( tl_iostream* super, const void* buffer,
+                                 size_t size, size_t* actual )
 {
-    cl_stream* this = (cl_stream*)super;
+    sockstream* this = (sockstream*)super;
     int status;
 
     if( actual )
@@ -109,7 +101,7 @@ static int cl_stream_write_raw( tl_iostream* super, const void* buffer,
     if( !size )
         return 0;
 
-    status = send( ((cl_stream*)this)->socket, buffer, size, 0 );
+    status = send( ((sockstream*)this)->socket, buffer, size, 0 );
 
     if( status<0 )
         return WSAHandleFuckup( );
@@ -119,10 +111,10 @@ static int cl_stream_write_raw( tl_iostream* super, const void* buffer,
     return 0;
 }
 
-static int cl_stream_read_raw( tl_iostream* super, void* buffer,
-                               size_t size, size_t* actual )
+static int sockstream_read_raw( tl_iostream* super, void* buffer,
+                                size_t size, size_t* actual )
 {
-    cl_stream* this = (cl_stream*)super;
+    sockstream* this = (sockstream*)super;
     int status;
 
     if( actual )
@@ -147,19 +139,21 @@ static int cl_stream_read_raw( tl_iostream* super, void* buffer,
 
 /****************************************************************************/
 
-tl_iostream* sock_stream_create( SOCKET sockfd )
+tl_iostream* sock_stream_create( SOCKET sockfd, int flags )
 {
-    cl_stream* this = malloc( sizeof(cl_stream) );
+    sockstream* this = malloc( sizeof(sockstream) );
     tl_iostream* super = (tl_iostream*)this;
 
     if( !this )
         return NULL;
 
+    ((w32stream*)this)->flags = flags;
+
     this->socket       = sockfd;
-    super->destroy     = cl_stream_destroy;
-    super->set_timeout = cl_stream_set_timeout;
-    super->write       = cl_stream_write_raw;
-    super->read        = cl_stream_read_raw;
+    super->destroy     = sockstream_destroy;
+    super->set_timeout = sockstream_set_timeout;
+    super->write       = sockstream_write_raw;
+    super->read        = sockstream_read_raw;
     return super;
 }
 

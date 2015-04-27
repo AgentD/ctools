@@ -28,14 +28,6 @@
 
 
 
-typedef struct
-{
-    tl_iostream super;
-    HANDLE rhnd;
-    HANDLE whnd;
-}
-pipestream;
-
 static void pipestream_destroy( tl_iostream* this )
 {
     CloseHandle( ((pipestream*)this)->rhnd );
@@ -137,6 +129,8 @@ tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd )
 
     if( this )
     {
+        ((w32stream*)this)->flags = WSTR_PIPE;
+
         this->rhnd         = readhnd;
         this->whnd         = writehnd;
         super->read        = pipestream_read;

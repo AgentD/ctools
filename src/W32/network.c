@@ -205,6 +205,31 @@ static SOCKET create_socket( const tl_net_addr* peer, void* addrbuffer,
     return socket( family, type, proto );
 }
 
+static int decode_sockaddr_in( const void* addr, size_t len,
+                               tl_net_addr* out )
+{
+    const SOCKADDR_IN6* ipv6 = addr;
+    const SOCKADDR_IN* ipv4 = addr;
+
+    if( len==sizeof(SOCKADDR_IN) && ipv4->sin_family==AF_INET )
+    {
+        out->net       = TL_IPV4;
+        out->port      = ntohs( ipv4->sin_port );
+        out->addr.ipv4 = ntohl( ipv4->sin_addr.s_addr );
+        return 1;
+    }
+
+    if( len==sizeof(SOCKADDR_IN6) && ipv6->sin6_family==AF_INET6 )
+    {
+        convert_ipv6( &(ipv6->sin6_addr), out );
+        out->net  = TL_IPV6;
+        out->port = ntohs( ipv6->sin6_port );
+        return 1;
+    }
+
+    return 0;
+}
+
 /****************************************************************************/
 
 int tl_network_resolve_name( const char* hostname, int proto,
@@ -345,8 +370,8 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
 {
     unsigned char addrbuffer[128];
     tl_iostream* stream;
+    int size, flags;
     SOCKET sockfd;
-    int size;
 
     winsock_acquire( );
 
@@ -361,7 +386,9 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
     if( connect( sockfd, (void*)addrbuffer, size ) == SOCKET_ERROR )
         goto fail;
 
-    if( !(stream = sock_stream_create( sockfd )) )
+    flags = WSTR_SOCK | (peer->transport==TL_UDP ? WSTR_UDP : WSTR_TCP);
+
+    if( !(stream = sock_stream_create( sockfd, flags )) )
         goto fail;
 
     return stream;
@@ -394,6 +421,66 @@ int tl_network_get_special_address( tl_net_addr* addr, int type, int net )
         case TL_LOOPBACK:  convert_ipv6( &in6addr_loopback, addr ); return 1;
         case TL_ALL:       convert_ipv6( &in6addr_any,      addr ); return 1;
         }
+    }
+
+    return 0;
+}
+
+int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
+{
+    sockstream* sock = (sockstream*)stream;
+    udp_stream* udp = (udp_stream*)stream;
+    w32stream* w32 = (w32stream*)stream;
+    unsigned char buffer[ 64 ];
+    int len;
+
+    if( !stream || !addr )
+        return 0;
+
+    if( (w32->flags & WSTR_TYPE_MASK) == WSTR_UDPBUF )
+    {
+        addr->transport = TL_UDP;
+        return decode_sockaddr_in( udp->address, udp->addrlen, addr );
+    }
+    else if( (w32->flags & WSTR_TYPE_MASK) == WSTR_SOCK )
+    {
+        addr->transport = (w32->flags & WSTR_UDP) ? TL_UDP : TL_TCP;
+        len = sizeof(buffer);
+
+        if( getpeername( sock->socket, (void*)buffer, &len )==0 )
+            return decode_sockaddr_in( buffer, len, addr );
+    }
+
+    return 0;
+}
+
+int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
+{
+    sockstream* sock = (sockstream*)stream;
+    udp_stream* udp = (udp_stream*)stream;
+    w32stream* w32 = (w32stream*)stream;
+    unsigned char buffer[ 64 ];
+    int len = sizeof(buffer);
+    int status;
+
+    if( !stream || !addr )
+        return 0;
+
+    if( (w32->flags & WSTR_TYPE_MASK) == WSTR_UDPBUF )
+    {
+        addr->transport = TL_UDP;
+
+        monitor_lock( &(udp->parent->monitor) );
+        status = getsockname( udp->parent->socket, (void*)buffer, &len );
+        monitor_unlock( &(udp->parent->monitor) );
+
+        return status==0 && decode_sockaddr_in( buffer, len, addr );
+    }
+    else if( (w32->flags & WSTR_TYPE_MASK) == WSTR_SOCK )
+    {
+        addr->transport = (w32->flags & WSTR_UDP) ? TL_UDP : TL_TCP;
+        status = getsockname( sock->socket, (void*)buffer, &len );
+        return status==0 && decode_sockaddr_in( buffer, len, addr );
     }
 
     return 0;
