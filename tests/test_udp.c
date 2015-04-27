@@ -5,11 +5,25 @@
 #include "tl_iostream.h"
 
 
+
+static int check_addr_match( tl_iostream* a, tl_iostream* b )
+{
+    tl_net_addr temp, temp2;
+
+    if( !tl_network_get_local_address( a, &temp ) ) return 0;
+    if( !tl_network_get_peer_address( b, &temp2 ) ) return 0;
+    if( temp.net!=temp2.net || temp.transport!=temp2.transport ) return 0;
+    if( temp.addr.ipv4!=temp2.addr.ipv4 ) return 0;
+    if( temp.port!=temp2.port ) return 0;
+    return 1;
+}
+
 static int run_test( tl_net_addr* peer, tl_net_addr* accept )
 {
     tl_iostream *a_down, *a, *b_down, *b;
     char buffer[ 128 ];
     tl_server* server;
+    tl_net_addr temp;
     size_t actual;
 
     if( !(server = tl_network_create_server( accept, 10 )) )
@@ -53,6 +67,22 @@ static int run_test( tl_net_addr* peer, tl_net_addr* accept )
         return 0;
     if( actual!=13 || strcmp( buffer, "Greetings, B" )!=0 )
         return 0;
+
+    /* test address fetch */
+    if( !tl_network_get_peer_address( a, &temp ) ) return 0;
+    if( temp.net!=peer->net || temp.transport!=peer->transport ) return 0;
+    if( temp.port!=peer->port ) return 0;
+    if( temp.addr.ipv4!=peer->addr.ipv4 ) return 0;
+
+    if( !tl_network_get_peer_address( b, &temp ) ) return 0;
+    if( temp.net!=peer->net || temp.transport!=peer->transport ) return 0;
+    if( temp.port!=peer->port ) return 0;
+    if( temp.addr.ipv4!=peer->addr.ipv4 ) return 0;
+
+    if( !check_addr_match( a, a_down ) ) return 0;
+    if( !check_addr_match( b, b_down ) ) return 0;
+    if( !check_addr_match( a_down, a ) ) return 0;
+    if( !check_addr_match( b_down, b ) ) return 0;
 
     /* cleanup */
     a->destroy( a );

@@ -66,7 +66,7 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 
     peer = accept( this->socket, NULL, 0 );
 
-    return peer<0 ? NULL : sock_stream_create( peer );
+    return peer<0 ? NULL : sock_stream_create( peer, USTR_SOCK|USTR_TCP );
 }
 
 /****************************************************************************/

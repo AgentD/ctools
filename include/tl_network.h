@@ -45,6 +45,8 @@
  * \li \ref tl_network_resolve_name
  * \li \ref tl_network_create_server
  * \li \ref tl_network_create_client
+ * \li \ref tl_network_get_peer_address
+ * \li \ref tl_network_get_local_address
  *
  * \subsection names Name Resolution
  *
@@ -298,6 +300,32 @@ TLAPI tl_iostream* tl_network_create_client( const tl_net_addr* peer );
  */
 TLAPI int tl_network_get_special_address( tl_net_addr* addr, int type,
                                           int net );
+
+/**
+ * \brief Get the address of a peer from an end-to-end network stream
+ *
+ * \param stream A pointer to the stream object.
+ * \param addr   A pointer to a tl_net_addr to retrieve the address that we
+ *               are sending to.
+ *
+ * \return Non-zero on success, zero on failure (e.g. one of the arguments
+ *         is NULL)
+ */
+TLAPI int tl_network_get_peer_address( tl_iostream* stream,
+                                       tl_net_addr* addr );
+
+/**
+ * \brief Get our own address in an end-to-end network stream
+ *
+ * \param stream A pointer to the stream object.
+ * \param addr   A pointer to a tl_net_addr to retrieve the address that we
+ *               are using as a source address when sending.
+ *
+ * \return Non-zero on success, zero on failure (e.g. one of the arguments
+ *         is NULL)
+ */
+TLAPI int tl_network_get_local_address( tl_iostream* stream,
+                                        tl_net_addr* addr );
 
 #ifdef __cplusplus
 }

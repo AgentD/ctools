@@ -173,6 +173,8 @@ udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen )
 
     tl_array_init( &(this->buffer), 1, NULL );
 
+    ((unix_stream*)this)->flags = USTR_UDPBUF|USTR_UDP;
+
     this->parent       = parent;
     this->addrlen      = addrlen;
     super->read        = udp_stream_read_raw;

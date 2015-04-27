@@ -28,19 +28,6 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
-
-
-typedef struct
-{
-    tl_iostream super;
-    int readfd;
-    int writefd;
-    unsigned int timeout;
-}
-fd_stream;
-
-
-
 static void fd_stream_destroy( tl_iostream* super )
 {
     fd_stream* this = (fd_stream*)super;
@@ -173,6 +160,8 @@ tl_iostream* pipe_stream_create( int readfd, int writefd )
     if( !this )
         return NULL;
 
+    ((unix_stream*)this)->flags = USTR_PIPE;
+
     this->readfd       = readfd;
     this->writefd      = writefd;
     super->destroy     = fd_stream_destroy;
@@ -209,13 +198,17 @@ fail:
     return TL_ERR_INTERNAL;
 }
 
-tl_iostream* sock_stream_create( int sockfd )
+tl_iostream* sock_stream_create( int sockfd, int flags )
 {
     tl_iostream* super = pipe_stream_create( sockfd, sockfd );
     fd_stream* this = (fd_stream*)super;
 
     if( this )
+    {
+        ((unix_stream*)this)->flags = flags;
+
         super->set_timeout = sock_stream_set_timeout;
+    }
     return super;
 }
 

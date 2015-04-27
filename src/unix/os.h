@@ -52,11 +52,37 @@
 
 
 
+#define USTR_TYPE_MASK 0x0F
+#define USTR_PIPE      0x00
+#define USTR_FILE      0x01
+#define USTR_SOCK      0x03
+#define USTR_UDPBUF    0x04
+#define USTR_UDP       0x10
+#define USTR_TCP       0x20
+
+
+
 typedef struct udp_stream udp_stream;
 typedef struct udp_server udp_server;
 typedef struct pt_monitor pt_monitor;
+typedef struct fd_stream fd_stream;
+typedef struct unix_stream unix_stream;
 
 
+
+struct unix_stream
+{
+    tl_iostream super;
+    int flags;
+};
+
+struct fd_stream
+{
+    unix_stream super;
+    int readfd;
+    int writefd;
+    unsigned int timeout;
+};
 
 struct pt_monitor
 {
@@ -67,7 +93,7 @@ struct pt_monitor
 
 struct udp_stream
 {
-    tl_iostream super;
+    unix_stream super;
     pt_monitor monitor;
     udp_stream* next;           /* linked list pointer */
     tl_array buffer;            /* incoming data waiting to be read */
@@ -116,8 +142,9 @@ void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 );
  * \brief Create a tl_iostream implementation that manages a connected socket
  *
  * \param sockfd A socket file descriptor
+ * \pafam flags  Flags to set for the underlying unix_stream structure
  */
-tl_iostream* sock_stream_create( int sockfd );
+tl_iostream* sock_stream_create( int sockfd, int flags );
 
 /**
  * \brief Create a tl_iostream implementation that operates on a pipe
