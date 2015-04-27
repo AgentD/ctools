@@ -41,18 +41,39 @@ int main( int argc, char** argv )
 
     for( i=0; args[i]; ++i )
     {
-        if( io->read( io, buffer, 5, &value )!=0 )
-            return EXIT_FAILURE;
-        if( value!=5 )
-            return EXIT_FAILURE;
-
         len = strlen( args[i] );
+#ifdef _WIN32
+        ++len;
+#endif
+        if( io->read( io, buffer, (len+1), &value )!=0 )
+            return EXIT_FAILURE;
+        if( value!=(len+1) )
+            return EXIT_FAILURE;
+#ifdef _WIN32
+        --len;
+#endif
         if( strncmp( args[i], buffer, len )!=0 )
             return EXIT_FAILURE;
+#ifdef _WIN32
+        if( buffer[len]!='\r' || buffer[len+1]!='\n' )
+            return EXIT_FAILURE;
+#else
         if( buffer[len]!='\n' )
             return EXIT_FAILURE;
+#endif
     }
 
+#ifdef _WIN32
+    if( io->read( io, buffer, 23, &value )!=0 || value!=23 )
+        return EXIT_FAILURE;
+    if( strncmp( buffer, "STDOUT: Hello, World!\r\n", 23 )!=0 )
+        return EXIT_FAILURE;
+
+    if( err->read( err, buffer, 23, &value )!=0 || value!=23 )
+        return EXIT_FAILURE;
+    if( strncmp( buffer, "STDERR: Hello, World!\r\n", 22 )!=0 )
+        return EXIT_FAILURE;
+#else
     if( io->read( io, buffer, 22, &value )!=0 || value!=22 )
         return EXIT_FAILURE;
     if( strncmp( buffer, "STDOUT: Hello, World!\n", 22 )!=0 )
@@ -62,6 +83,7 @@ int main( int argc, char** argv )
         return EXIT_FAILURE;
     if( strncmp( buffer, "STDERR: Hello, World!\n", 22 )!=0 )
         return EXIT_FAILURE;
+#endif
 
     tl_process_wait( proc, &i, 0 );
     if( i!=100 )
@@ -81,24 +103,43 @@ int main( int argc, char** argv )
 
     for( i=0; args[i]; ++i )
     {
-        if( io->read( io, buffer, 5, &value )!=0 )
-            return EXIT_FAILURE;
-        if( value!=5 )
-            return EXIT_FAILURE;
-
         len = strlen( args[i] );
+#ifdef _WIN32
+        ++len;
+#endif
+        if( io->read( io, buffer, (len+1), &value )!=0 )
+            return EXIT_FAILURE;
+        if( value!=(len+1) )
+            return EXIT_FAILURE;
+#ifdef _WIN32
+        --len;
+#endif
         if( strncmp( args[i], buffer, len )!=0 )
             return EXIT_FAILURE;
+#ifdef _WIN32
+        if( buffer[len]!='\r' || buffer[len+1]!='\n' )
+            return EXIT_FAILURE;
+#else
         if( buffer[len]!='\n' )
             return EXIT_FAILURE;
+#endif
     }
 
+#ifdef _WIN32
+    if( io->read( io, buffer, 46, &value )!=0 || value!=46 )
+        return EXIT_FAILURE;
+    if( strncmp( buffer, "STDOUT: Hello, World!\r\n", 23 )!=0 )
+        return EXIT_FAILURE;
+    if( strncmp( buffer+23, "STDERR: Hello, World!\r\n", 23 )!=0 )
+        return EXIT_FAILURE;
+#else
     if( io->read( io, buffer, 44, &value )!=0 || value!=44 )
         return EXIT_FAILURE;
     if( strncmp( buffer, "STDOUT: Hello, World!\n", 22 )!=0 )
         return EXIT_FAILURE;
     if( strncmp( buffer+22, "STDERR: Hello, World!\n", 22 )!=0 )
         return EXIT_FAILURE;
+#endif
 
     tl_process_wait( proc, &i, 0 );
     if( i!=100 )
