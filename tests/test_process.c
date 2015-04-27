@@ -124,10 +124,10 @@ int main( int argc, char** argv )
             return EXIT_FAILURE;
 #endif
     }
+
 #ifdef _WIN32
-    if( io->read( io, buffer, 23, &value )!=0 || value!=23 )
+    if( io->read( io, buffer, 46, &value )!=0 || value!=46 )
         return EXIT_FAILURE;
-printf("%s\n",buffer);
     if( strncmp( buffer, "STDOUT: Hello, World!\r\n", 23 )!=0 )
         return EXIT_FAILURE;
     if( strncmp( buffer+23, "STDERR: Hello, World!\r\n", 23 )!=0 )

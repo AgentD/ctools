@@ -59,6 +59,20 @@ out:
     return wargs;
 }
 
+static int create_pipe( HANDLE* out, int dontshare )
+{
+    SECURITY_ATTRIBUTES secattr;
+
+    memset( &secattr, 0, sizeof(secattr) );
+    secattr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    secattr.bInheritHandle = TRUE;
+
+    if( !CreatePipe( out, out+1, &secattr, 0 ) )
+        return 0;
+    if( !SetHandleInformation( out[dontshare], HANDLE_FLAG_INHERIT, 0 ) )
+        return 0;
+    return 1;
+}
 
 
 tl_process* tl_process_create( const char* filename, const char* const* argv,
@@ -71,6 +85,9 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
     WCHAR* wfilename = NULL;
     STARTUPINFOW startinfo;
     WCHAR* wargs = NULL;
+
+    if( flags & TL_STDERR_TO_STDOUT )
+        flags &= ~TL_PIPE_STDERR;
 
     /* convert filename and arguments */
     if( !(wfilename = utf8_to_utf16( filename )) )
@@ -89,14 +106,14 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
 
     if( flags & TL_PIPE_STDOUT )
     {
-        if( !CreatePipe( outpipe, outpipe+1, NULL, 0 ) )
+        if( !create_pipe( outpipe, 0 ) )
             goto poutfail;
         startinfo.hStdOutput = outpipe[1];
     }
 
     if( flags & TL_PIPE_STDIN )
     {
-        if( !CreatePipe( inpipe, inpipe+1, NULL, 0 ) )
+        if( !create_pipe( inpipe, 1 ) )
             goto pinfail;
         startinfo.hStdInput = inpipe[0];
     }
@@ -104,10 +121,17 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
     if( flags & TL_STDERR_TO_STDOUT )
     {
         startinfo.hStdError = startinfo.hStdOutput;
+
+        if( !DuplicateHandle( GetCurrentProcess( ), startinfo.hStdOutput,
+                              GetCurrentProcess( ), &startinfo.hStdError,
+                              0, TRUE, DUPLICATE_SAME_ACCESS ) )
+        {
+            goto perrfail;
+        }
     }
     else if( flags & TL_PIPE_STDERR )
     {
-        if( !CreatePipe( errpipe, errpipe+1, NULL, 0 ) )
+        if( !create_pipe( errpipe, 0 ) )
             goto perrfail;
         startinfo.hStdError = errpipe[1];
     }
@@ -124,7 +148,7 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
         if( !this->iostream )
             goto procfail;
     }
-    if( (flags & TL_PIPE_STDERR) && !(flags & TL_STDERR_TO_STDOUT) )
+    if( flags & TL_PIPE_STDERR )
     {
         this->errstream = pipe_stream_create(errpipe[0],INVALID_HANDLE_VALUE);
         if( !this->errstream )
@@ -132,11 +156,15 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
     }
 
     /* Create the process */
-    if( !CreateProcessW(wfilename, wargs, NULL, NULL, FALSE, 0,
+    if( !CreateProcessW(wfilename, wargs, NULL, NULL, TRUE, 0,
                         (void*)env, NULL, &startinfo, &(this->info)) )
     {
         goto procfail;
     }
+
+    if( flags & TL_PIPE_STDOUT ) CloseHandle( outpipe[1] );
+    if( flags & TL_PIPE_STDERR ) CloseHandle( errpipe[1] );
+    if( flags & TL_PIPE_STDIN  ) CloseHandle( inpipe[0] );
 out:
     free( wargs );
     free( wfilename );
@@ -209,7 +237,7 @@ int tl_process_wait( tl_process* this, int* status,
     return 1;
 }
 
-void tl_process_sleep( unsigned long ms )
+void tl_sleep( unsigned long ms )
 {
     Sleep( ms );
 }
