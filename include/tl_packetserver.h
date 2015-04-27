@@ -45,20 +45,17 @@
  * In contrast to the tl_server interface, the tl_packetserver does neither
  * handle packet demultiplexing, nor does it keep track of connections. The
  * tl_server interface internally demultiplexes incoming data into individual
- * end-to-end byte streams, whereas the tl_packetserver has methods for
+ * end-to-end byte streams whereas the tl_packetserver has methods for
  * sending and receiving packets and exposes the peer addresses, expecting the
  * code using it to handle packets and addresses propperly.
  *
- * Note that both tl_packetserver and tl_server have implementations that may
- * not be typicall for the given description. On the one hand, there is a
- * tl_server that handles UDP communications, demultiplexing received packets
- * into byte streams, emulating connections. On the other hand, there is a
- * tl_packetserver implementation that emulates reliable, stateles, TCP based
- * packet I/O by shortly opening a connection, transmitting data and closing
- * the connection again.
+ * Note that for some tl_packetserver implementations there are also tl_server
+ * implementations that implement emulate connection based communication and
+ * handle client demultiplexing.
  *
  * A tl_packetserver is prefereable for applications like sending broadcast
- * packets and receiving answers to broadcasts.
+ * packets and receiving answers to broadcasts, or implementing protocols
+ * that don't need client demultiplexing and are easier to implement that way.
  */
 
 

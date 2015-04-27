@@ -62,10 +62,7 @@
  * client demultiplexing and emulate connection based communication.
  *
  * For "raw" packet based, non-connection oriented communications, use the
- * tl_packetserver interface. There are also tl_packetserver implementations
- * that emulate state-less packet I/O via connection based, stream oriented
- * I/O devices (e.g. TCP) by briefly opening a connection and transmitting
- * data.
+ * tl_packetserver interface.
  */
 
 
