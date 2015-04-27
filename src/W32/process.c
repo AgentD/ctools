@@ -218,7 +218,7 @@ void tl_process_kill( tl_process* this )
 
 void tl_process_terminate( tl_process* this )
 {
-    (void)this;
+    PostThreadMessage( GetThreadId( this->info.hThread ), WM_QUIT, 0, 0 );
 }
 
 int tl_process_wait( tl_process* this, int* status,
