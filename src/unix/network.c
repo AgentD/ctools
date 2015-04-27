@@ -166,7 +166,7 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
 
     flags = USTR_SOCK | (peer->transport==TL_UDP ? USTR_UDP : USTR_TCP);
 
-    if( !(stream = sock_stream_create( sockfd, flags )) )
+    if( !(stream = pipe_stream_create( sockfd, sockfd, flags )) )
         goto fail;
 
     return stream;

@@ -123,6 +123,16 @@ extern "C" {
 int errno_to_fs( int code );
 
 /**
+ * \brief Wait for a file descriptor to become read or writeable
+ *
+ * \param fd        The file descriptor
+ * \param timeout   The timeout in milli seconds (zero for infinite)
+ * \param writeable Zero to wait for the descriptor to become readable,
+ *                  non-zero to wait for it to become writeable
+ */
+int wait_for_fd( int fd, unsigned long timeout, int readfd );
+
+/**
  * \brief Convert an in6_addr structure to a tl_net_addr
  *
  * \param v6   Pointer to input data
@@ -139,20 +149,13 @@ void convert_ipv6( const struct in6_addr* v6, tl_net_addr* addr );
 void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 );
 
 /**
- * \brief Create a tl_iostream implementation that manages a connected socket
- *
- * \param sockfd A socket file descriptor
- * \pafam flags  Flags to set for the underlying unix_stream structure
- */
-tl_iostream* sock_stream_create( int sockfd, int flags );
-
-/**
  * \brief Create a tl_iostream implementation that operates on a pipe
  *
  * \param readpipe  A file descriptor to read from
  * \param writepipe A file descriptor to write to
+ * \param flags     Flags to set for the underlying unix_stream structure
  */
-tl_iostream* pipe_stream_create( int readpipe, int writepipe );
+tl_iostream* pipe_stream_create( int readpipe, int writepipe, int flags );
 
 /**
  * \brief Create a tl_server implementation instance that offers a TCP server

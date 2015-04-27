@@ -31,10 +31,8 @@
 static void fd_stream_destroy( tl_iostream* super )
 {
     fd_stream* this = (fd_stream*)super;
-    if( this->readfd>=0 )
-        close( this->readfd );
-    if( this->writefd>=0 && this->writefd!=this->readfd )
-        close( this->writefd );
+    close( this->readfd );
+    close( this->writefd );
     free( this );
 }
 
@@ -50,36 +48,15 @@ static int fd_stream_write( tl_iostream* super, const void* buffer,
                             size_t size, size_t* actual )
 {
     fd_stream* this = (fd_stream*)super;
-    struct timeval tv;
     ssize_t result;
-    fd_set out_fds;
 
-    if( actual )
-        *actual = 0;
+    if( actual           ) *actual = 0;
+    if( !this || !buffer ) return TL_ERR_ARG;
+    if( this->writefd<0  ) return TL_ERR_NOT_SUPPORTED;
+    if( !size            ) return 0;
 
-    if( !this || !buffer )
-        return TL_ERR_ARG;
-
-    if( this->writefd<0 )
-        return TL_ERR_NOT_SUPPORTED;
-
-    if( !size )
-        return 0;
-
-    if( this->timeout )
-    {
-        FD_ZERO( &out_fds );
-        FD_SET( this->writefd, &out_fds );
-
-        tv.tv_sec = this->timeout/1000;
-        tv.tv_usec = (this->timeout - tv.tv_sec*1000)*1000;
-        result = select( this->writefd+1, 0, &out_fds, 0, &tv );
-
-        if( result<0 )
-            return TL_ERR_INTERNAL;
-        if( result==0 || !FD_ISSET(this->writefd,&out_fds) )
-            return TL_ERR_TIMEOUT;
-    }
+    if( !wait_for_fd( this->writefd, this->timeout, 1 ) )
+        return TL_ERR_TIMEOUT;
 
     result = write( this->writefd, buffer, size );
 
@@ -101,36 +78,15 @@ static int fd_stream_read( tl_iostream* super, void* buffer,
                            size_t size, size_t* actual )
 {
     fd_stream* this = (fd_stream*)super;
-    struct timeval tv;
     ssize_t result;
-    fd_set in_fds;
 
-    if( actual )
-        *actual = 0;
+    if( actual           ) *actual = 0;
+    if( !this || !buffer ) return TL_ERR_ARG;
+    if( this->readfd<0   ) return TL_ERR_NOT_SUPPORTED;
+    if( !size            ) return 0;
 
-    if( !this || !buffer )
-        return TL_ERR_ARG;
-
-    if( this->readfd<0 )
-        return TL_ERR_NOT_SUPPORTED;
-
-    if( !size )
-        return 0;
-
-    if( this->timeout )
-    {
-        FD_ZERO( &in_fds );
-        FD_SET( this->readfd, &in_fds );
-
-        tv.tv_sec = this->timeout/1000;
-        tv.tv_usec = (this->timeout - tv.tv_sec*1000)*1000;
-        result = select( this->readfd+1, &in_fds, 0, 0, &tv );
-
-        if( result<0 )
-            return TL_ERR_INTERNAL;
-        if( result==0 || !FD_ISSET(this->readfd, &in_fds) )
-            return TL_ERR_TIMEOUT;
-    }
+    if( !wait_for_fd( this->readfd, this->timeout, 0 ) )
+        return TL_ERR_TIMEOUT;
 
     result = read( this->readfd, buffer, size );
 
@@ -152,7 +108,7 @@ static int fd_stream_read( tl_iostream* super, void* buffer,
 
 /****************************************************************************/
 
-tl_iostream* pipe_stream_create( int readfd, int writefd )
+tl_iostream* pipe_stream_create( int readfd, int writefd, int flags )
 {
     fd_stream* this = malloc( sizeof(fd_stream) );
     tl_iostream* super = (tl_iostream*)this;
@@ -160,7 +116,7 @@ tl_iostream* pipe_stream_create( int readfd, int writefd )
     if( !this )
         return NULL;
 
-    ((unix_stream*)this)->flags = USTR_PIPE;
+    ((unix_stream*)this)->flags = flags;
 
     this->readfd       = readfd;
     this->writefd      = writefd;
@@ -168,47 +124,6 @@ tl_iostream* pipe_stream_create( int readfd, int writefd )
     super->set_timeout = fd_stream_set_timeout;
     super->write       = fd_stream_write;
     super->read        = fd_stream_read;
-    return super;
-}
-
-/****************************************************************************/
-
-static int sock_stream_set_timeout( tl_iostream* super, unsigned int timeout )
-{
-    fd_stream* this = (fd_stream*)super;
-    unsigned long sec = timeout/1000;
-    unsigned long usec = (timeout - sec*1000)*1000;
-    struct timeval tv;
-
-    tv.tv_sec = sec; tv.tv_usec = usec;
-    if( setsockopt(this->readfd,SOL_SOCKET,SO_RCVTIMEO,&tv,sizeof(tv)) < 0 )
-        goto fail;
-
-    tv.tv_sec = sec; tv.tv_usec = usec;
-    if( setsockopt(this->writefd,SOL_SOCKET,SO_SNDTIMEO,&tv,sizeof(tv)) < 0 )
-        goto fail;
-
-    this->timeout = timeout;
-    return 0;
-fail:
-    if( errno==EBADF || errno==ENOTSOCK )
-        return TL_ERR_CLOSED;
-    if( errno==EINVAL || errno==ENODEV || errno==ENXIO )
-        return TL_ERR_NOT_SUPPORTED;
-    return TL_ERR_INTERNAL;
-}
-
-tl_iostream* sock_stream_create( int sockfd, int flags )
-{
-    tl_iostream* super = pipe_stream_create( sockfd, sockfd );
-    fd_stream* this = (fd_stream*)super;
-
-    if( this )
-    {
-        ((unix_stream*)this)->flags = flags;
-
-        super->set_timeout = sock_stream_set_timeout;
-    }
     return super;
 }
 

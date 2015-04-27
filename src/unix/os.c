@@ -52,6 +52,36 @@ int errno_to_fs( int code )
     return code==0 ? 0 : TL_ERR_INTERNAL;
 }
 
+int wait_for_fd( int fd, unsigned long timeout, int writeable )
+{
+    struct timeval tv;
+    fd_set fds;
+
+    if( timeout > 0 )
+    {
+        FD_ZERO( &fds );
+        FD_SET( fd, &fds );
+
+        tv.tv_sec = timeout / 1000;
+        tv.tv_usec = (timeout - tv.tv_sec * 1000) * 1000;
+
+        if( writeable )
+        {
+            if( select( fd+1, 0, &fds, 0, &tv ) <= 0 )
+                return 0;
+        }
+        else
+        {
+            if( select( fd+1, &fds, 0, 0, &tv ) <= 0 )
+                return 0;
+        }
+        if( !FD_ISSET( fd, &fds ) )
+            return 0;
+    }
+
+    return 1;
+}
+
 void convert_ipv6( const struct in6_addr* v6, tl_net_addr* addr )
 {
     addr->addr.ipv6[7] = (v6->s6_addr[ 0]<<8) | v6->s6_addr[ 1];
@@ -92,24 +122,23 @@ int encode_sockaddr( const tl_net_addr* peer, void* addrbuffer, int* size )
     if( !peer )
         return 0;
 
-    if( peer->net==TL_IPV4 )
+    switch( peer->net )
     {
+    case TL_IPV4:
         memset( v4addr, 0, sizeof(struct sockaddr_in) );
         v4addr->sin_addr.s_addr = htonl( peer->addr.ipv4 );
         v4addr->sin_port        = htons( peer->port );
         v4addr->sin_family      = AF_INET;
         *size                   = sizeof(struct sockaddr_in);
-    }
-    else if( peer->net==TL_IPV6 )
-    {
+        break;
+    case TL_IPV6:
         memset( v6addr, 0, sizeof(struct sockaddr_in6) );
         convert_in6addr( peer, &(v6addr->sin6_addr) );
         v6addr->sin6_port   = htons( peer->port );
         v6addr->sin6_family = AF_INET6;
         *size               = sizeof(struct sockaddr_in6);
-    }
-    else
-    {
+        break;
+    default:
         return 0;
     }
 

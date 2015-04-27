@@ -118,7 +118,7 @@ int tl_process_args( tl_option* options, size_t num_options,
 {
     int i = 1, status;
     const char* arg;
-    size_t j, len;
+    size_t j=0, len;
 
     if( !options || !num_options || !argc || !argv )
         return 0;

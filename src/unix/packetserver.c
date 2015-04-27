@@ -53,29 +53,15 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
     unsigned char addrbuf[ 64 ];
-    struct timeval tv;
     socklen_t addrlen;
     ssize_t result;
-    fd_set out_fds;
 
     if( actual           ) *actual = 0;
     if( !this || !buffer ) return TL_ERR_ARG;
     if( !size            ) return 0;
 
-    if( this->timeout )
-    {
-        FD_ZERO( &out_fds );
-        FD_SET( this->sockfd, &out_fds );
-
-        tv.tv_sec = this->timeout/1000;
-        tv.tv_usec = (this->timeout - tv.tv_sec*1000)*1000;
-        result = select( this->sockfd+1, 0, &out_fds, 0, &tv );
-
-        if( result<0 )
-            return TL_ERR_INTERNAL;
-        if( result==0 || !FD_ISSET(this->sockfd,&out_fds) )
-            return TL_ERR_TIMEOUT;
-    }
+    if( !wait_for_fd( this->sockfd, this->timeout, 0 ) )
+        return TL_ERR_TIMEOUT;
 
     result = recvfrom(this->sockfd,buffer,size,0,(void*)addrbuf,&addrlen);
 
@@ -99,8 +85,6 @@ static int udp_send( tl_packetserver* super, const void* buffer,
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
     unsigned char addrbuf[ 64 ];
-    struct timeval tv;
-    fd_set out_fds;
     ssize_t result;
     int addrsize;
 
@@ -109,20 +93,8 @@ static int udp_send( tl_packetserver* super, const void* buffer,
     if( !encode_sockaddr( address, addrbuf, &addrsize ) ) return TL_ERR_ARG;
     if( !size                                           ) return 0;
 
-    if( this->timeout )
-    {
-        FD_ZERO( &out_fds );
-        FD_SET( this->sockfd, &out_fds );
-
-        tv.tv_sec = this->timeout/1000;
-        tv.tv_usec = (this->timeout - tv.tv_sec*1000)*1000;
-        result = select( this->sockfd+1, 0, &out_fds, 0, &tv );
-
-        if( result<0 )
-            return TL_ERR_INTERNAL;
-        if( result==0 || !FD_ISSET(this->sockfd,&out_fds) )
-            return TL_ERR_TIMEOUT;
-    }
+    if( !wait_for_fd( this->sockfd, this->timeout, 1 ) )
+        return TL_ERR_TIMEOUT;
 
     result = sendto(this->sockfd, buffer, size, 0, (void*)addrbuf, addrsize);
 
