@@ -208,6 +208,13 @@ typedef enum
 }
 TL_SPECIAL_ADDRESS;
 
+/** \brief Flags for tl_network_create_packet_server */
+typedef enum
+{
+    /** \brief If set, allow sending broadcast packets */
+    TL_ALLOW_BROADCAST = 0x01
+}
+TL_PACKETSERVER_FLAGS;
 
 
 /**
@@ -265,7 +272,7 @@ TLAPI int tl_network_resolve_name( const char* hostname, int proto,
 /**
  * \brief Create a server instance
  *
- * \param addr    Specifyes from what addresses to accept connections, on
+ * \param addr    Specifies from what addresses to accept connections, on
  *                what port to listen and what protocols to use.
  * \param backlog The maximum number of incomming connections kept waiting.
  *
@@ -326,6 +333,18 @@ TLAPI int tl_network_get_peer_address( tl_iostream* stream,
  */
 TLAPI int tl_network_get_local_address( tl_iostream* stream,
                                         tl_net_addr* addr );
+
+/**
+ * \brief Create a low-level state-less, packet based server implementation
+ *
+ * \param addr  Specifies from what addresses to accept connections, on
+ *              what port to listen and what protocols to use.
+ * \param flags A combination of TL_PACKETSERVER_FLAGS fields
+ *
+ * \return A pointer to a server interface on success, NULL on failure
+ */
+TLAPI tl_packetserver*
+tl_network_create_packet_server( const tl_net_addr* addr, int flags );
 
 #ifdef __cplusplus
 }

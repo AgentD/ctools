@@ -36,8 +36,8 @@
  *
  * \section tl_server The tl_server interface
  *
- * The tl_server interface abstracts stream or packet based communication of
- * a single process with an arbitrary number client processes. The client
+ * The tl_server interface abstracts stream based communication of a single
+ * process with an arbitrary number client processes. The client
  * communications are abstracted in the form of tl_iostream instances that the
  * server creates when a new client connects or (for non-connection based
  * communications) when the first data from a particular client is received.
@@ -56,6 +56,16 @@
  *
  * srv->destroy( destroy );
  * \endcode
+ *
+ * There are also tl_server implementations for purely packet based, or
+ * non-connection based communcations (e.g. UDP) that internally handle
+ * client demultiplexing and emulate connection based communication.
+ *
+ * For "raw" packet based, non-connection oriented communications, use the
+ * tl_packetserver interface. There are also tl_packetserver implementations
+ * that emulate state-less packet I/O via connection based, stream oriented
+ * I/O devices (e.g. TCP) by briefly opening a connection and transmitting
+ * data.
  */
 
 
