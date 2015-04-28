@@ -47,24 +47,12 @@ static void tcp_destroy( tl_server* this )
 static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 {
     tcp_server* this = (tcp_server*)super;
-    struct timeval tv;
-    fd_set in_fds;
     SOCKET peer;
 
-    if( timeout > 0 )
-    {
-        FD_ZERO( &in_fds );
-        FD_SET( this->socket, &in_fds );
-
-        tv.tv_sec = timeout / 1000;
-        tv.tv_usec = (timeout - tv.tv_sec * 1000) * 1000;
-
-        if( select( this->socket+1, &in_fds, 0, 0, &tv ) <= 0 )
-            return NULL;
-    }
+    if( !wait_for_socket( this->socket, timeout, 0 ) )
+        return NULL;
 
     peer = accept( this->socket, NULL, 0 );
-
     return peer==INVALID_SOCKET ? NULL :
            sock_stream_create( peer, WSTR_SOCK|WSTR_TCP );
 }

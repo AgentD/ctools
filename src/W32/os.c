@@ -141,6 +141,8 @@ int WSAHandleFuckup( void )
 {
     int status = WSAGetLastError( );
 
+    if( status==WSAENOPROTOOPT || status==WSAEINVAL )
+        return TL_ERR_NOT_SUPPORTED;
     if( status==WSAETIMEDOUT || status==WSAEWOULDBLOCK )
         return TL_ERR_TIMEOUT;
     if( status==WSAECONNRESET || status==WSAECONNABORTED ||
@@ -264,6 +266,13 @@ int decode_sockaddr_in( const void* addr, size_t len, tl_net_addr* out )
     }
 
     return 0;
+}
+
+int bind_socket( SOCKET sockfd, void* addrbuffer, int size )
+{
+    BOOL val = TRUE;
+    setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof(val) );
+    return bind( sockfd, addrbuffer, size ) >= 0;
 }
 
 /****************************************************************************/

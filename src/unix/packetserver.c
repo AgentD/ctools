@@ -151,11 +151,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
         return NULL;
 
     /* create socket */
-    if( !encode_sockaddr( addr, addrbuffer, &size ) )
-        goto fail;
-
-    this->sockfd = create_socket( addr->net, addr->transport );
-
+    this->sockfd = create_socket( addr, addrbuffer, &size );
     if( this->sockfd < 0 )
         goto fail;
 
@@ -165,10 +161,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
         setsockopt(this->sockfd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(int));
     }
 
-    val=1; setsockopt(this->sockfd,SOL_SOCKET,SO_REUSEADDR,&val,sizeof(val));
-    val=1; setsockopt(this->sockfd,SOL_SOCKET,SO_REUSEPORT,&val,sizeof(val));
-
-    if( bind( this->sockfd, (void*)addrbuffer, size ) < 0 )
+    if( !bind_socket( this->sockfd, addrbuffer, size ) )
         goto failclose;
 
     /* initialization */

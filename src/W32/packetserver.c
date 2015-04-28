@@ -160,11 +160,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
                     (void*)&val, sizeof(BOOL) );
     }
 
-    val = TRUE;
-    setsockopt( this->sockfd, SOL_SOCKET, SO_REUSEADDR,
-                (void*)&val, sizeof(BOOL) );
-
-    if( bind( this->sockfd, (void*)addrbuffer, size ) < 0 )
+    if( !bind_socket( this->sockfd, addrbuffer, size ) )
         goto failclose;
 
     /* initialization */

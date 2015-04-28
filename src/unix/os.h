@@ -205,12 +205,25 @@ int encode_sockaddr( const tl_net_addr* peer, void* addrbuffer, int* size );
 /**
  * \brief Create a socket
  *
- * \param net       A TL_NETWORK_PROTOCOL value
- * \param transport A TL_TRANSPORT_PROTOCOL value
+ * \param peer       The address to bind to
+ * \param addrbuffer A pointer to a buffer to write the sockaddr_in structure
+ *                   data to
+ * \param size       Returns the number of bytes written to the addrbuffer
  *
  * \return A socket file descriptor on success, -1 on failrue
  */
-int create_socket( int net, int transport );
+int create_socket( const tl_net_addr* peer, void* addrbuffer, int* size );
+
+/**
+ * \brief Bind a socket to an address
+ *
+ * \param sockfd   The socket file descriptor
+ * \param address  A pointer to the address structure
+ * \param addrsize The size of the address structure
+ *
+ * \return Non-zero on success, zero on failure
+ */
+int bind_socket( int sockfd, void* address, int addrsize );
 
 /**
  * \brief Decode a sockaddr_in or sockaddr_in6 structure to a tl_net_addr

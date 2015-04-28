@@ -28,7 +28,6 @@
 
 
 
-
 static void sockstream_destroy( tl_iostream* super )
 {
     sockstream* this = (sockstream*)super;
@@ -44,31 +43,14 @@ static int sockstream_set_timeout( tl_iostream* super, unsigned int timeout )
 {
     sockstream* this = (sockstream*)super;
     int status;
-    DWORD ms;
 
     if( !this )
         return TL_ERR_ARG;
 
-    ms = timeout;
-    status = setsockopt(this->socket,SOL_SOCKET,SO_RCVTIMEO,
-                        (const char*)&ms,sizeof(ms));
-    if( status != 0 )
-        goto fail;
-
-    ms = timeout;
+    this->timeout = timeout;
     status = setsockopt(this->socket,SOL_SOCKET,SO_SNDTIMEO,
-                        (const char*)&ms,sizeof(ms));
-    if( status != 0 )
-        goto fail;
-
-    return 0;
-fail:
-    status = WSAGetLastError( );
-    if( status==WSAENOTCONN || status==WSAENOTSOCK || status==WSAENETRESET )
-        return TL_ERR_CLOSED;
-    if( status==WSAENOPROTOOPT || status==WSAEINVAL )
-        return TL_ERR_NOT_SUPPORTED;
-    return TL_ERR_INTERNAL;
+                        (char*)&this->timeout,sizeof(this->timeout));
+    return status ? WSAHandleFuckup( ) : 0;
 }
 
 static int sockstream_write_raw( tl_iostream* super, const void* buffer,
@@ -77,20 +59,14 @@ static int sockstream_write_raw( tl_iostream* super, const void* buffer,
     sockstream* this = (sockstream*)super;
     int status;
 
-    if( actual )
-        *actual = 0;
-    if( !this || !buffer )
-        return TL_ERR_ARG;
-    if( !size )
-        return 0;
+    if( actual           ) *actual = 0;
+    if( !this || !buffer ) return TL_ERR_ARG;
+    if( !size            ) return 0;
 
     status = send( ((sockstream*)this)->socket, buffer, size, 0 );
 
-    if( status<0 )
-        return WSAHandleFuckup( );
-
-    if( actual )
-        *actual = status;
+    if( status<0 ) return WSAHandleFuckup( );
+    if( actual   ) *actual = status;
     return 0;
 }
 
@@ -100,23 +76,16 @@ static int sockstream_read_raw( tl_iostream* super, void* buffer,
     sockstream* this = (sockstream*)super;
     int status;
 
-    if( actual )
-        *actual = 0;
-    if( !this || !buffer )
-        return TL_ERR_ARG;
-    if( !size )
-        return 0;
+    if( actual                                           ) *actual = 0;
+    if( !this || !buffer                                 ) return TL_ERR_ARG;
+    if( !size                                            ) return 0;
+    if( !wait_for_socket(this->socket, this->timeout, 0) ) return 0;
 
     status = recv( this->socket, buffer, size, 0 );
 
-    if( status==0 )
-        return TL_ERR_CLOSED;
-
-    if( status<0 )
-        return WSAHandleFuckup( );
-
-    if( actual )
-        *actual = status;
+    if( status==0 ) return TL_ERR_CLOSED;
+    if( status<0  ) return WSAHandleFuckup( );
+    if( actual    ) *actual = status;
     return 0;
 }
 

@@ -145,18 +145,21 @@ int encode_sockaddr( const tl_net_addr* peer, void* addrbuffer, int* size )
     return 1;
 }
 
-int create_socket( int net, int transport )
+int create_socket( const tl_net_addr* peer, void* addrbuffer, int* size )
 {
     int family, type, proto;
 
-    switch( net )
+    if( !encode_sockaddr( peer, addrbuffer, size ) )
+        return -1;
+
+    switch( peer->net )
     {
     case TL_IPV4: family = PF_INET;  break;
     case TL_IPV6: family = PF_INET6; break;
     default:      return -1;
     }
 
-    switch( transport )
+    switch( peer->transport )
     {
     case TL_TCP: type = SOCK_STREAM; proto = IPPROTO_TCP; break;
     case TL_UDP: type = SOCK_DGRAM;  proto = IPPROTO_UDP; break;
@@ -164,6 +167,15 @@ int create_socket( int net, int transport )
     }
 
     return socket( family, type, proto );
+}
+
+int bind_socket( int sockfd, void* address, int addrsize )
+{
+    int val;
+    val=1; setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val) );
+    val=1; setsockopt( sockfd, SOL_SOCKET, SO_REUSEPORT, &val, sizeof(val) );
+
+    return bind( sockfd, address, addrsize ) >= 0;
 }
 
 int decode_sockaddr_in( const void* addr, size_t len, tl_net_addr* out )

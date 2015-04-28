@@ -117,20 +117,14 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
                                      unsigned int backlog )
 {
     unsigned char addrbuffer[128];
-    int sockfd, size, val;
     tl_server* server;
+    int sockfd, size;
 
-    if( !encode_sockaddr( addr, (void*)addrbuffer, &size ) )
-        return 0;
-
-    sockfd = create_socket( addr->net, addr->transport );
+    sockfd = create_socket( addr, (void*)addrbuffer, &size );
     if( sockfd < 0 )
         return NULL;
 
-    val=1; setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val) );
-    val=1; setsockopt( sockfd, SOL_SOCKET, SO_REUSEPORT, &val, sizeof(val) );
-
-    if( bind( sockfd, (void*)addrbuffer, size ) < 0 )
+    if( !bind_socket( sockfd, addrbuffer, size ) )
         goto fail;
 
     switch( addr->transport )
@@ -154,10 +148,7 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
     tl_iostream* stream;
     int sockfd, size, flags;
 
-    if( !encode_sockaddr( peer, (void*)addrbuffer, &size ) )
-        return 0;
-
-    sockfd = create_socket( peer->net, peer->transport );
+    sockfd = create_socket( peer, (void*)addrbuffer, &size );
     if( sockfd < 0 )
         return NULL;
 

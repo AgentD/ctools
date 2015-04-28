@@ -222,25 +222,16 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
     unsigned char addrbuffer[128];
     tl_server* server;
     SOCKET sockfd;
-    BOOL val;
     int size;
 
     winsock_acquire( );
 
     sockfd = create_socket( addr, (void*)addrbuffer, &size );
-
     if( sockfd == INVALID_SOCKET )
-    {
-        winsock_release( );
-        return NULL;
-    }
-
-    val = TRUE;
-    setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR,
-                (const char*)&val, sizeof(val) );
-
-    if( bind( sockfd, (void*)addrbuffer, size ) < 0 )
         goto fail;
+
+    if( !bind_socket( sockfd, addrbuffer, size ) )
+        goto failclose;
 
     switch( addr->transport )
     {
@@ -249,11 +240,11 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
     default:     server = NULL;                                 break;
     }
 
-    if( !server )
-        goto fail;
-    return server;
-fail:
+    if( server )
+        return server;
+failclose:
     closesocket( sockfd );
+fail:
     winsock_release( );
     return NULL;
 }

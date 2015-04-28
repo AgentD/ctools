@@ -82,6 +82,7 @@ struct pipestream
 struct sockstream
 {
     w32stream super;
+    DWORD timeout;
     SOCKET socket;
 };
 
@@ -185,6 +186,8 @@ int WSAHandleFuckup( void );
 int encode_sockaddr( const tl_net_addr* peer, void* addrbuffer, int* size );
 
 int decode_sockaddr_in( const void* addr, size_t len, tl_net_addr* out );
+
+int bind_socket( SOCKET sockfd, void* addrbuffer, int size );
 
 /** \brief Initialize a monitor object */
 int monitor_init( monitor_t* monitor );
