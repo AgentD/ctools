@@ -53,7 +53,7 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
     unsigned char addrbuf[ 64 ];
-    socklen_t addrlen;
+    socklen_t addrlen = sizeof(addrbuf);
     ssize_t result;
 
     if( actual           ) *actual = 0;
@@ -72,8 +72,13 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
         return TL_ERR_INTERNAL;
     }
 
-    if( !decode_sockaddr_in( addrbuf, addrlen, address ) )
-        return TL_ERR_INTERNAL;
+    if( address )
+    {
+        if( !decode_sockaddr_in( addrbuf, addrlen, address ) )
+            return TL_ERR_INTERNAL;
+
+        ((tl_net_addr*)address)->transport = TL_UDP;
+    }
 
     if( actual )
         *actual = result;
