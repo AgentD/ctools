@@ -370,6 +370,9 @@ TLAPI int tl_network_get_local_address( tl_iostream* stream,
  * \note Use pointers to tl_net_addr for functions that expect a pointer to
  *       an address structure.
  *
+ * The tl_packetserver implementation sends and recevies packets through the
+ * given port number to/from any remote port number.
+ *
  * \param addr  Specifies from what addresses to accept connections, on
  *              what port to listen and what protocols to use.
  * \param flags A combination of TL_PACKETSERVER_FLAGS fields
