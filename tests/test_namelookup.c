@@ -10,14 +10,14 @@ int main( void )
     tl_net_addr addr;
 
     /* resolve IPv4 addresses */
-    if( !tl_network_resolve_name( "127.0.0.1", TL_ANY, &addr ) )
+    if( !tl_network_resolve_name( "127.0.0.1", TL_ANY, &addr, 1 ) )
         return EXIT_FAILURE;
     if( addr.net!=TL_IPV4 )
         return EXIT_FAILURE;
     if( addr.addr.ipv4!=0x7F000001 )
         return EXIT_FAILURE;
 
-    if( !tl_network_resolve_name( "192.168.1.1", TL_ANY, &addr ) )
+    if( !tl_network_resolve_name( "192.168.1.1", TL_ANY, &addr, 1 ) )
         return EXIT_FAILURE;
     if( addr.net!=TL_IPV4 )
         return EXIT_FAILURE;
@@ -25,7 +25,7 @@ int main( void )
         return EXIT_FAILURE;
 
     /* resolve IPv6 addresses */
-    if( !tl_network_resolve_name( "::1", TL_ANY, &addr ) )
+    if( !tl_network_resolve_name( "::1", TL_ANY, &addr, 1 ) )
         return EXIT_FAILURE;
     if( addr.net!=TL_IPV6 )
         return EXIT_FAILURE;
@@ -38,7 +38,7 @@ int main( void )
     if( addr.addr.ipv6[1]!=0x0000 ) return EXIT_FAILURE;
     if( addr.addr.ipv6[0]!=0x0001 ) return EXIT_FAILURE;
 
-    if( !tl_network_resolve_name("FE80::0202:B3FF:FE1E:8329",TL_ANY,&addr) )
+    if( !tl_network_resolve_name("FE80::0202:B3FF:FE1E:8329",TL_ANY,&addr,1) )
         return EXIT_FAILURE;
     if( addr.net!=TL_IPV6 )
         return EXIT_FAILURE;
@@ -52,23 +52,23 @@ int main( void )
     if( addr.addr.ipv6[0]!=0x8329 ) return EXIT_FAILURE;
 
     /* resolve hostname */
-    if( !tl_network_resolve_name( "localhost", TL_IPV4, &addr ) )
+    if( !tl_network_resolve_name( "localhost", TL_IPV4, &addr,1 ) )
         return EXIT_FAILURE;
     if( addr.net!=TL_IPV4 )
         return EXIT_FAILURE;
 
-    if( !tl_network_resolve_name( "localhost", TL_IPV6, &addr ) )
+    if( !tl_network_resolve_name( "localhost", TL_IPV6, &addr, 1 ) )
         return EXIT_FAILURE;
     if( addr.net!=TL_IPV6 )
         return EXIT_FAILURE;
 
     /* resolve DNS name */
-    if( !tl_network_resolve_name( "www.example.com", TL_IPV4, &addr ) )
+    if( !tl_network_resolve_name( "www.example.com", TL_IPV4, &addr, 1 ) )
         return EXIT_FAILURE;
     if( addr.net!=TL_IPV4 )
         return EXIT_FAILURE;
 
-    if( !tl_network_resolve_name( "www.example.com", TL_IPV6, &addr ) )
+    if( !tl_network_resolve_name( "www.example.com", TL_IPV6, &addr,1 ) )
         return EXIT_FAILURE;
     if( addr.net!=TL_IPV6 )
         return EXIT_FAILURE;

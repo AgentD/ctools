@@ -31,11 +31,12 @@
 
 
 int tl_network_resolve_name( const char* hostname, int proto,
-                             tl_net_addr* addr )
+                             tl_net_addr* addr, size_t count )
 {
     struct addrinfo hints, *info, *p;
     struct in6_addr addr6;
     struct in_addr addr4;
+    size_t i = 0;
 
     if( !hostname )
         return 0;
@@ -45,7 +46,7 @@ int tl_network_resolve_name( const char* hostname, int proto,
     {
         if( proto!=TL_IPV4 && proto!=TL_ANY )
             return 0;
-        if( addr )
+        if( addr && count>0 )
         {
             addr->addr.ipv4 = ntohl( addr4.s_addr );
             addr->net = TL_IPV4;
@@ -58,7 +59,7 @@ int tl_network_resolve_name( const char* hostname, int proto,
     {
         if( proto!=TL_IPV6 && proto!=TL_ANY )
             return 0;
-        if( addr )
+        if( addr && count>0 )
         {
             convert_ipv6( &addr6, addr );
             addr->net = TL_IPV6;
@@ -84,33 +85,27 @@ int tl_network_resolve_name( const char* hostname, int proto,
         if( proto!=AF_UNSPEC && p->ai_family!=proto )
             continue;
 
-        break;
-    }
-
-    if( !p )
-    {
-        freeaddrinfo( info );
-        return 0;
-    }
-
-    if( addr )
-    {
-        if( p->ai_family==AF_INET6 )
+        if( addr && i<count )
         {
-            addr6 = ((struct sockaddr_in6*)p->ai_addr)->sin6_addr;
-            convert_ipv6( &addr6, addr );
-        }
-        else
-        {
-            addr4 = ((struct sockaddr_in*)p->ai_addr)->sin_addr;
-            addr->addr.ipv4 = ntohl( addr4.s_addr );
-        }
+            if( p->ai_family==AF_INET6 )
+            {
+                addr6 = ((struct sockaddr_in6*)p->ai_addr)->sin6_addr;
+                convert_ipv6( &addr6, addr );
+            }
+            else
+            {
+                addr4 = ((struct sockaddr_in*)p->ai_addr)->sin_addr;
+                addr->addr.ipv4 = ntohl( addr4.s_addr );
+            }
 
-        addr->net = p->ai_family==AF_INET6 ? TL_IPV6 : TL_IPV4;
+            addr->net = p->ai_family==AF_INET6 ? TL_IPV6 : TL_IPV4;
+            ++i;
+            ++addr;
+        }
     }
 
     freeaddrinfo( info );
-    return 1;
+    return i;
 }
 
 tl_server* tl_network_create_server( const tl_net_addr* addr,

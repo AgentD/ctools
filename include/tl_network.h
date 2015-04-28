@@ -52,10 +52,10 @@
  *
  * Checking if a DNS name can be resolved:
  * \code{.c}
- * if( tl_network_resolve_name( "www.example.com", TL_IPV4, NULL ) )
+ * if( tl_network_resolve_name( "www.example.com", TL_IPV4, NULL, 0 ) )
  *     puts( "Found an IPv4 address for this domain!" );
  *
- * if( tl_network_resolve_name( "www.example.com", TL_IPV6, NULL ) )
+ * if( tl_network_resolve_name( "www.example.com", TL_IPV6, NULL, 0 ) )
  *     puts( "Found an IPv6 address for this domain!" );
  * \endcode
  *
@@ -63,16 +63,16 @@
  * \code{.c}
  * tl_net_addr addr;
  *
- * tl_network_resolve_name( "www.example.com", TL_ANY, &addr );
- * tl_network_resolve_name( "localhost", TL_ANY, &addr );
+ * tl_network_resolve_name( "www.example.com", TL_ANY, &addr, 1 );
+ * tl_network_resolve_name( "localhost", TL_ANY, &addr, 1 );
  * \endcode
  *
  * Converting an IP address string to an address structure:
  * \code{.c}
  * tl_net_addr addr;
  *
- * tl_network_resolve_name( "127.0.0.1", TL_ANY, &addr );
- * tl_network_resolve_name( "::1", TL_ANY, &addr );
+ * tl_network_resolve_name( "127.0.0.1", TL_ANY, &addr, 1 );
+ * tl_network_resolve_name( "::1", TL_ANY, &addr, 1 );
  * \endcode
  *
  * \subsection netserver Network Server Objects
@@ -122,7 +122,7 @@
  * tl_net_addr addr;
  * tl_iostream* str;
  *
- * tl_network_resolve_name( "www.example.com", TL_ANY, &addr );
+ * tl_network_resolve_name( "www.example.com", TL_ANY, &addr, 1 );
  * addr.transport = TL_TCP;
  * addr.port = 80;
  *
@@ -134,7 +134,7 @@
  * tl_net_addr addr;
  * tl_iostream* str;
  *
- * tl_network_resolve_name( "8.8.8.8", TL_IPV4, &addr );
+ * tl_network_resolve_name( "8.8.8.8", TL_IPV4, &addr, 1 );
  * addr.transport = TL_UDP;
  * addr.port = 53;
  *
@@ -290,14 +290,16 @@ extern "C" {
  * \param hostname The string to resolve to an address
  * \param proto    A \ref TL_NETWORK_PROTOCOL value specifying a prefered
  *                 protocol address to fetch.
- * \param addr     A pointer to a tl_net_addr structure to write the resolved
- *                 address and address type to. This can be NULL to check if
- *                 a host name \em can be resolved.
+ * \param addr     A pointer to an array of tl_net_addr structure to write
+ *                 the resolved addresses and address type to. This can be
+ *                 NULL to check if a host name \em can be resolved.
+ * \param count    The number of aray elements, i.e. maximum number of
+ *                 addresses to resolve.
  *
  * \return Non-zero on success, zero on failure
  */
 TLAPI int tl_network_resolve_name( const char* hostname, int proto,
-                                   tl_net_addr* addr );
+                                   tl_net_addr* addr, size_t count );
 
 /**
  * \brief Create a server instance
