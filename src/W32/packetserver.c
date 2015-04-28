@@ -54,7 +54,7 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
     unsigned char addrbuf[ 64 ];
     socklen_t addrlen = sizeof(addrbuf);
-    ssize_t result;
+    int result;
 
     if( actual           ) *actual = 0;
     if( !this || !buffer ) return TL_ERR_ARG;
@@ -86,8 +86,7 @@ static int udp_send( tl_packetserver* super, const void* buffer,
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
     unsigned char addrbuf[ 64 ];
-    ssize_t result;
-    int addrsize;
+    int result, addrsize;
 
     if( actual                                          ) *actual = 0;
     if( !super || !buffer || !address                   ) return TL_ERR_ARG;
