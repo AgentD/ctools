@@ -126,9 +126,10 @@ static void udp_destroy( tl_packetserver* super )
 tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
                                                   int flags )
 {
+    unsigned char addrbuffer[64];
     tl_udp_packetserver* this;
     tl_packetserver* super;
-    int val;
+    int val, size;
 
     /* sanity check */
     if( !addr || addr->transport!=TL_UDP )
@@ -145,19 +146,25 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
         return NULL;
 
     /* create socket */
+    if( !encode_sockaddr( addr, addrbuffer, &size ) )
+        goto fail;
+
     this->sockfd = create_socket( addr->net, addr->transport );
 
     if( this->sockfd < 0 )
-    {
-        free( this );
-        return NULL;
-    }
+        goto fail;
 
     if( flags & TL_ALLOW_BROADCAST )
     {
         val = 1;
         setsockopt(this->sockfd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(int));
     }
+
+    val=1; setsockopt(this->sockfd,SOL_SOCKET,SO_REUSEADDR,&val,sizeof(val));
+    val=1; setsockopt(this->sockfd,SOL_SOCKET,SO_REUSEPORT,&val,sizeof(val));
+
+    if( bind( this->sockfd, (void*)addrbuffer, size ) < 0 )
+        goto failclose;
 
     /* initialization */
     this->timeout = 0;
@@ -166,5 +173,10 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     super->receive = udp_receive;
     super->set_timeout = udp_set_timeout;
     return super;
+failclose:
+    close( this->sockfd );
+fail:
+    free( this );
+    return NULL;
 }
 
