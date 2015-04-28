@@ -8,17 +8,28 @@
 
 
  At the moment, the following things are implemented:
-  - tl_array, a resizeable array
-  - tl_hashmap, a seperate-chaining based hash map
-  - tl_list, a doubly linked list
-  - tl_rbtree, a red-black tree
-  - tl_string, a UTF-16 dynamic string implementation
+  - container data structures
+    - resizeable array
+    - hash map
+    - intrusive linked list
+    - red-black tree
+    - a container for blobs of data with auto detection
+      and conversion of encoding
+    - abstract allocator to create deep copies of user data types
+    - abstract external iterator interface
+  - string handling
+    - UTF-8 dynamic string implementation
+    - UTF-8 and UTF-16 string utilities
   - various sorting algorithm implementations
-  - abstract filesystem and directory access functions
-  - abstract iterator for containers
-  - abstract allocator allowing containers to make deep-copies of
-    complex objects or using custom allocation
-  - some UTF-8 and UTF-16 string utilities
+  - command line option parsing
+  - abstract filesystem and directory access
+  - creating and managing child processes
+  - abstract network I/O
+    - IPv4 and IPv6 support
+    - abstract byte stream oriented TCP and UDP client
+    - TCP and UDP server with client demultiplexing
+    - packet oriented UDP server
+    - name resolving
 
 
   Compiling
@@ -44,14 +55,17 @@
 
  For 64 bit Windows(R), use '-DCMAKE_TOOLCHAIN_FILE=../CMake/mingw64.cmake'.
 
- To generate the doxygen API reference, run the following in the build
- directory after generating the Makefile:
+ To generate the doxygen API reference and documentation, run the following
+ in the build directory after generating the Makefile:
 
     $ make doc
 
  This generates a HTML reference in <build_directory>/doxydoc/html, man pages
  for section 3 under <build_directory>/doxydoc/man and LaTeX input files in
  <build_directory>/doxydoc/latex.
+
+ The doxygen reference includes hand written documentation pages with lots
+ of examples.
 
  To run the unit tests, run the following:
 
@@ -67,6 +81,12 @@
 
  Use the generated build system files in the target directory (e.g. MSVC
  solution) to compile the library.
+
+
+
+ If the cmake option "SHARED" is set, a shared library is generated. When
+ crosscompiling for Windows(R), the option "USEWINE" can be set to run the
+ unit test programs via wine.
 
 
   Directory Hirarchy
