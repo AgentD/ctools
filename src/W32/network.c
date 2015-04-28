@@ -28,38 +28,6 @@
 
 
 
-static void convert_ipv6( const IN6_ADDR* v6, tl_net_addr* addr )
-{
-    addr->addr.ipv6[7] = (v6->u.Byte[ 0]<<8) | v6->u.Byte[ 1];
-    addr->addr.ipv6[6] = (v6->u.Byte[ 2]<<8) | v6->u.Byte[ 3];
-    addr->addr.ipv6[5] = (v6->u.Byte[ 4]<<8) | v6->u.Byte[ 5];
-    addr->addr.ipv6[4] = (v6->u.Byte[ 6]<<8) | v6->u.Byte[ 7];
-    addr->addr.ipv6[3] = (v6->u.Byte[ 8]<<8) | v6->u.Byte[ 9];
-    addr->addr.ipv6[2] = (v6->u.Byte[10]<<8) | v6->u.Byte[11];
-    addr->addr.ipv6[1] = (v6->u.Byte[12]<<8) | v6->u.Byte[13];
-    addr->addr.ipv6[0] = (v6->u.Byte[14]<<8) | v6->u.Byte[15];
-}
-
-static void convert_in6addr( const tl_net_addr* addr, IN6_ADDR* v6 )
-{
-    v6->u.Byte[ 0] = (addr->addr.ipv6[7]>>8) & 0xFF;
-    v6->u.Byte[ 1] =  addr->addr.ipv6[7]     & 0xFF;
-    v6->u.Byte[ 2] = (addr->addr.ipv6[6]>>8) & 0xFF;
-    v6->u.Byte[ 3] =  addr->addr.ipv6[6]     & 0xFF;
-    v6->u.Byte[ 4] = (addr->addr.ipv6[5]>>8) & 0xFF;
-    v6->u.Byte[ 5] =  addr->addr.ipv6[5]     & 0xFF;
-    v6->u.Byte[ 6] = (addr->addr.ipv6[4]>>8) & 0xFF;
-    v6->u.Byte[ 7] =  addr->addr.ipv6[4]     & 0xFF;
-    v6->u.Byte[ 8] = (addr->addr.ipv6[3]>>8) & 0xFF;
-    v6->u.Byte[ 9] =  addr->addr.ipv6[3]     & 0xFF;
-    v6->u.Byte[10] = (addr->addr.ipv6[2]>>8) & 0xFF;
-    v6->u.Byte[11] =  addr->addr.ipv6[2]     & 0xFF;
-    v6->u.Byte[12] = (addr->addr.ipv6[1]>>8) & 0xFF;
-    v6->u.Byte[13] =  addr->addr.ipv6[1]     & 0xFF;
-    v6->u.Byte[14] = (addr->addr.ipv6[0]>>8) & 0xFF;
-    v6->u.Byte[15] =  addr->addr.ipv6[0]     & 0xFF;
-}
-
 static int parse_ipv4( const char* s, void* a0 )
 {
     unsigned char* a = a0;
@@ -152,82 +120,6 @@ static int parse_ipv6( const char* s, void* a0 )
     }
 
     return need_v4 ? parse_ipv4( s, a-4 ) : 1;
-}
-
-static SOCKET create_socket( const tl_net_addr* peer, void* addrbuffer,
-                             int* size )
-{
-    struct sockaddr_in6* v6addr = addrbuffer;
-    struct sockaddr_in* v4addr = addrbuffer;
-    int family, type, proto;
-
-    if( !peer )
-        return INVALID_SOCKET;
-
-    if( peer->net==TL_IPV4 )
-    {
-        memset( v4addr, 0, sizeof(struct sockaddr_in) );
-        v4addr->sin_addr.s_addr = htonl( peer->addr.ipv4 );
-        v4addr->sin_port        = htons( peer->port );
-        v4addr->sin_family      = AF_INET;
-        family                  = PF_INET;
-        *size                   = sizeof(struct sockaddr_in);
-    }
-    else if( peer->net==TL_IPV6 )
-    {
-        memset( v6addr, 0, sizeof(struct sockaddr_in6) );
-        convert_in6addr( peer, &(v6addr->sin6_addr) );
-        v6addr->sin6_port   = htons( peer->port );
-        v6addr->sin6_family = AF_INET6;
-        family              = PF_INET6;
-        *size               = sizeof(struct sockaddr_in6);
-    }
-    else
-    {
-        return -1;
-    }
-
-    if( peer->transport==TL_TCP )
-    {
-        type = SOCK_STREAM;
-        proto = IPPROTO_TCP;
-    }
-    else if( peer->transport==TL_UDP )
-    {
-        type = SOCK_DGRAM;
-        proto = IPPROTO_UDP;
-    }
-    else
-    {
-        return -1;
-    }
-
-    return socket( family, type, proto );
-}
-
-static int decode_sockaddr_in( const void* addr, size_t len,
-                               tl_net_addr* out )
-{
-    const SOCKADDR_IN6* ipv6 = addr;
-    const SOCKADDR_IN* ipv4 = addr;
-
-    if( len==sizeof(SOCKADDR_IN) && ipv4->sin_family==AF_INET )
-    {
-        out->net       = TL_IPV4;
-        out->port      = ntohs( ipv4->sin_port );
-        out->addr.ipv4 = ntohl( ipv4->sin_addr.s_addr );
-        return 1;
-    }
-
-    if( len==sizeof(SOCKADDR_IN6) && ipv6->sin6_family==AF_INET6 )
-    {
-        convert_ipv6( &(ipv6->sin6_addr), out );
-        out->net  = TL_IPV6;
-        out->port = ntohs( ipv6->sin6_port );
-        return 1;
-    }
-
-    return 0;
 }
 
 /****************************************************************************/

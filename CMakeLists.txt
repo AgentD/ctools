@@ -119,7 +119,8 @@ elseif( WIN32 )
                      src/W32/pipestream.c
                      src/W32/tcpserver.c
                      src/W32/udpstream.c
-                     src/W32/udpserver.c )
+                     src/W32/udpserver.c
+                     src/W32/packetserver.c )
 
   set( CTOOLS_SYSLIBS userenv ws2_32 )
 endif( )

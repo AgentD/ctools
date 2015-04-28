@@ -29,23 +29,6 @@
 
 
 
-static int WSAHandleFuckup( void )
-{
-    int status = WSAGetLastError( );
-
-    if( status==WSAETIMEDOUT || status==WSAEWOULDBLOCK )
-        return TL_ERR_TIMEOUT;
-    if( status==WSAECONNRESET || status==WSAECONNABORTED ||
-        status==WSAESHUTDOWN || status==WSAENOTSOCK ||
-        status==WSAENOTCONN || status==WSAENETRESET )
-    {
-        return TL_ERR_CLOSED;
-    }
-    return TL_ERR_INTERNAL;
-}
-
-
-
 static void sockstream_destroy( tl_iostream* super )
 {
     sockstream* this = (sockstream*)super;

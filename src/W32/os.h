@@ -171,6 +171,21 @@ udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen );
  */
 void udp_stream_add_data( udp_stream* stream, void* buffer, size_t size );
 
+int wait_for_socket( SOCKET socket, unsigned long timeout, int write );
+
+void convert_ipv6( const IN6_ADDR* v6, tl_net_addr* addr );
+
+void convert_in6addr( const tl_net_addr* addr, IN6_ADDR* v6 );
+
+SOCKET create_socket( const tl_net_addr* peer, void* addrbuffer,
+                      int* size );
+
+int WSAHandleFuckup( void );
+
+int encode_sockaddr( const tl_net_addr* peer, void* addrbuffer, int* size );
+
+int decode_sockaddr_in( const void* addr, size_t len, tl_net_addr* out );
+
 /** \brief Initialize a monitor object */
 int monitor_init( monitor_t* monitor );
 
