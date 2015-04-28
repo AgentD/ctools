@@ -170,6 +170,7 @@ add_executable( test_tcp tests/test_tcp.c )
 add_executable( test_udp tests/test_udp.c )
 add_executable( test_process tests/test_process.c )
 add_executable( test_opt tests/test_opt.c )
+add_executable( test_packetserver tests/test_packetserver.c )
 add_executable( test_udpbroadcast tests/test_udpbroadcast.c )
 add_executable( childproc tests/childproc.c )
 
@@ -189,6 +190,7 @@ target_link_libraries( test_tcp ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( test_udp ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( test_process ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( test_opt ctools ${CTOOLS_SYSLIBS} )
+target_link_libraries( test_packetserver ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( test_udpbroadcast ctools ${CTOOLS_SYSLIBS} )
 target_link_libraries( childproc ctools ${CTOOLS_SYSLIBS} )
 
@@ -211,6 +213,8 @@ add_test( test_udp ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_udp )
 add_test( test_process ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_process
           ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/childproc )
 add_test( test_opt ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_opt )
+add_test( test_packetserver
+          ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_packetserver )
 add_test( test_udpbroadcast
           ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_udpbroadcast )
 
