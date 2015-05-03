@@ -275,36 +275,3 @@ int bind_socket( SOCKET sockfd, void* addrbuffer, int size )
     return bind( sockfd, addrbuffer, size ) >= 0;
 }
 
-/****************************************************************************/
-
-int monitor_init( monitor_t* this )
-{
-    this->cond = CreateEvent( NULL, FALSE, FALSE, NULL );
-
-    if( !this->cond )
-        return 0;
-
-    InitializeCriticalSection( &(this->mutex) );
-    this->timeout = INFINITE;
-    return 1;
-}
-
-void monitor_cleanup( monitor_t* this )
-{
-    CloseHandle( this->cond );
-    DeleteCriticalSection( &(this->mutex) );
-}
-
-int monitor_wait( monitor_t* this )
-{
-    DWORD status, timeout;
-
-    timeout = this->timeout ? this->timeout : INFINITE;
-
-    LeaveCriticalSection( &(this->mutex) );
-    status = WaitForMultipleObjects( 1, &(this->cond), FALSE, timeout );
-    EnterCriticalSection( &(this->mutex) );
-
-    return status!=WAIT_TIMEOUT && status!=WAIT_FAILED;
-}
-

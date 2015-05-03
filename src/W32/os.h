@@ -28,6 +28,7 @@
 
 
 #include "tl_iostream.h"
+#include "tl_thread.h"
 #include "tl_server.h"
 #include "tl_string.h"
 #include "tl_array.h"
@@ -55,15 +56,16 @@
 typedef struct udp_stream udp_stream;
 typedef struct udp_server udp_server;
 typedef struct pipestream pipestream;
-typedef struct monitor_t monitor_t;
 typedef struct sockstream sockstream;
 typedef struct w32stream w32stream;
 
-struct monitor_t
+struct tl_monitor
 {
     CRITICAL_SECTION mutex;
-    HANDLE cond;
-    unsigned int timeout;
+    CRITICAL_SECTION waiter_mutex;
+    HANDLE notify_event;
+    HANDLE notify_all_event;
+    unsigned int wait_count;
 };
 
 struct w32stream
@@ -89,7 +91,8 @@ struct sockstream
 struct udp_stream
 {
     w32stream super;
-    monitor_t monitor;
+    tl_monitor monitor;
+    unsigned long timeout;
     udp_stream* next;           /* linked list pointer */
     tl_array buffer;            /* incoming data waiting to be read */
     int addrlen;                /* size of peer address */
@@ -100,7 +103,7 @@ struct udp_stream
 struct udp_server
 {
     tl_server super;
-    monitor_t monitor;
+    tl_monitor monitor;
     int socket;                 /* udp socket */
     int pending;                /* number of streams not yet accepted */
     udp_stream* streams;        /* list of server-to-client */
@@ -190,24 +193,13 @@ int decode_sockaddr_in( const void* addr, size_t len, tl_net_addr* out );
 int bind_socket( SOCKET sockfd, void* addrbuffer, int size );
 
 /** \brief Initialize a monitor object */
-int monitor_init( monitor_t* monitor );
+int tl_monitor_init( tl_monitor* monitor );
 
 /** \brief Destroy a monitor object */
-void monitor_cleanup( monitor_t* monitor );
-
-/** \brief Wait for a monitor to receive a notification */
-int monitor_wait( monitor_t* monitor );
+void tl_monitor_cleanup( tl_monitor* monitor );
 
 /** \brief Create a stream object that uses pipe HANDLE objects */
 tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd );
-
-#define monitor_set_timeout( m, ms ) (m)->timeout = (ms);
-
-#define monitor_lock( m ) EnterCriticalSection( &((m)->mutex) )
-
-#define monitor_unlock( m ) LeaveCriticalSection( &((m)->mutex) )
-
-#define monitor_notify( m ) SetEvent( (m)->cond )
 
 #ifdef __cplusplus
 }

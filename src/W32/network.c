@@ -346,9 +346,9 @@ int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
     {
         addr->transport = TL_UDP;
 
-        monitor_lock( &(udp->parent->monitor) );
+        tl_monitor_lock( &(udp->parent->monitor), 0 );
         status = getsockname( udp->parent->socket, (void*)buffer, &len );
-        monitor_unlock( &(udp->parent->monitor) );
+        tl_monitor_unlock( &(udp->parent->monitor) );
 
         return status==0 && decode_sockaddr_in( buffer, len, addr );
     }
