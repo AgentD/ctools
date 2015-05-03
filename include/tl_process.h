@@ -37,7 +37,7 @@
 
 
 /**
- * \page util Miscellaneous Utilities
+ * \page conc Concurrency
  *
  * \section proc Process utilities
  *
@@ -47,8 +47,31 @@
  * function on how to create a process with given command line arguments and
  * environment.
  *
- * There are also other, minor process utility functions including:
- * \li \ref tl_sleep for pausing the calling thread for a specified time
+ * An example program running the UNIX "cal" program in a child process:
+ * \code{.c}
+ * char buffer[1024];
+ * tl_process* proc;
+ * tl_iostream* io;
+ * size_t bytes;
+ *
+ * static const char* args[] =
+ * {
+ *     "9",
+ *     "1752",
+ *     NULL
+ * };
+ *
+ * proc = tl_process_create( "cal", args, NULL, TL_PIPE_STDOUT );
+ * io = tl_process_get_stdio( proc );
+ *
+ * io->read( io, buffer, sizeof(buffer), &bytes );
+ * buffer[ bytes ] = '\0';
+ * puts( buffer );
+ *
+ * tl_process_wait( proc, NULL, 0 );
+ * io->destroy( io );
+ * tl_process_destroy( proc );
+ * \endcode
  */
 
 /**

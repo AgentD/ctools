@@ -33,18 +33,19 @@
 
 
 /**
- * \page util Miscellaneous Utilities
+ * \page conc Concurrency
  *
  * \section thread Thread utilities
  *
  * There are a number of primitives for creating, managing and
- * synchronizing thrads.
+ * synchronizing threads.
  *
  * The following data structurs are currently available: 
  * \li tl_thread for creating and managing threads
  * \li tl_mutex for mutually exclusive access to resources
  * \li tl_rwlock for managing parallel read and exclusive write access
  * \li tl_monitor combining a mutex and waiting/signifying condition mechanics
+ * \li tl_sleep for pausing the calling thread for a specified time
  */
 
 
