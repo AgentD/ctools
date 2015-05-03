@@ -202,6 +202,7 @@ testcase( test_opt "" )
 testcase( test_packetserver "" )
 testcase( test_udpbroadcast "" )
 testcase( test_thread "" )
+testcase( test_rwlock "" )
 
 #----------------------------------------------------------------------
 # generate Doxygen API reference
