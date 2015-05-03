@@ -35,7 +35,7 @@ static void udp_stream_destroy( tl_iostream* super )
 
     if( p )
     {
-        pt_monitor_lock( &(p->monitor) );
+        tl_monitor_lock( &(p->monitor), 0 );
         if( p->streams == this )
         {
             p->streams = p->streams->next;
@@ -51,17 +51,17 @@ static void udp_stream_destroy( tl_iostream* super )
                 }
             }
         }
-        pt_monitor_unlock( &(p->monitor) );
+        tl_monitor_unlock( &(p->monitor) );
     }
 
-    pt_monitor_cleanup( &(this->monitor) );
+    tl_monitor_cleanup( &(this->monitor) );
     tl_array_cleanup( &(this->buffer) );
     free( this );
 }
 
 static int udp_stream_set_timeout( tl_iostream* this, unsigned int timeout )
 {
-    pt_monitor_set_timeout( &(((udp_stream*)this)->monitor), timeout );
+    ((udp_stream*)this)->timeout = timeout;
     return 0;
 }
 
@@ -83,10 +83,10 @@ static int udp_stream_write_raw( tl_iostream* super, const void* buffer,
 
     if( size )
     {
-        pt_monitor_lock( &(p->monitor) );
+        tl_monitor_lock( &(p->monitor), this->timeout );
         result = sendto( p->socket, buffer, size, 0,
                          (void*)this->address, this->addrlen );
-        pt_monitor_unlock( &(p->monitor) );
+        tl_monitor_unlock( &(p->monitor) );
 
         if( result < 0 )
             return TL_ERR_INTERNAL;
@@ -110,10 +110,10 @@ static int udp_stream_read_raw( tl_iostream* super, void* buffer,
     if( !size )
         return 0;
 
-    pt_monitor_lock( &(this->monitor) );
+    tl_monitor_lock( &(this->monitor), this->timeout );
     if( this->buffer.used==0 )
     {
-        if( !pt_monitor_wait( &(this->monitor) ) )
+        if( !tl_monitor_wait( &(this->monitor), this->timeout ) )
         {
             result = TL_ERR_TIMEOUT;
             goto done;
@@ -137,7 +137,7 @@ static int udp_stream_read_raw( tl_iostream* super, void* buffer,
     }
 
 done:
-    pt_monitor_unlock( &(this->monitor) );
+    tl_monitor_unlock( &(this->monitor) );
     return result;
 }
 
@@ -147,10 +147,10 @@ void udp_stream_add_data( udp_stream* this, void* buffer, size_t size )
 {
     if( this && buffer && size )
     {
-        pt_monitor_lock( &(this->monitor) );
+        tl_monitor_lock( &(this->monitor), this->timeout );
         tl_array_append_array( &(this->buffer), buffer, size );
-        pt_monitor_notify( &(this->monitor) );
-        pt_monitor_unlock( &(this->monitor) );
+        tl_monitor_notify( &(this->monitor) );
+        tl_monitor_unlock( &(this->monitor) );
     }
 }
 
@@ -165,7 +165,7 @@ udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen )
     memset( this, 0, sizeof(udp_stream)+addrlen );
     memcpy( this->address, addr, addrlen );
 
-    if( !pt_monitor_init( &(this->monitor) ) )
+    if( !tl_monitor_init( &(this->monitor) ) )
     {
         free( this );
         return NULL;
@@ -175,6 +175,7 @@ udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen )
 
     ((unix_stream*)this)->flags = USTR_UDPBUF|USTR_UDP;
 
+    this->timeout      = 0;
     this->parent       = parent;
     this->addrlen      = addrlen;
     super->read        = udp_stream_read_raw;

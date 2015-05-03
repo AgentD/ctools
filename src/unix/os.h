@@ -28,6 +28,7 @@
 
 
 #include "tl_iostream.h"
+#include "tl_thread.h"
 #include "tl_server.h"
 #include "tl_string.h"
 #include "tl_array.h"
@@ -64,7 +65,6 @@
 
 typedef struct udp_stream udp_stream;
 typedef struct udp_server udp_server;
-typedef struct pt_monitor pt_monitor;
 typedef struct fd_stream fd_stream;
 typedef struct unix_stream unix_stream;
 
@@ -84,17 +84,17 @@ struct fd_stream
     unsigned int timeout;
 };
 
-struct pt_monitor
+struct tl_monitor
 {
     pthread_mutex_t mutex;
     pthread_cond_t cond;
-    struct timespec timeout;
 };
 
 struct udp_stream
 {
     unix_stream super;
-    pt_monitor monitor;
+    tl_monitor monitor;
+    unsigned int timeout;
     udp_stream* next;           /* linked list pointer */
     tl_array buffer;            /* incoming data waiting to be read */
     int addrlen;                /* size of peer address */
@@ -105,7 +105,7 @@ struct udp_stream
 struct udp_server
 {
     tl_server super;
-    pt_monitor monitor;
+    tl_monitor monitor;
     int socket;                 /* udp socket */
     int pending;                /* number of streams not yet accepted */
     udp_stream* streams;        /* list of server-to-client */
@@ -237,28 +237,10 @@ int bind_socket( int sockfd, void* address, int addrsize );
 int decode_sockaddr_in( const void* addr, size_t len, tl_net_addr* out );
 
 /** \brief Initialize a monitor object */
-int pt_monitor_init( pt_monitor* monitor );
+int tl_monitor_init( tl_monitor* monitor );
 
 /** \brief Destruct and cleanup a monitor object */
-void pt_monitor_cleanup( pt_monitor* monitor );
-
-/** \brief Set the timeout in milliseconds on a monitor */
-void pt_monitor_set_timeout( pt_monitor* monitor, unsigned int ms );
-
-/**
- * \brief Wait for a condition on a montitor
- *
- * \param monitor A pointer to the monitor
- *
- * \return Non-zero on success, zero if interrupted or timed out
- */
-int pt_monitor_wait( pt_monitor* monitor );
-
-#define pt_monitor_lock( m ) pthread_mutex_lock( &((m)->mutex) )
-
-#define pt_monitor_unlock( m ) pthread_mutex_unlock( &((m)->mutex) )
-
-#define pt_monitor_notify( m ) pthread_cond_signal( &((m)->cond) )
+void tl_monitor_cleanup( tl_monitor* monitor );
 
 #ifdef __cplusplus
 }

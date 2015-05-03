@@ -88,7 +88,7 @@ static void* udp_server_listen_thread( void* arg )
             if( len<=0 )
                 continue;
 
-            pt_monitor_lock( &(srv->monitor) );
+            tl_monitor_lock( &(srv->monitor), 0 );
             isnew = 0;
 
             for( str=srv->streams; str!=NULL; str=str->next )
@@ -114,8 +114,8 @@ static void* udp_server_listen_thread( void* arg )
             udp_stream_add_data( str, buffer, len );
 
             if( isnew )
-                pt_monitor_notify( &(srv->monitor) );
-            pt_monitor_unlock( &(srv->monitor) );
+                tl_monitor_notify( &(srv->monitor) );
+            tl_monitor_unlock( &(srv->monitor) );
         }
 
         pthread_mutex_unlock( &server_mutex );
@@ -184,7 +184,7 @@ static void udp_server_destroy( tl_server* super )
         i->parent = NULL;
 
     remove_server( this );
-    pt_monitor_cleanup( &(this->monitor) );
+    tl_monitor_cleanup( &(this->monitor) );
     close( this->socket );
     free( this );
 }
@@ -195,10 +195,9 @@ static tl_iostream* udp_wait_for_client( tl_server* super, int timeout )
     udp_stream* str = NULL;
     int i;
 
-    pt_monitor_lock( &(this->monitor) );
-    pt_monitor_set_timeout( &(this->monitor), timeout );
+    tl_monitor_lock( &(this->monitor), timeout );
     if( this->pending == 0 )
-        pt_monitor_wait( &(this->monitor) );
+        tl_monitor_wait( &(this->monitor), timeout );
 
     if( this->pending != 0 )
     {
@@ -207,7 +206,7 @@ static tl_iostream* udp_wait_for_client( tl_server* super, int timeout )
         for( ; i<this->pending && str; ++i, str=str->next ) { }
         --this->pending;
     }
-    pt_monitor_unlock( &(this->monitor) );
+    tl_monitor_unlock( &(this->monitor) );
     return (tl_iostream*)str;
 }
 
@@ -221,7 +220,7 @@ tl_server* udp_server_create( int sockfd )
 
     memset( this, 0, sizeof(udp_server) );
 
-    if( !pt_monitor_init( &(this->monitor) ) )
+    if( !tl_monitor_init( &(this->monitor) ) )
     {
         free( this );
         return NULL;

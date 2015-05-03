@@ -131,6 +131,10 @@ typedef struct tl_net_addr tl_net_addr;
 typedef struct tl_process tl_process;
 typedef struct tl_option tl_option;
 typedef struct tl_packetserver tl_packetserver;
+typedef struct tl_mutex tl_mutex;
+typedef struct tl_rwlock tl_rwlock;
+typedef struct tl_monitor tl_monitor;
+typedef struct tl_thread tl_thread;
 
 
 

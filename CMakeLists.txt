@@ -71,6 +71,7 @@ if( WIN32 )
 elseif( APPLE )
   message( ERROR "Mac OS X is not supported yet!" )
 elseif( UNIX )
+  add_definitions( -D_GNU_SOURCE )
   add_definitions( -DMACHINE_OS_UNIX )
   message( STATUS "Compiling for a generic UNIX like operating system" )
 else( )
@@ -103,6 +104,7 @@ if( UNIX )
                      src/unix/dir.c
                      src/unix/network.c
                      src/unix/process.c
+                     src/unix/thread.c
                      src/unix/fdstream.c
                      src/unix/tcpserver.c
                      src/unix/udpstream.c
@@ -198,6 +200,7 @@ testcase( test_process "${childexe}" )
 testcase( test_opt "" )
 testcase( test_packetserver "" )
 testcase( test_udpbroadcast "" )
+testcase( test_thread "" )
 
 #----------------------------------------------------------------------
 # generate Doxygen API reference
