@@ -133,6 +133,16 @@ TLAPI tl_list_node* tl_list_node_create( const tl_list* list,
                                          const void* data );
 
 /**
+ * \brief Destroy a list node and free its content using the list allocator
+ *
+ * \memberof tl_list_node
+ *
+ * \param node A pointer to a node assumed to no longer be in the list
+ * \param list A pointer to the list that originally contained the node
+ */
+TLAPI void tl_list_node_destroy( tl_list_node* node, tl_list* list );
+
+/**
  * \brief Get a pointer to the data field of a linked list node
  *
  * \memberof tl_list_node
@@ -489,6 +499,36 @@ TLAPI tl_list_node* tl_list_search( const tl_list* list, tl_compare cmp,
  * \copydoc tl_list_search
  */
 #define tl_list_search_unsorted tl_list_search
+
+/**
+ * \brief Remove and return the first node of a list but do not delete it
+ *
+ * \memberof tl_list
+ *
+ * This function removes the first node from a list but does not delete it.
+ * The node is returned and the caller has to free it later using
+ * tl_list_node_destroy.
+ *
+ * \param list A pointer to a list
+ *
+ * \return A pointer to the original first node, NULL on failure
+ */
+TLAPI tl_list_node* tl_list_drop_first( tl_list* list );
+
+/**
+ * \brief Remove and return the last node of a list but do not delete it
+ *
+ * \memberof tl_list
+ *
+ * This function removes the last node from a list but does not delete it.
+ * The node is returned and the caller has to free it later using
+ * tl_list_node_destroy.
+ *
+ * \param list A pointer to a list
+ *
+ * \return A pointer to the original last node, NULL on failure
+ */
+TLAPI tl_list_node* tl_list_drop_last( tl_list* list );
 
 /**
  * \brief Get an iterator to the first element
