@@ -70,7 +70,9 @@ int main( void )
     t1 = tl_thread_create( mon_thread, b );
 
     tl_sleep( 100 );
+    tl_monitor_lock( mon, 5000 );
     tl_monitor_notify_all( mon );
+    tl_monitor_unlock( mon );
 
     if( !tl_thread_join( t0, 5000 ) ) return EXIT_FAILURE;
     if( !tl_thread_join( t1, 5000 ) ) return EXIT_FAILURE;
@@ -91,8 +93,10 @@ int main( void )
     t1 = tl_thread_create( mon_thread, b );
 
     tl_sleep( 100 );
+    tl_monitor_lock( mon, 5000 );
     tl_monitor_notify( mon );
     tl_monitor_notify( mon );
+    tl_monitor_unlock( mon );
 
     if( !tl_thread_join( t0, 5000 ) ) return EXIT_FAILURE;
     if( !tl_thread_join( t1, 5000 ) ) return EXIT_FAILURE;

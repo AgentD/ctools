@@ -287,16 +287,13 @@ void tl_mutex_destroy( tl_mutex* this )
 
 /****************************************************************************/
 
-#define T_DETACHED 0x10
-#define ENCODE_STATE( svar, state ) (((svar)&0xF0)|((state)&0x0F))
-#define DECODE_STATE( svar ) ((svar)&0x0F)
-
 struct tl_thread
 {
-    volatile int flags;
+    int state;
     void* retval;
     tl_thread_function function;
     void* argument;
+    CRITICAL_SECTION mutex;
     HANDLE thread;
 };
 
@@ -304,13 +301,18 @@ struct tl_thread
 DWORD WINAPI thread_wrapper( LPVOID param )
 {
     tl_thread* this = param;
+    void* retval;
 
-    this->flags  = ENCODE_STATE( this->flags, TL_RUNNING );
-    this->retval = this->function( this->argument );
-    this->flags  = ENCODE_STATE( this->flags, TL_TERMINATED );
+    EnterCriticalSection( &(this->mutex) );
+    this->state = TL_RUNNING;
+    LeaveCriticalSection( &(this->mutex) );
 
-    if( this->flags & T_DETACHED )
-        free( this );
+    retval = this->function( this->argument );
+
+    EnterCriticalSection( &(this->mutex) );
+    this->state = TL_TERMINATED;
+    this->retval = retval;
+    LeaveCriticalSection( &(this->mutex) );
     return 0;
 }
 
@@ -323,10 +325,12 @@ tl_thread* tl_thread_create( tl_thread_function function, void* arg )
     if( !this )
         return NULL;
 
+    InitializeCriticalSection( &(this->mutex) );
+
     this->function = function;
     this->argument = arg;
     this->retval = NULL;
-    this->flags = TL_PENDING;
+    this->state = TL_PENDING;
     this->thread = CreateThread( NULL, 0, thread_wrapper, this, 0, 0 );
 
     if( !this->thread )
@@ -340,32 +344,38 @@ tl_thread* tl_thread_create( tl_thread_function function, void* arg )
 
 int tl_thread_join( tl_thread* this, unsigned long timeout )
 {
-    if( this->flags & T_DETACHED )
-        return 0;
+    DWORD dt = timeout ? timeout : INFINITE;
 
-    if( DECODE_STATE( this->flags )==TL_TERMINATED )
-        return 1;
-
-    return WaitForSingleObject( this->thread, timeout ) == WAIT_OBJECT_0;
+    return WaitForSingleObject( this->thread, dt ) == WAIT_OBJECT_0;
 }
 
 void* tl_thread_get_return_value( tl_thread* this )
 {
-    return this->retval;
+    void* retval;
+
+    EnterCriticalSection( &(this->mutex) );
+    retval = this->retval;
+    LeaveCriticalSection( &(this->mutex) );
+
+    return retval;
 }
 
 int tl_thread_get_state( tl_thread* this )
 {
-    return DECODE_STATE( this->flags );
+    int state;
+
+    EnterCriticalSection( &(this->mutex) );
+    state = this->state;
+    LeaveCriticalSection( &(this->mutex) );
+
+    return state;
 }
 
 void tl_thread_destroy( tl_thread* this )
 {
-    this->flags |= T_DETACHED;
-
+    TerminateThread( this->thread, EXIT_FAILURE );
     CloseHandle( this->thread );
-
-    if( DECODE_STATE( this->flags ) == TL_TERMINATED )
-        free( this );
+    DeleteCriticalSection( &(this->mutex) );
+    free( this );
 }
 

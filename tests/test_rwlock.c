@@ -5,6 +5,7 @@
 #include "tl_process.h"
 
 static tl_rwlock* rwlock;
+static tl_mutex* countmutex;
 static int readers = 0;
 static int writers = 0;
 
@@ -16,9 +17,13 @@ void* read_thread( void* arg )
     if( writers!=0 )
         exit( EXIT_FAILURE );
 
+    tl_mutex_lock( countmutex, 0 );
     ++readers;
+    tl_mutex_unlock( countmutex );
     tl_sleep( 300 );
+    tl_mutex_lock( countmutex, 0 );
     --readers;
+    tl_mutex_unlock( countmutex );
 
     tl_rwlock_unlock_read( rwlock );
     return arg;
@@ -46,6 +51,8 @@ int main( void )
 
     rwlock = tl_rwlock_create( );
 
+    countmutex = tl_mutex_create( 1 );
+
     tl_rwlock_lock_read( rwlock, 0 );
     tl_rwlock_lock_read( rwlock, 0 );
 
@@ -68,6 +75,7 @@ int main( void )
     tl_thread_destroy( t1 );
     tl_thread_destroy( t2 );
     tl_thread_destroy( t3 );
+    tl_mutex_destroy( countmutex );
     return EXIT_SUCCESS;
 }
 

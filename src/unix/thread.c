@@ -230,15 +230,11 @@ void tl_mutex_destroy( tl_mutex* this )
 
 /****************************************************************************/
 
-#define T_DETACHED 0x10
-#define ENCODE_STATE( svar, state ) (((svar)&0xF0)|((state)&0x0F))
-#define DECODE_STATE( svar ) ((svar)&0x0F)
-
 struct tl_thread
 {
     pthread_t thread;
     tl_monitor monitor;
-    volatile int flags;
+    int state;
     void* retval;
     tl_thread_function function;
     void* argument;
@@ -247,20 +243,23 @@ struct tl_thread
 static void* pthread_wrapper( void* arg )
 {
     tl_thread* this = arg;
+    void* retval;
 
-    this->flags  = ENCODE_STATE( this->flags, TL_RUNNING );
-    this->retval = this->function( this->argument );
-    this->flags  = ENCODE_STATE( this->flags, TL_TERMINATED );
+    pthread_cleanup_push( tl_monitor_unlock, &(this->monitor) );
 
-    if( this->flags & T_DETACHED )
-    {
-        tl_monitor_cleanup( &(this->monitor) );
-        free( this );
-    }
-    else
-    {
-        tl_monitor_notify( &(this->monitor) );
-    }
+    tl_monitor_lock( &(this->monitor), 0 );
+    this->state = TL_RUNNING;
+    tl_monitor_unlock( &(this->monitor) );
+
+    retval = this->function( this->argument );
+
+    tl_monitor_lock( &(this->monitor), 0 );
+    this->retval = retval;
+    this->state = TL_TERMINATED;
+    tl_monitor_notify( &(this->monitor) );
+    tl_monitor_unlock( &(this->monitor) );
+
+    pthread_cleanup_pop( 0 );
     return NULL;
 }
 
@@ -274,12 +273,13 @@ tl_thread* tl_thread_create( tl_thread_function function, void* arg )
     if( !this )
         return NULL;
 
-    this->flags    = TL_PENDING;
+    this->state    = TL_PENDING;
     this->retval   = NULL;
     this->function = function;
     this->argument = arg;
 
-    if( !tl_monitor_init( &(this->monitor) ) ) goto fail;
+    if( !tl_monitor_init( &(this->monitor) ) )
+        goto fail;
     if( pthread_create( &(this->thread), NULL, pthread_wrapper, this )!=0 )
         goto failthread;
 
@@ -291,41 +291,57 @@ fail:       free( this );
 
 int tl_thread_join( tl_thread* this, unsigned long timeout )
 {
-    if( this->flags & T_DETACHED )
-        return 0;
+    int status = 1;
 
-    if( timeout>0 && DECODE_STATE( this->flags )!=TL_TERMINATED )
+    if( timeout>0 )
     {
-        if( !tl_monitor_wait( &(this->monitor), timeout ) )
-            return 0;
+        tl_monitor_lock( &(this->monitor), 0 );
+        if( this->state!=TL_TERMINATED )
+        {
+            tl_monitor_wait( &(this->monitor), timeout );
+            status = (this->state==TL_TERMINATED);
+        }
+        tl_monitor_unlock( &(this->monitor) );
+    }
+    else
+    {
+        pthread_join( this->thread, NULL );
     }
 
-    pthread_join( this->thread, NULL );
-    return 1;
+    return status;
 }
 
 void* tl_thread_get_return_value( tl_thread* this )
 {
-    return this->retval;
+    void* retval;
+
+    tl_monitor_lock( &(this->monitor), 0 );
+    retval = this->retval;
+    tl_monitor_unlock( &(this->monitor) );
+
+    return retval;
 }
 
 int tl_thread_get_state( tl_thread* this )
 {
-    return DECODE_STATE( this->flags );
+    int state;
+
+    tl_monitor_lock( &(this->monitor), 0 );
+    state = this->state;
+    tl_monitor_unlock( &(this->monitor) );
+
+    return state;
 }
 
 void tl_thread_destroy( tl_thread* this )
 {
-    this->flags |= T_DETACHED;
+    if( this->state!=TL_TERMINATED )
+    {
+        pthread_cancel( this->thread );
+        pthread_join( this->thread, NULL );
+    }
 
-    if( DECODE_STATE( this->flags ) != TL_TERMINATED )
-    {
-        pthread_detach( this->thread );
-    }
-    else
-    {
-        tl_monitor_cleanup( &(this->monitor) );
-        free( this );
-    }
+    tl_monitor_cleanup( &(this->monitor) );
+    free( this );
 }
 
