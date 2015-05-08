@@ -298,7 +298,7 @@ struct tl_thread
 };
 
 
-DWORD WINAPI thread_wrapper( LPVOID param )
+static DWORD WINAPI thread_wrapper( LPVOID param )
 {
     tl_thread* this = param;
     void* retval;
