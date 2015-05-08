@@ -46,6 +46,7 @@
  * \li tl_rwlock for managing parallel read and exclusive write access
  * \li tl_monitor combining a mutex and waiting/signifying condition mechanics
  * \li tl_sleep for pausing the calling thread for a specified time
+ * \li tl_thread_get_id for getting the calling threads ID
  */
 
 
@@ -399,6 +400,19 @@ TLAPI int tl_thread_get_state( tl_thread* thread );
  * \param thread A pointer ot a thread object
  */
 TLAPI void tl_thread_destroy( tl_thread* thread );
+
+/**
+ * \brief Return a unique thread ID of the calling thread
+ *
+ * \memberof tl_thread
+ *
+ * \static
+ *
+ * \note Once a thread terminates, its id can be reused
+ *
+ * \return A unique thread ID
+ */
+TLAPI int tl_thread_get_id( void );
 
 #ifdef __cplusplus
 }

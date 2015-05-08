@@ -379,3 +379,8 @@ void tl_thread_destroy( tl_thread* this )
     free( this );
 }
 
+int tl_thread_get_id( void )
+{
+    return GetCurrentThreadId( );
+}
+
