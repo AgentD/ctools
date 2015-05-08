@@ -123,6 +123,7 @@ elseif( WIN32 )
                      src/W32/network.c
                      src/W32/process.c
                      src/W32/thread.c
+                     src/W32/threadpool.c
                      src/W32/sockstream.c
                      src/W32/pipestream.c
                      src/W32/tcpserver.c
