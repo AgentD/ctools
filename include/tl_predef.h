@@ -135,6 +135,7 @@ typedef struct tl_mutex tl_mutex;
 typedef struct tl_rwlock tl_rwlock;
 typedef struct tl_monitor tl_monitor;
 typedef struct tl_thread tl_thread;
+typedef struct tl_threadpool tl_threadpool;
 
 
 

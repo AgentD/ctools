@@ -242,6 +242,14 @@ int tl_monitor_init( tl_monitor* monitor );
 /** \brief Destruct and cleanup a monitor object */
 void tl_monitor_cleanup( tl_monitor* monitor );
 
+/**
+ * \brief Convert a relative timeout to an absolute timespec value
+ *
+ * \param timeout A timeout in milli seconds
+ * \param ts      Returns the absolute time stamp when the timeout occoures
+ */
+void timeout_to_abs( unsigned long timeout, struct timespec* ts );
+
 #ifdef __cplusplus
 }
 #endif

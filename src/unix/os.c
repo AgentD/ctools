@@ -202,3 +202,15 @@ int decode_sockaddr_in( const void* addr, size_t len, tl_net_addr* out )
     return 0;
 }
 
+void timeout_to_abs( unsigned long timeout, struct timespec* ts )
+{
+    struct timespec now;
+
+    ts->tv_sec = timeout / 1000;
+    ts->tv_nsec = (timeout - ts->tv_sec*1000) * 1000000;
+
+    clock_gettime( CLOCK_REALTIME, &now );
+    ts->tv_sec += now.tv_sec;
+    ts->tv_nsec += now.tv_nsec;
+}
+

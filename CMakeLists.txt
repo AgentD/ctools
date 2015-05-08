@@ -105,6 +105,7 @@ if( UNIX )
                      src/unix/network.c
                      src/unix/process.c
                      src/unix/thread.c
+                     src/unix/threadpool.c
                      src/unix/fdstream.c
                      src/unix/tcpserver.c
                      src/unix/udpstream.c
@@ -203,6 +204,7 @@ testcase( test_packetserver "" )
 testcase( test_udpbroadcast "" )
 testcase( test_thread "" )
 testcase( test_rwlock "" )
+testcase( test_threadpool "" )
 
 #----------------------------------------------------------------------
 # generate Doxygen API reference
