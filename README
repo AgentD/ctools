@@ -23,6 +23,12 @@
   - various sorting algorithm implementations
   - command line option parsing
   - abstract filesystem and directory access
+  - thread and synchronization primitives
+    - thread creation and management
+    - mutex
+    - read/write lock
+    - monitor
+    - thread pool
   - creating and managing child processes
   - creating and managing threads
     - thread abstraction
