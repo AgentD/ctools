@@ -41,6 +41,13 @@
  * A thread pool manages a task queue and a number of worker threads that
  * take tasks of the queue and process them. If the queue is empty, the
  * worker threads pause until more objects are added to the queue.
+ *
+ * Initialization and cleanup functions can be provided to a thread pool
+ * object to be called from the worker threads when they start processing or
+ * terminate respectively. This functions can be used to manage thread local
+ * data, like binding an OpenGL context per worker thread, et cetera.
+ *
+ * For a function reference, see \ref tl_threadpool.
  */
 
 
@@ -54,6 +61,8 @@
  * \struct tl_threadpool
  *
  * \brief Manages a thread pool
+ *
+ * For a detailed description, see \ref tpool
  */
 
 

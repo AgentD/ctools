@@ -40,13 +40,39 @@
  * There are a number of primitives for creating, managing and
  * synchronizing threads.
  *
- * The following data structurs are currently available: 
+ * The following data structurs and functions are currently available:
  * \li tl_thread for creating and managing threads
  * \li tl_mutex for mutually exclusive access to resources
  * \li tl_rwlock for managing parallel read and exclusive write access
  * \li tl_monitor combining a mutex and waiting/signifying condition mechanics
- * \li tl_sleep for pausing the calling thread for a specified time
- * \li tl_thread_get_id for getting the calling threads ID
+ * \li \ref tl_sleep for pausing the calling thread for a specified time
+ * \li \ref tl_thread_get_id for getting the calling threads ID
+ *
+ * \subsection createthread Creating Threads
+ *
+ * Here is a small example on how to create a thread:
+ * \code{.c}
+ * void* thread_function( void* arg )
+ * {
+ *     printf( "Thread argument: %d\n", *((int*)arg) );
+ *     printf( "ID of thread: %d\n", tl_thread_get_id( ) );
+ *     return NULL;
+ * }
+ *
+ * int main( void )
+ * {
+ *     tl_thread* thread;
+ *     int i = 42;
+ *
+ *     printf( "ID of main thread: %d\n", tl_thread_get_id( ) );
+ *
+ *     thread = tl_thread_create( thread_function, &i );
+ *
+ *     tl_thread_join( thread, 0 );
+ *     tl_thread_destroy( thread );
+ *     return 0;
+ * }
+ * \endcode
  */
 
 
