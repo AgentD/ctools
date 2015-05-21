@@ -37,7 +37,7 @@ typedef struct
 {
     tl_iterator super;  /* inherits iterator interface */
     tl_array* array;    /* pointer to array that created the iterator */
-    size_t index;       /* index of current element */
+    size_t idx;         /* index of current element */
     int forward;        /* non-zero if running forward, zero if backward */
 }
 tl_array_iterator;
@@ -52,25 +52,25 @@ static void tl_array_iterator_destroy( tl_iterator* this )
 static void tl_array_iterator_reset( tl_iterator* super )
 {
     tl_array_iterator* this = (tl_array_iterator*)super;
-    this->index = this->forward ? 0 : (this->array->used - 1);
+    this->idx = this->forward ? 0 : (this->array->used - 1);
 }
 
 static int tl_array_iterator_has_data( tl_iterator* super )
 {
     tl_array_iterator* this = (tl_array_iterator*)super;
-    return this->index < this->array->used;
+    return this->idx < this->array->used;
 }
 
 static void tl_array_iterator_next( tl_iterator* super )
 {
     tl_array_iterator* this = (tl_array_iterator*)super;
 
-    if( this->index < this->array->used )
+    if( this->idx < this->array->used )
     {
         if( this->forward )
-            ++this->index;
+            ++this->idx;
         else
-            --this->index;  /* eventually underflows out of range */
+            --this->idx;  /* eventually underflows out of range */
     }
 }
 
@@ -84,20 +84,20 @@ static void* tl_array_iterator_get_value( tl_iterator* super )
 {
     tl_array_iterator* this = (tl_array_iterator*)super;
 
-    if( this->index >= this->array->used )
+    if( this->idx >= this->array->used )
         return NULL;
 
-    return (char*)this->array->data + this->index * this->array->unitsize;
+    return (char*)this->array->data + this->idx * this->array->unitsize;
 }
 
 static void tl_array_iterator_remove( tl_iterator* super )
 {
     tl_array_iterator* this = (tl_array_iterator*)super;
 
-    tl_array_remove( this->array, this->index, 1 );
+    tl_array_remove( this->array, this->idx, 1 );
 
     if( !this->forward )
-        --this->index;
+        --this->idx;
 }
 
 static tl_iterator* tl_array_iterator_create( tl_array* array, int first )
@@ -106,7 +106,7 @@ static tl_iterator* tl_array_iterator_create( tl_array* array, int first )
     tl_iterator* super = (tl_iterator*)this;
 
     this->array = array;
-    this->index = first ? 0 : array->used - 1;
+    this->idx = first ? 0 : array->used - 1;
     this->forward = first;
 
     super->destroy = tl_array_iterator_destroy;
@@ -315,25 +315,25 @@ int tl_array_reserve( tl_array* this, size_t size )
     return 1;
 }
 
-void tl_array_remove( tl_array* this, size_t index, size_t count )
+void tl_array_remove( tl_array* this, size_t idx, size_t count )
 {
-    if( this && (index < this->used) )
+    if( this && (idx < this->used) )
     {
         /* clamp element count */
-        if( (index + count) > this->used )
-            count = this->used - index;
+        if( (idx + count) > this->used )
+            count = this->used - idx;
 
         /* cleanup region */
         tl_allocator_cleanup( this->alloc,
-                              (char*)this->data + index*this->unitsize,
+                              (char*)this->data + idx*this->unitsize,
                               this->unitsize, count );
 
         /* move data after the region forward */
-        if( (index + count) < this->used )
+        if( (idx + count) < this->used )
         {
-            memmove( (char*)this->data + index        *this->unitsize,
-                     (char*)this->data + (index+count)*this->unitsize,
-                     (this->used - count - index) * this->unitsize );
+            memmove( (char*)this->data + idx        *this->unitsize,
+                     (char*)this->data + (idx+count)*this->unitsize,
+                     (this->used - count - idx) * this->unitsize );
         }
 
         /* shrink */
@@ -347,22 +347,22 @@ int tl_array_is_empty( const tl_array* this )
     return this ? (this->used==0) : 1;
 }
 
-void* tl_array_at( const tl_array* this, size_t index )
+void* tl_array_at( const tl_array* this, size_t idx )
 {
-    if( !this || (index >= this->used) )
+    if( !this || (idx >= this->used) )
         return NULL;
 
-    return ((unsigned char*)this->data + index * this->unitsize);
+    return ((unsigned char*)this->data + idx * this->unitsize);
 }
 
-int tl_array_set( tl_array* this, size_t index, const void* element )
+int tl_array_set( tl_array* this, size_t idx, const void* element )
 {
     void* ptr;
 
-    if( !this || (index >= this->used) || !element )
+    if( !this || (idx >= this->used) || !element )
         return 0;
 
-    ptr = (char*)this->data + index*this->unitsize;
+    ptr = (char*)this->data + idx*this->unitsize;
 
     tl_allocator_cleanup( this->alloc, ptr, this->unitsize, 1 );
     tl_allocator_copy( this->alloc, ptr, element, this->unitsize, 1 );
@@ -395,10 +395,10 @@ int tl_array_prepend( tl_array* this, const void* element )
     return 1;
 }
 
-int tl_array_insert( tl_array* this, size_t index,
+int tl_array_insert( tl_array* this, size_t idx,
                      const void* element, size_t count )
 {
-    if( !this || !element || index>=this->used )
+    if( !this || !element || idx>=this->used )
         return 0;
 
     if( count==0 )
@@ -408,12 +408,12 @@ int tl_array_insert( tl_array* this, size_t index,
         return 0;
 
     /* move elements ahead */
-    memmove( (unsigned char*)this->data + (index + count) * this->unitsize,
-             (unsigned char*)this->data +  index          * this->unitsize,
-             (this->used - index) * this->unitsize );
+    memmove( (unsigned char*)this->data + (idx + count) * this->unitsize,
+             (unsigned char*)this->data +  idx          * this->unitsize,
+             (this->used - idx) * this->unitsize );
 
     /* copy elements into array */
-    tl_allocator_copy( this->alloc, (char*)this->data + index*this->unitsize,
+    tl_allocator_copy( this->alloc, (char*)this->data + idx*this->unitsize,
                        element, this->unitsize, count );
 
     this->used += count;

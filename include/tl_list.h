@@ -184,13 +184,12 @@ TLAPI void tl_list_cleanup( tl_list* list );
  * \note This function runs in linear time
  *
  * \param list  A pointer to a list
- * \param index The zero based index of the element
+ * \param idx   The zero based index of the element
  *
  * \return A pointer to the node on success, NULL if index out of bounds or
  *         the list pointer is NULL
  */
-TLAPI tl_list_node* tl_list_node_from_index( const tl_list* list,
-                                             size_t index );
+TLAPI tl_list_node* tl_list_node_from_index(const tl_list* list, size_t idx);
 
 /**
  * \brief Generate a list of elements from an array
@@ -262,14 +261,14 @@ TLAPI int tl_list_copy_range( tl_list* dst, const tl_list* src,
  * \param list  A list to add the elements of an other list to.
  * \param other A pointer to a list to take elements from. This list is empty
  *              afterwards.
- * \param index The at which to insert the elements. Zero prepends the other,
+ * \param idx   The at which to insert the elements. Zero prepends the other,
  *              list list->size appends it. When index is N, the first element
  *              of the second list will end up at N.
  *
  * \return Non-zero on success, zero on failure (one of the list pointers is
  *         NULL, index is out of bounds, element sizes don't match, etc...)
  */
-TLAPI int tl_list_join( tl_list* list, tl_list* other, size_t index );
+TLAPI int tl_list_join( tl_list* list, tl_list* other, size_t idx );
 
 /**
  * \brief Reverse the order of elements in a list
@@ -305,10 +304,10 @@ TLAPI int tl_list_concat( tl_list* dst, const tl_list* src );
  * \note This function runs in linear time
  *
  * \param list  A pointer to a list
- * \param index The index of the first element to remove
+ * \param idx   The index of the first element to remove
  * \param count The number of elements to remove
  */
-TLAPI void tl_list_remove( tl_list* list, size_t index, size_t count );
+TLAPI void tl_list_remove( tl_list* list, size_t idx, size_t count );
 
 /**
  * \brief Check if a list is empty
@@ -331,11 +330,11 @@ TLAPI int tl_list_is_empty( const tl_list* list );
  * \note This function runs in linear time
  *
  * \param list  A pointer to a list
- * \param index The index of the node to get the data from
+ * \param idx   The index of the node to get the data from
  *
  * \return A pointer to the data, or NULL if index out of bounds
  */
-TLAPI void* tl_list_at( const tl_list* list, size_t index );
+TLAPI void* tl_list_at( const tl_list* list, size_t idx );
 
 /**
  * \brief Overwrite an element of a list
@@ -345,13 +344,13 @@ TLAPI void* tl_list_at( const tl_list* list, size_t index );
  * \note This function runs in linear time
  *
  * \param list    A pointer to a list
- * \param index   The index of the destination element in the list
+ * \param idx     The index of the destination element in the list
  * \param element A pointer to the data to copy over the list element
  *
  * \return Non-zero on success, zero on failure (index out of bounds, invalid
  *         pointers, etc...)
  */
-TLAPI int tl_list_set( tl_list* list, size_t index, const void* element );
+TLAPI int tl_list_set( tl_list* list, size_t idx, const void* element );
 
 /**
  * \brief Add a new element to the end of a list
@@ -391,14 +390,14 @@ TLAPI int tl_list_prepend( tl_list* list, const void* element );
  * \note This function runs in constant time
  *
  * \param list     A pointer to a list
- * \param index    The index at which to inser the first element
+ * \param idx      The index at which to inser the first element
  * \param elements A pointer to an array of elements to add
  * \param count    The number of elements from the array to add
  *
  * \return Non-zero on success, zero on failure (out of memory, index out of
  *         bounds, invalid pointers, etc...)
  */
-TLAPI int tl_list_insert( tl_list* list, size_t index,
+TLAPI int tl_list_insert( tl_list* list, size_t idx,
                           const void* elements, size_t count );
 
 /**

@@ -214,14 +214,14 @@ TLAPI void* tl_hashmap_entry_get_value( const tl_hashmap* map,
  *
  * \note This function runs in constant time
  *
- * \param map   A pointer to a hash map
- * \param index The index of the bin
+ * \param map A pointer to a hash map
+ * \param idx The index of the bin
  *
  * \return A pointer to the bin (list head) on success, NULL on failure
  *         (i.e. 'map' is NULL, index is out of range or the bin is empty)
  */
 TLAPI tl_hashmap_entry* tl_hashmap_get_bin( const tl_hashmap* map,
-                                            size_t index );
+                                            size_t idx );
 
 /**
  * \brief Overwrite a hash map with a copy of another hash map

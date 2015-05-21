@@ -156,20 +156,20 @@ int tl_string_is_empty( const tl_string* this )
     return (!this) || (this->charcount==0);
 }
 
-unsigned int tl_string_at( const tl_string* this, size_t index )
+unsigned int tl_string_at( const tl_string* this, size_t idx )
 {
     const unsigned char* ptr;
     size_t i;
 
-    if( this && (index < this->charcount) )
+    if( this && (idx < this->charcount) )
     {
-        if( index < this->mbseq )
-            return ((const unsigned char*)this->data.data)[ index ];
+        if( idx < this->mbseq )
+            return ((const unsigned char*)this->data.data)[ idx ];
 
         ptr = ((const unsigned char*)this->data.data) + this->mbseq;
         i = this->mbseq;
 
-        while( i<index )
+        while( i<idx )
         {
             ++ptr;
             ++i;

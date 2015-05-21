@@ -31,10 +31,10 @@
         if(value) (field) |= (flag); else (field) &= ~(flag)
 
 
-static void remove_option( int* argc, char** argv, int index, int count )
+static void remove_option( int* argc, char** argv, int idx, int count )
 {
     int i;
-    for( i=index+count; i<(*argc); ++i )
+    for( i=idx+count; i<(*argc); ++i )
         argv[i-count] = argv[i];
     *argc -= count;
 }
@@ -52,14 +52,14 @@ escape:
 }
 
 static int find_string( tl_option* options, size_t num_options,
-                        const char* arg, int type, size_t* index )
+                        const char* arg, int type, size_t* idx )
 {
     size_t i;
     for( i=0; i<num_options; ++i )
     {
         if( options[i].type==type && !strcmp( arg, options[i].opt ) )
         {
-            *index = i;
+            *idx = i;
             return 1;
         }
     }
@@ -67,14 +67,14 @@ static int find_string( tl_option* options, size_t num_options,
 }
 
 static int find_flag( tl_option* options, size_t num_options,
-                      char flag, int type, size_t* index )
+                      char flag, int type, size_t* idx )
 {
     size_t i;
     for( i=0; i<num_options; ++i )
     {
         if( options[i].type==type && options[i].opt[0]==flag )
         {
-            *index = i;
+            *idx = i;
             return 1;
         }
     }

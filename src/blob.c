@@ -393,7 +393,7 @@ int tl_blob_decode_base64( tl_blob* this, const tl_blob* input,
     unsigned char c, group[4], *dst;
     size_t size, outsize, i;
     const char* src;
-    int index;
+    int idx;
 
     if( !this || !input )
         return 0;
@@ -438,7 +438,7 @@ done:
     /* convert */
     src = input->data;
     dst = this->data;
-    index = 0;
+    idx = 0;
 
     for( i=0; i<size; ++i, ++src )
     {
@@ -449,21 +449,21 @@ done:
         else if( c=='+' || c=='-' ) c = 62;
         else if( c=='/' || c=='_' ) c = 63;
         else                        continue;
-        group[ index++ ] = c;
-        if( index==4 )
+        group[ idx++ ] = c;
+        if( idx==4 )
         {
             *(dst++) = ((group[0]<<2) & 0xFC) | ((group[1]>>4) & 0x03);
             *(dst++) = ((group[1]<<4) & 0xF0) | ((group[2]>>2) & 0x0F);
             *(dst++) = ((group[2]<<6) & 0xC0) | ((group[3]   ) & 0x3F);
-            index = 0;
+            idx = 0;
         }
     }
 
-    if( index )
+    if( idx )
     {
         dst[0] = ((group[0]<<2) & 0xFC) | ((group[1]>>4) & 0x03);
 
-        if( index>2 )
+        if( idx>2 )
             dst[1] = ((group[1]<<4) & 0xF0) | ((group[2]>>2) & 0x0F);
     }
 

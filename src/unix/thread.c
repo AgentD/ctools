@@ -228,10 +228,11 @@ struct tl_thread
 
 static void* pthread_wrapper( void* arg )
 {
+    void(* cleanup_fun )(void*) = (void(*)(void*))tl_monitor_unlock;
     tl_thread* this = arg;
     void* retval;
 
-    pthread_cleanup_push( tl_monitor_unlock, &(this->monitor) );
+    pthread_cleanup_push( cleanup_fun, &(this->monitor) );
 
     tl_monitor_lock( &(this->monitor), 0 );
     this->state = TL_RUNNING;

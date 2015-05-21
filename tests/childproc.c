@@ -12,9 +12,9 @@
 #ifndef _WIN32
 static volatile int run = 1;
 
-static void handle_sigterm( int signal )
+static void handle_sigterm( int sig )
 {
-    if( signal==SIGTERM )
+    if( sig==SIGTERM )
         run = 0;
 }
 #endif

@@ -181,12 +181,12 @@ TLAPI int tl_string_is_empty( const tl_string* str );
  *       surrogate pair, linear in worst case (string starts with surrogate
  *       pair).
  *
- * \param str   A pointer to a string object
- * \param index A character index
+ * \param str A pointer to a string object
+ * \param idx A character index
  *
  * \return A unicode code point value
  */
-TLAPI unsigned int tl_string_at( const tl_string* str, size_t index );
+TLAPI unsigned int tl_string_at( const tl_string* str, size_t idx );
 
 /**
  * \brief Get a null-terminated UTF-8 string from a string object

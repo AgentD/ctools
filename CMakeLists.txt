@@ -115,7 +115,7 @@ if( UNIX )
   add_definitions( -D_POSIX_SOURCE=1 )
   add_definitions( -D_POSIX_C_SOURCE=200112L )
 
-  set( CTOOLS_SYSLIBS ${CMAKE_THREAD_LIBS_INIT} )
+  set( CTOOLS_SYSLIBS ${CMAKE_THREAD_LIBS_INIT} rt )
 elseif( WIN32 )
   set( CTOOLS_SYSDEP src/W32/os.c
                      src/W32/fs.c

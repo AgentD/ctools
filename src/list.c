@@ -231,20 +231,20 @@ void tl_list_cleanup( tl_list* this )
     tl_list_clear( this );
 }
 
-tl_list_node* tl_list_node_from_index( const tl_list* this, size_t index )
+tl_list_node* tl_list_node_from_index( const tl_list* this, size_t idx )
 {
     tl_list_node* n = NULL;
     size_t i;
 
-    if( this && index<this->size )
+    if( this && idx<this->size )
     {
-        if( index > this->size/2 )
+        if( idx > this->size/2 )
         {
-            for(n=this->last, i=this->size-1; n && i>index; --i, n=n->prev) {}
+            for(n=this->last, i=this->size-1; n && i>idx; --i, n=n->prev) {}
         }
         else
         {
-            for( n=this->first, i=0; n && i<index; ++i, n=n->next ) { }
+            for( n=this->first, i=0; n && i<idx; ++i, n=n->next ) { }
         }
     }
     return n;
@@ -334,11 +334,11 @@ int tl_list_copy_range( tl_list* this, const tl_list* src,
     return 1;
 }
 
-int tl_list_join( tl_list* this, tl_list* other, size_t index )
+int tl_list_join( tl_list* this, tl_list* other, size_t idx )
 {
     tl_list_node* n;
 
-    if( !this||!other||this->unitsize!=other->unitsize||index>this->size )
+    if( !this||!other||this->unitsize!=other->unitsize||idx>this->size )
         return 0;
 
     if( !other->size )
@@ -349,14 +349,14 @@ int tl_list_join( tl_list* this, tl_list* other, size_t index )
         this->first = other->first;
         this->last  = other->last;
     }
-    else if( index==0 )                     /* prepend to list */
+    else if( idx==0 )                       /* prepend to list */
     {
         other->last->next = this->first;
         this->first->prev = other->last;
 
         this->first = other->first;
     }
-    else if( index==this->size )            /* append to list */
+    else if( idx==this->size )              /* append to list */
     {
         other->first->prev = this->last;
         this->last->next = other->first;
@@ -365,7 +365,7 @@ int tl_list_join( tl_list* this, tl_list* other, size_t index )
     }
     else                                    /* insert somewhere in the list */
     {
-        if( !(n = tl_list_node_from_index( this, index )) )
+        if( !(n = tl_list_node_from_index( this, idx )) )
             return 0;
 
         n->prev->next = other->first;
@@ -425,18 +425,18 @@ int tl_list_concat( tl_list* this, const tl_list* src )
     return tl_list_join( this, &temp, this->size );
 }
 
-void tl_list_remove( tl_list* this, size_t index, size_t count )
+void tl_list_remove( tl_list* this, size_t idx, size_t count )
 {
     tl_list_node* old;
     tl_list_node* n;
     size_t i;
 
-    if( !this || index>=this->size )
+    if( !this || idx>=this->size )
         return;
 
     count = (count > this->size) ? this->size : count;
 
-    if( index==0 )
+    if( idx==0 )
     {
         for( i=0; this->first && i<count; ++i )
         {
@@ -449,9 +449,9 @@ void tl_list_remove( tl_list* this, size_t index, size_t count )
         if( this->first )
             this->first->prev = NULL;
     }
-    else if( (index+count) >= this->size )
+    else if( (idx+count) >= this->size )
     {
-        count = this->size - index;
+        count = this->size - idx;
         for( i=0; i<count && this->last; ++i )
         {
             n = this->last;
@@ -465,7 +465,7 @@ void tl_list_remove( tl_list* this, size_t index, size_t count )
     }
     else
     {
-        if( !(n = tl_list_node_from_index( this, index )) )
+        if( !(n = tl_list_node_from_index( this, idx )) )
             return;
 
         for( i=0; i<count && n; ++i )
@@ -494,16 +494,16 @@ int tl_list_is_empty( const tl_list* this )
     return (!this || this->size==0);
 }
 
-void* tl_list_at( const tl_list* this, size_t index )
+void* tl_list_at( const tl_list* this, size_t idx )
 {
-    return tl_list_node_get_data( tl_list_node_from_index( this, index ) );
+    return tl_list_node_get_data( tl_list_node_from_index( this, idx ) );
 }
 
-int tl_list_set( tl_list* this, size_t index, const void* element )
+int tl_list_set( tl_list* this, size_t idx, const void* element )
 {
     void* ptr;
 
-    ptr = tl_list_at( this, index );
+    ptr = tl_list_at( this, idx );
 
     if( !ptr )
         return 0;
@@ -567,12 +567,12 @@ int tl_list_prepend( tl_list* this, const void* element )
     return 1;
 }
 
-int tl_list_insert( tl_list* this, size_t index,
+int tl_list_insert( tl_list* this, size_t idx,
                     const void* elements, size_t count )
 {
     tl_list list;
 
-    if( !this || index>this->size || !elements )
+    if( !this || idx>this->size || !elements )
         return 0;
 
     if( !count )
@@ -585,7 +585,7 @@ int tl_list_insert( tl_list* this, size_t index,
         return 0;
 
     /* merge the list into the array */
-    if( !tl_list_join( this, &list, index ) )
+    if( !tl_list_join( this, &list, idx ) )
     {
         tl_list_clear( this );
         return 0;

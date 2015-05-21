@@ -244,10 +244,10 @@ TLAPI int tl_array_reserve( tl_array* vec, size_t size );
  * \note This function runs in linear time
  *
  * \param vec   A pointer to an array
- * \param index The index of the first element to remove
+ * \param idx   The index of the first element to remove
  * \param count The number of elements to remove
  */
-TLAPI void tl_array_remove( tl_array* vec, size_t index, size_t count );
+TLAPI void tl_array_remove( tl_array* vec, size_t idx, size_t count );
 
 /**
  * \brief Check if an array is empty
@@ -269,12 +269,12 @@ TLAPI int tl_array_is_empty( const tl_array* vec );
  *
  * \note This function runs in constant time
  *
- * \param vec   A pointer to an array
- * \param index The index of the element to retrieve
+ * \param vec A pointer to an array
+ * \param idx The index of the element to retrieve
  *
  * \return A pointer to an element, or NULL if index out of bounds
  */
-TLAPI void* tl_array_at( const tl_array* vec, size_t index );
+TLAPI void* tl_array_at( const tl_array* vec, size_t idx );
 
 /**
  * \brief Overwrite an element in an array
@@ -284,13 +284,13 @@ TLAPI void* tl_array_at( const tl_array* vec, size_t index );
  * \note This function runs in constant time
  *
  * \param vec     A pointer to an array
- * \param index   The index of destination element in the array
+ * \param idx     The index of destination element in the array
  * \param element A pointer to the data to copy to the array
  *
  * \return Non-zero on success, zero on failure (out memory or index out
  *         of bounds)
  */
-TLAPI int tl_array_set( tl_array* vec, size_t index, const void* element );
+TLAPI int tl_array_set( tl_array* vec, size_t idx, const void* element );
 
 /**
  * \brief Append an element to an array
@@ -328,14 +328,14 @@ TLAPI int tl_array_prepend( tl_array* vec, const void* element );
  * \note This function runs in linear time
  *
  * \param vec     A pointer to an array
- * \param index   The index at which to insert the first element
+ * \param idx     The index at which to insert the first element
  * \param element A pointer to an array of elements to insert
  * \param count   The number of elements to insert
  *
  * \return Non-zero on success, zero on failure (out memory or index
  *         out of bounds)
  */
-TLAPI int tl_array_insert( tl_array* vec, size_t index,
+TLAPI int tl_array_insert( tl_array* vec, size_t idx,
                            const void* element, size_t count );
 
 /**
