@@ -151,6 +151,7 @@ add_library( ctools ${TYPE} src/array.c
                             src/allocator.c
                             src/blob.c
                             src/opt.c
+                            src/hash.c
                             ${CTOOLS_SYSDEP} )
 
 if( SHARED )
@@ -206,6 +207,7 @@ testcase( test_udpbroadcast "" )
 testcase( test_thread "" )
 testcase( test_rwlock "" )
 testcase( test_threadpool "" )
+testcase( test_hash "" )
 
 #----------------------------------------------------------------------
 # generate Doxygen API reference
