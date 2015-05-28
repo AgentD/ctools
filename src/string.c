@@ -27,6 +27,7 @@
 #include "tl_string.h"
 #include "tl_utf16.h"
 #include "tl_utf8.h"
+#include "tl_hash.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -525,7 +526,12 @@ int tl_string_compare( const tl_string* this, const tl_string* other )
 
 unsigned long tl_string_hash( const tl_string* this )
 {
-    return tl_utf8_hash( this ? this->data.data : NULL );
+    /*
+        The address of the stralloc structure is used as a seed. It doesn't
+        change during the run of an application.
+     */
+    return tl_hash_murmur3_32( this->data.data, this->data.used,
+                               (tl_u32)((size_t)&stralloc) );
 }
 
 tl_allocator* tl_string_get_allocator( void )

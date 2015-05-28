@@ -166,17 +166,6 @@ TLAPI size_t tl_utf16_estimate_utf8_length( const char* utf8,
  */
 TLAPI int tl_utf16_compare( const tl_u16* a, const tl_u16* b );
 
-/**
- * \brief Compute a hash function of a UTF-16 string
- *
- * \note This function runs in linear time
- *
- * \param str A pointer to a null-terminated UTF-16
- *
- * \return A hash value computed using a djb2 implementation
- */
-TLAPI unsigned long tl_utf16_hash( const tl_u16* str );
-
 #ifdef __cplusplus
 }
 #endif

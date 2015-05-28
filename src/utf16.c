@@ -161,19 +161,3 @@ int tl_utf16_compare( const tl_u16* a, const tl_u16* b )
     return 0;                           /* equal */
 }
 
-unsigned long tl_utf16_hash( const tl_u16* str )
-{
-    unsigned long hash = 5381;
-    int c;
-
-    if( str )
-    {
-        while( (c = *(str++)) != 0 )
-        {
-            hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-        }
-    }
-
-    return hash;
-}
-

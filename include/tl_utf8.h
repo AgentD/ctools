@@ -131,17 +131,6 @@ TLAPI unsigned int tl_utf8_encode( char* utf8, unsigned int cp );
 TLAPI size_t tl_utf8_estimate_utf16_length( const tl_u16* utf16,
                                             size_t charcount );
 
-/**
- * \brief Compute a hash function of a UTF-8 string
- *
- * \note This function runs in linear time
- *
- * \param str A pointer to a null-terminated UTF-8
- *
- * \return A hash value computed using a djb2 implementation
- */
-TLAPI unsigned long tl_utf8_hash( const char* str );
-
 #ifdef __cplusplus
 }
 #endif
