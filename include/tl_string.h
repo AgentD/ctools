@@ -122,7 +122,7 @@ TLAPI int tl_string_copy( tl_string* dst, const tl_string* src );
 
 /**
  * \brief Get the number of characters stored in a string object, counting
- *        surrogate pairs as a single character
+ *        multi byte sequences as a single character
  *
  * \memberof tl_string
  *
@@ -136,8 +136,8 @@ TLAPI int tl_string_copy( tl_string* dst, const tl_string* src );
 TLAPI size_t tl_string_characters( const tl_string* str );
 
 /**
- * \brief Get the number of code units stored in a string object (surrogate
- *        pairs are two code units)
+ * \brief Get the number of code units stored in a string object (multi byte
+ *        sequences are multible code units)
  *
  * \memberof tl_string
  *
@@ -178,8 +178,8 @@ TLAPI int tl_string_is_empty( const tl_string* str );
  * \memberof tl_string
  *
  * \note This function runs in constant time if the index is before the first
- *       surrogate pair, linear in worst case (string starts with surrogate
- *       pair).
+ *       multi byte seqneuce, linear in worst case (string starts with a multi
+ *       byte sequence).
  *
  * \param str A pointer to a string object
  * \param idx A character index
@@ -427,8 +427,6 @@ TLAPI void tl_string_drop_last( tl_string* str );
  * \brief Compare two strings
  *
  * \memberof tl_string
- *
- * This function compares two UTF-16 strings codepoint by codepoint.
  *
  * \note NULL pointers are treated as empty strings and always smaller than
  *       non-null strings. If both are NULL, they are reported as equal.

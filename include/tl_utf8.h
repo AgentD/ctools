@@ -52,9 +52,6 @@
  *
  * The function \ref tl_utf8_estimate_utf16_length is provided to determine
  * the number of bytes required to store a UTF-8 string in UTF-16 encoding.
- *
- * A hash function for arbitrary C strings (not neccessarily UTF-8 encoded) is
- * provided by \ref tl_utf8_hash.
  */
 
 

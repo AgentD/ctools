@@ -60,9 +60,6 @@
  * The function \ref tl_utf16_estimate_utf8_length is provided to determine
  * the number of bytes required to store a UTF-16 string in UTF-8 encoding.
  *
- * A hash function for arbitrary UTF-16 strings is provided by
- * \ref tl_utf16_hash.
- *
  * A strcmp like function for comparing UTF-16 strings is provided by
  * \ref tl_utf16_compare.
  */
