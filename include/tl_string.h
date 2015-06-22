@@ -447,7 +447,14 @@ TLAPI int tl_string_compare( const tl_string* a, const tl_string* b );
  *
  * \memberof tl_string
  *
- * \note This function runs in linear time
+ * \note This function generates the same hash every time it is run on the
+ *       same input, which makes it suitable for hash tables, as well as data
+ *       integrity checks in protocols. However, if it is used for a hash
+ *       table that stores user input, a different function should be used
+ *       that changes it's behaviour every time the application is run,
+ *       othwerise an attacker might exploit hash collisions and DOS the
+ *       application by degrading the hash table to a linked list. See also
+ *       \ref tl_hash_murmur3_32.
  *
  * \param str A pointer to a string
  *

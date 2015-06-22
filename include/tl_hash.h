@@ -67,6 +67,14 @@ extern "C" {
  * between performance and hash-quality and is widely used in a number of
  * software projects (e.g. libstdc++, Perl, nginx, ...).
  *
+ * \note The hash function accepts a "seed" value. This value can be used to
+ *       randomize the hash function when using it for a hash table. That way,
+ *       different hashes can be generated every time the application is run
+ *       and an attacke cannot DOS the application by exploting hash table
+ *       behaviour as an attacker can no longer predict what hash values are
+ *       generated for an input and what values collide, even when knowing
+ *       the hash algorithm and hash table implementation.
+ *
  * \param data The block of data to process
  * \param len  The size fo the block in bytes
  * \param seed A seed value to start the hash computation with. A different
