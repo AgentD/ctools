@@ -526,12 +526,7 @@ int tl_string_compare( const tl_string* this, const tl_string* other )
 
 unsigned long tl_string_hash( const tl_string* this )
 {
-    /*
-        The address of the stralloc structure is used as a seed. It doesn't
-        change during the run of an application.
-     */
-    return tl_hash_murmur3_32( this->data.data, this->data.used,
-                               (tl_u32)((size_t)&stralloc) );
+    return tl_hash_murmur3_32( this->data.data, this->data.used, 0xDEADBEEF );
 }
 
 tl_allocator* tl_string_get_allocator( void )

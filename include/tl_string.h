@@ -451,7 +451,7 @@ TLAPI int tl_string_compare( const tl_string* a, const tl_string* b );
  *
  * \param str A pointer to a string
  *
- * \return A hash value computed using a djb2 implementation
+ * \return A hash value value
  */
 TLAPI unsigned long tl_string_hash( const tl_string* str );
 
