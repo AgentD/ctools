@@ -1,0 +1,116 @@
+/**
+\page compiling Compiling the library from source
+
+\section compnix Compiling on Unix-like systems
+
+On a Unix-like operating system, change to the directory where you want to
+build the binaries. Inside that directory, run cmake with the path to the
+source directory as an argument. By default, this generates a \b Makefile
+that can then be built using \b make.
+
+For instance, to compile the binaries in a directory called \b build
+underneath the source directory, run this in the source directory:
+
+\code{.sh}
+mkdir build
+cd build
+cmake ..
+make
+\endcode
+
+Different generators (other than the default Makefile generator) can be
+specified with the \b "-G" option. The build options specified in the
+section \ref buildopt can be set via the \b "-D" option.
+
+Alternatively, use the program \b ccmake instead of cmake to get a TUI
+based wizard that allows easy changing of all possible configuration option.
+
+Run \b "make doc" to generate the doxygen reference/documentation you are
+reading right now. To compile the \b latex version, go to the directory
+\b "doxydoc/latex" and run \b make.
+
+Run \b "make test" to run the unit test programs.
+
+To \b cross-compile for Windows or other platforms, a toolchain file must be
+specified via the \b CMAKE_TOOLCHAIN_FILE variable. Default toolchain files
+for 32 bit and 64 bit MinGW are provided in the CMake subdirectory of the
+source directory.
+
+For instance, to cross compile for 32 bit Windows, run the following in the
+source directory:
+\code{.sh}
+mkdir build
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=../CMake/mingw.cmake
+make
+\endcode
+
+\section compwin Compiling on Windows
+
+First, start the CMake GUI program. The CMake GUI program will display a
+window similar to the one seen below.
+
+\image html s0.png "CMake GUI with source and build path entered"
+\image latex s0.png "CMake GUI with source and build path entered" width=0.6\textwidth
+
+The image above shows the CMake GUI running with source and build paths
+already entered. The path to the root of the source directory is entered into
+the text box marked with a red \b 1. The \b "Browse Source" button can be used
+to open a directory browser dialog to enter the source directory.
+
+The directory used by the build system to compile and build the binaries is
+entered into the text box marked with a red \b 2. Similar to the source
+diretory, the button \b "Browse Build" can be used to open a directory
+browser dialog to navigate to the build directory.
+
+After the paths are entered, press the \b "Configure" button marked with a
+red \b 3 in the image above.
+
+\image html s1.png "Creating the build directory"
+\image latex s1.png "Creating the build directory" width=0.6\textwidth
+
+If the build directory does not yet exist when pressing the configure button,
+the CMake GUI will display a message box, asking for permission to create the
+build directory, as seen in the image above.
+
+\image html s2.png "Generator settings"
+\image latex s2.png "Generator settings" width=0.6\textwidth
+
+After creating the build directory, the CMake GUI displays a dialog for
+selecting and configuring the toolchain used to compile the software.
+Depending on the toolchain used, this dialog may consist of multiple pages.
+
+\image html s3.png "CMake GUI after generating the output"
+\image latex s3.png "CMake GUI after generating the output" width=0.6\textwidth
+
+After configuring the toolchain, the CMake GUI displays a list of build
+configuration settings as seen above. In the initial state, the list is
+highlighted in red. Please refere to \ref buildopt for an explanation of
+the available configuration options.
+
+After setting the configuration, click on the button \b "Generate" next to the
+"Configure" button. This generates the necessary toolchain files in the build
+directory.
+
+Afer this is all done, \b run the \b toolchain inside the \b build \b directory.
+For instance, if Visual Studio was selected as a toolchain, open the Visual
+Studio solution file in the build directory and compile the the solution.
+
+You can optionally build the target \b RUN_TESTS to run the automated
+unit tests.
+
+\section buildopt Build options
+
+The following build options are supported:
+\li \b ALLIGN If set to true, the container data structures take care of
+    allignment of the structures they manage and all allocated structures
+    are manually alligned to the CPU word size. Setting this will set the
+    pre-processor definition \b TL_ALLIGN_MEMORY in the library source code.
+    Default is \b ON.
+\li \b SHARED If set, generate a shared library. If not set, generate a static
+    library. If this is set, the pre-processor definition \b TL_SHARED is set
+    in the library source code. Default is \b OFF.
+\li \b USEWINE This option is only available when compiling for a Windows
+    target. It is intended for cross compiling via MinGW. When this is set,
+    the unit test programs are run with \b wine. Default is \b OFF.
+*/

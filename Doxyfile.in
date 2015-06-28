@@ -116,8 +116,10 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 
 INPUT                  = @CMAKE_SOURCE_DIR@/include/
+INPUT                 += @CMAKE_SOURCE_DIR@/doc/
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h
+FILE_PATTERNS         += *.dox
 RECURSIVE              = YES
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
@@ -126,7 +128,7 @@ EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           = 
 EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = NO
-IMAGE_PATH             = 
+IMAGE_PATH             = @CMAKE_SOURCE_DIR@/doc/
 INPUT_FILTER           = 
 FILTER_PATTERNS        = 
 FILTER_SOURCE_FILES    = NO
