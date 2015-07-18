@@ -26,10 +26,14 @@
 #include "tl_thread.h"
 #include "os.h"
 
+#include <assert.h>
+
 
 
 int tl_monitor_init( tl_monitor* this )
 {
+    assert( this );
+
     if( pthread_mutex_init( &(this->mutex), NULL )!=0 )
         return 0;
 
@@ -44,6 +48,7 @@ int tl_monitor_init( tl_monitor* this )
 
 void tl_monitor_cleanup( tl_monitor* this )
 {
+    assert( this );
     pthread_cond_destroy( &(this->cond) );
     pthread_mutex_destroy( &(this->mutex) );
 }
@@ -63,17 +68,21 @@ tl_monitor* tl_monitor_create( void )
 
 int tl_monitor_lock( tl_monitor* this, unsigned long timeout )
 {
+    assert( this );
     return tl_mutex_lock( (tl_mutex*)(&(this->mutex)), timeout );
 }
 
 void tl_monitor_unlock( tl_monitor* this )
 {
+    assert( this );
     pthread_mutex_unlock( &(this->mutex) );
 }
 
 int tl_monitor_wait( tl_monitor* this, unsigned long timeout )
 {
     struct timespec ts;
+
+    assert( this );
 
     if( timeout > 0 )
     {
@@ -86,16 +95,19 @@ int tl_monitor_wait( tl_monitor* this, unsigned long timeout )
 
 void tl_monitor_notify( tl_monitor* this )
 {
+    assert( this );
     pthread_cond_signal( &(this->cond) );
 }
 
 void tl_monitor_notify_all( tl_monitor* this )
 {
+    assert( this );
     pthread_cond_broadcast( &(this->cond) );
 }
 
 void tl_monitor_destroy( tl_monitor* this )
 {
+    assert( this );
     tl_monitor_cleanup( this );
     free( this );
 }
@@ -119,6 +131,8 @@ int tl_rwlock_lock_read( tl_rwlock* this, unsigned long timeout )
 {
     struct timespec ts;
 
+    assert( this );
+
     if( timeout>0 )
     {
         timeout_to_abs( timeout, &ts );
@@ -132,6 +146,8 @@ int tl_rwlock_lock_write( tl_rwlock* this, unsigned long timeout )
 {
     struct timespec ts;
 
+    assert( this );
+
     if( timeout>0 )
     {
         timeout_to_abs( timeout, &ts );
@@ -143,16 +159,19 @@ int tl_rwlock_lock_write( tl_rwlock* this, unsigned long timeout )
 
 void tl_rwlock_unlock_read( tl_rwlock* this )
 {
+    assert( this );
     pthread_rwlock_unlock( (pthread_rwlock_t*)this );
 }
 
 void tl_rwlock_unlock_write( tl_rwlock* this )
 {
+    assert( this );
     pthread_rwlock_unlock( (pthread_rwlock_t*)this );
 }
 
 void tl_rwlock_destroy( tl_rwlock* this )
 {
+    assert( this );
     pthread_rwlock_destroy( (pthread_rwlock_t*)this );
     free( this );
 }
@@ -194,6 +213,8 @@ int tl_mutex_lock( tl_mutex* this, unsigned long timeout )
 {
     struct timespec ts;
 
+    assert( this );
+
     if( timeout>0 )
     {
         timeout_to_abs( timeout, &ts );
@@ -205,11 +226,13 @@ int tl_mutex_lock( tl_mutex* this, unsigned long timeout )
 
 void tl_mutex_unlock( tl_mutex* this )
 {
+    assert( this );
     pthread_mutex_unlock( (pthread_mutex_t*)this );
 }
 
 void tl_mutex_destroy( tl_mutex* this )
 {
+    assert( this );
     pthread_mutex_destroy( (pthread_mutex_t*)this );
     free( this );
 }
@@ -256,6 +279,8 @@ tl_thread* tl_thread_create( tl_thread_function function, void* arg )
 {
     tl_thread* this;
 
+    assert( function );
+
     this = malloc( sizeof(tl_thread) );
     if( !this )
         return NULL;
@@ -280,6 +305,8 @@ int tl_thread_join( tl_thread* this, unsigned long timeout )
 {
     int status = 1;
 
+    assert( this );
+
     if( timeout>0 )
     {
         tl_monitor_lock( &(this->monitor), 0 );
@@ -302,6 +329,8 @@ void* tl_thread_get_return_value( tl_thread* this )
 {
     void* retval;
 
+    assert( this );
+
     tl_monitor_lock( &(this->monitor), 0 );
     retval = this->retval;
     tl_monitor_unlock( &(this->monitor) );
@@ -313,6 +342,8 @@ int tl_thread_get_state( tl_thread* this )
 {
     int state;
 
+    assert( this );
+
     tl_monitor_lock( &(this->monitor), 0 );
     state = this->state;
     tl_monitor_unlock( &(this->monitor) );
@@ -322,6 +353,8 @@ int tl_thread_get_state( tl_thread* this )
 
 void tl_thread_destroy( tl_thread* this )
 {
+    assert( this );
+
     if( this->state!=TL_TERMINATED )
     {
         pthread_cancel( this->thread );

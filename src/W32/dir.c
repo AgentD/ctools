@@ -29,6 +29,8 @@
 #include "tl_fs.h"
 #include "os.h"
 
+#include <assert.h>
+
 
 
 typedef struct
@@ -48,6 +50,8 @@ static void dir_iterator_reset( tl_iterator* super )
 {
     dir_iterator* this = (dir_iterator*)super;
     WCHAR* str;
+
+    assert( this );
 
     FindClose( this->hnd );
     this->hnd = FindFirstFileW( this->wpath, &this->ent );
@@ -81,6 +85,8 @@ static void dir_iterator_destroy( tl_iterator* super )
 {
     dir_iterator* this = (dir_iterator*)super;
 
+    assert( this );
+
     FindClose( this->hnd );
     tl_string_cleanup( &this->current );
     free( this->wpath );
@@ -91,6 +97,8 @@ static void dir_iterator_next( tl_iterator* super )
 {
     dir_iterator* this = (dir_iterator*)super;
     WCHAR* str;
+
+    assert( this );
 
     tl_string_clear( &this->current );
 
@@ -119,11 +127,13 @@ static void* dir_iterator_get_key( tl_iterator* this )
 
 static void* dir_iterator_get_value( tl_iterator* this )
 {
+    assert( this );
     return &(((dir_iterator*)this)->current);
 }
 
 static int dir_iterator_has_data( tl_iterator* this )
 {
+    assert( this );
     return ((dir_iterator*)this)->have_entry;
 }
 
@@ -142,8 +152,10 @@ int tl_dir_scan( const char* path, tl_array* list )
     HANDLE hnd;
     WCHAR* ptr;
 
-    if( !path || !tl_fs_exists( path ) ) return TL_ERR_NOT_EXIST;
-    if( !list                          ) return 0;
+    assert( path && list );
+
+    if( !tl_fs_exists( path ) )
+        return TL_ERR_NOT_EXIST;
 
     /* paste path string */
     tl_string_init( &str );
@@ -195,7 +207,9 @@ tl_iterator* tl_dir_iterate( const char* path )
     unsigned int c;
     WCHAR* str;
 
-    if( !path || !(this = malloc(sizeof(dir_iterator))) )
+    assert( path );
+
+    if( !(this = malloc(sizeof(dir_iterator))) )
         return NULL;
 
     super = (tl_iterator*)this;

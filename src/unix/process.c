@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <assert.h>
 
 
 
@@ -47,7 +48,9 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
     int inpipe[2]={-1,-1}, outpipe[2]={-1,-1}, errpipe[2]={-1,-1};
     tl_process* this;
 
-    if( !filename || !argv || !(this = malloc( sizeof(tl_process) )) )
+    assert( filename && argv );
+
+    if( !(this = malloc( sizeof(tl_process) )) )
         return NULL;
 
     memset( this, 0, sizeof(tl_process) );
@@ -131,39 +134,40 @@ fail:
 
 void tl_process_destroy( tl_process* this )
 {
-    if( this )
-    {
-        kill( this->pid, SIGKILL );
-        waitpid( this->pid, NULL, 0 );
+    assert( this );
 
-        if( this->errpipe )
-            this->errpipe->destroy( this->errpipe );
-        if( this->iopipe )
-            this->iopipe->destroy( this->iopipe );
-        free( this );
-    }
+    kill( this->pid, SIGKILL );
+    waitpid( this->pid, NULL, 0 );
+
+    if( this->errpipe )
+        this->errpipe->destroy( this->errpipe );
+    if( this->iopipe )
+        this->iopipe->destroy( this->iopipe );
+    free( this );
 }
 
 tl_iostream* tl_process_get_stdio( tl_process* this )
 {
-    return this ? this->iopipe : NULL;
+    assert( this );
+    return this->iopipe;
 }
 
 tl_iostream* tl_process_get_stderr( tl_process* this )
 {
-    return this ? this->errpipe : NULL;
+    assert( this );
+    return this->errpipe;
 }
 
 void tl_process_kill( tl_process* this )
 {
-    if( this )
-        kill( this->pid, SIGKILL );
+    assert( this );
+    kill( this->pid, SIGKILL );
 }
 
 void tl_process_terminate( tl_process* this )
 {
-    if( this )
-        kill( this->pid, SIGTERM );
+    assert( this );
+    kill( this->pid, SIGTERM );
 }
 
 int tl_process_wait( tl_process* this, int* status,
@@ -175,8 +179,7 @@ int tl_process_wait( tl_process* this, int* status,
     sigset_t mask;
     int result;
 
-    if( !this )
-        return TL_ERR_ARG;
+    assert( this );
 
     while( timeout && kill( this->pid, 0 )==0 )
     {

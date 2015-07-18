@@ -30,6 +30,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 
 
@@ -52,7 +53,11 @@ static void tl_array_iterator_destroy( tl_iterator* this )
 static void tl_array_iterator_reset( tl_iterator* super )
 {
     tl_array_iterator* this = (tl_array_iterator*)super;
-    this->idx = this->forward ? 0 : (this->array->used - 1);
+
+    if( !this->forward && this->array->used )
+        this->idx = this->array->used - 1;
+    else
+        this->idx = 0;
 }
 
 static int tl_array_iterator_has_data( tl_iterator* super )
@@ -123,35 +128,32 @@ static tl_iterator* tl_array_iterator_create( tl_array* array, int first )
 
 void tl_array_init( tl_array* this, size_t elementsize, tl_allocator* alloc )
 {
-    if( this )
-    {
-        this->reserved = 0;
-        this->used     = 0;
-        this->unitsize = elementsize;
-        this->data     = NULL;
-        this->alloc    = alloc;
-    }
+    assert( this );
+
+    this->reserved = 0;
+    this->used     = 0;
+    this->unitsize = elementsize;
+    this->data     = NULL;
+    this->alloc    = alloc;
 }
 
 void tl_array_cleanup( tl_array* this )
 {
-    if( this )
-    {
-        tl_allocator_cleanup( this->alloc, this->data,
-                              this->unitsize, this->used );
+    assert( this );
 
-        free( this->data );
-        this->reserved = 0;
-        this->used     = 0;
-        this->data     = NULL;
-        this->alloc    = NULL;
-    }
+    tl_allocator_cleanup( this->alloc, this->data,
+                          this->unitsize, this->used );
+
+    free( this->data );
+    this->reserved = 0;
+    this->used     = 0;
+    this->data     = NULL;
+    this->alloc    = NULL;
 }
 
 int tl_array_from_array( tl_array* this, const void* data, size_t count )
 {
-    if( !this || !data )
-        return 0;
+    assert( this && data );
 
     if( !tl_array_resize( this, count, 0 ) )
         return 0;
@@ -162,18 +164,15 @@ int tl_array_from_array( tl_array* this, const void* data, size_t count )
 
 void tl_array_to_array( const tl_array* this, void* data )
 {
-    if( this && data )
-    {
-        tl_allocator_copy( this->alloc, data, this->data,
-                           this->unitsize, this->used );
-    }
+    assert( this && data );
+
+    tl_allocator_copy( this->alloc, data, this->data,
+                       this->unitsize, this->used );
 }
 
 int tl_array_copy( tl_array* this, const tl_array* src )
 {
-    if( !this || !src )
-        return 0;
-
+    assert( this && src && this->unitsize==src->unitsize );
     return tl_array_copy_range( this, src, 0, src->used );
 }
 
@@ -182,7 +181,9 @@ int tl_array_copy_range( tl_array* this, const tl_array* src,
 {
     void* newdata;
 
-    if( !this || !src || start>=src->used )
+    assert( this && src && this->unitsize==src->unitsize );
+
+    if( start>=src->used )
         return 0;
 
     if( (start + count) > src->used )
@@ -216,8 +217,7 @@ int tl_array_copy_range( tl_array* this, const tl_array* src,
 
 int tl_array_concat( tl_array* this, const tl_array* src )
 {
-    if( !this || !src || this->unitsize!=src->unitsize )
-        return 0;
+    assert( this && src && this->unitsize==src->unitsize );
 
     /* filter some trivial cases */
     if( !src->used )
@@ -244,8 +244,7 @@ int tl_array_resize( tl_array* this, size_t size, int initialize )
 {
     void* newdata;
 
-    if( !this )
-        return 0;
+    assert( this );
 
     if( size == this->used )
         return 1;
@@ -296,8 +295,7 @@ int tl_array_reserve( tl_array* this, size_t size )
 {
     void* newdata;
 
-    if( !this )
-        return 0;
+    assert( this );
 
     /* already enough capacity? nothing to do */
     if( size <= this->reserved )
@@ -317,7 +315,9 @@ int tl_array_reserve( tl_array* this, size_t size )
 
 void tl_array_remove( tl_array* this, size_t idx, size_t count )
 {
-    if( this && (idx < this->used) )
+    assert( this );
+
+    if( idx < this->used )
     {
         /* clamp element count */
         if( (idx + count) > this->used )
@@ -344,12 +344,15 @@ void tl_array_remove( tl_array* this, size_t idx, size_t count )
 
 int tl_array_is_empty( const tl_array* this )
 {
-    return this ? (this->used==0) : 1;
+    assert( this );
+    return this->used==0;
 }
 
 void* tl_array_at( const tl_array* this, size_t idx )
 {
-    if( !this || (idx >= this->used) )
+    assert( this );
+
+    if( idx >= this->used )
         return NULL;
 
     return ((unsigned char*)this->data + idx * this->unitsize);
@@ -359,7 +362,9 @@ int tl_array_set( tl_array* this, size_t idx, const void* element )
 {
     void* ptr;
 
-    if( !this || (idx >= this->used) || !element )
+    assert( this && element );
+
+    if( idx >= this->used )
         return 0;
 
     ptr = (char*)this->data + idx*this->unitsize;
@@ -371,7 +376,9 @@ int tl_array_set( tl_array* this, size_t idx, const void* element )
 
 int tl_array_append( tl_array* this, const void* element )
 {
-    if( !this || !element || !tl_array_resize( this, this->used+1, 0 ) )
+    assert( this && element );
+
+    if( !tl_array_resize( this, this->used+1, 0 ) )
         return 0;
 
     tl_allocator_copy( this->alloc,
@@ -382,7 +389,9 @@ int tl_array_append( tl_array* this, const void* element )
 
 int tl_array_prepend( tl_array* this, const void* element )
 {
-    if( !this || !element || !tl_array_resize( this, this->used+1, 0 ) )
+    assert( this && element );
+
+    if( !tl_array_resize( this, this->used+1, 0 ) )
         return 0;
 
     if( this->used > 1 )
@@ -398,7 +407,9 @@ int tl_array_prepend( tl_array* this, const void* element )
 int tl_array_insert( tl_array* this, size_t idx,
                      const void* element, size_t count )
 {
-    if( !this || !element || idx>=this->used )
+    assert( this && element );
+
+    if( idx>=this->used )
         return 0;
 
     if( count==0 )
@@ -422,8 +433,7 @@ int tl_array_insert( tl_array* this, size_t idx,
 
 int tl_array_append_array( tl_array* this, const void* data, size_t count )
 {
-    if( !this || !data )
-        return 0;
+    assert( this && data );
 
     if( !count )
         return 1;
@@ -445,8 +455,7 @@ int tl_array_insert_sorted( tl_array* this, tl_compare cmp,
     size_t i = 0;
     char* ptr;
 
-    if( !this || !cmp || !element )
-        return 0;
+    assert( this && cmp && element );
 
     /* for each element */
     for( ptr=this->data, i=0; i<this->used; ++i, ptr+=this->unitsize )
@@ -476,7 +485,9 @@ int tl_array_insert_sorted( tl_array* this, tl_compare cmp,
 
 void tl_array_remove_first( tl_array* this )
 {
-    if( this && this->used )
+    assert( this );
+
+    if( this->used )
     {
         tl_allocator_cleanup( this->alloc, this->data, this->unitsize, 1 );
 
@@ -493,29 +504,34 @@ void tl_array_remove_first( tl_array* this )
 
 void tl_array_remove_last( tl_array* this )
 {
-    if( this && this->used >= 1 )
+    assert( this );
+
+    if( this->used >= 1 )
         tl_array_resize( this, this->used-1, 0 );
 }
 
 void tl_array_clear( tl_array* this )
 {
-    if( this )
-    {
-        tl_allocator_cleanup( this->alloc, this->data,
-                              this->unitsize, this->used );
-        this->used = 0;
-    }
+    assert( this );
+
+    tl_allocator_cleanup( this->alloc, this->data,
+                          this->unitsize, this->used );
+    this->used = 0;
 }
 
 void tl_array_sort( tl_array* this, tl_compare cmp )
 {
-    if( this && cmp && this->data && this->used )
+    assert( this && cmp );
+
+    if( this->data && this->used )
         tl_heapsort( this->data, this->used, this->unitsize, cmp );
 }
 
 void tl_array_stable_sort( tl_array* this, tl_compare cmp )
 {
-    if( this && cmp && this->data && this->used )
+    assert( this && cmp );
+
+    if( this->data && this->used )
     {
         if( !tl_mergesort( this->data, this->used, this->unitsize, cmp ) )
         {
@@ -531,7 +547,9 @@ void* tl_array_search( const tl_array* this, tl_compare cmp, const void* key )
     char* ptr;
     int cv;
 
-    if( !this || !cmp || !key || !this->used )
+    assert( this && cmp && key );
+
+    if( !this->used )
         return NULL;
 
     l = 0;
@@ -560,6 +578,8 @@ void* tl_array_search_unsorted( const tl_array* this, tl_compare cmp,
     char* ptr;
     size_t i;
 
+    assert( this && cmp && key );
+
     for( ptr=this->data, i=0; i<this->used; ++i, ptr+=this->unitsize )
     {
         if( cmp( ptr, key )==0 )
@@ -573,7 +593,9 @@ void tl_array_try_shrink( tl_array* this )
 {
     void* newdata;
 
-    if( this && (this->used < this->reserved/4) )
+    assert( this );
+
+    if( this->used < this->reserved/4 )
     {
         newdata =
         realloc( this->data, (this->reserved/2) * this->unitsize );
@@ -588,27 +610,32 @@ void tl_array_try_shrink( tl_array* this )
 
 tl_iterator* tl_array_first( tl_array* this )
 {
+    assert( this );
     return tl_array_iterator_create( this, 1 );
 }
 
 tl_iterator* tl_array_last( tl_array* this )
 {
+    assert( this );
     return tl_array_iterator_create( this, 0 );
 }
 
 size_t tl_array_get_size( const tl_array* this )
 {
-    return this ? this->used : 0;
+    assert( this );
+    return this->used;
 }
 
 void* tl_array_get_first( tl_array* this )
 {
-    return (this && this->used) ? this->data : NULL;
+    assert( this );
+    return this->used ? this->data : NULL;
 }
 
 void* tl_array_get_last( tl_array* this )
 {
-    return (this && this->used) ?
+    assert( this );
+    return this->used ?
            ((char*)this->data + this->unitsize*(this->used-1)) : NULL;
 }
 

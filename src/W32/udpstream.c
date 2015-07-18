@@ -25,6 +25,8 @@
 #define TL_EXPORT
 #include "os.h"
 
+#include <assert.h>
+
 
 
 static void udp_stream_destroy( tl_iostream* super )
@@ -61,6 +63,7 @@ static void udp_stream_destroy( tl_iostream* super )
 
 static int udp_stream_set_timeout( tl_iostream* this, unsigned int timeout )
 {
+    assert( this );
     ((udp_stream*)this)->timeout = timeout;
     return 0;
 }
@@ -72,10 +75,10 @@ static int udp_stream_write_raw( tl_iostream* super, const void* buffer,
     udp_server* p = this->parent;
     int result;
 
+    assert( this && buffer );
+
     if( actual )
         *actual = 0;
-    if( !this || !buffer )
-        return TL_ERR_ARG;
     if( !p )
         return TL_ERR_CLOSED;
 
@@ -101,10 +104,10 @@ static int udp_stream_read_raw( tl_iostream* super, void* buffer,
     udp_stream* this = (udp_stream*)super;
     int result = 0;
 
+    assert( this && buffer );
+
     if( actual )
         *actual = 0;
-    if( !this || !buffer )
-        return TL_ERR_ARG;
     if( !size )
         return 0;
 
@@ -143,7 +146,9 @@ done:
 
 void udp_stream_add_data( udp_stream* this, void* buffer, size_t size )
 {
-    if( this && buffer && size )
+    assert( this && buffer );
+
+    if( size )
     {
         tl_monitor_lock( &(this->monitor), this->timeout );
         tl_array_append_array( &(this->buffer), buffer, size );

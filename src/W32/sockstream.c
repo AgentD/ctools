@@ -26,17 +26,19 @@
 #include "os.h"
 #include "tl_iostream.h"
 
+#include <assert.h>
+
 
 
 static void sockstream_destroy( tl_iostream* super )
 {
     sockstream* this = (sockstream*)super;
-    if( this )
-    {
-        closesocket( this->socket );
-        free( this );
-        winsock_release( );
-    }
+
+    assert( this );
+
+    closesocket( this->socket );
+    free( this );
+    winsock_release( );
 }
 
 static int sockstream_set_timeout( tl_iostream* super, unsigned int timeout )
@@ -44,8 +46,7 @@ static int sockstream_set_timeout( tl_iostream* super, unsigned int timeout )
     sockstream* this = (sockstream*)super;
     int status;
 
-    if( !this )
-        return TL_ERR_ARG;
+    assert( this );
 
     this->timeout = timeout;
     status = setsockopt(this->socket,SOL_SOCKET,SO_SNDTIMEO,
@@ -59,9 +60,10 @@ static int sockstream_write_raw( tl_iostream* super, const void* buffer,
     sockstream* this = (sockstream*)super;
     int status;
 
-    if( actual           ) *actual = 0;
-    if( !this || !buffer ) return TL_ERR_ARG;
-    if( !size            ) return 0;
+    assert( this && buffer );
+
+    if( actual ) *actual = 0;
+    if( !size  ) return 0;
 
     status = send( ((sockstream*)this)->socket, buffer, size, 0 );
 
@@ -76,8 +78,9 @@ static int sockstream_read_raw( tl_iostream* super, void* buffer,
     sockstream* this = (sockstream*)super;
     int status;
 
+    assert( this && buffer );
+
     if( actual                                           ) *actual = 0;
-    if( !this || !buffer                                 ) return TL_ERR_ARG;
     if( !size                                            ) return 0;
     if( !wait_for_socket(this->socket, this->timeout, 0) ) return 0;
 

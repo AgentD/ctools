@@ -33,6 +33,7 @@
  *      so WinDOS 95/98/ME need a work around
  */
 #include <userenv.h>
+#include <assert.h>
 
 
 
@@ -46,8 +47,7 @@ int tl_fs_get_wd( tl_string* path )
     DWORD length;
     WCHAR* wpath;
 
-    if( !path )
-        return 0;
+    assert( path );
 
     tl_string_clear( path );
     length = GetCurrentDirectoryW( 0, NULL );
@@ -79,8 +79,7 @@ int tl_fs_get_user_dir( tl_string* path )
     WCHAR* wpath = NULL;
     DWORD size = 0;
 
-    if( !path )
-        return 0;
+    assert( path );
 
     tl_string_clear( path );
 
@@ -119,7 +118,9 @@ int tl_fs_exists( const char* path )
     WCHAR* wpath;
     int status;
 
-    if( !path || !(wpath = utf8_to_utf16( path )) )
+    assert( path );
+
+    if( !(wpath = utf8_to_utf16( path )) )
         return 0;
 
     status = GetFileAttributesW( wpath ) != INVALID_FILE_ATTRIBUTES;
@@ -134,7 +135,9 @@ int tl_fs_is_directory( const char* path )
     DWORD attr;
     int status;
 
-    if( !path || !(wpath = utf8_to_utf16( path )) )
+    assert( path );
+
+    if( !(wpath = utf8_to_utf16( path )) )
         return 0;
 
     attr = GetFileAttributesW( wpath );
@@ -153,7 +156,9 @@ int tl_fs_is_symlink( const char* path )
     HANDLE hnd;
     DWORD attr;
 
-    if( !path || !(wpath = utf8_to_utf16( path )) )
+    assert( path );
+
+    if( !(wpath = utf8_to_utf16( path )) )
         return 0;
 
     attr = GetFileAttributesW( wpath );
@@ -182,8 +187,8 @@ int tl_fs_cwd( const char* path )
     WCHAR* wpath;
     int status;
 
-    if( !path )
-        return TL_ERR_ARG;
+    assert( path );
+
     if( !(wpath = utf8_to_utf16( path )) )
         return TL_ERR_INTERNAL;
 
@@ -199,8 +204,8 @@ int tl_fs_mkdir( const char* path )
     DWORD attr;
     int status;
 
-    if( !path )
-        return TL_ERR_ARG;
+    assert( path );
+
     if( !(wpath = utf8_to_utf16( path )) )
         return TL_ERR_INTERNAL;
 
@@ -229,8 +234,8 @@ int tl_fs_delete( const char* path )
     WCHAR* wpath;
     DWORD attr;
 
-    if( !path )
-        return 0;
+    assert( path );
+
     if( !(wpath = utf8_to_utf16( path )) )
         return TL_ERR_INTERNAL;
 
@@ -263,8 +268,10 @@ tl_u64 tl_fs_get_file_size( const char* path )
     HANDLE hnd;
     DWORD attr;
 
+    assert( path );
+
     /* check if path actually names an existing file */
-    if( !path || !(wpath = utf8_to_utf16( path )) )
+    if( !(wpath = utf8_to_utf16( path )) )
         return 0;
 
     attr = GetFileAttributesW( wpath );

@@ -25,6 +25,8 @@
 #define TL_EXPORT
 #include "os.h"
 
+#include <assert.h>
+
 
 
 static volatile int run = 0;
@@ -180,6 +182,8 @@ static void udp_server_destroy( tl_server* super )
     udp_server* this = (udp_server*)super;
     udp_stream* i;
 
+    assert( this );
+
     for( i=this->streams; i!=NULL; i=i->next )
         i->parent = NULL;
 
@@ -194,6 +198,8 @@ static tl_iostream* udp_wait_for_client( tl_server* super, int timeout )
     udp_server* this = (udp_server*)super;
     udp_stream* str = NULL;
     int i;
+
+    assert( this );
 
     tl_monitor_lock( &(this->monitor), timeout );
     if( this->pending == 0 )

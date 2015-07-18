@@ -26,6 +26,8 @@
 #include "tl_server.h"
 #include "os.h"
 
+#include <assert.h>
+
 
 
 typedef struct
@@ -39,6 +41,8 @@ tcp_server;
 
 static void tcp_destroy( tl_server* this )
 {
+    assert( this );
+
     closesocket( ((tcp_server*)this)->socket );
     free( this );
     winsock_release( );
@@ -48,6 +52,8 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 {
     tcp_server* this = (tcp_server*)super;
     SOCKET peer;
+
+    assert( this );
 
     if( !wait_for_socket( this->socket, timeout, 0 ) )
         return NULL;

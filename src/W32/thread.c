@@ -26,10 +26,13 @@
 #include "tl_thread.h"
 #include "os.h"
 
+#include <assert.h>
+
 
 
 int tl_monitor_init( tl_monitor* this )
 {
+    assert( this );
     this->notify_event = CreateEvent( NULL, FALSE, FALSE, NULL );
 
     if( !this->notify_event )
@@ -51,6 +54,7 @@ int tl_monitor_init( tl_monitor* this )
 
 void tl_monitor_cleanup( tl_monitor* this )
 {
+    assert( this );
     CloseHandle( this->notify_event );
     CloseHandle( this->notify_all_event );
     DeleteCriticalSection( &(this->mutex) );
@@ -72,17 +76,20 @@ tl_monitor* tl_monitor_create( void )
 
 void tl_monitor_destroy( tl_monitor* this )
 {
+    assert( this );
     tl_monitor_cleanup( this );
     free( this );
 }
 
 int tl_monitor_lock( tl_monitor* this, unsigned long timeout )
 {
+    assert( this );
     return tl_mutex_lock( (tl_mutex*)(&(this->mutex)), timeout );
 }
 
 void tl_monitor_unlock( tl_monitor* this )
 {
+    assert( this );
     tl_mutex_unlock( (tl_mutex*)(&(this->mutex)) );
 }
 
@@ -90,6 +97,8 @@ int tl_monitor_wait( tl_monitor* this, unsigned long timeout )
 {
     DWORD status = WAIT_FAILED, waittime = timeout ? timeout : INFINITE;
     HANDLE events[ 2 ];
+
+    assert( this );
 
     /* increment wait count */
     EnterCriticalSection( &(this->waiter_mutex) );
@@ -118,6 +127,8 @@ int tl_monitor_wait( tl_monitor* this, unsigned long timeout )
 
 void tl_monitor_notify( tl_monitor* this )
 {
+    assert( this );
+
     EnterCriticalSection( &(this->waiter_mutex) );
 
     if( this->wait_count > 0 )
@@ -128,6 +139,8 @@ void tl_monitor_notify( tl_monitor* this )
 
 void tl_monitor_notify_all( tl_monitor* this )
 {
+    assert( this );
+
     EnterCriticalSection( &(this->waiter_mutex) );
 
     if( this->wait_count > 0 )
@@ -168,6 +181,8 @@ tl_rwlock* tl_rwlock_create( void )
 
 int tl_rwlock_lock_read( tl_rwlock* this, unsigned long timeout )
 {
+    assert( this );
+
     if( !tl_mutex_lock( (tl_mutex*)(&(this->readlock)), timeout ) )
         return 0;
     if( !tl_mutex_lock( (tl_mutex*)(&(this->lock)), timeout ) )
@@ -186,6 +201,8 @@ int tl_rwlock_lock_read( tl_rwlock* this, unsigned long timeout )
 
 int tl_rwlock_lock_write( tl_rwlock* this, unsigned long timeout )
 {
+    assert( this );
+
     if( !tl_mutex_lock( (tl_mutex*)(&(this->readlock)), timeout ) )
         return 0;
 top:
@@ -217,6 +234,7 @@ fail:
 
 void tl_rwlock_unlock_read( tl_rwlock* this )
 {
+    assert( this );
     EnterCriticalSection( &(this->lock) );
     if( --(this->readers) == 0 )
         SetEvent( this->writelock );
@@ -225,11 +243,13 @@ void tl_rwlock_unlock_read( tl_rwlock* this )
 
 void tl_rwlock_unlock_write( tl_rwlock* this )
 {
+    assert( this );
     LeaveCriticalSection( &(this->lock) );
 }
 
 void tl_rwlock_destroy( tl_rwlock* this )
 {
+    assert( this );
     CloseHandle( this->writelock );
     DeleteCriticalSection( &(this->lock) );
     DeleteCriticalSection( &(this->readlock) );
@@ -243,15 +263,16 @@ tl_mutex* tl_mutex_create( int recursive )
     CRITICAL_SECTION* this = malloc( sizeof(CRITICAL_SECTION) );
     (void)recursive;
 
-    if( this )
-        InitializeCriticalSection( this );
-
+    assert( this );
+    InitializeCriticalSection( this );
     return (tl_mutex*)this;
 }
 
 int tl_mutex_lock( tl_mutex* this, unsigned long timeout )
 {
     unsigned long dt;
+
+    assert( this );
 
     if( timeout>0 )
     {
@@ -276,11 +297,13 @@ int tl_mutex_lock( tl_mutex* this, unsigned long timeout )
 
 void tl_mutex_unlock( tl_mutex* this )
 {
+    assert( this );
     LeaveCriticalSection( (CRITICAL_SECTION*)this );
 }
 
 void tl_mutex_destroy( tl_mutex* this )
 {
+    assert( this );
     DeleteCriticalSection( (CRITICAL_SECTION*)this );
     free( this );
 }
@@ -346,6 +369,7 @@ int tl_thread_join( tl_thread* this, unsigned long timeout )
 {
     DWORD dt = timeout ? timeout : INFINITE;
 
+    assert( this );
     return WaitForSingleObject( this->thread, dt ) == WAIT_OBJECT_0;
 }
 
@@ -353,6 +377,7 @@ void* tl_thread_get_return_value( tl_thread* this )
 {
     void* retval;
 
+    assert( this );
     EnterCriticalSection( &(this->mutex) );
     retval = this->retval;
     LeaveCriticalSection( &(this->mutex) );
@@ -364,6 +389,7 @@ int tl_thread_get_state( tl_thread* this )
 {
     int state;
 
+    assert( this );
     EnterCriticalSection( &(this->mutex) );
     state = this->state;
     LeaveCriticalSection( &(this->mutex) );
@@ -373,6 +399,7 @@ int tl_thread_get_state( tl_thread* this )
 
 void tl_thread_destroy( tl_thread* this )
 {
+    assert( this );
     TerminateThread( this->thread, EXIT_FAILURE );
     CloseHandle( this->thread );
     DeleteCriticalSection( &(this->mutex) );

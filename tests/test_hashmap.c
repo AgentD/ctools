@@ -76,7 +76,6 @@ int main( void )
     tl_hashmap_init(&map,sizeof(long),sizeof(long),10,hash,compare,NULL,NULL);
 
     if( !tl_hashmap_is_empty( &map ) ) return EXIT_FAILURE;
-    if( !tl_hashmap_is_empty( NULL ) ) return EXIT_FAILURE;
 
     for( i=0; i<sizeof(test_vals)/sizeof(test_vals[0]); ++i )
     {

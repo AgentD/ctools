@@ -24,15 +24,14 @@
  */
 #define TL_EXPORT
 #include "tl_iostream.h"
+#include <assert.h>
 
 
 
 int tl_iostream_write_blob( tl_iostream* this, const tl_blob* blob,
                             size_t* actual )
 {
-    if( !this || !blob )
-        return TL_ERR_ARG;
-
+    assert( this && blob );
     return this->write( this, blob->data, blob->size, actual );
 }
 
@@ -41,8 +40,7 @@ int tl_iostream_read_blob( tl_iostream* this, tl_blob* blob,
 {
     int status;
 
-    if( !this || !blob )
-        return TL_ERR_ARG;
+    assert( this && blob );
 
     if( !tl_blob_init( blob, maximum, NULL ) )
         return TL_ERR_INTERNAL;

@@ -28,6 +28,8 @@
 #include "tl_blob.h"
 #include "os.h"
 
+#include <assert.h>
+
 
 
 int tl_network_resolve_name( const char* hostname, int proto,
@@ -38,8 +40,7 @@ int tl_network_resolve_name( const char* hostname, int proto,
     struct in_addr addr4;
     size_t i = 0;
 
-    if( !hostname )
-        return 0;
+    assert( hostname );
 
     /* check if hostname is actually a numeric IPv4 address */
     if( inet_pton( AF_INET, hostname, &addr4 )>0 )
@@ -115,6 +116,8 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
     tl_server* server;
     int sockfd, size;
 
+    assert( addr );
+
     sockfd = create_socket( addr, (void*)addrbuffer, &size );
     if( sockfd < 0 )
         return NULL;
@@ -143,6 +146,8 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
     tl_iostream* stream;
     int sockfd, size, flags;
 
+    assert( peer );
+
     sockfd = create_socket( peer, (void*)addrbuffer, &size );
     if( sockfd < 0 )
         return NULL;
@@ -163,8 +168,7 @@ fail:
 
 int tl_network_get_special_address( tl_net_addr* addr, int type, int net )
 {
-    if( !addr )
-        return 0;
+    assert( addr );
 
     addr->net = net;
 
@@ -197,8 +201,7 @@ int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
     unsigned char buffer[ 64 ];
     socklen_t len;
 
-    if( !stream || !addr )
-        return 0;
+    assert( stream && addr );
 
     if( (unix->flags & USTR_TYPE_MASK) == USTR_UDPBUF )
     {
@@ -226,8 +229,7 @@ int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
     socklen_t len = sizeof(buffer);
     int status;
 
-    if( !stream || !addr )
-        return 0;
+    assert( stream && addr );
 
     if( (unix->flags & USTR_TYPE_MASK) == USTR_UDPBUF )
     {

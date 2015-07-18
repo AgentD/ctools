@@ -66,7 +66,6 @@ int main( void )
     if( !tl_string_is_empty( &str ) ) return EXIT_FAILURE;
     if( tl_string_at( &str, 0 ) ) return EXIT_FAILURE;
     if( tl_string_utf16_len( &str )!=0 ) return EXIT_FAILURE;
-    if( tl_string_utf16_len( NULL )!=0 ) return EXIT_FAILURE;
 
     /* append codepoints <= 0x7F */
     tl_string_append_code_point( &str, '\n' );
@@ -174,12 +173,6 @@ int main( void )
     if( tl_string_to_utf16( &str, buffer, 5 )!=3 )
         return EXIT_FAILURE;
 
-    if( tl_string_to_utf16( NULL, buffer, 1000 )!=0 || buffer[0]!='\0' )
-        return EXIT_FAILURE;
-
-    if( tl_string_to_utf16( &str, NULL, 1000 )!=0 )
-        return EXIT_FAILURE;
-
     if( tl_string_to_utf16( &str, buffer, 1 )!=0 || buffer[0]!='\0' )
         return EXIT_FAILURE;
 
@@ -253,9 +246,7 @@ int main( void )
     tl_string_init( &str );
 
     if( tl_string_last( &str )!=0 ) return EXIT_FAILURE;
-    if( tl_string_last( NULL )!=0 ) return EXIT_FAILURE;
     tl_string_drop_last( &str );
-    tl_string_drop_last( NULL );
     if( tl_string_last( &str )!=0 ) return EXIT_FAILURE;
 
     tl_string_append_code_point( &str, 'A' );

@@ -27,6 +27,7 @@
 #include "tl_packetserver.h"
 #include "os.h"
 
+#include <assert.h>
 
 
 
@@ -44,8 +45,8 @@ static void udp_set_timeout( tl_packetserver* super, unsigned int timeout )
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
 
-    if( this )
-        this->timeout = timeout;
+    assert( this );
+    this->timeout = timeout;
 }
 
 static int udp_receive( tl_packetserver* super, void* buffer, void* address,
@@ -56,9 +57,10 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
     socklen_t addrlen = sizeof(addrbuf);
     ssize_t result;
 
-    if( actual           ) *actual = 0;
-    if( !this || !buffer ) return TL_ERR_ARG;
-    if( !size            ) return 0;
+    assert( this && buffer );
+
+    if( actual ) *actual = 0;
+    if( !size  ) return 0;
 
     if( !wait_for_fd( this->sockfd, this->timeout, 0 ) )
         return TL_ERR_TIMEOUT;
@@ -93,8 +95,9 @@ static int udp_send( tl_packetserver* super, const void* buffer,
     ssize_t result;
     int addrsize;
 
+    assert( this && buffer && address );
+
     if( actual                                          ) *actual = 0;
-    if( !super || !buffer || !address                   ) return TL_ERR_ARG;
     if( !encode_sockaddr( address, addrbuf, &addrsize ) ) return TL_ERR_ARG;
     if( !size                                           ) return 0;
 
@@ -119,11 +122,9 @@ static void udp_destroy( tl_packetserver* super )
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
 
-    if( this )
-    {
-        close( this->sockfd );
-        free( this );
-    }
+    assert( this );
+    close( this->sockfd );
+    free( this );
 }
 
 /****************************************************************************/
@@ -136,8 +137,10 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     tl_packetserver* super;
     int val, size;
 
+    assert( addr );
+
     /* sanity check */
-    if( !addr || addr->transport!=TL_UDP )
+    if( addr->transport!=TL_UDP )
         return NULL;
 
     if( addr->net!=TL_IPV4 && addr->net!=TL_IPV6 )

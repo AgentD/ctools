@@ -26,6 +26,8 @@
 #include "tl_process.h"
 #include "os.h"
 
+#include <assert.h>
+
 
 
 struct tl_process
@@ -85,6 +87,8 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
     WCHAR* wfilename = NULL;
     STARTUPINFOW startinfo;
     WCHAR* wargs = NULL;
+
+    assert( filename && argv );
 
     if( flags & TL_STDERR_TO_STDOUT )
         flags &= ~TL_PIPE_STDERR;
@@ -191,6 +195,7 @@ strfail:
 
 void tl_process_destroy( tl_process* this )
 {
+    assert( this );
     if( this->iostream )
         this->iostream->destroy( this->iostream );
     if( this->errstream )
@@ -203,21 +208,25 @@ void tl_process_destroy( tl_process* this )
 
 tl_iostream* tl_process_get_stdio( tl_process* this )
 {
-    return this ? this->iostream : NULL;
+    assert( this );
+    return this->iostream;
 }
 
 tl_iostream* tl_process_get_stderr( tl_process* this )
 {
-    return this ? this->errstream : NULL;
+    assert( this );
+    return this->errstream;
 }
 
 void tl_process_kill( tl_process* this )
 {
+    assert( this );
     TerminateProcess( this->info.hProcess, EXIT_FAILURE );
 }
 
 void tl_process_terminate( tl_process* this )
 {
+    assert( this );
     PostThreadMessage( GetThreadId( this->info.hThread ), WM_QUIT, 0, 0 );
 }
 
@@ -225,6 +234,8 @@ int tl_process_wait( tl_process* this, int* status,
                      unsigned int timeout )
 {
     DWORD exitcode;
+
+    assert( this );
 
     if( WaitForSingleObject( this->info.hProcess,
                              timeout ? timeout : INFINITE )!=0 )

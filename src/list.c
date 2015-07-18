@@ -29,6 +29,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 
 
@@ -88,9 +89,10 @@ static void* tl_list_iterator_get_key( tl_iterator* this )
     return NULL;
 }
 
-static void* tl_list_iterator_get_value( tl_iterator* this )
+static void* tl_list_iterator_get_value( tl_iterator* super )
 {
-    return tl_list_node_get_data( ((tl_list_iterator*)this)->node );
+    tl_list_iterator* this = (tl_list_iterator*)super;
+    return this->node ? tl_list_node_get_data( this->node ) : NULL;
 }
 
 static void tl_list_iterator_remove( tl_iterator* super )
@@ -163,25 +165,23 @@ tl_list_node* tl_list_node_create( const tl_list* this, const void* data )
     tl_list_node* node;
     char* ptr;
 
+    assert( this && data );
+
     node = malloc( sizeof(tl_list_node) + this->unitsize + PADDING );
 
-    if( node )
+    ptr = (char*)node + sizeof(tl_list_node);
+    ALLIGN( ptr );
+
+    if( data )
     {
-        ptr = (char*)node + sizeof(tl_list_node);
-        ALLIGN( ptr );
-
-        if( data )
-        {
-            tl_allocator_copy( this->alloc, ptr, data, this->unitsize, 1 );
-        }
-        else
-        {
-            tl_allocator_init( this->alloc, ptr, this->unitsize, 1 );
-        }
-
-        node->prev = node->next = NULL;
+        tl_allocator_copy( this->alloc, ptr, data, this->unitsize, 1 );
+    }
+    else
+    {
+        tl_allocator_init( this->alloc, ptr, this->unitsize, 1 );
     }
 
+    node->prev = node->next = NULL;
     return node;
 }
 
@@ -189,25 +189,23 @@ void tl_list_node_destroy( tl_list_node* node, tl_list* list )
 {
     char* ptr = NULL;
 
-    if( node && list )
-    {
-        ptr = (char*)node + sizeof(tl_list_node);
-        ALLIGN( ptr );
+    assert( node && list );
 
-        tl_allocator_cleanup( list->alloc, ptr, list->unitsize, 1 );
-        free( node );
-    }
+    ptr = (char*)node + sizeof(tl_list_node);
+    ALLIGN( ptr );
+
+    tl_allocator_cleanup( list->alloc, ptr, list->unitsize, 1 );
+    free( node );
 }
 
 void* tl_list_node_get_data( const tl_list_node* node )
 {
     char* ptr = NULL;
 
-    if( node )
-    {
-        ptr = (char*)node + sizeof(tl_list_node);
-        ALLIGN( ptr );
-    }
+    assert( node );
+
+    ptr = (char*)node + sizeof(tl_list_node);
+    ALLIGN( ptr );
 
     return ptr;
 }
@@ -216,14 +214,13 @@ void* tl_list_node_get_data( const tl_list_node* node )
 
 void tl_list_init( tl_list* this, size_t elementsize, tl_allocator* alloc )
 {
-    if( this )
-    {
-        this->first    = NULL;
-        this->last     = NULL;
-        this->size     = 0;
-        this->unitsize = elementsize;
-        this->alloc    = alloc;
-    }
+    assert( this );
+
+    this->first    = NULL;
+    this->last     = NULL;
+    this->size     = 0;
+    this->unitsize = elementsize;
+    this->alloc    = alloc;
 }
 
 void tl_list_cleanup( tl_list* this )
@@ -236,7 +233,9 @@ tl_list_node* tl_list_node_from_index( const tl_list* this, size_t idx )
     tl_list_node* n = NULL;
     size_t i;
 
-    if( this && idx<this->size )
+    assert( this );
+
+    if( idx<this->size )
     {
         if( idx > this->size/2 )
         {
@@ -255,8 +254,7 @@ int tl_list_from_array( tl_list* this, const void* data, size_t count )
     tl_list temp;
     size_t i;
 
-    if( !this || !data )
-        return 0;
+    assert( this && data );
 
     tl_list_init( &temp, this->unitsize, this->alloc );
 
@@ -282,7 +280,9 @@ void tl_list_to_array( const tl_list* this, void* data )
 {
     tl_list_node* n;
 
-    if( this && this->size && data )
+    assert( this && data );
+
+    if( this->size )
     {
         for( n=this->first; n; n=n->next )
         {
@@ -306,9 +306,11 @@ int tl_list_copy_range( tl_list* this, const tl_list* src,
     tl_list temp;
     size_t i;
 
+    assert( this && src );
+
     /* sanity check */
-    if( !this || !src || (start+count)>src->size ) return 0;
-    if( !src->size                               ) return 1;
+    if( (start+count)>src->size ) return 0;
+    if( !src->size              ) return 1;
 
     /* get the start node */
     if( !(n = tl_list_node_from_index( src, start )) )
@@ -338,7 +340,9 @@ int tl_list_join( tl_list* this, tl_list* other, size_t idx )
 {
     tl_list_node* n;
 
-    if( !this||!other||this->unitsize!=other->unitsize||idx>this->size )
+    assert( this && other && this->unitsize==other->unitsize );
+
+    if( idx>this->size )
         return 0;
 
     if( !other->size )
@@ -388,7 +392,9 @@ void tl_list_reverse( tl_list* this )
     tl_list_node* temp;
     tl_list_node* i;
 
-    if( this && this->size )
+    assert( this );
+
+    if( this->size )
     {
         /* swap the previous and the next pointer for every node */
         for( i=this->first; i; i=i->prev )
@@ -409,8 +415,7 @@ int tl_list_concat( tl_list* this, const tl_list* src )
 {
     tl_list temp;
 
-    if( !this || !src || (src && src->unitsize!=this->unitsize) )
-        return 0;
+    assert( this && src && src->unitsize==this->unitsize );
 
     if( !src->size )
         return 1;
@@ -431,7 +436,9 @@ void tl_list_remove( tl_list* this, size_t idx, size_t count )
     tl_list_node* n;
     size_t i;
 
-    if( !this || idx>=this->size )
+    assert( this );
+
+    if( idx>=this->size )
         return;
 
     count = (count > this->size) ? this->size : count;
@@ -491,7 +498,8 @@ void tl_list_remove( tl_list* this, size_t idx, size_t count )
 
 int tl_list_is_empty( const tl_list* this )
 {
-    return (!this || this->size==0);
+    assert( this );
+    return (this->size==0);
 }
 
 void* tl_list_at( const tl_list* this, size_t idx )
@@ -517,8 +525,7 @@ int tl_list_append( tl_list* this, const void* element )
 {
     tl_list_node* node;
 
-    if( !this || !element )
-        return 0;
+    assert( this && element );
 
     node = tl_list_node_create( this, element );
 
@@ -544,8 +551,7 @@ int tl_list_prepend( tl_list* this, const void* element )
 {
     tl_list_node* node;
 
-    if( !this || !element )
-        return 0;
+    assert( this && element );
 
     node = tl_list_node_create( this, element );
 
@@ -572,7 +578,9 @@ int tl_list_insert( tl_list* this, size_t idx,
 {
     tl_list list;
 
-    if( !this || idx>this->size || !elements )
+    assert( this && elements );
+
+    if( idx>this->size )
         return 0;
 
     if( !count )
@@ -598,8 +606,7 @@ int tl_list_insert_sorted( tl_list* this, tl_compare cmp,
 {
     tl_list_node *n, *t;
 
-    if( !this || !cmp || !element )
-        return 0;
+    assert( this && cmp && element );
 
     if( !(t = tl_list_node_create( this, element )) )
         return 0;
@@ -642,7 +649,9 @@ void tl_list_remove_first( tl_list* this )
 {
     tl_list_node* n;
 
-    if( this && this->size )
+    assert( this );
+
+    if( this->size )
     {
         if( this->size==1 )
         {
@@ -665,7 +674,9 @@ void tl_list_remove_last( tl_list* this )
 {
     tl_list_node* n;
 
-    if( this && this->size )
+    assert( this );
+
+    if( this->size )
     {
         if( this->size==1 )
         {
@@ -688,20 +699,19 @@ void tl_list_clear( tl_list* this )
 {
     tl_list_node *n, *old;
 
-    if( this )
+    assert( this );
+
+    n = this->first;
+
+    this->size = 0;
+    this->first = NULL;
+    this->last = NULL;
+
+    while( n!=NULL )
     {
-        n = this->first;
-
-        this->size = 0;
-        this->first = NULL;
-        this->last = NULL;
-
-        while( n!=NULL )
-        {
-            old = n;
-            n = n->next;
-            tl_list_node_destroy( old, this );
-        }
+        old = n;
+        n = n->next;
+        tl_list_node_destroy( old, this );
     }
 }
 
@@ -760,7 +770,9 @@ void tl_list_sort( tl_list* this, tl_compare cmp )
 {
     tl_list_node* n;
 
-    if( this && cmp && this->size>1 )
+    assert( this && cmp );
+
+    if( this->size>1 )
     {
         this->first = msort( this->first, cmp );
 
@@ -774,13 +786,12 @@ tl_list_node* tl_list_search( const tl_list* this, tl_compare cmp,
 {
     tl_list_node* n;
 
-    if( this && cmp && key )
+    assert( this && cmp && key );
+
+    for( n=this->first; n; n=n->next )
     {
-        for( n=this->first; n; n=n->next )
-        {
-            if( cmp( tl_list_node_get_data( n ), key )==0 )
-                return n;
-        }
+        if( cmp( tl_list_node_get_data( n ), key )==0 )
+            return n;
     }
 
     return NULL;
@@ -790,7 +801,9 @@ tl_list_node* tl_list_drop_first( tl_list* this )
 {
     tl_list_node* n = NULL;
 
-    if( this && this->size )
+    assert( this );
+
+    if( this->size )
     {
         n = this->first;
 
@@ -809,7 +822,9 @@ tl_list_node* tl_list_drop_last( tl_list* this )
 {
     tl_list_node* n = NULL;
 
-    if( this && this->size )
+    assert( this );
+
+    if( this->size )
     {
         n = this->last;
 
@@ -826,26 +841,31 @@ tl_list_node* tl_list_drop_last( tl_list* this )
 
 tl_iterator* tl_list_first( tl_list* this )
 {
-    return this ? tl_list_iterator_create( this, 1 ) : NULL;
+    assert( this );
+    return tl_list_iterator_create( this, 1 );
 }
 
 tl_iterator* tl_list_last( tl_list* this )
 {
-    return this ? tl_list_iterator_create( this, 0 ) : NULL;
+    assert( this );
+    return tl_list_iterator_create( this, 0 );
 }
 
 size_t tl_list_get_size( const tl_list* this )
 {
-    return this ? this->size : 0;
+    assert( this );
+    return this->size;
 }
 
 void* tl_list_get_first( tl_list* this )
 {
-    return this ? tl_list_node_get_data( this->first ) : NULL;
+    assert( this );
+    return tl_list_node_get_data( this->first );
 }
 
 void* tl_list_get_last( tl_list* this )
 {
-    return this ? tl_list_node_get_data( this->last ) : NULL;
+    assert( this );
+    return tl_list_node_get_data( this->last );
 }
 

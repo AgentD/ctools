@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <assert.h>
 
 
 
@@ -139,13 +140,13 @@ static void tl_hashmap_iterator_next( tl_iterator* super )
 static void* tl_hashmap_iterator_get_key( tl_iterator* super )
 {
     tl_hashmap_iterator* this = (tl_hashmap_iterator*)super;
-    return tl_hashmap_entry_get_key( this->map, this->ent );
+    return this->ent ? tl_hashmap_entry_get_key(this->map,this->ent) : NULL;
 }
 
 static void* tl_hashmap_iterator_get_value( tl_iterator* super )
 {
     tl_hashmap_iterator* this = (tl_hashmap_iterator*)super;
-    return tl_hashmap_entry_get_value( this->map, this->ent );
+    return this->ent ? tl_hashmap_entry_get_value(this->map,this->ent) : NULL;
 }
 
 static void tl_hashmap_iterator_remove( tl_iterator* super )
@@ -220,11 +221,8 @@ int tl_hashmap_init( tl_hashmap* this, size_t keysize, size_t objsize,
     char* ptr;
 
     /* sanity check */
-    if( !this || !keysize || !objsize || !bincount )
-        return 0;
-
-    if( !keyhash || !keycompare )
-        return 0;
+    assert( this && keysize && objsize && bincount );
+    assert( keyhash && keycompare );
 
     /* allocate bins */
     binsize = sizeof(tl_hashmap_entry) + keysize + objsize + 2*PADDING;
@@ -263,15 +261,14 @@ int tl_hashmap_init( tl_hashmap* this, size_t keysize, size_t objsize,
 
 void tl_hashmap_cleanup( tl_hashmap* this )
 {
-    if( this )
-    {
-        tl_hashmap_clear( this );
+    assert( this );
 
-        free( this->bitmap );
-        free( this->bins );
+    tl_hashmap_clear( this );
 
-        memset( this, 0, sizeof(tl_hashmap) );
-    }
+    free( this->bitmap );
+    free( this->bins );
+
+    memset( this, 0, sizeof(tl_hashmap) );
 }
 
 int tl_hashmap_copy( tl_hashmap* this, const tl_hashmap* src )
@@ -282,8 +279,7 @@ int tl_hashmap_copy( tl_hashmap* this, const tl_hashmap* src )
     int* bitmap;
     int used;
 
-    if( !this || !src )
-        return 0;
+    assert( this && src );
 
     /* allocate bins */
     binsize = sizeof(tl_hashmap_entry) + src->keysize + src->objsize;
@@ -391,53 +387,52 @@ void tl_hashmap_clear( tl_hashmap* this )
     char* ptr;
     int used;
 
-    if( this )
+    assert( this );
+
+    binsize = sizeof(tl_hashmap_entry) + this->keysize + this->objsize;
+    binsize+= 2*PADDING;
+    ptr = (char*)this->bins;
+
+    for( i=0; i<this->bincount; ++i, ptr+=binsize )
     {
-        binsize = sizeof(tl_hashmap_entry) + this->keysize + this->objsize;
-        binsize+= 2*PADDING;
-        ptr = (char*)this->bins;
+        used = this->bitmap[ i / (sizeof(int)*CHAR_BIT) ];
+        used = (used >> (i % (sizeof(int)*CHAR_BIT))) & 0x01;
 
-        for( i=0; i<this->bincount; ++i, ptr+=binsize )
+        if( !used )
+            continue;
+
+        it = ((tl_hashmap_entry*)ptr)->next;
+
+        while( it )
         {
-            used = this->bitmap[ i / (sizeof(int)*CHAR_BIT) ];
-            used = (used >> (i % (sizeof(int)*CHAR_BIT))) & 0x01;
+            old = it;
+            it = it->next;
 
-            if( !used )
-                continue;
-
-            it = ((tl_hashmap_entry*)ptr)->next;
-
-            while( it )
-            {
-                old = it;
-                it = it->next;
-
-                entry = (char*)old + sizeof(tl_hashmap_entry);
-                ALLIGN(entry);
-                tl_allocator_cleanup(this->keyalloc, entry, this->keysize, 1);
-
-                entry += this->keysize;
-                ALLIGN(entry);
-                tl_allocator_cleanup(this->objalloc, entry, this->objsize, 1);
-
-                free( old );
-            }
-
-            ((tl_hashmap_entry*)ptr)->next = NULL;
-
-            entry = ptr + sizeof(tl_hashmap_entry);
+            entry = (char*)old + sizeof(tl_hashmap_entry);
             ALLIGN(entry);
             tl_allocator_cleanup(this->keyalloc, entry, this->keysize, 1);
 
             entry += this->keysize;
             ALLIGN(entry);
             tl_allocator_cleanup(this->objalloc, entry, this->objsize, 1);
+
+            free( old );
         }
 
-        mapcount = 1 + (this->bincount / (sizeof(int)*CHAR_BIT));
+        ((tl_hashmap_entry*)ptr)->next = NULL;
 
-        memset( this->bitmap, 0, mapcount * sizeof(int) );
+        entry = ptr + sizeof(tl_hashmap_entry);
+        ALLIGN(entry);
+        tl_allocator_cleanup(this->keyalloc, entry, this->keysize, 1);
+
+        entry += this->keysize;
+        ALLIGN(entry);
+        tl_allocator_cleanup(this->objalloc, entry, this->objsize, 1);
     }
+
+    mapcount = 1 + (this->bincount / (sizeof(int)*CHAR_BIT));
+
+    memset( this->bitmap, 0, mapcount * sizeof(int) );
 }
 
 tl_hashmap_entry* tl_hashmap_get_bin( const tl_hashmap* this, size_t idx )
@@ -445,7 +440,9 @@ tl_hashmap_entry* tl_hashmap_get_bin( const tl_hashmap* this, size_t idx )
     size_t binsize;
     int used;
 
-    if( !this || idx>=this->bincount )
+    assert( this );
+
+    if( idx>=this->bincount )
         return NULL;
 
     used = this->bitmap[ idx / (sizeof(int)*CHAR_BIT) ];
@@ -464,9 +461,9 @@ void* tl_hashmap_entry_get_key( const tl_hashmap* this,
                                 const tl_hashmap_entry* ent )
 {
     char* ptr;
+    (void)this;
 
-    if( !this || !ent )
-        return NULL;
+    assert( this && ent );
 
     ptr = (char*)ent + sizeof(tl_hashmap_entry);
     ALLIGN( ptr );
@@ -479,8 +476,7 @@ void* tl_hashmap_entry_get_value( const tl_hashmap* this,
 {
     char* ptr;
 
-    if( !this || !ent )
-        return NULL;
+    assert( this && ent );
 
     ptr = (char*)ent + sizeof(tl_hashmap_entry);
     ALLIGN( ptr );
@@ -498,8 +494,7 @@ int tl_hashmap_insert( tl_hashmap* this, const void* key,
     char* ptr;
     int mask;
 
-    if( !this || !key || !object )
-        return 0;
+    assert( this && key && object );
 
     get_entry_data( this, &data, key );
 
@@ -540,16 +535,15 @@ int tl_hashmap_set( tl_hashmap* this, const void* key, const void* object )
 {
     void* ptr;
 
-    if( this && key && object )
-    {
-        ptr = tl_hashmap_at( this, key );
+    assert( this && key && object );
 
-        if( ptr )
-        {
-            tl_allocator_cleanup( this->objalloc, ptr, this->objsize, 1 );
-            tl_allocator_copy(this->objalloc, ptr, object, this->objsize, 1);
-            return 1;
-        }
+    ptr = tl_hashmap_at( this, key );
+
+    if( ptr )
+    {
+        tl_allocator_cleanup( this->objalloc, ptr, this->objsize, 1 );
+        tl_allocator_copy(this->objalloc, ptr, object, this->objsize, 1);
+        return 1;
     }
 
     return 0;
@@ -561,8 +555,7 @@ void* tl_hashmap_at( const tl_hashmap* this, const void* key )
     entrydata data;
     char* ptr;
 
-    if( !this || !key )
-        return NULL;
+    assert( this && key );
 
     get_entry_data( this, &data, key );
 
@@ -592,8 +585,7 @@ int tl_hashmap_remove( tl_hashmap* this, const void* key, void* object )
     char* ptr;
     int mask;
 
-    if( !this || !key )
-        return 0;
+    assert( this && key );
 
     get_entry_data( this, &data, key );
 
@@ -666,15 +658,14 @@ int tl_hashmap_is_empty( const tl_hashmap* this )
 {
     size_t i, mapcount;
 
-    if( this )
-    {
-        mapcount = 1 + (this->bincount / (sizeof(int)*CHAR_BIT));
+    assert( this );
 
-        for( i=0; i<mapcount; ++i )
-        {
-            if( this->bitmap[ i ] )
-                return 0;
-        }
+    mapcount = 1 + (this->bincount / (sizeof(int)*CHAR_BIT));
+
+    for( i=0; i<mapcount; ++i )
+    {
+        if( this->bitmap[ i ] )
+            return 0;
     }
 
     return 1;
@@ -684,26 +675,25 @@ tl_iterator* tl_hashmap_get_iterator( tl_hashmap* this )
 {
     tl_hashmap_iterator* it = NULL;
 
-    if( this )
+    assert( this );
+
+    it = malloc( sizeof(tl_hashmap_iterator) );
+
+    if( it )
     {
-        it = malloc( sizeof(tl_hashmap_iterator) );
+        it->map             = this;
+        it->ent             = NULL;
+        it->prev            = NULL;
+        it->idx             = 0;
+        it->super.destroy   = tl_hashmap_iterator_destroy;
+        it->super.reset     = tl_hashmap_iterator_reset;
+        it->super.has_data  = tl_hashmap_iterator_has_data;
+        it->super.next      = tl_hashmap_iterator_next;
+        it->super.get_key   = tl_hashmap_iterator_get_key;
+        it->super.get_value = tl_hashmap_iterator_get_value;
+        it->super.remove    = tl_hashmap_iterator_remove;
 
-        if( it )
-        {
-            it->map             = this;
-            it->ent             = NULL;
-            it->prev            = NULL;
-            it->idx             = 0;
-            it->super.destroy   = tl_hashmap_iterator_destroy;
-            it->super.reset     = tl_hashmap_iterator_reset;
-            it->super.has_data  = tl_hashmap_iterator_has_data;
-            it->super.next      = tl_hashmap_iterator_next;
-            it->super.get_key   = tl_hashmap_iterator_get_key;
-            it->super.get_value = tl_hashmap_iterator_get_value;
-            it->super.remove    = tl_hashmap_iterator_remove;
-
-            tl_hashmap_iterator_reset( (tl_iterator*)it );
-        }
+        tl_hashmap_iterator_reset( (tl_iterator*)it );
     }
 
     return (tl_iterator*)it;

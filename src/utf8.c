@@ -25,6 +25,7 @@
 #define TL_EXPORT
 #include "tl_utf8.h"
 
+#include <assert.h>
 
 
 #define IS_SURROGATE( x ) (((x) >= 0xD800) && ((x) <= 0xDFFF))
@@ -35,6 +36,8 @@ size_t tl_utf8_charcount( const char* utf8 )
 {
     const unsigned char* str = (const unsigned char*)utf8;
     size_t count = 0;
+
+    assert( utf8 );
 
     while( *str )
     {
@@ -50,6 +53,8 @@ size_t tl_utf8_strlen( const char* utf8, size_t chars )
 {
     const unsigned char* str = (const unsigned char*)utf8;
     size_t i=0, count = 0;
+
+    assert( utf8 );
 
     for( i=0; i<chars; ++i )
     {
@@ -70,11 +75,10 @@ unsigned int tl_utf8_decode( const char* utf8, unsigned int* bytecount )
 {
     unsigned char* data = (unsigned char*)utf8;
 
+    assert( utf8 );
+
     if( bytecount )
         *bytecount = 0;
-
-    if( !data )
-        return 0;
 
     if( data[0] < 0x80 )
     {
@@ -129,7 +133,9 @@ unsigned int tl_utf8_encode( char* utf8, unsigned int cp )
 {
     unsigned char* data = (unsigned char*)utf8;
 
-    if( !data || cp>0x10FFFF )
+    assert( utf8 );
+
+    if( cp>0x10FFFF )
         return 0;
 
     if( cp < 0x80 )
@@ -164,8 +170,7 @@ size_t tl_utf8_estimate_utf16_length( const tl_u16* in, size_t charcount )
 {
     size_t i, count;
 
-    if( !in || !charcount )
-        return 0;
+    assert( in );
 
     for( count=0, i=0; i<charcount; ++i )
     {

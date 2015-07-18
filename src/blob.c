@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 
 
 
@@ -46,8 +47,7 @@ static const char* base64_chars_alt =
 
 int tl_blob_init( tl_blob* this, size_t size, const void* data )
 {
-    if( !this )
-        return 0;
+    assert( this );
 
     memset( this, 0, sizeof(tl_blob) );
 
@@ -68,35 +68,36 @@ int tl_blob_init( tl_blob* this, size_t size, const void* data )
 
 void tl_blob_cleanup( tl_blob* this )
 {
-    if( this )
-    {
-        free( this->data );
-        memset( this, 0, sizeof(tl_blob) );
-    }
+    assert( this );
+
+    free( this->data );
+    memset( this, 0, sizeof(tl_blob) );
 }
 
 int tl_blob_copy( tl_blob* this, const tl_blob* src )
 {
-    return this && src && tl_blob_init( this, src->size, src->data );
+    assert( this && src );
+    return tl_blob_init( this, src->size, src->data );
 }
 
 int tl_blob_copy_range( tl_blob* this, const tl_blob* src,
                         size_t offset, size_t size )
 {
-    if( !this || !src ) return 0;
+    assert( this && src );
     CLAMP_SIZE( src, offset, size );
     return tl_blob_init( this, size, (char*)src->data + offset );
 }
 
 int tl_blob_append( tl_blob* this, const tl_blob* src )
 {
-    return this && src && tl_blob_append_raw( this, src->data, src->size );
+    assert( this && src );
+    return tl_blob_append_raw( this, src->data, src->size );
 }
 
 int tl_blob_append_range( tl_blob* this, const tl_blob* src,
                           size_t offset, size_t size )
 {
-    if( !this || !src ) return 0;
+    assert( this && src );
     CLAMP_SIZE( src, offset, size );
     return tl_blob_append_raw( this, (char*)src->data + offset, size );
 }
@@ -105,11 +106,14 @@ int tl_blob_append_raw( tl_blob* this, const void* src, size_t size )
 {
     void* new;
 
-    if( !this ) return 0;
-    if( !size ) return 1;
+    assert( this );
+
+    if( !size )
+        return 1;
 
     new = realloc( this->data, this->size + size );
-    if( !new  ) return 0;
+    if( !new )
+        return 0;
 
     if( src )
         memcpy( (char*)new + this->size, src, size );
@@ -121,8 +125,7 @@ int tl_blob_append_raw( tl_blob* this, const void* src, size_t size )
 
 int tl_blob_split( tl_blob* this, tl_blob* src, size_t offset )
 {
-    if( !this || !src )
-        return 0;
+    assert( this && src );
 
     if( !offset )
     {
@@ -157,7 +160,8 @@ int tl_blob_insert_raw( tl_blob* this, const void* src,
 {
     void* new;
 
-    if( !this   ) return 0;
+    assert( this );
+
     if( !length ) return 1;
     new = realloc( this->data, this->size + length );
     if( !new    ) return 0;
@@ -178,7 +182,7 @@ int tl_blob_insert_raw( tl_blob* this, const void* src,
 int tl_blob_insert( tl_blob* this, const tl_blob* src,
                     size_t dstoffset, size_t srcoffset, size_t length )
 {
-    if( !this || !src ) return 0;
+    assert( this && src );
     CLAMP_SIZE( src, srcoffset, length );
     return tl_blob_insert_raw( this, (char*)src->data + srcoffset,
                                dstoffset, length );
@@ -188,7 +192,9 @@ void tl_blob_remove( tl_blob* this, size_t offset, size_t length )
 {
     void* new;
 
-    if( this && length && (offset < this->size) )
+    assert( this );
+
+    if( length && (offset < this->size) )
     {
         if( (offset+length) >= this->size )
         {
@@ -211,7 +217,9 @@ void tl_blob_truncate( tl_blob* this, size_t offset )
 {
     void* new;
 
-    if( this && (offset < this->size) )
+    assert( this );
+
+    if( offset < this->size )
     {
         if( offset )
         {
@@ -234,7 +242,9 @@ int tl_blob_guess_encoding( tl_blob* this )
     unsigned int a, b;
     size_t count, i;
 
-    if( !this || !this->size )
+    assert( this );
+
+    if( !this->size )
         return TL_BLOB_UNKNOWN;
 
     count = this->size < 100 ? this->size : 100;    /* sample to analize */
@@ -340,8 +350,7 @@ int tl_blob_encode_base64( tl_blob* this, const tl_blob* input, int use_alt )
     size_t size, i;
     char* dst;
 
-    if( !this || !input )
-        return 0;
+    assert( this && input );
 
     /* determine size */
     size = 4 * (input->size / 3);
@@ -395,8 +404,7 @@ int tl_blob_decode_base64( tl_blob* this, const tl_blob* input,
     const char* src;
     int idx;
 
-    if( !this || !input )
-        return 0;
+    assert( this && input );
 
     /* determine exact size of decoded data and sanity check the input */
     src = input->data;
@@ -476,8 +484,7 @@ void tl_blob_unicode_byteswap( tl_blob* this, int encoding )
     unsigned int a;
     size_t i;
 
-    if( !this )
-        return;
+    assert( this );
 
     ptr = this->data;
 

@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <assert.h>
 #include <pwd.h>
 
 
@@ -41,44 +42,39 @@ const char* tl_fs_get_dir_sep( void )
 int tl_fs_exists( const char* path )
 {
     struct stat sb;
-
-    return path && stat( path, &sb )==0;
+    assert( path );
+    return stat( path, &sb )==0;
 }
 
 int tl_fs_is_directory( const char* path )
 {
     struct stat sb;
-
-    return path && stat( path, &sb )==0 && S_ISDIR(sb.st_mode);
+    assert( path );
+    return stat( path, &sb )==0 && S_ISDIR(sb.st_mode);
 }
 
 int tl_fs_is_symlink( const char* path )
 {
     struct stat sb;
-
-    return path && stat( path, &sb )==0 && S_ISLNK(sb.st_mode);
+    assert( path );
+    return stat( path, &sb )==0 && S_ISLNK(sb.st_mode);
 }
 
 int tl_fs_mkdir( const char* path )
 {
     struct stat sb;
 
-    if( !path )
-        return TL_ERR_ARG;
+    assert( path );
 
     if( stat( path, &sb )==0 )
         return S_ISDIR(sb.st_mode) ? 0 : TL_ERR_EXISTS;
 
-    errno = 0;
     return mkdir( path, S_IRWXU )==0 ? 0 : errno_to_fs( errno );
 }
 
 int tl_fs_cwd( const char* path )
 {
-    if( !path )
-        return TL_ERR_ARG;
-
-    errno = 0;
+    assert( path );
     return chdir( path )==0 ? 0 : errno_to_fs( errno );
 }
 
@@ -86,10 +82,10 @@ int tl_fs_delete( const char* path )
 {
     struct stat sb;
 
-    if( !path || stat( path, &sb )!=0 )
-        return 0;
+    assert( path );
 
-    errno = 0;
+    if( stat( path, &sb )!=0 )
+        return 0;
 
     if( S_ISDIR(sb.st_mode) )
     {
@@ -110,8 +106,7 @@ int tl_fs_get_wd( tl_string* path )
     char* str = NULL;
     char* new;
 
-    if( !path )
-        return 0;
+    assert( path );
 
     /* Benny Hill theme starts playing */
     while( 1 )
@@ -123,7 +118,6 @@ int tl_fs_get_wd( tl_string* path )
         }
 
         str = new;
-        errno = 0;
 
         if( getcwd( str, size ) )
             break;
@@ -153,8 +147,7 @@ int tl_fs_get_user_dir( tl_string* path )
     struct passwd* pw;
     char* dir;
 
-    if( !path )
-        return 0;
+    assert( path );
 
     /* try to get passwd entry */
     pw = getpwuid( getuid( ) );
@@ -196,7 +189,9 @@ tl_u64 tl_fs_get_file_size( const char* path )
 {
     struct stat sb;
 
-    if( path && stat( path, &sb )==0 && !S_ISDIR(sb.st_mode) )
+    assert( path );
+
+    if( stat( path, &sb )==0 && !S_ISDIR(sb.st_mode) )
         return sb.st_size;
 
     return 0;

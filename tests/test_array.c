@@ -128,7 +128,6 @@ int main( void )
     }
 
     /* try some illegal accesses */
-    if(  tl_array_at( NULL,  10  ) ) return EXIT_FAILURE;
     if( !tl_array_at( &avec, 79  ) ) return EXIT_FAILURE;
     if( !tl_array_at( &avec, 89  ) ) return EXIT_FAILURE;
     if(  tl_array_at( &avec, 90  ) ) return EXIT_FAILURE;
@@ -136,18 +135,11 @@ int main( void )
 
     tl_array_remove( &avec, 10000, 50 );
 
-    if( tl_array_set( NULL,   10, vals ) ) return EXIT_FAILURE;
     if( tl_array_set( &avec,  90, vals ) ) return EXIT_FAILURE;
     if( tl_array_set( &avec, 200, vals ) ) return EXIT_FAILURE;
-    if( tl_array_set( &avec,  10, NULL ) ) return EXIT_FAILURE;
 
-    if( tl_array_append( NULL,  vals ) ) return EXIT_FAILURE;
-    if( tl_array_append( &avec, NULL ) ) return EXIT_FAILURE;
-
-    if( tl_array_insert( NULL,   10, vals, 1 ) ) return EXIT_FAILURE;
     if( tl_array_insert( &avec,  90, vals, 1 ) ) return EXIT_FAILURE;
     if( tl_array_insert( &avec, 200, vals, 1 ) ) return EXIT_FAILURE;
-    if( tl_array_insert( &avec,  10, NULL, 1 ) ) return EXIT_FAILURE;
 
     /* copy range */
     tl_array_init( &bvec, sizeof(int), NULL );

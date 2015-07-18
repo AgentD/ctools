@@ -26,6 +26,8 @@
 #include "tl_network.h"
 #include "os.h"
 
+#include <assert.h>
+
 
 
 static int parse_ipv4( const char* s, void* a0 )
@@ -132,8 +134,7 @@ int tl_network_resolve_name( const char* hostname, int proto,
     IN_ADDR addr4;
     size_t i = 0;
 
-    if( !hostname )
-        return 0;
+    assert( hostname );
 
     /* check if hostname is actually a numeric IPv4 address */
     if( parse_ipv4( hostname, &addr4 )>0 )
@@ -217,6 +218,8 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
     SOCKET sockfd;
     int size;
 
+    assert( addr );
+
     winsock_acquire( );
 
     sockfd = create_socket( addr, (void*)addrbuffer, &size );
@@ -249,6 +252,8 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
     int size, flags;
     SOCKET sockfd;
 
+    assert( peer );
+
     winsock_acquire( );
 
     sockfd = create_socket( peer, addrbuffer, &size );
@@ -276,8 +281,7 @@ fail:
 
 int tl_network_get_special_address( tl_net_addr* addr, int type, int net )
 {
-    if( !addr )
-        return 0;
+    assert( addr );
 
     addr->net = net;
 
@@ -310,8 +314,7 @@ int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
     unsigned char buffer[ 64 ];
     int len;
 
-    if( !stream || !addr )
-        return 0;
+    assert( stream && addr );
 
     if( (w32->flags & WSTR_TYPE_MASK) == WSTR_UDPBUF )
     {
@@ -339,8 +342,7 @@ int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
     int len = sizeof(buffer);
     int status;
 
-    if( !stream || !addr )
-        return 0;
+    assert( stream && addr );
 
     if( (w32->flags & WSTR_TYPE_MASK) == WSTR_UDPBUF )
     {

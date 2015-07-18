@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <string.h>
+#include <assert.h>
 
 
 
@@ -125,12 +126,9 @@ int tl_dir_scan( const char* path, tl_array* list )
     tl_string str;
     DIR* dir;
 
-    if( !list || !path )
-        return TL_ERR_ARG;
+    assert( list && path );
 
     /* open directory */
-    errno = 0;
-
     if( !(dir = opendir( path )) )
         return errno_to_fs( errno );
 

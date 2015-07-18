@@ -28,6 +28,8 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
+#include <assert.h>
+
 
 
 typedef struct
@@ -41,6 +43,7 @@ tcp_server;
 
 static void tcp_destroy( tl_server* this )
 {
+    assert( this );
     close( ((tcp_server*)this)->socket );
     free( this );
 }
@@ -49,6 +52,8 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 {
     tcp_server* this = (tcp_server*)super;
     int peer;
+
+    assert( this );
 
     if( !wait_for_fd( this->socket, timeout, 0 ) )
         return NULL;

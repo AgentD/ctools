@@ -25,6 +25,7 @@
 #define TL_EXPORT
 #include "tl_utf16.h"
 
+#include <assert.h>
 
 
 #define IS_SURROGATE( x ) (((x) >= 0xD800) && ((x) <= 0xDFFF))
@@ -41,21 +42,20 @@ size_t tl_utf16_charcount( const tl_u16* str )
 {
     size_t count = 0;
 
-    if( str )
-    {
-        while( *str )
-        {
-            if( IS_LEAD_SURROGATE( str[0] ) )
-            {
-                if( IS_TRAIL_SURROGATE( str[1] ) )
-                {
-                    ++str;
-                }
-            }
+    assert( str );
 
-            ++count;
-            ++str;
+    while( *str )
+    {
+        if( IS_LEAD_SURROGATE( str[0] ) )
+        {
+            if( IS_TRAIL_SURROGATE( str[1] ) )
+            {
+                ++str;
+            }
         }
+
+        ++count;
+        ++str;
     }
 
     return count;
@@ -64,6 +64,8 @@ size_t tl_utf16_charcount( const tl_u16* str )
 size_t tl_utf16_strlen( const tl_u16* str, size_t chars )
 {
     size_t i, count = 0;
+
+    assert( str );
 
     for( i=0; i<chars; ++i )
     {
@@ -87,8 +89,7 @@ unsigned int tl_utf16_decode( const tl_u16* utf16, unsigned int* count )
     if( count )
         *count = 0;
 
-    if( !utf16 )
-        return 0;
+    assert( utf16 );
 
     if( IS_SURROGATE(*utf16) )
     {
@@ -106,8 +107,7 @@ unsigned int tl_utf16_decode( const tl_u16* utf16, unsigned int* count )
 
 unsigned int tl_utf16_encode( tl_u16* utf16, unsigned int cp )
 {
-    if( !utf16 )
-        return 0;
+    assert( utf16 );
 
     if( cp < 0x10000 )
     {
@@ -125,6 +125,8 @@ size_t tl_utf16_estimate_utf8_length( const char* str, size_t chars )
     const unsigned char* ptr = (const unsigned char*)str;
     size_t i, count;
 
+    assert( str );
+
     for( i=0, count=0; *ptr && i<chars; ++ptr )
     {
         if( (*ptr & 0xC0) == 0x80 )
@@ -139,9 +141,8 @@ size_t tl_utf16_estimate_utf8_length( const char* str, size_t chars )
 
 int tl_utf16_compare( const tl_u16* a, const tl_u16* b )
 {
-    if( !a && !b ) return  0;    /* both are "empty" => equal */
-    if( !a       ) return -1;    /* a is "empty", b is not => a < b */
-    if( !b       ) return  1;    /* b is "empty", a is not => a > b */
+    assert( a );
+    assert( b );
 
     while( (*a) && (*b) )
     {

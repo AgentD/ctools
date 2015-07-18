@@ -26,10 +26,13 @@
 #include "tl_iostream.h"
 #include "os.h"
 
+#include <assert.h>
+
 
 
 static void pipestream_destroy( tl_iostream* this )
 {
+    assert( this );
     CloseHandle( ((pipestream*)this)->rhnd );
     CloseHandle( ((pipestream*)this)->whnd );
     free( this );
@@ -39,6 +42,8 @@ static int pipestream_set_timeout( tl_iostream* super, unsigned int timeout )
 {
     pipestream* this = (pipestream*)super;
     COMMTIMEOUTS ct;
+
+    assert( this );
 
     if( timeout )
     {
@@ -74,8 +79,7 @@ static int pipestream_write( tl_iostream* super, const void* buffer,
     if( actual )
         *actual = 0;
 
-    if( !this || !buffer )
-        return TL_ERR_INTERNAL;
+    assert( this && buffer );
 
     if( this->whnd==INVALID_HANDLE_VALUE )
         return TL_ERR_NOT_SUPPORTED;
@@ -102,8 +106,7 @@ static int pipestream_read( tl_iostream* super, void* buffer, size_t size,
     if( actual )
         *actual = 0;
 
-    if( !this || !buffer )
-        return TL_ERR_INTERNAL;
+    assert( this && buffer );
 
     if( this->rhnd==INVALID_HANDLE_VALUE )
         return TL_ERR_NOT_SUPPORTED;

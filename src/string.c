@@ -31,6 +31,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 
 
@@ -89,15 +90,14 @@ int tl_string_init( tl_string* this )
 {
     unsigned char null = 0;
 
-    if( this )
+    assert( this );
+
+    memset( this, 0, sizeof(tl_string) );
+    tl_array_init( &(this->data), 1, NULL );
+    if( !tl_array_append( &(this->data), &null ) )
     {
-        memset( this, 0, sizeof(tl_string) );
-        tl_array_init( &(this->data), 1, NULL );
-        if( !tl_array_append( &(this->data), &null ) )
-        {
-            tl_array_cleanup( &(this->data) );
-            return 0;
-        }
+        tl_array_cleanup( &(this->data) );
+        return 0;
     }
 
     return 1;
@@ -105,56 +105,57 @@ int tl_string_init( tl_string* this )
 
 void tl_string_cleanup( tl_string* this )
 {
-    if( this )
-    {
-        tl_array_cleanup( &(this->data) );
-        memset( this, 0, sizeof(tl_string) );
-    }
+    assert( this );
+
+    tl_array_cleanup( &(this->data) );
+    memset( this, 0, sizeof(tl_string) );
 }
 
 int tl_string_copy( tl_string* this, const tl_string* src )
 {
     tl_array dst;
 
-    if( this )
-    {
-        if( !tl_array_copy( &dst, &(src->data) ) )
-            return 0;
+    assert( this );
+    assert( src );
 
-        tl_array_cleanup( &(this->data) );
+    if( !tl_array_copy( &dst, &(src->data) ) )
+        return 0;
 
-        this->data      = dst;
-        this->charcount = src->charcount;
-        this->mbseq     = src->mbseq;
-    }
+    tl_array_cleanup( &(this->data) );
+
+    this->data      = dst;
+    this->charcount = src->charcount;
+    this->mbseq     = src->mbseq;
     return 1;
 }
 
 size_t tl_string_characters( const tl_string* this )
 {
-    return this ? this->charcount : 0;
+    assert( this );
+    return this->charcount;
 }
 
 size_t tl_string_length( const tl_string* this )
 {
-    return this ? (this->data.used - 1) : 0;
+    assert( this );
+    return (this->data.used - 1);
 }
 
 void tl_string_clear( tl_string* this )
 {
-    if( this )
-    {
-        tl_array_resize( &(this->data), 1, 0 );
-        *((unsigned char*)this->data.data) = 0;
+    assert( this );
 
-        this->charcount = 0;
-        this->mbseq = 0;
-    }
+    tl_array_resize( &(this->data), 1, 0 );
+    *((unsigned char*)this->data.data) = 0;
+
+    this->charcount = 0;
+    this->mbseq = 0;
 }
 
 int tl_string_is_empty( const tl_string* this )
 {
-    return (!this) || (this->charcount==0);
+    assert( this );
+    return (this->charcount==0);
 }
 
 unsigned int tl_string_at( const tl_string* this, size_t idx )
@@ -162,7 +163,9 @@ unsigned int tl_string_at( const tl_string* this, size_t idx )
     const unsigned char* ptr;
     size_t i;
 
-    if( this && (idx < this->charcount) )
+    assert( this );
+
+    if( idx < this->charcount )
     {
         if( idx < this->mbseq )
             return ((const unsigned char*)this->data.data)[ idx ];
@@ -186,7 +189,8 @@ unsigned int tl_string_at( const tl_string* this, size_t idx )
 
 char* tl_string_cstr( tl_string* this )
 {
-    return this ? this->data.data : NULL;
+    assert( this );
+    return this->data.data;
 }
 
 int tl_string_append_code_point( tl_string* this, unsigned int cp )
@@ -194,7 +198,9 @@ int tl_string_append_code_point( tl_string* this, unsigned int cp )
     unsigned char val[8];
     unsigned int count;
 
-    if( !this || IS_SURROGATE(cp) || cp>UNICODE_MAX || cp==BOM || cp==BOM2 )
+    assert( this );
+
+    if( IS_SURROGATE(cp) || cp>UNICODE_MAX || cp==BOM || cp==BOM2 )
         return 0;
 
     count = tl_utf8_encode( (char*)val, cp );
@@ -214,25 +220,22 @@ int tl_string_append_code_point( tl_string* this, unsigned int cp )
 
 int tl_string_append_utf8( tl_string* this, const char* utf8 )
 {
-    if( !this ) return 0;
-    if( !utf8 ) return 1;
-
+    assert( this );
+    assert( utf8 );
     return tl_string_append_utf8_count( this, utf8, tl_utf8_charcount(utf8) );
 }
 
 int tl_string_append_latin1( tl_string* this, const char* latin1 )
 {
-    if( !this   ) return 0;
-    if( !latin1 ) return 1;
-
+    assert( this );
+    assert( latin1 );
     return tl_string_append_latin1_count( this, latin1, strlen( latin1 ) );
 }
 
 int tl_string_append_utf16( tl_string* this, const tl_u16* str )
 {
-    if( !this ) return 0;
-    if( !str  ) return 1;
-
+    assert( this );
+    assert( str );
     return tl_string_append_utf16_count( this, str, tl_utf16_charcount(str) );
 }
 
@@ -243,9 +246,11 @@ int tl_string_append_utf8_count( tl_string* this, const char* utf8,
     size_t u8len, i, j, k, len;
     unsigned char* dst;
 
-    if( !this                                    ) return 0;
-    if( !utf8 || !count                          ) return 1;
-    if( !(u8len = tl_utf8_strlen( utf8, count )) ) return 1;
+    assert( this );
+    assert( utf8 );
+
+    if( !count || !(u8len = tl_utf8_strlen( utf8, count )) )
+        return 1;
 
     if( !tl_array_reserve( &(this->data), this->data.used+u8len ) )
         return 0;
@@ -298,8 +303,11 @@ int tl_string_append_latin1_count( tl_string* this, const char* latin1,
     unsigned char* dst;
     size_t i, len;
 
-    if( !this             ) return 0;
-    if( !latin1 || !count ) return 1;
+    assert( this );
+    assert( latin1 );
+
+    if( !count )
+        return 1;
 
     for( i=0, len=0; i<count && src[i]; ++i )
         len += (src[i] & 0x80) ? 2 : 1;
@@ -336,8 +344,11 @@ int tl_string_append_utf16_count( tl_string* this, const tl_u16* str,
     size_t i, j, len, codeunits;
     unsigned int cp;
 
-    if( !this          ) return 0;
-    if( !str || !count ) return 1;
+    assert( this );
+    assert( str );
+
+    if( !count )
+        return 1;
 
     len = tl_utf8_estimate_utf16_length( str, count );
     codeunits = tl_utf16_strlen( str, count );
@@ -371,8 +382,7 @@ int tl_string_append_uint( tl_string* this, unsigned long value, int base )
     char buffer[ 128 ];     /* enough for a 128 bit number in base 2 */
     int digit, i = sizeof(buffer)-1;
 
-    if( !this )
-        return 0;
+    assert( this );
 
     if( !value )
     {
@@ -399,8 +409,7 @@ int tl_string_append_int( tl_string* this, long value, int base )
     char buffer[ 129 ];     /* enough for a 128 bit number in base 2 + sign */
     int digit, i = sizeof(buffer)-1, sign = 0;
 
-    if( !this )
-        return 0;
+    assert( this );
 
     if( !value )
     {
@@ -433,9 +442,7 @@ int tl_string_append_int( tl_string* this, long value, int base )
 
 size_t tl_string_utf16_len( const tl_string* this )
 {
-    if( !this || !this->charcount )
-        return 0;
-
+    assert( this );
     return tl_utf16_estimate_utf8_length( this->data.data, this->charcount );
 }
 
@@ -448,14 +455,11 @@ size_t tl_string_to_utf16( const tl_string* this, tl_u16* buffer,
     size_t i, j;
     tl_u16* dst;
 
-    if( !buffer || !size )
-        return 0;
+    assert( this );
+    assert( buffer );
 
-    if( !this || !this->charcount )
-    {
-        *buffer = '\0';
+    if( !size )
         return 0;
-    }
 
     src = this->data.data;
     dst = buffer;
@@ -483,7 +487,9 @@ unsigned int tl_string_last( const tl_string* this )
     const unsigned char* ptr;
     unsigned int cp = 0;
 
-    if( this && this->charcount )
+    assert( this );
+
+    if( this->charcount )
     {
         ptr = (const unsigned char*)this->data.data + this->data.used - 2;
         while( (*ptr & 0xC0)==0x80 )
@@ -498,7 +504,9 @@ void tl_string_drop_last( tl_string* this )
 {
     unsigned char* ptr;
 
-    if( this && this->charcount )
+    assert( this );
+
+    if( this->charcount )
     {
         ptr = (unsigned char*)this->data.data + this->data.used - 2;
         while( (*ptr & 0xC0)==0x80 )
@@ -517,9 +525,8 @@ void tl_string_drop_last( tl_string* this )
 
 int tl_string_compare( const tl_string* this, const tl_string* other )
 {
-    if( !this && !other ) return  0;    /* both are "empty" => equal */
-    if( !this           ) return -1;    /* a is "empty", b is not => a < b */
-    if( !other          ) return  1;    /* b is "empty", a is not => a > b */
+    assert( this );
+    assert( other );
 
     return strcmp( this->data.data, other->data.data );
 }

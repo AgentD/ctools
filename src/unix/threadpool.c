@@ -27,6 +27,8 @@
 #include "tl_allocator.h"
 #include "os.h"
 
+#include <assert.h>
+
 
 
 typedef struct tl_task
@@ -181,6 +183,8 @@ void tl_threadpool_destroy( tl_threadpool* this )
     unsigned int i;
     tl_task* t;
 
+    assert( this );
+
     /* terminate threads */
     pthread_mutex_lock( &(this->mutex) );
     this->shutdown = 1;
@@ -214,6 +218,8 @@ int tl_threadpool_add_task( tl_threadpool* this,
                             size_t tasksize, tl_allocator* alloc )
 {
     tl_task* task;
+
+    assert( this && function );
 
     task = malloc( sizeof(tl_task) + tasksize );
     if( !task )
@@ -271,6 +277,8 @@ int tl_threadpool_add_task( tl_threadpool* this,
 void tl_threadpool_stats( tl_threadpool* this,
                           size_t* total, size_t* done )
 {
+    assert( this );
+
     pthread_mutex_lock( &(this->mutex) );
     if( total )
         *total = this->total;
@@ -283,6 +291,8 @@ int tl_threadpool_wait( tl_threadpool* this, unsigned long timeout )
 {
     struct timespec ts;
     int status = 1;
+
+    assert( this );
 
     pthread_mutex_lock( &(this->mutex) );
     if( timeout > 0 )

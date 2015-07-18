@@ -25,6 +25,7 @@
 #define TL_EXPORT
 #include "tl_opt.h"
 #include <string.h>
+#include <assert.h>
 
 
 #define SET_FLAG( field, flag, value )\
@@ -120,7 +121,9 @@ int tl_process_args( tl_option* options, size_t num_options,
     const char* arg;
     size_t j=0, len;
 
-    if( !options || !num_options || !argc || !argv )
+    assert( options && argc && argv );
+
+    if( !num_options )
         return 0;
 
     while( i < (*argc) )

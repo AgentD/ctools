@@ -28,6 +28,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 
 
@@ -276,8 +277,7 @@ tl_rbtree_node* tl_rbtree_node_create( const tl_rbtree* tree,
     tl_rbtree_node* node;
     unsigned char* ptr;
 
-    if( !tree )
-        return NULL;
+    assert( tree );
 
     node = malloc( sizeof(tl_rbtree_node) + 2*PADDING +
                    tree->keysize + tree->valuesize );
@@ -314,9 +314,9 @@ void* tl_rbtree_node_get_key( const tl_rbtree* tree,
                               const tl_rbtree_node* node )
 {
     char* ptr;
+    (void)tree;
 
-    if( !tree || !node )
-        return NULL;
+    assert( tree && node );
 
     ptr = (char*)node + sizeof(tl_rbtree_node);
     ALLIGN( ptr );
@@ -329,8 +329,7 @@ void* tl_rbtree_node_get_value( const tl_rbtree* tree,
 {
     char* ptr;
 
-    if( !tree || !node )
-        return NULL;
+    assert( tree && node );
 
     ptr = (char*)node + sizeof(tl_rbtree_node);
     ALLIGN( ptr );
@@ -348,7 +347,7 @@ static tl_rbtree_node* copy_subtree( const tl_rbtree* this,
     char* value;
     char* key;
 
-    if( !this || !src )
+    if( !src )
         return NULL;
 
     /* create a copy node */
@@ -377,34 +376,31 @@ void tl_rbtree_init( tl_rbtree* this, size_t keysize, size_t valuesize,
                      tl_compare comparefun, tl_allocator* keyalloc,
                      tl_allocator* valalloc )
 {
-    if( this )
-    {
-        this->root = NULL;
-        this->size = 0;
-        this->compare = comparefun;
-        this->keysize = keysize;
-        this->valuesize = valuesize;
-        this->keyalloc = keyalloc;
-        this->valalloc = valalloc;
-    }
+    assert( this );
+
+    this->root = NULL;
+    this->size = 0;
+    this->compare = comparefun;
+    this->keysize = keysize;
+    this->valuesize = valuesize;
+    this->keyalloc = keyalloc;
+    this->valalloc = valalloc;
 }
 
 void tl_rbtree_cleanup( tl_rbtree* this )
 {
-    if( this )
-    {
-        node_recursive_delete( this->root, this );
-        this->root = NULL;
-        this->size = 0;
-    }
+    assert( this );
+
+    node_recursive_delete( this->root, this );
+    this->root = NULL;
+    this->size = 0;
 }
 
 int tl_rbtree_copy( tl_rbtree* this, const tl_rbtree* src )
 {
     tl_rbtree_node* newroot;
 
-    if( !this || !src )
-        return 0;
+    assert( this && src );
 
     /* create a copy of the source tree */
     newroot = copy_subtree( src, src->root );
@@ -428,8 +424,7 @@ int tl_rbtree_insert( tl_rbtree* this, const void* key, const void* value )
 {
     tl_rbtree_node* node;
 
-    if( !this || !key )
-        return 0;
+    assert( this && key );
 
     node = tl_rbtree_node_create( this, key, value );
 
@@ -448,8 +443,7 @@ void* tl_rbtree_at( const tl_rbtree* this, const void* key )
     tl_rbtree_node* node;
     void* nodekey;
 
-    if( !this || !key )
-        return NULL;
+    assert( this && key );
 
     node = this->root;
 
@@ -472,8 +466,7 @@ int tl_rbtree_set( tl_rbtree* this, const void* key, const void* value )
 {
     void* ptr;
 
-    if( !this || !key || !value )
-        return 0;
+    assert( this && key && value );
 
     if( !(ptr = tl_rbtree_at( this, key )) )
         return 0;
@@ -487,7 +480,9 @@ int tl_rbtree_get_min( const tl_rbtree* this, void** key, void** value )
 {
     tl_rbtree_node* n;
 
-    if( !this || !this->root )
+    assert( this );
+
+    if( !this->root )
         return 0;
 
     if( !key && !value )
@@ -508,7 +503,9 @@ int tl_rbtree_get_max( const tl_rbtree* this, void** key, void** value )
 {
     tl_rbtree_node* n;
 
-    if( !this || !this->root )
+    assert( this );
+
+    if( !this->root )
         return 0;
 
     if( !key && !value )
@@ -527,7 +524,9 @@ int tl_rbtree_get_max( const tl_rbtree* this, void** key, void** value )
 
 void tl_rbtree_remove_min( tl_rbtree* this )
 {
-    if( !this || !(this->size) )
+    assert( this );
+
+    if( !(this->size) )
         return;
 
     /* hack for tree balancing algorithm */
@@ -544,7 +543,9 @@ void tl_rbtree_remove_min( tl_rbtree* this )
 
 void tl_rbtree_remove_max( tl_rbtree* this )
 {
-    if( !this || !(this->size) )
+    assert( this );
+
+    if( !(this->size) )
         return;
 
     /* hack for tree balancing algorithm */
@@ -565,7 +566,9 @@ int tl_rbtree_remove( tl_rbtree* this, const void* key, void* value )
     tl_rbtree_node* node;
     char* ptr;
 
-    if( !this || !key || !this->size )
+    assert( this && key );
+
+    if( !this->size )
         return 0;
 
     /* find node */
@@ -606,16 +609,16 @@ int tl_rbtree_remove( tl_rbtree* this, const void* key, void* value )
 
 int tl_rbtree_is_empty( const tl_rbtree* this )
 {
-    return !this || (this->size == 0);
+    assert( this );
+    return (this->size == 0);
 }
 
 void tl_rbtree_clear( tl_rbtree* this )
 {
-    if( this )
-    {
-        node_recursive_delete( this->root, this );
-        this->root = NULL;
-        this->size = 0;
-    }
+    assert( this );
+
+    node_recursive_delete( this->root, this );
+    this->root = NULL;
+    this->size = 0;
 }
 
