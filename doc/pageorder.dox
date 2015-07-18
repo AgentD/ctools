@@ -1,0 +1,13 @@
+/**
+\page compiling Compiling the library from source
+\page containers Containers
+\page kvcontainers Key-Value-Containers
+\page sorting Sorting Algorithms
+\page hash Hash and Check Sum Algorithms
+\page stringproc String processing functions
+\page filesystem Filesystem
+\page io Input/Output
+\page conc Concurrency
+\page interfaces Interfaces
+\page util Miscellaneous Utilities
+*/

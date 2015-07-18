@@ -50,8 +50,8 @@
  * code using it to handle packets and addresses propperly.
  *
  * Note that for some tl_packetserver implementations there are also tl_server
- * implementations that implement emulate connection based communication and
- * handle client demultiplexing.
+ * implementations that emulate connection based communication and handle
+ * client demultiplexing internally.
  *
  * A tl_packetserver is prefereable for applications like sending broadcast
  * packets and receiving answers to broadcasts, or implementing protocols

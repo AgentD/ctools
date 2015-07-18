@@ -115,7 +115,8 @@ WARN_LOGFILE           =
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
 
-INPUT                  = @CMAKE_SOURCE_DIR@/include/
+INPUT                  = @CMAKE_SOURCE_DIR@/doc/pageorder.dox
+INPUT                 += @CMAKE_SOURCE_DIR@/include/
 INPUT                 += @CMAKE_SOURCE_DIR@/doc/
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h
