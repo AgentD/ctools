@@ -156,6 +156,7 @@ add_library( ctools ${TYPE} src/array.c
 
 if( SHARED )
   target_link_libraries( ctools ${CTOOLS_SYSLIBS} )
+  set_target_properties( ctools PROPERTIES SOVERSION "0.1" )
 
   if( WIN32 )
     set_target_properties( ctools PROPERTIES PREFIX "" )
@@ -224,4 +225,35 @@ if( DOXYGEN_FOUND )
                        VERBATIM
                      )
 endif( )
+
+#----------------------------------------------------------------------
+# configure installation
+#----------------------------------------------------------------------
+install( FILES include/tl_allocator.h
+               include/tl_array.h
+               include/tl_blob.h
+               include/tl_dir.h
+               include/tl_fs.h
+               include/tl_hash.h
+               include/tl_hashmap.h
+               include/tl_iostream.h
+               include/tl_iterator.h
+               include/tl_list.h
+               include/tl_network.h
+               include/tl_opt.h
+               include/tl_packetserver.h
+               include/tl_predef.h
+               include/tl_process.h
+               include/tl_rbtree.h
+               include/tl_server.h
+               include/tl_sort.h
+               include/tl_string.h
+               include/tl_thread.h
+               include/tl_threadpool.h
+               include/tl_utf16.h
+               include/tl_utf8.h
+         DESTINATION include )
+
+install( TARGETS ctools LIBRARY DESTINATION lib
+                        ARCHIVE DESTINATION lib )
 
