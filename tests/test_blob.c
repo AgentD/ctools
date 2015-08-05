@@ -118,27 +118,7 @@ int main( void )
         ((unsigned char*)b0.data)[i+1] = ~i;
     }
 
-    tl_blob_unicode_byteswap( &b0, TL_BLOB_UTF8 );
-    if( b0.size!=20 || !b0.data )
-        return EXIT_FAILURE;
-    for( i=0; i<20; i+=2 )
-    {
-        if( ((unsigned char*)b0.data)[i]!=i ||
-            ((unsigned char*)b0.data)[i+1]!=(~i & 0xFF) )
-            return EXIT_FAILURE;
-    }
-
-    tl_blob_unicode_byteswap( &b0, TL_BLOB_BASE64 );
-    if( b0.size!=20 || !b0.data )
-        return EXIT_FAILURE;
-    for( i=0; i<20; i+=2 )
-    {
-        if( ((unsigned char*)b0.data)[i]!=i ||
-            ((unsigned char*)b0.data)[i+1]!=(~i & 0xFF) )
-            return EXIT_FAILURE;
-    }
-
-    tl_blob_unicode_byteswap( &b0, TL_BLOB_UTF16_LE );
+    tl_blob_byteswap( &b0, 2 );
     if( b0.size!=20 || !b0.data )
         return EXIT_FAILURE;
     for( i=0; i<20; i+=2 )
@@ -148,7 +128,7 @@ int main( void )
             return EXIT_FAILURE;
     }
 
-    tl_blob_unicode_byteswap( &b0, TL_BLOB_UTF16_LE );
+    tl_blob_byteswap( &b0, 2 );
     if( b0.size!=20 || !b0.data )
         return EXIT_FAILURE;
     for( i=0; i<20; i+=2 )
@@ -166,7 +146,7 @@ int main( void )
         ((unsigned char*)b0.data)[i+3] = i*4 + 4;
     }
 
-    tl_blob_unicode_byteswap( &b0, TL_BLOB_UTF32_LE );
+    tl_blob_byteswap( &b0, 4 );
     if( b0.size!=20 || !b0.data )
         return EXIT_FAILURE;
 
@@ -178,7 +158,7 @@ int main( void )
         if( ((unsigned char*)b0.data)[i  ] != (i*4 + 4) ) return EXIT_FAILURE;
     }
 
-    tl_blob_unicode_byteswap( &b0, TL_BLOB_UTF32_LE );
+    tl_blob_byteswap( &b0, 4 );
     if( b0.size!=20 || !b0.data )
         return EXIT_FAILURE;
 

@@ -37,10 +37,9 @@
  * \section tl_blob The tl_blob structure
  *
  * The tl_blob data structure allows managing a blob of bytes and allows
- * various encoding transformation operations, i.e. guessing the encoding
- * of using \ref tl_blob_guess_encoding base64 encoding of the blob data
- * using \ref tl_blob_encode_base64 and \ref tl_blob_decode_base64, et
- * cetera.
+ * various encoding transformation operations, e.g. base64 encoding of
+ * the blob data using \ref tl_blob_encode_base64 and
+ * \ref tl_blob_decode_base64, et cetera.
  *
  * The tl_blob data structure also has various operations for inserting,
  * removing or appending data ranges, however those are way less efficient
@@ -51,41 +50,6 @@
 
 
 #include "tl_predef.h"
-
-
-
-/**
- * \enum TL_BLOB_ENCODING
- *
- * \brief Represents an encoding of a blob
- */
-typedef enum
-{
-    /** \brief The blob has an unknown encoding */
-    TL_BLOB_UNKNOWN = 0,
-
-    /** 
-     * \brief The blob contains ASCII charactes representing a base64 encoded
-     *        version of the original data
-     */
-    TL_BLOB_BASE64 = 1,
-
-    /** \brief The blob contains UTF-8 encoded text */
-    TL_BLOB_UTF8 = 2,
-
-    /** \brief The blob contains little endian UTF-16 encoded text */
-    TL_BLOB_UTF16_LE = 3,
-
-    /** \brief The blob contains big endian UTF-16 encoded text */
-    TL_BLOB_UTF16_BE = 4,
-
-    /** \brief The blob contains big endian UTF-32 encoded text */
-    TL_BLOB_UTF32_LE = 5,
-
-    /** \brief The blob contains big endian UTF-32 encoded text */
-    TL_BLOB_UTF32_BE = 6
-}
-TL_BLOB_ENCODING;
 
 
 
@@ -300,17 +264,6 @@ TLAPI void tl_blob_remove( tl_blob* blob, size_t offset, size_t length );
 TLAPI void tl_blob_truncate( tl_blob* blob, size_t offset );
 
 /**
- * \brief Try to determine the encoding of the data in a blob
- *
- * \memberof tl_blob
- *
- * \param blob A pointer to the blob object
- *
- * \return A \ref TL_BLOB_ENCODING enumerator value
- */
-TLAPI int tl_blob_guess_encoding( tl_blob* blob );
-
-/**
  * \brief Encode a blob using base64
  *
  * \memberof tl_blob
@@ -343,16 +296,14 @@ TLAPI int tl_blob_decode_base64( tl_blob* dst, const tl_blob* src,
                                  int ignoregarbage );
 
 /**
- * \brief Byteswap a UTF-32 or UTF-16 blob
+ * \brief Treat a blob as an array of integers and byteswap them
  *
  * \memberof tl_blob
  *
- * \param blob     A pointer to a blob containing UTF-16 or UTF-32
- *                 encoded data
- * \param encoding A \ref TL_BLOB_ENCODING enumerator value specifying the
- *                 current encoding.
+ * \param blob A pointer to a blob
+ * \param size The sizeof of a signle integer
  */
-TLAPI void tl_blob_unicode_byteswap( tl_blob* blob, int encoding );
+TLAPI void tl_blob_byteswap( tl_blob* blob, int size );
 
 #ifdef __cplusplus
 }
