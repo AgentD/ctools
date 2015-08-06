@@ -94,45 +94,19 @@ endif( )
 #----------------------------------------------------------------------
 # Configure targets
 #----------------------------------------------------------------------
-include_directories( ${CMAKE_SOURCE_DIR}/include/ )
-
 if( UNIX )
   find_package( Threads )
-
-  set( CTOOLS_SYSDEP src/unix/os.c
-                     src/unix/fs.c
-                     src/unix/dir.c
-                     src/unix/network.c
-                     src/unix/process.c
-                     src/unix/thread.c
-                     src/unix/threadpool.c
-                     src/unix/fdstream.c
-                     src/unix/tcpserver.c
-                     src/unix/udpstream.c
-                     src/unix/udpserver.c
-                     src/unix/packetserver.c )
 
   add_definitions( -D_POSIX_SOURCE=1 )
   add_definitions( -D_POSIX_C_SOURCE=200112L )
 
   set( CTOOLS_SYSLIBS ${CMAKE_THREAD_LIBS_INIT} rt )
 elseif( WIN32 )
-  set( CTOOLS_SYSDEP src/W32/os.c
-                     src/W32/fs.c
-                     src/W32/dir.c
-                     src/W32/network.c
-                     src/W32/process.c
-                     src/W32/thread.c
-                     src/W32/threadpool.c
-                     src/W32/sockstream.c
-                     src/W32/pipestream.c
-                     src/W32/tcpserver.c
-                     src/W32/udpstream.c
-                     src/W32/udpserver.c
-                     src/W32/packetserver.c )
-
   set( CTOOLS_SYSLIBS userenv ws2_32 )
 endif( )
+
+include_directories( ${CMAKE_SOURCE_DIR}/core/include/
+                     ${CMAKE_SOURCE_DIR}/os/include/ )
 
 if( SHARED )
   set( TYPE SHARED )
@@ -140,28 +114,8 @@ else( )
   set( TYPE STATIC )
 endif( )
 
-add_library( ctools ${TYPE} src/array.c
-                            src/list.c
-                            src/rbtree.c
-                            src/string.c
-                            src/sort.c
-                            src/hashmap.c
-                            src/utf8.c
-                            src/utf16.c
-                            src/allocator.c
-                            src/blob.c
-                            src/opt.c
-                            src/hash.c
-                            ${CTOOLS_SYSDEP} )
-
-if( SHARED )
-  target_link_libraries( ctools ${CTOOLS_SYSLIBS} )
-  set_target_properties( ctools PROPERTIES SOVERSION "0.1" )
-
-  if( WIN32 )
-    set_target_properties( ctools PROPERTIES PREFIX "" )
-  endif( )
-endif( )
+add_subdirectory( core )
+add_subdirectory( os )
 
 #----------------------------------------------------------------------
 # Configure tests
@@ -170,7 +124,7 @@ enable_testing( )
 
 function( testcase name args )
   add_executable( ${name} tests/${name}.c )
-  target_link_libraries( ${name} ctools ${CTOOLS_SYSLIBS} )
+  target_link_libraries( ${name} tlcore tlos ${CTOOLS_SYSLIBS} )
 
   set( command
        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${name}${CMAKE_EXECUTABLE_SUFFIX}" )
@@ -183,7 +137,7 @@ function( testcase name args )
 endfunction( )
 
 add_executable( childproc tests/childproc.c )
-target_link_libraries( childproc ctools ${CTOOLS_SYSLIBS} )
+target_link_libraries( childproc tlcore tlos ${CTOOLS_SYSLIBS} )
 set( childexe
      "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/childproc${CMAKE_EXECUTABLE_SUFFIX}" )
 
@@ -225,35 +179,4 @@ if( DOXYGEN_FOUND )
                        VERBATIM
                      )
 endif( )
-
-#----------------------------------------------------------------------
-# configure installation
-#----------------------------------------------------------------------
-install( FILES include/tl_allocator.h
-               include/tl_array.h
-               include/tl_blob.h
-               include/tl_dir.h
-               include/tl_fs.h
-               include/tl_hash.h
-               include/tl_hashmap.h
-               include/tl_iostream.h
-               include/tl_iterator.h
-               include/tl_list.h
-               include/tl_network.h
-               include/tl_opt.h
-               include/tl_packetserver.h
-               include/tl_predef.h
-               include/tl_process.h
-               include/tl_rbtree.h
-               include/tl_server.h
-               include/tl_sort.h
-               include/tl_string.h
-               include/tl_thread.h
-               include/tl_threadpool.h
-               include/tl_utf16.h
-               include/tl_utf8.h
-         DESTINATION include )
-
-install( TARGETS ctools LIBRARY DESTINATION lib
-                        ARCHIVE DESTINATION lib )
 
