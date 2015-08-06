@@ -374,9 +374,7 @@ done:
 void tl_blob_byteswap( tl_blob* this, int size )
 {
     unsigned char* ptr;
-    tl_u16 u16;
-    tl_u32 u32;
-    tl_u64 u64;
+    tl_u16 a, b;
     size_t i;
 
     assert( this );
@@ -388,37 +386,46 @@ void tl_blob_byteswap( tl_blob* this, int size )
     {
         for( i=0; i<this->size; i+=2, ptr+=2 )
         {
-            u16 = *((tl_u16*)ptr);
-            u16 = ((u16<<8)&0xFF00) | ((u16>>8)&0x00FF);
-            *((tl_u16*)ptr) = u16;
+            a = *((tl_u16*)ptr);
+            a = ((a<<8)&0xFF00) | ((a>>8)&0x00FF);
+            *((tl_u16*)ptr) = a;
         }
     }
     else if( size==4 )
     {
         for( i=0; i<this->size; i+=4, ptr+=4 )
         {
-            u32 = *((tl_u32*)ptr);
-            u32 = ((u32>>24) & 0x000000FF) |
-                  ((u32>> 8) & 0x0000FF00) |
-                  ((u32<< 8) & 0x00FF0000) |
-                  ((u32<<24) & 0xFF000000);
-            *((tl_u32*)ptr) = u32;
+            a = *( (tl_u16*)ptr     );
+            b = *(((tl_u16*)ptr) + 1);
+
+            a = ((a<<8)&0xFF00) | ((a>>8)&0x00FF);
+            b = ((b<<8)&0xFF00) | ((b>>8)&0x00FF);
+
+            *( (tl_u16*)ptr     ) = b;
+            *(((tl_u16*)ptr) + 1) = a;
         }
     }
     else if( size==8 )
     {
         for( i=0; i<this->size; i+=8, ptr+=8 )
         {
-            u64 = *((tl_u64*)ptr);
-            u64 = ((u64<<56UL) & 0xFF00000000000000UL) |
-                  ((u64<<40UL) & 0x00FF000000000000UL) |
-                  ((u64<<24UL) & 0x0000FF0000000000UL) |
-                  ((u64<< 8UL) & 0x000000FF00000000UL) |
-                  ((u64>> 8UL) & 0x00000000FF000000UL) |
-                  ((u64>>24UL) & 0x0000000000FF0000UL) |
-                  ((u64>>40UL) & 0x000000000000FF00UL) |
-                  ((u64>>56UL) & 0x00000000000000FFUL);
-            *((tl_u64*)ptr) = u64;
+            a = *( (tl_u16*)ptr     );
+            b = *(((tl_u16*)ptr) + 3);
+
+            a = ((a<<8)&0xFF00) | ((a>>8)&0x00FF);
+            b = ((b<<8)&0xFF00) | ((b>>8)&0x00FF);
+
+            *( (tl_u16*)ptr     ) = b;
+            *(((tl_u16*)ptr) + 3) = a;
+
+            a = *(((tl_u16*)ptr) + 1);
+            b = *(((tl_u16*)ptr) + 2);
+
+            a = ((a<<8)&0xFF00) | ((a>>8)&0x00FF);
+            b = ((b<<8)&0xFF00) | ((b>>8)&0x00FF);
+
+            *(((tl_u16*)ptr) + 1) = b;
+            *(((tl_u16*)ptr) + 2) = a;
         }
     }
 }

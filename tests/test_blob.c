@@ -24,7 +24,7 @@ const char* strings[] =
 int main( void )
 {
     unsigned char buffer[ 256 ];
-    unsigned int i;
+    unsigned int i, j;
     tl_blob b0, b1;
 
     /********** initialization **********/
@@ -110,7 +110,7 @@ int main( void )
         tl_blob_cleanup( &b1 );
     }
 
-    /********** unicode byte swapping **********/
+    /********** byte swapping **********/
     tl_blob_init( &b0, 20, NULL );
     for( i=0; i<20; i+=2 )
     {
@@ -168,6 +168,34 @@ int main( void )
         if( ((unsigned char*)b0.data)[i+1] != (i*4 + 2) ) return EXIT_FAILURE;
         if( ((unsigned char*)b0.data)[i+2] != (i*4 + 3) ) return EXIT_FAILURE;
         if( ((unsigned char*)b0.data)[i+3] != (i*4 + 4) ) return EXIT_FAILURE;
+    }
+
+    for( i=0; i<16; i+=8 )
+    {
+        for( j=0; j<8; ++j )
+            ((unsigned char*)b0.data)[i+j] = (i*8 + j);
+    }
+
+    tl_blob_byteswap( &b0, 8 );
+    if( b0.size!=20 || !b0.data )
+        return EXIT_FAILURE;
+
+    for( i=0; i<16; i+=8 )
+    {
+        for( j=0; j<8; ++j )
+            if( ((unsigned char*)b0.data)[i+7-j] != (i*8 + j) )
+                return EXIT_FAILURE;
+    }
+
+    tl_blob_byteswap( &b0, 8 );
+    if( b0.size!=20 || !b0.data )
+        return EXIT_FAILURE;
+
+    for( i=0; i<16; i+=8 )
+    {
+        for( j=0; j<8; ++j )
+            if( ((unsigned char*)b0.data)[i+j] != (i*8 + j) )
+                return EXIT_FAILURE;
     }
 
     tl_blob_cleanup( &b0 );
