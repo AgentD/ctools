@@ -21,6 +21,7 @@
     - UTF-8 dynamic string implementation
     - UTF-8 and UTF-16 string utilities
   - various sorting algorithm implementations
+  - various non-cryptgraphic hash functions
   - command line option parsing
   - abstract filesystem and directory access
   - thread and synchronization primitives
@@ -105,10 +106,17 @@
 
  The root directory contains the following files and directories:
   - CMake/              Containing misc. CMake files (e.g. toolchain files)
-  - include/            Contains library headers
-  - src/                Contains library source
+  - core/               Contains the core library (containers, algorithsm,...)
+    - include/          Contains the core library headers
+    - src/              Contains the core library source
+    - CMakeLists.txt    CMake file for core library
+  - os/                 Contains the OS abstraction library (threads,
+                        network, ...)
+    - include/          Contains the OS library headers
+    - src/              Contains the OS library source
+    - CMakeLists.txt    CMake file for OS library
   - tests/              Contains unit tests
-  - CMakeLists.txt      CMake build system input file
+  - CMakeLists.txt      CMake build system main input file
   - Doxyfile.in         Doxygen input file consumed by build system
   - LICENSE             License file
   - README              The file you are reading right now
