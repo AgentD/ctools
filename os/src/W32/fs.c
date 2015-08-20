@@ -190,7 +190,7 @@ int tl_fs_cwd( const char* path )
     assert( path );
 
     if( !(wpath = utf8_to_utf16( path )) )
-        return TL_ERR_INTERNAL;
+        return TL_ERR_ALLOC;
 
     status = SetCurrentDirectoryW( wpath ) ? 0 : errno_to_fs(GetLastError());
 
@@ -207,7 +207,7 @@ int tl_fs_mkdir( const char* path )
     assert( path );
 
     if( !(wpath = utf8_to_utf16( path )) )
-        return TL_ERR_INTERNAL;
+        return TL_ERR_ALLOC;
 
     attr = GetFileAttributesW( wpath );
 
@@ -237,7 +237,7 @@ int tl_fs_delete( const char* path )
     assert( path );
 
     if( !(wpath = utf8_to_utf16( path )) )
-        return TL_ERR_INTERNAL;
+        return TL_ERR_ALLOC;
 
     attr = GetFileAttributesW( wpath );
 

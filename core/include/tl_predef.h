@@ -115,6 +115,9 @@ typedef enum
     /** \brief A directory could not be deleted because it was empty */
     TL_ERR_NOT_EMPTY = -10,
 
+    /** \brief Out of memory */
+    TL_ERR_ALLOC = -11,
+
     /** \brief A function was called with an invalid argument */
     TL_ERR_ARG = -100
 }

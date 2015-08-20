@@ -47,6 +47,8 @@ int errno_to_fs( int code )
         return TL_ERR_EXISTS;
     case ENOTEMPTY:
         return TL_ERR_NOT_EMPTY;
+    case ENOMEM:
+        return TL_ERR_ALLOC;
     }
 
     return code==0 ? 0 : TL_ERR_INTERNAL;
