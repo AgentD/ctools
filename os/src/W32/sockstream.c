@@ -102,9 +102,8 @@ tl_iostream* sock_stream_create( SOCKET sockfd, int flags )
     if( !this )
         return NULL;
 
-    ((w32stream*)this)->flags = flags;
-
     this->socket       = sockfd;
+    super->flags       = flags;
     super->destroy     = sockstream_destroy;
     super->set_timeout = sockstream_set_timeout;
     super->write       = sockstream_write_raw;

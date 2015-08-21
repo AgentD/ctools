@@ -58,6 +58,30 @@
 
 
 /**
+ * \enum TL_STREAM_FLAG
+ *
+ * \brief Encapsulates the underlying type of a stream and various flags
+ */
+typedef enum
+{
+    /**< \brief A mask to flag out the stream type */
+    TL_STREAM_TYPE_MASK = 0x00FF,
+
+    TL_STREAM_TYPE_PIPE = 0x0000,   /**< \brief The stream is a pipe */
+    TL_STREAM_TYPE_FILE = 0x0001,   /**< \brief The stream is a file */
+    TL_STREAM_TYPE_SOCK = 0x0002,   /**< \brief The stream is a socket */
+
+    /** \brief The stream is a wrapper for a demultiplexed UDP socket */
+    TL_STREAM_TYPE_UDPBUF = 0x0003,
+
+    TL_STREAM_UDP = 0x0100,         /**< \brief Set for UDP sockets */
+    TL_STREAM_TCP = 0x0200          /**< \brief Set for TCP sockets */
+}
+TL_STREAM_FLAG;
+
+
+
+/**
  * \interface tl_iostream
  *
  * \brief Represents an end-to-end connection between two processes, possibly
@@ -65,6 +89,9 @@
  */
 struct tl_iostream
 {
+    /** \brief A combination of \ref TL_STREAM_FLAG flags */
+    int flags;
+
     /**
      * \brief Make sure all pending writes are performed and destroy a stream
      *

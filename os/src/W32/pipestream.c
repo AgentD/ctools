@@ -132,10 +132,9 @@ tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd )
 
     if( this )
     {
-        ((w32stream*)this)->flags = WSTR_PIPE;
-
         this->rhnd         = readhnd;
         this->whnd         = writehnd;
+        super->flags       = TL_STREAM_TYPE_PIPE;
         super->read        = pipestream_read;
         super->write       = pipestream_write;
         super->destroy     = pipestream_destroy;

@@ -60,7 +60,7 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 
     peer = accept( this->socket, NULL, 0 );
     return peer==INVALID_SOCKET ? NULL :
-           sock_stream_create( peer, WSTR_SOCK|WSTR_TCP );
+           sock_stream_create( peer, TL_STREAM_TYPE_SOCK|TL_STREAM_TCP );
 }
 
 /****************************************************************************/

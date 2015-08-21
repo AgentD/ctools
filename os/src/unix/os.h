@@ -53,32 +53,13 @@
 
 
 
-#define USTR_TYPE_MASK 0x0F
-#define USTR_PIPE      0x00
-#define USTR_FILE      0x01
-#define USTR_SOCK      0x03
-#define USTR_UDPBUF    0x04
-#define USTR_UDP       0x10
-#define USTR_TCP       0x20
-
-
-
 typedef struct udp_stream udp_stream;
 typedef struct udp_server udp_server;
 typedef struct fd_stream fd_stream;
-typedef struct unix_stream unix_stream;
-
-
-
-struct unix_stream
-{
-    tl_iostream super;
-    int flags;
-};
 
 struct fd_stream
 {
-    unix_stream super;
+    tl_iostream super;
     int readfd;
     int writefd;
     unsigned int timeout;
@@ -92,7 +73,7 @@ struct tl_monitor
 
 struct udp_stream
 {
-    unix_stream super;
+    tl_iostream super;
     tl_monitor monitor;
     unsigned int timeout;
     udp_stream* next;           /* linked list pointer */
@@ -153,7 +134,7 @@ void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 );
  *
  * \param readpipe  A file descriptor to read from
  * \param writepipe A file descriptor to write to
- * \param flags     Flags to set for the underlying unix_stream structure
+ * \param flags     Flags to set for the underlying tl_iostream structure
  */
 tl_iostream* pipe_stream_create( int readpipe, int writepipe, int flags );
 

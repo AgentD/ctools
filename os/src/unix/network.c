@@ -155,7 +155,8 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
     if( connect( sockfd, (void*)addrbuffer, size ) < 0 )
         goto fail;
 
-    flags = USTR_SOCK | (peer->transport==TL_UDP ? USTR_UDP : USTR_TCP);
+    flags = TL_STREAM_TYPE_SOCK;
+    flags |= (peer->transport==TL_UDP ? TL_STREAM_UDP : TL_STREAM_TCP);
 
     if( !(stream = pipe_stream_create( sockfd, sockfd, flags )) )
         goto fail;
@@ -195,7 +196,6 @@ int tl_network_get_special_address( tl_net_addr* addr, int type, int net )
 
 int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 {
-    unix_stream* unix = (unix_stream*)stream;
     udp_stream* udp = (udp_stream*)stream;
     fd_stream* fd = (fd_stream*)stream;
     unsigned char buffer[ 64 ];
@@ -203,14 +203,14 @@ int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 
     assert( stream && addr );
 
-    if( (unix->flags & USTR_TYPE_MASK) == USTR_UDPBUF )
+    if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_UDPBUF )
     {
         addr->transport = TL_UDP;
         return decode_sockaddr_in( udp->address, udp->addrlen, addr );
     }
-    else if( (unix->flags & USTR_TYPE_MASK) == USTR_SOCK )
+    else if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
     {
-        addr->transport = (unix->flags & USTR_UDP) ? TL_UDP : TL_TCP;
+        addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
         len = sizeof(buffer);
 
         if( getpeername( fd->writefd, (void*)buffer, &len )==0 )
@@ -222,7 +222,6 @@ int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 
 int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
 {
-    unix_stream* unix = (unix_stream*)stream;
     udp_stream* udp = (udp_stream*)stream;
     fd_stream* fd = (fd_stream*)stream;
     unsigned char buffer[ 64 ];
@@ -231,7 +230,7 @@ int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
 
     assert( stream && addr );
 
-    if( (unix->flags & USTR_TYPE_MASK) == USTR_UDPBUF )
+    if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_UDPBUF )
     {
         addr->transport = TL_UDP;
 
@@ -241,9 +240,9 @@ int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
 
         return status==0 && decode_sockaddr_in( buffer, len, addr );
     }
-    else if( (unix->flags & USTR_TYPE_MASK) == USTR_SOCK )
+    else if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
     {
-        addr->transport = (unix->flags & USTR_UDP) ? TL_UDP : TL_TCP;
+        addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
         status = getsockname( fd->writefd, (void*)buffer, &len );
         return status==0 && decode_sockaddr_in( buffer, len, addr );
     }

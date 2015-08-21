@@ -51,7 +51,7 @@ static void tcp_destroy( tl_server* this )
 static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 {
     tcp_server* this = (tcp_server*)super;
-    int peer;
+    int peer, flags;
 
     assert( this );
 
@@ -60,7 +60,9 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 
     peer = accept( this->socket, NULL, 0 );
 
-    return peer<0 ? NULL : pipe_stream_create(peer,peer,USTR_SOCK|USTR_TCP);
+    flags = TL_STREAM_TYPE_SOCK|TL_STREAM_TCP;
+
+    return peer<0 ? NULL : pipe_stream_create(peer,peer,flags);
 }
 
 /****************************************************************************/

@@ -173,11 +173,10 @@ udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen )
 
     tl_array_init( &(this->buffer), 1, NULL );
 
-    ((unix_stream*)this)->flags = USTR_UDPBUF|USTR_UDP;
-
     this->timeout      = 0;
     this->parent       = parent;
     this->addrlen      = addrlen;
+    super->flags       = TL_STREAM_TYPE_UDPBUF|TL_STREAM_UDP;
     super->read        = udp_stream_read_raw;
     super->write       = udp_stream_write_raw;
     super->set_timeout = udp_stream_set_timeout;

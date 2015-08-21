@@ -267,7 +267,8 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
     if( connect( sockfd, (void*)addrbuffer, size ) == SOCKET_ERROR )
         goto fail;
 
-    flags = WSTR_SOCK | (peer->transport==TL_UDP ? WSTR_UDP : WSTR_TCP);
+    flags = TL_STREAM_TYPE_SOCK;
+    flags |= (peer->transport==TL_UDP ? TL_STREAM_UDP : TL_STREAM_TCP);
 
     if( !(stream = sock_stream_create( sockfd, flags )) )
         goto fail;
@@ -310,20 +311,19 @@ int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 {
     sockstream* sock = (sockstream*)stream;
     udp_stream* udp = (udp_stream*)stream;
-    w32stream* w32 = (w32stream*)stream;
     unsigned char buffer[ 64 ];
     int len;
 
     assert( stream && addr );
 
-    if( (w32->flags & WSTR_TYPE_MASK) == WSTR_UDPBUF )
+    if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_UDPBUF )
     {
         addr->transport = TL_UDP;
         return decode_sockaddr_in( udp->address, udp->addrlen, addr );
     }
-    else if( (w32->flags & WSTR_TYPE_MASK) == WSTR_SOCK )
+    else if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
     {
-        addr->transport = (w32->flags & WSTR_UDP) ? TL_UDP : TL_TCP;
+        addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
         len = sizeof(buffer);
 
         if( getpeername( sock->socket, (void*)buffer, &len )==0 )
@@ -337,14 +337,13 @@ int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
 {
     sockstream* sock = (sockstream*)stream;
     udp_stream* udp = (udp_stream*)stream;
-    w32stream* w32 = (w32stream*)stream;
     unsigned char buffer[ 64 ];
     int len = sizeof(buffer);
     int status;
 
     assert( stream && addr );
 
-    if( (w32->flags & WSTR_TYPE_MASK) == WSTR_UDPBUF )
+    if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_UDPBUF )
     {
         addr->transport = TL_UDP;
 
@@ -354,9 +353,9 @@ int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
 
         return status==0 && decode_sockaddr_in( buffer, len, addr );
     }
-    else if( (w32->flags & WSTR_TYPE_MASK) == WSTR_SOCK )
+    else if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
     {
-        addr->transport = (w32->flags & WSTR_UDP) ? TL_UDP : TL_TCP;
+        addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
         status = getsockname( sock->socket, (void*)buffer, &len );
         return status==0 && decode_sockaddr_in( buffer, len, addr );
     }

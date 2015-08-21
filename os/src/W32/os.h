@@ -43,21 +43,12 @@
 #include <in6addr.h>
 #include <ws2tcpip.h>
 
-#define WSTR_TYPE_MASK 0x0F
-#define WSTR_PIPE      0x00
-#define WSTR_FILE      0x01
-#define WSTR_SOCK      0x03
-#define WSTR_UDPBUF    0x04
-#define WSTR_UDP       0x10
-#define WSTR_TCP       0x20
-
 
 
 typedef struct udp_stream udp_stream;
 typedef struct udp_server udp_server;
 typedef struct pipestream pipestream;
 typedef struct sockstream sockstream;
-typedef struct w32stream w32stream;
 
 struct tl_monitor
 {
@@ -68,29 +59,23 @@ struct tl_monitor
     unsigned int wait_count;
 };
 
-struct w32stream
-{
-    tl_iostream super;
-    int flags;
-};
-
 struct pipestream
 {
-    w32stream super;
+    tl_iostream super;
     HANDLE rhnd;
     HANDLE whnd;
 };
 
 struct sockstream
 {
-    w32stream super;
+    tl_iostream super;
     DWORD timeout;
     SOCKET socket;
 };
 
 struct udp_stream
 {
-    w32stream super;
+    tl_iostream super;
     tl_monitor monitor;
     unsigned long timeout;
     udp_stream* next;           /* linked list pointer */

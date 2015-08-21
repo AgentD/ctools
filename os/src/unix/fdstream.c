@@ -1,3 +1,4 @@
+
 /*
  * fdstream.c
  * This file is part of ctools
@@ -119,10 +120,9 @@ tl_iostream* pipe_stream_create( int readfd, int writefd, int flags )
     if( !this )
         return NULL;
 
-    ((unix_stream*)this)->flags = flags;
-
     this->readfd       = readfd;
     this->writefd      = writefd;
+    super->flags       = flags;
     super->destroy     = fd_stream_destroy;
     super->set_timeout = fd_stream_set_timeout;
     super->write       = fd_stream_write;
