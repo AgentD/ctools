@@ -41,15 +41,15 @@ if( SHARED )
   endif( )
 endif( )
 
-install( FILES os/include/tl_dir.h
-               os/include/tl_fs.h
-               os/include/tl_iostream.h
-               os/include/tl_network.h
-               os/include/tl_packetserver.h
-               os/include/tl_process.h
-               os/include/tl_server.h
-               os/include/tl_thread.h
-               os/include/tl_threadpool.h
+install( FILES include/tl_dir.h
+               include/tl_fs.h
+               include/tl_iostream.h
+               include/tl_network.h
+               include/tl_packetserver.h
+               include/tl_process.h
+               include/tl_server.h
+               include/tl_thread.h
+               include/tl_threadpool.h
          DESTINATION include )
 
 install( TARGETS tlos LIBRARY DESTINATION lib

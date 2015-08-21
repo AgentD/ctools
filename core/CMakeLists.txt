@@ -19,20 +19,20 @@ if( SHARED )
   endif( )
 endif( )
 
-install( FILES core/include/tl_allocator.h
-               core/include/tl_array.h
-               core/include/tl_blob.h
-               core/include/tl_hash.h
-               core/include/tl_hashmap.h
-               core/include/tl_iterator.h
-               core/include/tl_list.h
-               core/include/tl_opt.h
-               core/include/tl_predef.h
-               core/include/tl_rbtree.h
-               core/include/tl_sort.h
-               core/include/tl_string.h
-               core/include/tl_utf16.h
-               core/include/tl_utf8.h
+install( FILES include/tl_allocator.h
+               include/tl_array.h
+               include/tl_blob.h
+               include/tl_hash.h
+               include/tl_hashmap.h
+               include/tl_iterator.h
+               include/tl_list.h
+               include/tl_opt.h
+               include/tl_predef.h
+               include/tl_rbtree.h
+               include/tl_sort.h
+               include/tl_string.h
+               include/tl_utf16.h
+               include/tl_utf8.h
          DESTINATION include )
 
 install( TARGETS tlcore LIBRARY DESTINATION lib
