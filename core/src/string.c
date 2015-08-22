@@ -104,6 +104,47 @@ int tl_string_init( tl_string* this )
     return 1;
 }
 
+int tl_string_init_cstr( tl_string* this, const char* data )
+{
+    assert( this );
+    assert( data );
+
+    if( !tl_string_init( this ) )
+        return 0;
+
+    if( !tl_string_append_utf8( this, data ) )
+    {
+        tl_string_cleanup( this );
+        return 0;
+    }
+
+    return 1;
+}
+
+void tl_string_init_local( tl_string* this, const char* data )
+{
+    size_t i=0, u8count=0, count=0, mbseq=0;
+
+    assert( this );
+
+    for( ; data[i]; ++i )
+    {
+        ++count;
+        if( (data[i] & 0xC0) != 0x80 )
+            ++u8count;
+
+        if( count==u8count )
+            mbseq = count;
+    }
+
+    this->data.reserved = this->data.used = count;
+    this->data.unitsize = 1;
+    this->data.data = (void*)data;
+    this->data.alloc = NULL;
+    this->mbseq = mbseq;
+    this->charcount = u8count;
+}
+
 void tl_string_cleanup( tl_string* this )
 {
     assert( this );

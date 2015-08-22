@@ -98,6 +98,36 @@ extern "C" {
 TLAPI int tl_string_init( tl_string* str );
 
 /**
+ * \brief Initialize a string from an UTF-8 encoded C string
+ *
+ * \memberof tl_string
+ *
+ * \param str  A pointer to an uninitialized string
+ * \param data A pointer to the C string to copy into the string
+ *
+ * \return Non-zero on success, zero if out of memory
+ */
+TLAPI int tl_string_init_cstr( tl_string* str, const char* data );
+
+/**
+ * \brief Initialize a local, read only string
+ *
+ * \memberof tl_string
+ *
+ * This function initializes a tl_string to enacpsulate an arbitrary C string,
+ * but without taking ownership or copying the string. Read-only string
+ * processing function can be used, but the string MUST NOT be modified and
+ * you MUST NOT call tl_string_cleanup on the string. Instead, simply let it
+ * run out of scope. This function is provied for conveniance to allow the
+ * string processing functions to be used on a regular, UTF-8 encoded C
+ * string.
+ *
+ * \param str  A pointer to an unitialized string
+ * \param data A C string to encapsulate
+ */
+TLAPI void tl_string_init_local( tl_string* str, const char* data );
+
+/**
  * \brief Uninitialize a string and free all its memory
  *
  * \memberof tl_string
