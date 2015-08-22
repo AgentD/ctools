@@ -43,8 +43,13 @@
 
 
 
+#include "tl_hash.h"
+#include "tl_utf8.h"
+#include "tl_utf16.h"
 #include "tl_array.h"
 #include "tl_predef.h"
+
+#include <string.h>
 
 
 
@@ -163,7 +168,11 @@ TLAPI int tl_string_copy( tl_string* dst, const tl_string* src );
  * \return The number of characters in the string object, excluding the
  *         null-terminator
  */
-TLAPI size_t tl_string_characters( const tl_string* str );
+static TL_INLINE size_t tl_string_characters( const tl_string* str )
+{
+    assert( str );
+    return str->charcount;
+}
 
 /**
  * \brief Get the number of code units stored in a string object (multi byte
@@ -178,7 +187,11 @@ TLAPI size_t tl_string_characters( const tl_string* str );
  * \return The number of code units in the string object, excluding the
  *         null-terminator
  */
-TLAPI size_t tl_string_length( const tl_string* str );
+static TL_INLINE size_t tl_string_length( const tl_string* str )
+{
+    assert( str );
+    return (str->data.used - 1);
+}
 
 /**
  * \brief Remove all characters from a string
@@ -200,7 +213,11 @@ TLAPI void tl_string_clear( tl_string* str );
  *
  * \return Non-zero if a string is empty, zero if it is not
  */
-TLAPI int tl_string_is_empty( const tl_string* str );
+static TL_INLINE int tl_string_is_empty( const tl_string* str )
+{
+    assert( str );
+    return (str->charcount==0);
+}
 
 /**
  * \brief Get a code point value from a character index
@@ -229,7 +246,11 @@ TLAPI unsigned int tl_string_at( const tl_string* str, size_t idx );
  *
  * \return A pointer to a null-terminated UTF-8 string
  */
-TLAPI char* tl_string_cstr( tl_string* str );
+static TL_INLINE char* tl_string_cstr( tl_string* str )
+{
+    assert( str );
+    return str->data.data;
+}
 
 /**
  * \brief Append a unicode code point value to a string object
@@ -245,52 +266,6 @@ TLAPI char* tl_string_cstr( tl_string* str );
  * \return Non-zero on success, zero if out of memory (or str==NULL)
  */
 TLAPI int tl_string_append_code_point( tl_string* str, unsigned int cp );
-
-/**
- * \brief Append a null-terminated UTF-8 or ASCII string to a string object
- *
- * \memberof tl_string
- *
- * \note If the function fails to allocate enough memory, the string is left
- *       unchanged.
- *
- * \param str  A pointer to a string object
- * \param utf8 A pointer to a null-terminated UTF-8 string
- *
- * \return Non-zero on success, zero if out of memory (or str==NULL)
- */
-TLAPI int tl_string_append_utf8( tl_string* str, const char* utf8 );
-
-/**
- * \brief Append a null-terminated Latin-1 or ASCII string to a string object
- *
- * \memberof tl_string
- *
- * \note If the function fails to allocate enough memory, the string is left
- *       unchanged.
- *
- * \param str    A pointer to a string object
- * \param latin1 A pointer to a null-terminated Latin-1 string
- *
- * \return Non-zero on success, zero if out of memory (or str==NULL)
- */
-TLAPI int tl_string_append_latin1( tl_string* str, const char* latin1 );
-
-/**
- * \brief Append a null-terminated UTF-16 string to a string
- *
- * \memberof tl_string
- *
- * \note If the function fails to allocate enough memory, the string is left
- *       unchanged.
- *
- * \param str A pointer to a string object
- * \param utf16 A pointer to a null-terminated UTF-16 string in the systems
- *              byte order
- *
- * \return Non-zero on success, zero if out of memory (or str==NULL)
- */
-TLAPI int tl_string_append_utf16( tl_string* str, const tl_u16* utf16 );
 
 /**
  * \brief Append a number of UTF-8 or ASCII characters to a string object
@@ -343,6 +318,66 @@ TLAPI int tl_string_append_latin1_count( tl_string* str, const char* latin1,
  */
 TLAPI int tl_string_append_utf16_count( tl_string* str, const tl_u16* utf16,
                                         size_t count );
+
+/**
+ * \brief Append a null-terminated UTF-8 or ASCII string to a string object
+ *
+ * \memberof tl_string
+ *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
+ *
+ * \param str  A pointer to a string object
+ * \param utf8 A pointer to a null-terminated UTF-8 string
+ *
+ * \return Non-zero on success, zero if out of memory (or str==NULL)
+ */
+static TL_INLINE int tl_string_append_utf8( tl_string* str, const char* utf8 )
+{
+    assert( str && utf8 );
+    return tl_string_append_utf8_count( str, utf8, tl_utf8_charcount(utf8) );
+}
+
+/**
+ * \brief Append a null-terminated Latin-1 or ASCII string to a string object
+ *
+ * \memberof tl_string
+ *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
+ *
+ * \param str    A pointer to a string object
+ * \param latin1 A pointer to a null-terminated Latin-1 string
+ *
+ * \return Non-zero on success, zero if out of memory (or str==NULL)
+ */
+static TL_INLINE int tl_string_append_latin1( tl_string* str,
+                                              const char* latin1 )
+{
+    assert( str && latin1 );
+    return tl_string_append_latin1_count( str, latin1, strlen( latin1 ) );
+}
+
+/**
+ * \brief Append a null-terminated UTF-16 string to a string
+ *
+ * \memberof tl_string
+ *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
+ *
+ * \param str A pointer to a string object
+ * \param utf16 A pointer to a null-terminated UTF-16 string in the systems
+ *              byte order
+ *
+ * \return Non-zero on success, zero if out of memory (or str==NULL)
+ */
+static TL_INLINE int tl_string_append_utf16( tl_string* str,
+                                             const tl_u16* utf16 )
+{
+    assert( str && utf16 );
+    return tl_string_append_utf16_count(str,utf16,tl_utf16_charcount(utf16));
+}
 
 /**
  * \brief Append an unsigned intger value to a string
@@ -404,7 +439,11 @@ TLAPI int tl_string_append_int( tl_string* str, long value, int base );
  *
  * \return The number of characters required
  */
-TLAPI size_t tl_string_utf16_len( const tl_string* str );
+static TL_INLINE size_t tl_string_utf16_len( const tl_string* str )
+{
+    assert( str );
+    return tl_utf16_estimate_utf8_length( str->data.data, str->charcount );
+}
 
 /**
  * \brief Convert a tl_string to UTF-16
@@ -468,7 +507,11 @@ TLAPI void tl_string_drop_last( tl_string* str );
  *         larger than the second, a negative value if the second is larger
  *         than the first and zero if they are equal.
  */
-TLAPI int tl_string_compare( const tl_string* a, const tl_string* b );
+static TL_INLINE int tl_string_compare(const tl_string* a, const tl_string* b)
+{
+    assert( a && b );
+    return strcmp( a->data.data, b->data.data );
+}
 
 /**
  * \brief Compute a hash function of a string
@@ -488,7 +531,11 @@ TLAPI int tl_string_compare( const tl_string* a, const tl_string* b );
  *
  * \return A hash value value
  */
-TLAPI unsigned long tl_string_hash( const tl_string* str );
+static TL_INLINE unsigned long tl_string_hash( const tl_string* str )
+{
+    assert( str );
+    return tl_hash_murmur3_32( str->data.data, str->data.used, 0xDEADBEEF );
+}
 
 /**
  * \brief Get an allocator for tl_string objects
@@ -534,7 +581,11 @@ TLAPI void tl_string_trim_begin( tl_string* str );
  *
  * \param str A pointer to a string
  */
-TLAPI void tl_string_trim( tl_string* str );
+static TL_INLINE void tl_string_trim( tl_string* str )
+{
+    tl_string_trim_begin( str );
+    tl_string_trim_end( str );
+}
 
 #ifdef __cplusplus
 }

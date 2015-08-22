@@ -41,6 +41,7 @@
 
 
 #include <stddef.h>
+#include <assert.h>
 
 #ifdef _MSC_VER
     typedef unsigned __int16 tl_u16;
@@ -66,6 +67,14 @@
     #else
         #define TLOSAPI __declspec(dllimport)
     #endif
+#endif
+
+#ifdef _MSC_VER
+    #define TL_INLINE __forceinline
+#else
+    #define TL_INLINE __inline__ __attribute__((always_inline))
+
+    #pragma GCC diagnostic ignored "-Wunused-function"
 #endif
 
 #ifndef TLAPI

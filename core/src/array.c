@@ -30,7 +30,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 
 
@@ -160,20 +159,6 @@ int tl_array_from_array( tl_array* this, const void* data, size_t count )
 
     tl_allocator_copy( this->alloc, this->data, data, this->unitsize, count );
     return 1;
-}
-
-void tl_array_to_array( const tl_array* this, void* data )
-{
-    assert( this && data );
-
-    tl_allocator_copy( this->alloc, data, this->data,
-                       this->unitsize, this->used );
-}
-
-int tl_array_copy( tl_array* this, const tl_array* src )
-{
-    assert( this && src && this->unitsize==src->unitsize );
-    return tl_array_copy_range( this, src, 0, src->used );
 }
 
 int tl_array_copy_range( tl_array* this, const tl_array* src,
@@ -340,12 +325,6 @@ void tl_array_remove( tl_array* this, size_t idx, size_t count )
         this->used -= count;
         tl_array_try_shrink( this );
     }
-}
-
-int tl_array_is_empty( const tl_array* this )
-{
-    assert( this );
-    return this->used==0;
 }
 
 void* tl_array_at( const tl_array* this, size_t idx )
@@ -618,18 +597,6 @@ tl_iterator* tl_array_last( tl_array* this )
 {
     assert( this );
     return tl_array_iterator_create( this, 0 );
-}
-
-size_t tl_array_get_size( const tl_array* this )
-{
-    assert( this );
-    return this->used;
-}
-
-void* tl_array_get_first( tl_array* this )
-{
-    assert( this );
-    return this->used ? this->data : NULL;
 }
 
 void* tl_array_get_last( tl_array* this )

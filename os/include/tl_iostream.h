@@ -54,6 +54,7 @@
 
 
 #include "tl_predef.h"
+#include "tl_blob.h"
 
 
 
@@ -174,8 +175,13 @@ extern "C" {
  *         TL_ERR_TIMEOUT if a timeout occoured or TL_ERR_INTERNAL if an
  *         internal error occoured.
  */
-TLOSAPI int tl_iostream_write_blob( tl_iostream* stream, const tl_blob* blob,
-                                    size_t* actual );
+static TL_INLINE int tl_iostream_write_blob( tl_iostream* stream,
+                                             const tl_blob* blob,
+                                             size_t* actual )
+{
+    return stream->write( stream, blob->data, blob->size, actual );
+}
+
 /**
  * \brief Read a blob of data from a stream
  *

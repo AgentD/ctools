@@ -329,7 +329,11 @@ TLAPI int tl_rbtree_remove( tl_rbtree* tree, const void* key, void* value );
  *
  * \return Non-zero if the tree is empty, zero if it contains nodes
  */
-TLAPI int tl_rbtree_is_empty( const tl_rbtree* tree );
+static TL_INLINE int tl_rbtree_is_empty( const tl_rbtree* tree )
+{
+    assert( tree );
+    return (tree->size == 0);
+}
 
 /**
  * \brief Remove all nodes from a red-black tree

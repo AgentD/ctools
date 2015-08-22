@@ -50,6 +50,7 @@
 
 
 #include "tl_predef.h"
+#include <stdlib.h>
 
 
 
@@ -95,7 +96,11 @@ TLAPI int tl_blob_init( tl_blob* blob, size_t size, const void* data );
  *
  * \param blob A pointer to the blob object
  */
-TLAPI void tl_blob_cleanup( tl_blob* blob );
+static TL_INLINE void tl_blob_cleanup( tl_blob* blob )
+{
+    assert( blob );
+    free( blob->data );
+}
 
 /**
  * \brief Initialize a blob with the contents of an other blob
@@ -107,7 +112,11 @@ TLAPI void tl_blob_cleanup( tl_blob* blob );
  *
  * \return Non-zero on success, zero if out of memory or dst or src is NULL.
  */
-TLAPI int tl_blob_copy( tl_blob* dst, const tl_blob* src );
+static TL_INLINE int tl_blob_copy( tl_blob* dst, const tl_blob* src )
+{
+    assert( dst && src );
+    return tl_blob_init( dst, src->size, src->data );
+}
 
 /**
  * \brief Initialize a blob with the contents of an other blob
@@ -125,18 +134,6 @@ TLAPI int tl_blob_copy( tl_blob* dst, const tl_blob* src );
  */
 TLAPI int tl_blob_copy_range( tl_blob* dst, const tl_blob* src,
                               size_t offset, size_t size );
-
-/**
- * \brief Append a blob object to an other blob object
- *
- * \memberof tl_blob
- *
- * \param dst A pointer to the destination blob object
- * \param src A pointer to the source data to copy to the end
- *
- * \return Non-zero on success, zero if out of memory or if src or dst is NULL
- */
-TLAPI int tl_blob_append( tl_blob* dst, const tl_blob* src );
 
 /**
  * \brief Append a range of a blob object to an other blob object
@@ -169,6 +166,22 @@ TLAPI int tl_blob_append_range( tl_blob* blob, const tl_blob* src,
  * \return Non-zero on success, zero if out of memory or blob is NULL.
  */
 TLAPI int tl_blob_append_raw( tl_blob* blob, const void* src, size_t size );
+
+/**
+ * \brief Append a blob object to an other blob object
+ *
+ * \memberof tl_blob
+ *
+ * \param dst A pointer to the destination blob object
+ * \param src A pointer to the source data to copy to the end
+ *
+ * \return Non-zero on success, zero if out of memory or if src or dst is NULL
+ */
+static TL_INLINE int tl_blob_append( tl_blob* dst, const tl_blob* src )
+{
+    assert( dst && src );
+    return tl_blob_append_raw( dst, src->data, src->size );
+}
 
 /**
  * \brief Split a blob object

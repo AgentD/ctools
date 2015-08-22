@@ -63,6 +63,7 @@
 
 
 #include "tl_predef.h"
+#include "tl_allocator.h"
 
 
 
@@ -150,21 +151,12 @@ TLAPI int tl_array_from_array(tl_array* vec, const void* data, size_t count);
  * \param data A pointer to an array, large enough to hold at
  *             least as many elements as the array contains.
  */
-TLAPI void tl_array_to_array( const tl_array* vec, void* data );
-
-/**
- * \brief Copy the data of a source array to a destination array
- *
- * \memberof tl_array
- *
- * \note This function runs in linear time
- *
- * \param dst A pointer to an array to copy the data to
- * \param src A pointer to an array to copy the data from
- *
- * \return Non-zero on success, zero on failure (read: out of memory)
- */
-TLAPI int tl_array_copy( tl_array* dst, const tl_array* src );
+static TL_INLINE void tl_array_to_array( const tl_array* vec, void* data )
+{
+    assert( vec && data );
+    tl_allocator_copy( vec->alloc, data, vec->data,
+                       vec->unitsize, vec->used );
+}
 
 /**
  * \brief Copy a sub range of an array to a destination array
@@ -183,6 +175,24 @@ TLAPI int tl_array_copy( tl_array* dst, const tl_array* src );
  */
 TLAPI int tl_array_copy_range( tl_array* dst, const tl_array* src,
                                size_t start, size_t count );
+
+/**
+ * \brief Copy the data of a source array to a destination array
+ *
+ * \memberof tl_array
+ *
+ * \note This function runs in linear time
+ *
+ * \param dst A pointer to an array to copy the data to
+ * \param src A pointer to an array to copy the data from
+ *
+ * \return Non-zero on success, zero on failure (read: out of memory)
+ */
+static TL_INLINE int tl_array_copy( tl_array* dst, const tl_array* src )
+{
+    assert( dst && src && dst->unitsize==src->unitsize );
+    return tl_array_copy_range( dst, src, 0, src->used );
+}
 
 /**
  * \brief Append an array to another array
@@ -260,7 +270,11 @@ TLAPI void tl_array_remove( tl_array* vec, size_t idx, size_t count );
  *
  * \return Zero if the array contains elements, zero if it is empty
  */
-TLAPI int tl_array_is_empty( const tl_array* vec );
+static TL_INLINE int tl_array_is_empty( const tl_array* vec )
+{
+    assert( vec );
+    return vec->used==0;
+}
 
 /**
  * \brief Get a pointer to an element in a array
@@ -517,7 +531,11 @@ TLAPI tl_iterator* tl_array_last( tl_array* arr );
  *
  * \return The number of elements in the array
  */
-TLAPI size_t tl_array_get_size( const tl_array* arr );
+static TL_INLINE size_t tl_array_get_size( const tl_array* arr )
+{
+    assert( arr );
+    return arr->used;
+}
 
 /**
  * \brief Get a pointer to the first element in a dynamic array
@@ -528,7 +546,11 @@ TLAPI size_t tl_array_get_size( const tl_array* arr );
  *
  * \return A pointer to the first element or NULL if empty
  */
-TLAPI void* tl_array_get_first( tl_array* arr );
+static TL_INLINE void* tl_array_get_first( tl_array* arr )
+{
+    assert( arr );
+    return arr->used ? arr->data : NULL;
+}
 
 /**
  * \brief Get a pointer to the last element in a dynamic array

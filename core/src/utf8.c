@@ -25,8 +25,6 @@
 #define TL_EXPORT
 #include "tl_utf8.h"
 
-#include <assert.h>
-
 
 #define IS_SURROGATE( x ) (((x) >= 0xD800) && ((x) <= 0xDFFF))
 

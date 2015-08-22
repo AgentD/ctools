@@ -25,7 +25,6 @@
 #define TL_EXPORT
 #include "tl_opt.h"
 #include <string.h>
-#include <assert.h>
 
 
 #define SET_FLAG( field, flag, value )\

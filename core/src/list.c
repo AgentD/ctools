@@ -29,7 +29,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 
 
@@ -223,11 +222,6 @@ void tl_list_init( tl_list* this, size_t elementsize, tl_allocator* alloc )
     this->alloc    = alloc;
 }
 
-void tl_list_cleanup( tl_list* this )
-{
-    tl_list_clear( this );
-}
-
 tl_list_node* tl_list_node_from_index( const tl_list* this, size_t idx )
 {
     tl_list_node* n = NULL;
@@ -292,11 +286,6 @@ void tl_list_to_array( const tl_list* this, void* data )
             data = (unsigned char*)data + this->unitsize;
         }
     }
-}
-
-int tl_list_copy( tl_list* this, const tl_list* src )
-{
-    return tl_list_copy_range( this, src, 0, src->size );
 }
 
 int tl_list_copy_range( tl_list* this, const tl_list* src,
@@ -494,17 +483,6 @@ void tl_list_remove( tl_list* this, size_t idx, size_t count )
         this->first = NULL;
         this->last  = NULL;
     }
-}
-
-int tl_list_is_empty( const tl_list* this )
-{
-    assert( this );
-    return (this->size==0);
-}
-
-void* tl_list_at( const tl_list* this, size_t idx )
-{
-    return tl_list_node_get_data( tl_list_node_from_index( this, idx ) );
 }
 
 int tl_list_set( tl_list* this, size_t idx, const void* element )
@@ -849,23 +827,5 @@ tl_iterator* tl_list_last( tl_list* this )
 {
     assert( this );
     return tl_list_iterator_create( this, 0 );
-}
-
-size_t tl_list_get_size( const tl_list* this )
-{
-    assert( this );
-    return this->size;
-}
-
-void* tl_list_get_first( tl_list* this )
-{
-    assert( this );
-    return tl_list_node_get_data( this->first );
-}
-
-void* tl_list_get_last( tl_list* this )
-{
-    assert( this );
-    return tl_list_node_get_data( this->last );
 }
 

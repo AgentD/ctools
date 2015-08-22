@@ -28,7 +28,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
 
 
 
@@ -66,32 +65,12 @@ int tl_blob_init( tl_blob* this, size_t size, const void* data )
     return 1;
 }
 
-void tl_blob_cleanup( tl_blob* this )
-{
-    assert( this );
-
-    free( this->data );
-    memset( this, 0, sizeof(tl_blob) );
-}
-
-int tl_blob_copy( tl_blob* this, const tl_blob* src )
-{
-    assert( this && src );
-    return tl_blob_init( this, src->size, src->data );
-}
-
 int tl_blob_copy_range( tl_blob* this, const tl_blob* src,
                         size_t offset, size_t size )
 {
     assert( this && src );
     CLAMP_SIZE( src, offset, size );
     return tl_blob_init( this, size, (char*)src->data + offset );
-}
-
-int tl_blob_append( tl_blob* this, const tl_blob* src )
-{
-    assert( this && src );
-    return tl_blob_append_raw( this, src->data, src->size );
 }
 
 int tl_blob_append_range( tl_blob* this, const tl_blob* src,

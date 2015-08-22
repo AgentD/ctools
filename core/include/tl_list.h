@@ -166,17 +166,6 @@ TLAPI void tl_list_init( tl_list* list, size_t elementsize,
                          tl_allocator* alloc );
 
 /**
- * \brief Free the memory used by a list and reset it
- *
- * \memberof tl_list
- *
- * \note This function runs in linear time
- *
- * \param list A pointer to a list
- */
-TLAPI void tl_list_cleanup( tl_list* list );
-
-/**
  * \brief Get a pointer to a list node by its index
  *
  * \memberof tl_list
@@ -220,20 +209,6 @@ TLAPI int tl_list_from_array( tl_list* list, const void* data, size_t count );
 TLAPI void tl_list_to_array( const tl_list* list, void* data );
 
 /**
- * \brief Create a copy of a list
- *
- * \memberof tl_list
- *
- * \note This function runs in linear time
- *
- * \param dst A pointer to a list. Previous contents are discarded.
- * \param src A pointer to a source list to copy elements from.
- *
- * \return Non-zero on success, zero on failure (read: out of memory)
- */
-TLAPI int tl_list_copy( tl_list* dst, const tl_list* src );
-
-/**
  * \brief Create a copy of a sub range of a list
  *
  * \memberof tl_list
@@ -249,6 +224,24 @@ TLAPI int tl_list_copy( tl_list* dst, const tl_list* src );
  */
 TLAPI int tl_list_copy_range( tl_list* dst, const tl_list* src,
                               size_t start, size_t count );
+
+/**
+ * \brief Create a copy of a list
+ *
+ * \memberof tl_list
+ *
+ * \note This function runs in linear time
+ *
+ * \param dst A pointer to a list. Previous contents are discarded.
+ * \param src A pointer to a source list to copy elements from.
+ *
+ * \return Non-zero on success, zero on failure (read: out of memory)
+ */
+static TL_INLINE int tl_list_copy( tl_list* dst, const tl_list* src )
+{
+    assert( dst && src );
+    return tl_list_copy_range( dst, src, 0, src->size );
+}
 
 /**
  * \brief Insert into a list the contents of another list
@@ -320,7 +313,11 @@ TLAPI void tl_list_remove( tl_list* list, size_t idx, size_t count );
  *
  * \return Non-zero if the list is empty, zero if not.
  */
-TLAPI int tl_list_is_empty( const tl_list* list );
+static TL_INLINE int tl_list_is_empty( const tl_list* list )
+{
+    assert( list );
+    return (list->size==0);
+}
 
 /**
  * \brief Get a pointer to the data of a list node by its index
@@ -334,7 +331,10 @@ TLAPI int tl_list_is_empty( const tl_list* list );
  *
  * \return A pointer to the data, or NULL if index out of bounds
  */
-TLAPI void* tl_list_at( const tl_list* list, size_t idx );
+static TL_INLINE void* tl_list_at( const tl_list* list, size_t idx )
+{
+    return tl_list_node_get_data( tl_list_node_from_index( list, idx ) );
+}
 
 /**
  * \brief Overwrite an element of a list
@@ -450,6 +450,20 @@ TLAPI void tl_list_remove_last( tl_list* list );
 TLAPI void tl_list_clear( tl_list* list );
 
 /**
+ * \brief Free the memory used by a list and reset it
+ *
+ * \memberof tl_list
+ *
+ * \note This function runs in linear time
+ *
+ * \param list A pointer to a list
+ */
+static TL_INLINE void tl_list_cleanup( tl_list* list )
+{
+    tl_list_clear( list );
+}
+
+/**
  * \brief Sort a list in ascending order
  *
  * \memberof tl_list
@@ -472,7 +486,10 @@ TLAPI void tl_list_sort( tl_list* list, tl_compare cmp );
  *
  * \copydoc tl_list_sort
  */
-#define tl_list_stable_sort tl_list_sort
+static TL_INLINE void tl_list_stable_sort( tl_list* list, tl_compare cmp )
+{
+    tl_list_sort( list, cmp );
+}
 
 /**
  * \brief Search for a key in a given list
@@ -491,13 +508,18 @@ TLAPI tl_list_node* tl_list_search( const tl_list* list, tl_compare cmp,
                                     const void* key );
 
 /**
- * \def tl_list_search_unsorted
+ * \brief tl_list_search_unsorted
  *
  * \memberof tl_list
  *
  * \copydoc tl_list_search
  */
-#define tl_list_search_unsorted tl_list_search
+static TL_INLINE tl_list_node* tl_list_search_unsorted( const tl_list* list,
+                                                        tl_compare cmp,
+                                                        const void* key )
+{
+    return tl_list_search( list, cmp, key );
+}
 
 /**
  * \brief Remove and return the first node of a list but do not delete it
@@ -567,7 +589,11 @@ TLAPI tl_iterator* tl_list_last( tl_list* list );
  *
  * \return The number of elements currently in the list
  */
-TLAPI size_t tl_list_get_size( const tl_list* list );
+static TL_INLINE size_t tl_list_get_size( const tl_list* list )
+{
+    assert( list );
+    return list->size;
+}
 
 /**
  * \brief Get a pointer to the first element in a list
@@ -578,7 +604,11 @@ TLAPI size_t tl_list_get_size( const tl_list* list );
  *
  * \return A pointer to the first element or NULL if empty
  */
-TLAPI void* tl_list_get_first( tl_list* list );
+static TL_INLINE void* tl_list_get_first( tl_list* list )
+{
+    assert( list );
+    return tl_list_node_get_data( list->first );
+}
 
 /**
  * \brief Get a pointer to the last element in a list
@@ -589,7 +619,11 @@ TLAPI void* tl_list_get_first( tl_list* list );
  *
  * \return A pointer to the last element or NULL if empty
  */
-TLAPI void* tl_list_get_last( tl_list* list );
+static TL_INLINE void* tl_list_get_last( tl_list* list )
+{
+    assert( list );
+    return tl_list_node_get_data( list->last );
+}
 
 #ifdef __cplusplus
 }

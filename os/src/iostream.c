@@ -24,17 +24,8 @@
  */
 #define TL_OS_EXPORT
 #include "tl_iostream.h"
-#include "tl_blob.h"
-#include <assert.h>
 
 
-
-int tl_iostream_write_blob( tl_iostream* this, const tl_blob* blob,
-                            size_t* actual )
-{
-    assert( this && blob );
-    return this->write( this, blob->data, blob->size, actual );
-}
 
 int tl_iostream_read_blob( tl_iostream* this, tl_blob* blob,
                            size_t maximum )

@@ -25,13 +25,9 @@
 #define TL_EXPORT
 #include "tl_allocator.h"
 #include "tl_string.h"
-#include "tl_utf16.h"
-#include "tl_utf8.h"
-#include "tl_hash.h"
 
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <ctype.h>
 
 
@@ -171,18 +167,6 @@ int tl_string_copy( tl_string* this, const tl_string* src )
     return 1;
 }
 
-size_t tl_string_characters( const tl_string* this )
-{
-    assert( this );
-    return this->charcount;
-}
-
-size_t tl_string_length( const tl_string* this )
-{
-    assert( this );
-    return (this->data.used - 1);
-}
-
 void tl_string_clear( tl_string* this )
 {
     assert( this );
@@ -192,12 +176,6 @@ void tl_string_clear( tl_string* this )
 
     this->charcount = 0;
     this->mbseq = 0;
-}
-
-int tl_string_is_empty( const tl_string* this )
-{
-    assert( this );
-    return (this->charcount==0);
 }
 
 unsigned int tl_string_at( const tl_string* this, size_t idx )
@@ -229,12 +207,6 @@ unsigned int tl_string_at( const tl_string* this, size_t idx )
     return 0;
 }
 
-char* tl_string_cstr( tl_string* this )
-{
-    assert( this );
-    return this->data.data;
-}
-
 int tl_string_append_code_point( tl_string* this, unsigned int cp )
 {
     unsigned char val[8];
@@ -258,27 +230,6 @@ int tl_string_append_code_point( tl_string* this, unsigned int cp )
 
     ++this->charcount;
     return 1;
-}
-
-int tl_string_append_utf8( tl_string* this, const char* utf8 )
-{
-    assert( this );
-    assert( utf8 );
-    return tl_string_append_utf8_count( this, utf8, tl_utf8_charcount(utf8) );
-}
-
-int tl_string_append_latin1( tl_string* this, const char* latin1 )
-{
-    assert( this );
-    assert( latin1 );
-    return tl_string_append_latin1_count( this, latin1, strlen( latin1 ) );
-}
-
-int tl_string_append_utf16( tl_string* this, const tl_u16* str )
-{
-    assert( this );
-    assert( str );
-    return tl_string_append_utf16_count( this, str, tl_utf16_charcount(str) );
 }
 
 int tl_string_append_utf8_count( tl_string* this, const char* utf8,
@@ -482,12 +433,6 @@ int tl_string_append_int( tl_string* this, long value, int base )
     return tl_string_append_latin1_count(this,buffer+i+1,sizeof(buffer)-i-1);
 }
 
-size_t tl_string_utf16_len( const tl_string* this )
-{
-    assert( this );
-    return tl_utf16_estimate_utf8_length( this->data.data, this->charcount );
-}
-
 size_t tl_string_to_utf16( const tl_string* this, tl_u16* buffer,
                            size_t size )
 {
@@ -565,19 +510,6 @@ void tl_string_drop_last( tl_string* this )
     }
 }
 
-int tl_string_compare( const tl_string* this, const tl_string* other )
-{
-    assert( this );
-    assert( other );
-
-    return strcmp( this->data.data, other->data.data );
-}
-
-unsigned long tl_string_hash( const tl_string* this )
-{
-    return tl_hash_murmur3_32( this->data.data, this->data.used, 0xDEADBEEF );
-}
-
 tl_allocator* tl_string_get_allocator( void )
 {
     return &stralloc;
@@ -631,11 +563,5 @@ void tl_string_trim_begin( tl_string* this )
         this->charcount -= i;
         this->mbseq -= i;
     }
-}
-
-void tl_string_trim( tl_string* str )
-{
-    tl_string_trim_begin( str );
-    tl_string_trim_end( str );
 }
 

@@ -28,7 +28,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 
 
@@ -605,12 +604,6 @@ int tl_rbtree_remove( tl_rbtree* this, const void* key, void* value )
 
     --(this->size);
     return 1;
-}
-
-int tl_rbtree_is_empty( const tl_rbtree* this )
-{
-    assert( this );
-    return (this->size == 0);
 }
 
 void tl_rbtree_clear( tl_rbtree* this )
