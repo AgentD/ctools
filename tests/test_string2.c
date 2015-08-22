@@ -63,6 +63,62 @@ int main( void )
     tl_string_clear( &str );
 
     tl_string_cleanup( &str );
+
+    /**** ltrim ****/
+    tl_string_init( &str );
+
+    /* string of only white space */
+    tl_string_append_utf8( &str, "  \t\t\r\n" );
+    tl_string_trim_begin( &str );
+    if( strcmp( tl_string_cstr( &str ), "" ) ) { return EXIT_FAILURE; }
+
+    /* empty string */
+    tl_string_append_utf8( &str, "" );
+    tl_string_trim_begin( &str );
+    if( strcmp( tl_string_cstr( &str ), "" ) ) { return EXIT_FAILURE; }
+
+    /* actual non-space data */
+    tl_string_append_utf8( &str, "  \t\t\r\nfoobar  \t\t\r\n" );
+    tl_string_trim_begin( &str );
+    if( strcmp( tl_string_cstr( &str ), "foobar  \t\t\r\n" ) )
+        return EXIT_FAILURE;
+
+    /* nothing to do */
+    tl_string_clear( &str );
+    tl_string_append_utf8( &str, "a b c" );
+    tl_string_trim_begin( &str );
+    if( strcmp( tl_string_cstr( &str ), "a b c" ) )
+        return EXIT_FAILURE;
+
+    tl_string_cleanup( &str );
+
+    /**** rtrim ****/
+    tl_string_init( &str );
+
+    /* string of only white space */
+    tl_string_append_utf8( &str, "  \t\t\r\n" );
+    tl_string_trim_end( &str );
+    if( strcmp( tl_string_cstr( &str ), "" ) ) { return EXIT_FAILURE; }
+
+    /* empty string */
+    tl_string_append_utf8( &str, "" );
+    tl_string_trim_end( &str );
+    if( strcmp( tl_string_cstr( &str ), "" ) ) { return EXIT_FAILURE; }
+
+    /* actual non-space data */
+    tl_string_append_utf8( &str, "  \t\t\r\nfoobar  \t\t\r\n" );
+    tl_string_trim_end( &str );
+    if( strcmp( tl_string_cstr( &str ), "  \t\t\r\nfoobar" ) )
+        return EXIT_FAILURE;
+
+    /* nothing to do */
+    tl_string_clear( &str );
+    tl_string_append_utf8( &str, "a b c" );
+    tl_string_trim_end( &str );
+    if( strcmp( tl_string_cstr( &str ), "a b c" ) )
+        return EXIT_FAILURE;
+
+    tl_string_cleanup( &str );
     return EXIT_SUCCESS;
 }
 

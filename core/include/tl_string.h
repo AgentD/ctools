@@ -470,6 +470,42 @@ TLAPI unsigned long tl_string_hash( const tl_string* str );
  */
 TLAPI tl_allocator* tl_string_get_allocator( void );
 
+/**
+ * \brief Remove white space characters from the end of a string
+ *
+ * \note White space characters are space, form-feed, line-feed, carriage
+ *       return, horizontal tab and vertical tab
+ *
+ * \memberof tl_string
+ *
+ * \param str A pointer to a string
+ */
+TLAPI void tl_string_trim_end( tl_string* str );
+
+/**
+ * \brief Remove white space characters from the beginning of a string
+ *
+ * \note White space characters are space, form-feed, line-feed, carriage
+ *       return, horizontal tab and vertical tab
+ *
+ * \memberof tl_string
+ *
+ * \param str A pointer to a string
+ */
+TLAPI void tl_string_trim_begin( tl_string* str );
+
+/**
+ * \brief Remove white space characters from both ends of a string
+ *
+ * \note White space characters are space, form-feed, line-feed, carriage
+ *       return, horizontal tab and vertical tab
+ *
+ * \memberof tl_string
+ *
+ * \param str A pointer to a string
+ */
+TLAPI void tl_string_trim( tl_string* str );
+
 #ifdef __cplusplus
 }
 #endif
