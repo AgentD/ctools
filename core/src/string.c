@@ -286,7 +286,7 @@ int tl_string_append_utf8_count( tl_string* this, const char* utf8,
                 goto skip;
             /* 0xFFFF or 0xFFFE */
             if( src[0]==0xEF&&src[1]==0xBF&&(src[2]&0xFE)==0xBE )
-	            goto skip;
+                goto skip;
 
             *(dst++) = *(src++);
             *(dst++) = *(src++);

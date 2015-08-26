@@ -263,7 +263,7 @@ static TL_INLINE char* tl_string_cstr( tl_string* str )
  * \param str A pointer to a string object
  * \param cp  A unicode code point value
  *
- * \return Non-zero on success, zero if out of memory (or str==NULL)
+ * \return Non-zero on success, zero if out of memory
  */
 TLAPI int tl_string_append_code_point( tl_string* str, unsigned int cp );
 
@@ -281,7 +281,7 @@ TLAPI int tl_string_append_code_point( tl_string* str, unsigned int cp );
  * \param utf8  A pointer to a UTF-8 string (not neccessarily null terminated)
  * \param count The number of bytes (not code points!) to read from the string
  *
- * \return Non-zero on success, zero if out of memory (or str==NULL)
+ * \return Non-zero on success, zero if out of memory
  */
 TLAPI int tl_string_append_utf8_count( tl_string* str, const char* utf8,
                                        size_t count );
@@ -300,7 +300,7 @@ TLAPI int tl_string_append_utf8_count( tl_string* str, const char* utf8,
  *               terminated)
  * \param count  The number of characters to read from the string
  *
- * \return Non-zero on success, zero if out of memory (or str==NULL)
+ * \return Non-zero on success, zero if out of memory
  */
 TLAPI int tl_string_append_latin1_count( tl_string* str, const char* latin1,
                                          size_t count );
@@ -334,7 +334,7 @@ TLAPI int tl_string_append_utf16_count( tl_string* str, const tl_u16* utf16,
  * \param str  A pointer to a string object
  * \param utf8 A pointer to a null-terminated UTF-8 string
  *
- * \return Non-zero on success, zero if out of memory (or str==NULL)
+ * \return Non-zero on success, zero if out of memory
  */
 static TL_INLINE int tl_string_append_utf8( tl_string* str, const char* utf8 )
 {
@@ -353,7 +353,7 @@ static TL_INLINE int tl_string_append_utf8( tl_string* str, const char* utf8 )
  * \param str    A pointer to a string object
  * \param latin1 A pointer to a null-terminated Latin-1 string
  *
- * \return Non-zero on success, zero if out of memory (or str==NULL)
+ * \return Non-zero on success, zero if out of memory
  */
 static TL_INLINE int tl_string_append_latin1( tl_string* str,
                                               const char* latin1 )
@@ -374,7 +374,7 @@ static TL_INLINE int tl_string_append_latin1( tl_string* str,
  * \param utf16 A pointer to a null-terminated UTF-16 string in the systems
  *              byte order
  *
- * \return Non-zero on success, zero if out of memory (or str==NULL)
+ * \return Non-zero on success, zero if out of memory
  */
 static TL_INLINE int tl_string_append_utf16( tl_string* str,
                                              const tl_u16* utf16 )
@@ -422,7 +422,7 @@ static TL_INLINE int tl_string_append(tl_string* str, const tl_string* other)
  *              less than 2 is interpreted as base 10 and everything greater
  *              than 36 is clamped to 36.
  *
- * \return Non-zero on success, zero if out of memory (or str==NULL)
+ * \return Non-zero on success, zero if out of memory
  */
 TLAPI int tl_string_append_uint( tl_string* str, unsigned long value,
                                  int base );
@@ -446,7 +446,7 @@ TLAPI int tl_string_append_uint( tl_string* str, unsigned long value,
  *              less than 2 is interpreted as base 10 and everything greater
  *              than 36 is clamped to 36.
  *
- * \return Non-zero on success, zero if out of memory (or str==NULL)
+ * \return Non-zero on success, zero if out of memory
  */
 TLAPI int tl_string_append_int( tl_string* str, long value, int base );
 
@@ -501,7 +501,7 @@ TLAPI size_t tl_string_to_utf16( const tl_string* str, tl_u16* buffer,
  * \param str A pointer to a string
  *
  * \return The unicode code point of the last character in the string, or 0 if
- *         the string is empty or NULL
+ *         the string is empty
  */
 TLAPI unsigned int tl_string_last( const tl_string* str );
 
@@ -521,9 +521,6 @@ TLAPI void tl_string_drop_last( tl_string* str );
  * \brief Compare two strings
  *
  * \memberof tl_string
- *
- * \note NULL pointers are treated as empty strings and always smaller than
- *       non-null strings. If both are NULL, they are reported as equal.
  *
  * \param a A pointer to the first string
  * \param b A pointer to the second string
