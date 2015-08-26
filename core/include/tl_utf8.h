@@ -119,14 +119,14 @@ TLAPI unsigned int tl_utf8_encode( char* utf8, unsigned int cp );
  *
  * \note This function runs in linear time
  *
- * \param utf16     A pointer to an UTF-16 string to estimate
- * \param charcount The number of characters to read from the string
+ * \param utf16 A pointer to an UTF-16 string to estimate
+ * \param count The number of code units to read from the string
  *
  * \return The number of bytes required, not including a possible
  *         null-terminator
  */
 TLAPI size_t tl_utf8_estimate_utf16_length( const tl_u16* utf16,
-                                            size_t charcount );
+                                            size_t count );
 
 #ifdef __cplusplus
 }

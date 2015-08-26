@@ -275,9 +275,11 @@ TLAPI int tl_string_append_code_point( tl_string* str, unsigned int cp );
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
  *
+ * \note Appending data to the string is stopped if a null byte is encountered
+ *
  * \param str   A pointer to a string object
  * \param utf8  A pointer to a UTF-8 string (not neccessarily null terminated)
- * \param count The number of characters (!) to read from the string
+ * \param count The number of bytes (not code points!) to read from the string
  *
  * \return Non-zero on success, zero if out of memory (or str==NULL)
  */
@@ -291,6 +293,7 @@ TLAPI int tl_string_append_utf8_count( tl_string* str, const char* utf8,
  *
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
+ * \note Appending data to the string is stopped if a null byte is encountered
  *
  * \param str    A pointer to a string object
  * \param latin1 A pointer to a Latin-1 string (not neccessarily null
@@ -309,12 +312,13 @@ TLAPI int tl_string_append_latin1_count( tl_string* str, const char* latin1,
  *
  * \note If the function fails to allocate enough memory, the string is left
  *       unchanged.
+ * \note Appending data to the string is stopped if a null word is encountered
  *
  * \param str   A pointer to a string object
  * \param utf16 A pointer to a UTF-16 string (not neccessarily null
  *              terminated), in system byte order.
- * \param count The number of characters to read from the string (surrogate
- *              pairs count as one character)
+ * \param count The number of words to read from the string (surrogate
+ *              pairs count as two words)
  */
 TLAPI int tl_string_append_utf16_count( tl_string* str, const tl_u16* utf16,
                                         size_t count );
@@ -335,7 +339,7 @@ TLAPI int tl_string_append_utf16_count( tl_string* str, const tl_u16* utf16,
 static TL_INLINE int tl_string_append_utf8( tl_string* str, const char* utf8 )
 {
     assert( str && utf8 );
-    return tl_string_append_utf8_count( str, utf8, tl_utf8_charcount(utf8) );
+    return tl_string_append_utf8_count( str, utf8, strlen( utf8 ) );
 }
 
 /**
@@ -376,7 +380,8 @@ static TL_INLINE int tl_string_append_utf16( tl_string* str,
                                              const tl_u16* utf16 )
 {
     assert( str && utf16 );
-    return tl_string_append_utf16_count(str,utf16,tl_utf16_charcount(utf16));
+    return tl_string_append_utf16_count(str,utf16,
+                                        tl_utf16_strlen(utf16,~((size_t)0)));
 }
 
 /**
@@ -437,7 +442,7 @@ TLAPI int tl_string_append_int( tl_string* str, long value, int base );
  *
  * \param str A pointer to a string
  *
- * \return The number of characters required
+ * \return The number of code units (16 bit words) required
  */
 static TL_INLINE size_t tl_string_utf16_len( const tl_string* str )
 {

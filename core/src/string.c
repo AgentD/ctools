@@ -214,7 +214,7 @@ int tl_string_append_code_point( tl_string* this, unsigned int cp )
 
     assert( this );
 
-    if( IS_SURROGATE(cp) || cp>UNICODE_MAX || cp==BOM || cp==BOM2 )
+    if( IS_SURROGATE(cp)||cp>UNICODE_MAX||cp==BOM||cp==BOM2||cp==0xFFFF )
         return 0;
 
     count = tl_utf8_encode( (char*)val, cp );
@@ -236,52 +236,86 @@ int tl_string_append_utf8_count( tl_string* this, const char* utf8,
                                  size_t count )
 {
     const unsigned char* src = (const unsigned char*)utf8;
-    size_t u8len, i, j, k, len;
     unsigned char* dst;
+    size_t i=0;
 
     assert( this );
     assert( utf8 );
 
-    if( !count || !(u8len = tl_utf8_strlen( utf8, count )) )
+    if( !count )
         return 1;
 
-    if( !tl_array_reserve( &(this->data), this->data.used+u8len ) )
+    if( !tl_array_reserve( &(this->data), this->data.used+count ) )
         return 0;
 
     dst = (unsigned char*)this->data.data + this->data.used - 1;
 
-    for( j=0, i=0; i<count && j<u8len; ++i )
+    while( i<count && (*src) )
     {
-             if(!(*src)              ) { break;     }
-        else if(!(*src & 0x80)       ) { len = 1;   }
-        else if( (*src & 0xE0)==0xC0 ) { len = 2;   }
-        else if( (*src & 0xF0)==0xE0 ) { len = 3;   }
-        else if( (*src & 0xF8)==0xF0 ) { len = 4;   }
-        else if( (*src & 0xFC)==0xF8 ) { len = 5;   }
-        else if( (*src & 0xFE)==0xFC ) { len = 6;   }
-        else if( (*src & 0xC0)==0x80 ) { goto skip; }
-        else if(  *src & 0x80        ) { goto skip; }
-
-        if( (j+len-1)>=u8len )
-            break;
-        for( k=1; k<len; ++k )
+        if( (*src & 0x80)==0x00 )
         {
-            if( (src[k] & 0xC0)!=0x80 )
-                goto skip;
+            if( this->mbseq==this->charcount )
+                ++this->mbseq;
+
+            *(dst++) = *(src++);
+            ++this->charcount;
+            ++i;
+            continue;
         }
+        if( (*src & 0xE0)==0xC0 )
+        {
+            if( (i+1)>=count          ) break;
+            if( (src[1] & 0xC0)!=0x80 ) goto skip;
+            if( (src[0] & 0xFE)==0xC0 ) goto skip;  /* overlong */
 
-        memcpy( dst, src, len );
-        dst += len;
-        src += len;
-        j += len;
+            *(dst++) = *(src++);
+            *(dst++) = *(src++);
+            ++this->charcount;
+            i += 2;
+            continue;
+        }
+        if( (*src & 0xF0)==0xE0 )
+        {
+            if( (i+2)>=count )
+                break;
+            if( (src[1] & 0xC0)!=0x80 || (src[2] & 0xC0)!=0x80 )
+                goto skip;
+            if( src[0]==0xE0 && (src[1] & 0xE0)==0x80 )     /* overlong */
+                goto skip;
+            if( src[0]==0xED && (src[1] & 0xE0)==0xA0 )     /* surrogate */
+                goto skip;
+            /* 0xFFFF or 0xFFFE */
+            if( src[0]==0xEF&&src[1]==0xBF&&(src[2]&0xFE)==0xBE )
+	            goto skip;
 
-        if( len==1 && this->mbseq==this->charcount )
-            ++this->mbseq;
-
-        ++this->charcount;
-        continue;
+            *(dst++) = *(src++);
+            *(dst++) = *(src++);
+            *(dst++) = *(src++);
+            ++this->charcount;
+            i += 3;
+            continue;
+        }
+        if( (*src & 0xF8)==0xF0 )
+        {
+            if( (i+3)>=count )
+                break;
+            if((src[1]&0xC0)!=0x80||(src[2]&0xC0)!=0x80||(src[3]&0xC0)!=0x80)
+                goto skip;
+            if( src[0]==0xF0 && (src[1] & 0xF0)==0x80 )     /* overlong */
+                goto skip;
+            if( (src[0]==0xF4 && src[1]>0x8F) || src[0]>0xF4) /* > 0x10FFFF */
+                goto skip;
+            *(dst++) = *(src++);
+            *(dst++) = *(src++);
+            *(dst++) = *(src++);
+            *(dst++) = *(src++);
+            ++this->charcount;
+            i += 4;
+            continue;
+        }
     skip:
-        for( ++src, ++j; j<u8len && (*src & 0xC0)==0x80; ++src, ++j ) { }
+        ++src;
+        ++i;
     }
 
     *dst = 0;
@@ -334,7 +368,8 @@ int tl_string_append_latin1_count( tl_string* this, const char* latin1,
 int tl_string_append_utf16_count( tl_string* this, const tl_u16* str,
                                   size_t count )
 {
-    size_t i, j, len, codeunits;
+    unsigned char* dst;
+    size_t i, len;
     unsigned int cp;
 
     assert( this );
@@ -344,29 +379,57 @@ int tl_string_append_utf16_count( tl_string* this, const tl_u16* str,
         return 1;
 
     len = tl_utf8_estimate_utf16_length( str, count );
-    codeunits = tl_utf16_strlen( str, count );
 
     if( !tl_array_reserve( &(this->data), this->data.used+len ) )
         return 0;
 
-    for( i=0, j=0; i<count && j<codeunits && *str; ++i )
+    dst = (unsigned char*)this->data.data + this->data.used - 1;
+
+    for( i=0; i<count && *str; ++str, ++i )
     {
-        if( (j+1)<codeunits && IS_LEAD_SURROGATE( str[0] ) &&
-            IS_TRAIL_SURROGATE( str[1] ) )
+        if( IS_TRAIL_SURROGATE(*str)||*str==BOM||*str==0xFFFE||*str==0xFFFF )
+            continue;
+
+        if( IS_LEAD_SURROGATE(str[0]) )
         {
+            if( (i+1)>=count                ) break;
+            if( !IS_TRAIL_SURROGATE(str[1]) ) continue;
+
             cp = (str[0] << 10) + str[1] + SURROGATE_OFFSET;
-            str += 2;
-            j += 2;
+
+            *(dst++) = 0xF0 | ((cp>>18) & 0x07);
+            *(dst++) = 0x80 | ((cp>>12) & 0x3F);
+            *(dst++) = 0x80 | ((cp>> 6) & 0x3F);
+            *(dst++) = 0x80 | ( cp      & 0x3F);
+            ++this->charcount;
+            ++str;
+            ++i;
+        }
+        else if( *str>=0x0800 )
+        {
+            *(dst++) = 0xE0 | ((*str>>12) & 0x0F);
+            *(dst++) = 0x80 | ((*str>>6 ) & 0x3F);
+            *(dst++) = 0x80 | ( *str      & 0x3F);
+            ++this->charcount;
+        }
+        else if( *str>=0x0080 )
+        {
+            *(dst++) = 0xC0 | ((*str>>6) & 0x1F);
+            *(dst++) = 0x80 | ( *str     & 0x3F);
+            ++this->charcount;
         }
         else
         {
-            cp = *(str++);
-            ++j;
-        }
+            if( this->mbseq==this->charcount )
+                ++this->mbseq;
 
-        tl_string_append_code_point( this, cp );
+            ++this->charcount;
+            *(dst++) = *str;
+        }
     }
 
+    *dst = 0;
+    this->data.used = dst - ((unsigned char*)this->data.data) + 1;
     return 1;
 }
 

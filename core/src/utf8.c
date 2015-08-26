@@ -164,28 +164,28 @@ unsigned int tl_utf8_encode( char* utf8, unsigned int cp )
     return 4;
 }
 
-size_t tl_utf8_estimate_utf16_length( const tl_u16* in, size_t charcount )
+size_t tl_utf8_estimate_utf16_length( const tl_u16* in, size_t count )
 {
-    size_t i, count;
+    size_t i, u8count=0;
 
     assert( in );
 
-    for( count=0, i=0; i<charcount; ++i )
+    for( i=0; i<count && *in; ++i )
     {
         if( IS_SURROGATE(*in) )
         {
-            count += 4;
+            u8count += 4;
             in += 2;
         }
         else
         {
-                 if( (*in)<0x0080 ) count += 1;
-            else if( (*in)<0x0800 ) count += 2;
-            else                    count += 3;
+                 if( (*in)<0x0080 ) u8count += 1;
+            else if( (*in)<0x0800 ) u8count += 2;
+            else                    u8count += 3;
 
             ++in;
         }
     }
-    return count;
+    return u8count;
 }
 

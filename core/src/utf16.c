@@ -65,7 +65,7 @@ size_t tl_utf16_strlen( const tl_u16* str, size_t chars )
 
     assert( str );
 
-    for( i=0; i<chars; ++i )
+    for( i=0; i<chars && *str; ++i )
     {
         if( IS_LEAD_SURROGATE( str[0] ) )
         {
@@ -118,23 +118,23 @@ unsigned int tl_utf16_encode( tl_u16* utf16, unsigned int cp )
     return 2;
 }
 
-size_t tl_utf16_estimate_utf8_length( const char* str, size_t chars )
+size_t tl_utf16_estimate_utf8_length( const char* str, size_t count )
 {
     const unsigned char* ptr = (const unsigned char*)str;
-    size_t i, count;
+    size_t i, u16count=0;
 
     assert( str );
 
-    for( i=0, count=0; *ptr && i<chars; ++ptr )
+    for( i=0; i<count && *ptr; ++ptr )
     {
         if( (*ptr & 0xC0) == 0x80 )
             continue;
 
-        count += ((*ptr & 0xF8)==0xF0) ? 2 : 1;
+        u16count += ((*ptr & 0xF8)==0xF0) ? 2 : 1;
         ++i;
     }
 
-    return count;
+    return u16count;
 }
 
 int tl_utf16_compare( const tl_u16* a, const tl_u16* b )
