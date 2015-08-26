@@ -73,8 +73,6 @@
     #define TL_INLINE __forceinline
 #else
     #define TL_INLINE __inline__ __attribute__((always_inline))
-
-    #pragma GCC diagnostic ignored "-Wunused-function"
 #endif
 
 #ifndef TLAPI
