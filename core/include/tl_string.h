@@ -385,6 +385,26 @@ static TL_INLINE int tl_string_append_utf16( tl_string* str,
 }
 
 /**
+ * \brief Append a string to another string
+ *
+ * \memberof tl_string
+ *
+ * \note If the function fails to allocate enough memory, the string is left
+ *       unchanged.
+ *
+ * \param str   A pointer to a string object
+ * \param other A pointer to the source string to append
+ *
+ * \return Non-zero on success, zero if out of memory
+ */
+static TL_INLINE int tl_string_append(tl_string* str, const tl_string* other)
+{
+    assert( str && other );
+    return tl_string_append_utf8_count(str, other->data.data,
+                                       other->data.used-1);
+}
+
+/**
  * \brief Append an unsigned intger value to a string
  *
  * \memberof tl_string
