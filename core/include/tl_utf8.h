@@ -128,6 +128,17 @@ TLAPI unsigned int tl_utf8_encode( char* utf8, unsigned int cp );
 TLAPI size_t tl_utf8_estimate_utf16_length( const tl_u16* utf16,
                                             size_t count );
 
+/**
+ * \brief Find an UTF-8 encoded character in a string
+ *
+ * \param haystack The string to search
+ * \param needle   A pointer to an UTF-8 encoded character to search for
+ *
+ * \return On success, a pointer to the first occourance of the character in
+ *         the haystack, NULL if not found
+ */
+TLAPI char* tl_utf8_strchr( const char* haystack, const char* needle );
+
 #ifdef __cplusplus
 }
 #endif

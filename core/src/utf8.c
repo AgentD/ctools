@@ -25,6 +25,8 @@
 #define TL_EXPORT
 #include "tl_utf8.h"
 
+#include <string.h>
+
 
 #define IS_SURROGATE( x ) (((x) >= 0xD800) && ((x) <= 0xDFFF))
 
@@ -187,5 +189,30 @@ size_t tl_utf8_estimate_utf16_length( const tl_u16* in, size_t count )
         }
     }
     return u8count;
+}
+
+char* tl_utf8_strchr( const char* haystack, const char* needle )
+{
+    char* candidate;
+    size_t len;
+
+    do
+    {
+        candidate = strchr( haystack, *needle );
+        if( !candidate )
+            return NULL;
+        if( !(*needle & 0x80) )
+            return candidate;
+
+        for( len=1; (needle[len] & 0xC0)==0x80; ++len ) { }
+
+        if( !strncmp( needle, candidate, len ) )
+            return candidate;
+
+        haystack = candidate + 1;
+    }
+    while( *haystack );
+
+    return NULL;
 }
 
