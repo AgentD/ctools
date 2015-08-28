@@ -2,10 +2,12 @@
 #include <string.h>
 
 #include "tl_string.h"
+#include "tl_iterator.h"
 
 
 int main( void )
 {
+    tl_iterator* it;
     tl_string str;
 
     tl_string_init( &str );
@@ -117,6 +119,94 @@ int main( void )
     tl_string_trim_end( &str );
     if( strcmp( tl_string_cstr( &str ), "a b c" ) )
         return EXIT_FAILURE;
+
+    tl_string_cleanup( &str );
+
+    /**** string tokenizing ****/
+    tl_string_init( &str );
+
+    /* empty string */
+    tl_string_clear( &str );
+    it = tl_string_tokenize( &str, " \t" );
+
+    if( !it || it->has_data( it ) )
+        return EXIT_FAILURE;
+
+    it->destroy( it );
+
+    /* string without seperators */
+    tl_string_append_utf8( &str, "foobar" );
+    it = tl_string_tokenize( &str, " \t" );
+
+    if( !it || !it->has_data( it ) )
+        return EXIT_FAILURE;
+
+    if( strcmp( tl_string_cstr(it->get_value(it)), "foobar" )!=0 )
+        return EXIT_FAILURE;
+
+    it->next( it );
+    if( it->has_data( it ) )
+        return EXIT_FAILURE;
+
+    it->destroy( it );
+
+    /* string with seperators */
+    tl_string_clear( &str );
+
+    tl_string_append_utf8( &str, "foo bar\tbaz  \t\t  qux" );
+    it = tl_string_tokenize( &str, " \t" );
+
+    if( !it || !it->has_data( it ) )
+        return EXIT_FAILURE;
+    if( strcmp( tl_string_cstr(it->get_value(it)), "foo" )!=0 )
+        return EXIT_FAILURE;
+
+    it->next( it );
+    if( !it->has_data( it ) )
+        return EXIT_FAILURE;
+    if( strcmp( tl_string_cstr(it->get_value(it)), "bar" )!=0 )
+        return EXIT_FAILURE;
+
+    it->next( it );
+    if( !it->has_data( it ) )
+        return EXIT_FAILURE;
+    if( strcmp( tl_string_cstr(it->get_value(it)), "baz" )!=0 )
+        return EXIT_FAILURE;
+
+    it->next( it );
+    if( !it->has_data( it ) )
+        return EXIT_FAILURE;
+    if( strcmp( tl_string_cstr(it->get_value(it)), "qux" )!=0 )
+        return EXIT_FAILURE;
+
+    it->next( it );
+    if( it->has_data( it ) )
+        return EXIT_FAILURE;
+
+    it->destroy( it );
+
+    /* seperators at the beginning and end */
+    tl_string_clear( &str );
+
+    tl_string_append_utf8( &str, "  foo   bar  " );
+    it = tl_string_tokenize( &str, " \t" );
+
+    if( !it || !it->has_data( it ) )
+        return EXIT_FAILURE;
+    if( strcmp( tl_string_cstr(it->get_value(it)), "foo" )!=0 )
+        return EXIT_FAILURE;
+
+    it->next( it );
+    if( !it->has_data( it ) )
+        return EXIT_FAILURE;
+    if( strcmp( tl_string_cstr(it->get_value(it)), "bar" )!=0 )
+        return EXIT_FAILURE;
+
+    it->next( it );
+    if( it->has_data( it ) )
+        return EXIT_FAILURE;
+
+    it->destroy( it );
 
     tl_string_cleanup( &str );
     return EXIT_SUCCESS;
