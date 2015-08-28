@@ -80,6 +80,24 @@ typedef enum
 }
 TL_STREAM_FLAG;
 
+/**
+ * \enum TL_READ_LINE_FLAG
+ *
+ * \brief Encapsulates flags for tl_iostream_read_line
+ */
+typedef enum
+{
+    /** \brief Default: Assume the input data is Latin 1 (ISO 8859-1) */
+    TL_LINE_READ_LATIN1 = 0x00,
+
+    /** \brief Assume the input data is UTF-8 */
+    TL_LINE_READ_UTF8 = 0x01,
+
+    /** \brief Always treat end of file or disconnect as failure */
+    TL_LINE_READ_FAIL_ON_EOF = 0x02
+}
+TL_READ_LINE_FLAG;
+
 
 
 /**
@@ -198,6 +216,46 @@ static TL_INLINE int tl_iostream_write_blob( tl_iostream* stream,
  */
 TLOSAPI int tl_iostream_read_blob( tl_iostream* stream, tl_blob* blob,
                                    size_t maximum );
+
+/**
+ * \brief Read characters from a stream until a new line symbol is encountered
+ *
+ * \memberof tl_iostream
+ *
+ * This function reads characters from a stream and appends them to a 
+ * string until a line feed (LF) symbol is encountered or the stream ends (end
+ * of file or connection closed). The line feed symbol itself is not added to
+ * the string. The given string is assumed to be uninitialized and cleaned up
+ * in case of failure.
+ *
+ * Depending on a combination of flags, the function can perform sanity
+ * checking and encoding transformations.
+ *
+ * If the end of the stream is reached (EOF or disconnect), but it was
+ * possible to read characters before that, the function returns with success
+ * state. It only reports end of file (or connection closed) if it was not
+ * able to read any characters, excpet if the TL_LINE_READ_FAIL_ON_EOF flag is
+ * set. In this case, it will always fail on end-of-stream.
+ *
+ * \param stream A pointer to a stream object
+ * \param line   A pointer to an unitialized tl_string
+ * \param flags  A combination of \ref TL_READ_LINE_FLAG flags
+ *
+ * \return Zero on success, a negative value (\ref TL_ERROR_CODE) on failure
+ */
+TLOSAPI int tl_iostream_read_line( tl_iostream* stream, tl_string* line,
+                                   int flags );
+
+/**
+ * \brief Write formated data to a tl_iostream
+ *
+ * \param stream A pointer to a stream object
+ * \param format A printf like format string, followed by arguments
+ *
+ * \return Zero on success, a negative value (\ref TL_ERROR_CODE) on failure
+ */
+TLOSAPI int tl_iostream_printf( tl_iostream* stream,
+                                const char* format, ... ) TL_FORMATSTR;
 
 #ifdef __cplusplus
 }

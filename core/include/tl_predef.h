@@ -71,8 +71,10 @@
 
 #ifdef _MSC_VER
     #define TL_INLINE __forceinline
+    #define TL_FORMATSTR
 #else
     #define TL_INLINE __inline__ __attribute__((always_inline))
+    #define TL_FORMATSTR __attribute__ ((format (printf, 2, 3)))
 #endif
 
 #ifndef TLAPI
