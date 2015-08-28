@@ -609,6 +609,26 @@ static TL_INLINE void tl_string_trim( tl_string* str )
     tl_string_trim_end( str );
 }
 
+/**
+ * \brief Create an iterator that iterates over tokens in a string
+ *
+ * \memberof tl_string
+ *
+ * This function creates an iterator that splits a string on the fly and
+ * allows iterating over the substrings. The iterator leaves the original
+ * string unchanged and simply searches for special splitting characters.
+ * It does not have a remove or get_key method. The get_value method returns
+ * a pointer to a tl_string.
+ *
+ * \param str        A pointer to a tl_string
+ * \param seperators A string containing splitting characters that can be
+ *                   arbitrary, UTF-8 encoded unicode characters.
+ *
+ * \return A pointer to a new iterator obect or NULL if out of memory
+ */
+TLAPI tl_iterator* tl_string_tokenize( tl_string* str,
+                                       const char* seperators );
+
 #ifdef __cplusplus
 }
 #endif
