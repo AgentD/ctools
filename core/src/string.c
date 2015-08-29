@@ -253,14 +253,6 @@ void tl_string_init_local( tl_string* this, const char* data )
     this->charcount = u8count;
 }
 
-void tl_string_cleanup( tl_string* this )
-{
-    assert( this );
-
-    tl_array_cleanup( &(this->data) );
-    memset( this, 0, sizeof(tl_string) );
-}
-
 int tl_string_copy( tl_string* this, const tl_string* src )
 {
     tl_array dst;

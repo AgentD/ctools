@@ -157,6 +157,7 @@ int main( void )
     tl_array_cleanup( &bvec );
 
     /* copy */
+    tl_array_init( &bvec, sizeof(int), NULL );
     tl_array_copy( &bvec, &avec );
 
     if( avec.used != bvec.used      ) return EXIT_FAILURE;

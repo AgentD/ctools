@@ -23,10 +23,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #define TL_EXPORT
-#include "tl_allocator.h"
 #include "tl_iterator.h"
 #include "tl_array.h"
-#include "tl_sort.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -124,31 +122,6 @@ static tl_iterator* tl_array_iterator_create( tl_array* array, int first )
 }
 
 /****************************************************************************/
-
-void tl_array_init( tl_array* this, size_t elementsize, tl_allocator* alloc )
-{
-    assert( this );
-
-    this->reserved = 0;
-    this->used     = 0;
-    this->unitsize = elementsize;
-    this->data     = NULL;
-    this->alloc    = alloc;
-}
-
-void tl_array_cleanup( tl_array* this )
-{
-    assert( this );
-
-    tl_allocator_cleanup( this->alloc, this->data,
-                          this->unitsize, this->used );
-
-    free( this->data );
-    this->reserved = 0;
-    this->used     = 0;
-    this->data     = NULL;
-    this->alloc    = NULL;
-}
 
 int tl_array_from_array( tl_array* this, const void* data, size_t count )
 {
@@ -327,16 +300,6 @@ void tl_array_remove( tl_array* this, size_t idx, size_t count )
     }
 }
 
-void* tl_array_at( const tl_array* this, size_t idx )
-{
-    assert( this );
-
-    if( idx >= this->used )
-        return NULL;
-
-    return ((unsigned char*)this->data + idx * this->unitsize);
-}
-
 int tl_array_set( tl_array* this, size_t idx, const void* element )
 {
     void* ptr;
@@ -481,31 +444,6 @@ void tl_array_remove_first( tl_array* this )
     }
 }
 
-void tl_array_remove_last( tl_array* this )
-{
-    assert( this );
-
-    if( this->used >= 1 )
-        tl_array_resize( this, this->used-1, 0 );
-}
-
-void tl_array_clear( tl_array* this )
-{
-    assert( this );
-
-    tl_allocator_cleanup( this->alloc, this->data,
-                          this->unitsize, this->used );
-    this->used = 0;
-}
-
-void tl_array_sort( tl_array* this, tl_compare cmp )
-{
-    assert( this && cmp );
-
-    if( this->data && this->used )
-        tl_heapsort( this->data, this->used, this->unitsize, cmp );
-}
-
 void tl_array_stable_sort( tl_array* this, tl_compare cmp )
 {
     assert( this && cmp );
@@ -597,12 +535,5 @@ tl_iterator* tl_array_last( tl_array* this )
 {
     assert( this );
     return tl_array_iterator_create( this, 0 );
-}
-
-void* tl_array_get_last( tl_array* this )
-{
-    assert( this );
-    return this->used ?
-           ((char*)this->data + this->unitsize*(this->used-1)) : NULL;
 }
 

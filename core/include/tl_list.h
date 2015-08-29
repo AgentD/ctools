@@ -63,6 +63,8 @@
 
 #include "tl_predef.h"
 
+#include <string.h>
+
 
 
 /**
@@ -162,8 +164,15 @@ TLAPI void* tl_list_node_get_data( const tl_list_node* node );
  * \param elementsize The size of an individual element
  * \param alloc       Pointer to an allocator or NULL if not used
  */
-TLAPI void tl_list_init( tl_list* list, size_t elementsize,
-                         tl_allocator* alloc );
+static TL_INLINE void tl_list_init( tl_list* list, size_t elementsize,
+                                    tl_allocator* alloc )
+{
+    assert( list );
+
+    memset( list, 0, sizeof(*list) );
+    list->unitsize = elementsize;
+    list->alloc    = alloc;
+}
 
 /**
  * \brief Get a pointer to a list node by its index

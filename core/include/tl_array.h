@@ -63,7 +63,12 @@
 
 
 #include "tl_predef.h"
+
+#include "tl_sort.h"
 #include "tl_allocator.h"
+
+#include <string.h>
+#include <stdlib.h>
 
 
 
@@ -112,8 +117,15 @@ extern "C" {
  * \param elementsize The size of a single element
  * \param alloc       A pointer to an allocator or NULL if not used
  */
-TLAPI void tl_array_init( tl_array* vec, size_t elementsize,
-                          tl_allocator* alloc );
+static TL_INLINE void tl_array_init( tl_array* vec, size_t elementsize,
+                                     tl_allocator* alloc )
+{
+    assert( vec );
+
+    memset( vec, 0, sizeof(*vec) );
+    vec->unitsize = elementsize;
+    vec->alloc    = alloc;
+}
 
 /**
  * \brief Free the memory used by a array and reset its fields
@@ -122,7 +134,12 @@ TLAPI void tl_array_init( tl_array* vec, size_t elementsize,
  *
  * \param vec A pointer to a dynamic array
  */
-TLAPI void tl_array_cleanup( tl_array* vec );
+static TL_INLINE void tl_array_cleanup( tl_array* vec )
+{
+    assert( vec );
+    tl_allocator_cleanup( vec->alloc, vec->data, vec->unitsize, vec->used );
+    free( vec->data );
+}
 
 /**
  * \brief Generate a dynamic array from an existing array
@@ -288,7 +305,13 @@ static TL_INLINE int tl_array_is_empty( const tl_array* vec )
  *
  * \return A pointer to an element, or NULL if index out of bounds
  */
-TLAPI void* tl_array_at( const tl_array* vec, size_t idx );
+static TL_INLINE void* tl_array_at( const tl_array* vec, size_t idx )
+{
+    assert( vec );
+
+    return idx < vec->used ?
+           ((unsigned char*)vec->data + idx * vec->unitsize) : NULL;
+}
 
 /**
  * \brief Overwrite an element in an array
@@ -405,7 +428,13 @@ TLAPI void tl_array_remove_first( tl_array* vec );
  *
  * \param vec A pointer to an array
  */
-TLAPI void tl_array_remove_last( tl_array* vec );
+static TL_INLINE void tl_array_remove_last( tl_array* vec )
+{
+    assert( vec );
+
+    if( vec->used )
+        tl_array_resize( vec, vec->used - 1, 0 );
+}
 
 /**
  * \brief Remove all elements of an array
@@ -416,7 +445,13 @@ TLAPI void tl_array_remove_last( tl_array* vec );
  *
  * \param vec A pointer to an array
  */
-TLAPI void tl_array_clear( tl_array* vec );
+static TL_INLINE void tl_array_clear( tl_array* vec )
+{
+    assert( vec );
+
+    tl_allocator_cleanup( vec->alloc, vec->data, vec->unitsize, vec->used );
+    vec->used = 0;
+}
 
 /**
  * \brief Sort a dynamic array in ascending order
@@ -431,7 +466,13 @@ TLAPI void tl_array_clear( tl_array* vec );
  * \param arr A pointer to an array
  * \param cmp A function used to compare two elements, determining the order
  */
-TLAPI void tl_array_sort( tl_array* arr, tl_compare cmp );
+static TL_INLINE void tl_array_sort( tl_array* arr, tl_compare cmp )
+{
+    assert( arr && cmp );
+
+    if( arr->data && arr->used )
+        tl_heapsort( arr->data, arr->used, arr->unitsize, cmp );
+}
 
 /**
  * \brief Sort a dynamic array in ascending order in a stable manner
@@ -561,7 +602,12 @@ static TL_INLINE void* tl_array_get_first( tl_array* arr )
  *
  * \return A pointer to the last element or NULL if empty
  */
-TLAPI void* tl_array_get_last( tl_array* arr );
+static TL_INLINE void* tl_array_get_last( tl_array* arr )
+{
+    assert( arr );
+    return arr->used ?
+           ((char*)arr->data + arr->unitsize*(arr->used-1)) : NULL;
+}
 
 #ifdef __cplusplus
 }

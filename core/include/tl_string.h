@@ -139,7 +139,11 @@ TLAPI void tl_string_init_local( tl_string* str, const char* data );
  *
  * \param str A pointer to a string object
  */
-TLAPI void tl_string_cleanup( tl_string* str );
+static TL_INLINE void tl_string_cleanup( tl_string* str )
+{
+    assert( str );
+    tl_array_cleanup( &(str->data) );
+}
 
 /**
  * \brief Copy the contents of one string over another string

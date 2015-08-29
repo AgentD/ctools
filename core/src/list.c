@@ -211,17 +211,6 @@ void* tl_list_node_get_data( const tl_list_node* node )
 
 /****************************************************************************/
 
-void tl_list_init( tl_list* this, size_t elementsize, tl_allocator* alloc )
-{
-    assert( this );
-
-    this->first    = NULL;
-    this->last     = NULL;
-    this->size     = 0;
-    this->unitsize = elementsize;
-    this->alloc    = alloc;
-}
-
 tl_list_node* tl_list_node_from_index( const tl_list* this, size_t idx )
 {
     tl_list_node* n = NULL;
