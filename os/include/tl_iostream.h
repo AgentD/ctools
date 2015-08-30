@@ -54,6 +54,7 @@
 
 
 #include "tl_predef.h"
+#include "tl_string.h"
 #include "tl_blob.h"
 
 
@@ -198,6 +199,27 @@ static TL_INLINE int tl_iostream_write_blob( tl_iostream* stream,
                                              size_t* actual )
 {
     return stream->write( stream, blob->data, blob->size, actual );
+}
+
+/**
+ * \brief Write a string to a stream
+ *
+ * \memberof tl_iostream
+ *
+ * \param stream A pointer to the stream object
+ * \param str    A pointer to a UTF-8 string to send (excluding null
+ *               terminator)
+ * \param actual If not NULL, returns the number of bytes actually written
+ *
+ * \return Zero on success, TL_ERR_CLOSED if the connection was closed,
+ *         TL_ERR_TIMEOUT if a timeout occoured or TL_ERR_INTERNAL if an
+ *         internal error occoured.
+ */
+static TL_INLINE int tl_iostream_write_string( tl_iostream* stream,
+                                               const tl_string* str,
+                                               size_t* actual )
+{
+    return stream->write( stream, str->data.data, str->data.used-1, actual );
 }
 
 /**
