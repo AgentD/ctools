@@ -233,7 +233,7 @@ void tl_string_init_local( tl_string* this, const char* data )
 {
     size_t i=0, u8count=0, count=0, mbseq=0;
 
-    assert( this );
+    assert( this && data );
 
     for( ; data[i]; ++i )
     {
@@ -245,7 +245,7 @@ void tl_string_init_local( tl_string* this, const char* data )
             mbseq = count;
     }
 
-    this->data.reserved = this->data.used = count;
+    this->data.reserved = this->data.used = count + 1;
     this->data.unitsize = 1;
     this->data.data = (void*)data;
     this->data.alloc = NULL;
