@@ -677,6 +677,84 @@ void tl_string_drop_last( tl_string* this )
     }
 }
 
+void tl_string_remove( tl_string* this, size_t offset, size_t count )
+{
+    unsigned char* ptr;
+    size_t i, diff=0;
+
+    assert( this );
+
+    if( offset>=this->charcount )
+        return;
+
+    if( (offset + count) > this->charcount )
+        count = this->charcount - offset;
+
+    if( !count )
+        return;
+
+    /* resolve offset to actual byte index */
+    if( offset > this->mbseq )
+    {
+        ptr = ((unsigned char*)this->data.data) + this->mbseq;
+
+        for( i=this->mbseq; i<offset; ++i )
+        {
+            ++ptr;
+            while( (*ptr & 0xC0) == 0x80 )
+                ++ptr;
+        }
+
+        offset = ptr - (unsigned char*)this->data.data;
+    }
+
+    /* resolve character count to byte count */
+    if( (offset+count) > this->mbseq )
+    {
+        ptr = ((unsigned char*)this->data.data) + offset;
+
+        for( i=0; i<count; ++i )
+        {
+            ++ptr;
+            while( (*ptr & 0xC0) == 0x80 )
+            {
+                ++ptr;
+                ++diff;
+            }
+        }
+
+        count += diff;
+    }
+
+    /* make sure we keep the terminator and remove */
+    if( (offset + count) >= this->data.used )
+        count = this->data.used - offset - 1;
+
+    tl_array_remove( &this->data, offset, count );
+
+    /* adjust character count */
+    this->charcount -= (count-diff);
+
+    if( offset<=this->mbseq )
+    {
+        if( !diff )
+        {
+            this->mbseq -= count;
+        }
+        else
+        {
+            this->mbseq = offset;
+
+            while( this->mbseq < this->data.used )
+            {
+                if( ((unsigned char*)this->data.data)[ this->mbseq ] & 0x80 )
+                    break;
+                ++this->mbseq;
+            }
+        }
+    }
+}
+
 tl_allocator* tl_string_get_allocator( void )
 {
     return &stralloc;

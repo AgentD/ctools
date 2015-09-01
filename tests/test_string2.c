@@ -209,6 +209,43 @@ int main( void )
     it->destroy( it );
 
     tl_string_cleanup( &str );
+
+    /**** remove ****/
+    /* after first mbseq */
+    tl_string_init_cstr( &str, "aäöfüßs" );
+
+    tl_string_remove( &str, 2, 3 );
+
+    if( strcmp( tl_string_cstr(&str), "aäßs" )!=0 )
+        return EXIT_FAILURE;
+    if( str.data.used!=7 || str.charcount!=4 || str.mbseq!=1 )
+        return EXIT_FAILURE;
+
+    tl_string_cleanup( &str );
+
+    /* across first mbseq */
+    tl_string_init_cstr( &str, "abäö" );
+
+    tl_string_remove( &str, 1, 15 );
+
+    if( strcmp( tl_string_cstr(&str), "a" )!=0 )
+        return EXIT_FAILURE;
+    if( str.data.used!=2 || str.charcount!=1 || str.mbseq!=2 )
+        return EXIT_FAILURE;
+
+    tl_string_cleanup( &str );
+
+    /* before first mbseq */
+    tl_string_init_cstr( &str, "abcdäöü" );
+
+    tl_string_remove( &str, 1, 2 );
+
+    if( strcmp( tl_string_cstr(&str), "adäöü" )!=0 )
+        return EXIT_FAILURE;
+    if( str.data.used!=9 || str.charcount!=5 || str.mbseq!=2 )
+        return EXIT_FAILURE;
+
+    tl_string_cleanup( &str );
     return EXIT_SUCCESS;
 }
 

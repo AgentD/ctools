@@ -522,6 +522,17 @@ TLAPI unsigned int tl_string_last( const tl_string* str );
 TLAPI void tl_string_drop_last( tl_string* str );
 
 /**
+ * \brief Remove a range of characters from a string
+ *
+ * \memberof tl_string
+ *
+ * \param str    A pointer to a string
+ * \param offset A character offset into the string
+ * \param count  The number of characters to remove from the string
+ */
+TLAPI void tl_string_remove( tl_string* str, size_t offset, size_t count );
+
+/**
  * \brief Compare two strings
  *
  * \memberof tl_string
