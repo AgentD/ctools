@@ -114,67 +114,47 @@ static int token_iterator_has_data( tl_iterator* this )
 static void token_iterator_next( tl_iterator* super )
 {
     tl_token_iterator* this = (tl_token_iterator*)super;
-    int state = STATE_NONE_FOUND;
-    char *ptr, *match;
     size_t first;
+    char *ptr;
 
     tl_string_clear( &this->current );
 
     if( this->offset >= (this->str->data.used - 1) )
         return;
 
-    /* for each character, starting at the current offset */
+    /* find first non-serperator character */
     ptr = (char*)this->str->data.data + this->offset;
 
     for( ; *ptr; ++ptr, ++this->offset )
     {
-        if( (*ptr & 0xC0)==0x80 )   /* skip continuation bytes */
+        if( (*ptr & 0xC0)==0x80 )
             continue;
-
-        /* check if current character is a seperator */
-        match = tl_utf8_strchr( tl_string_cstr(&this->seperators), ptr );
-
-        switch( state )
-        {
-        case STATE_NONE_FOUND:      /* no seperator found so far? */
-            if( match )
-            {
-                first = this->offset + 1;               /* remember start */
-                while( (ptr[first] & 0xC0) == 0x80 )
-                    ++first;
-                state = STATE_LAST_WAS_START;           /* state transition */
-            }
-            else
-            {
-                first = this->offset;
-                state = STATE_NONSEP_FOUND;
-            }
+        if( !tl_utf8_strchr( tl_string_cstr(&this->seperators), ptr ) )
             break;
-        case STATE_LAST_WAS_START:
-            if( match )
-            {
-                first = this->offset + 1;
-                while( (ptr[first] & 0xC0) == 0x80 )
-                    ++first;
-            }
-            else
-            {
-                state = STATE_NONSEP_FOUND;
-            }
-            break;
-        case STATE_NONSEP_FOUND:
-            if( match )
-            {
-                tl_string_append_utf8_count(&this->current,
-                                            (char*)this->str->data.data+first,
-                                            this->offset - first);
-                return;
-            }
-            break;
-        }
     }
 
-    if( state == STATE_NONSEP_FOUND )
+    if( !(*ptr) )
+        return;
+
+    first = this->offset;
+
+    /* find next seperator character */
+    for( ; *ptr; ++ptr, ++this->offset )
+    {
+        if( (*ptr & 0xC0)==0x80 )
+            continue;
+        if( tl_utf8_strchr( tl_string_cstr(&this->seperators), ptr ) )
+            break;
+    }
+
+    /* isolate */
+    if( *ptr )
+    {
+        tl_string_append_utf8_count( &this->current,
+                                     (char*)this->str->data.data+first,
+                                     this->offset - first );
+    }
+    else
     {
         tl_string_append_utf8( &this->current,
                                (char*)this->str->data.data+first );
