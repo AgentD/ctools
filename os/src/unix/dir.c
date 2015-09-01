@@ -48,11 +48,25 @@ dir_iterator;
 
 
 
+static void find_next( dir_iterator* this )
+{
+retry:
+    this->ent = readdir( this->dir );
+
+    if( !this->ent )
+        return;
+    if( !strcmp( this->ent->d_name, "." ) )
+        goto retry;
+    if( !strcmp( this->ent->d_name, ".." ) )
+        goto retry;
+
+    tl_string_init_local( &this->current, this->ent->d_name );
+}
+
 static void dir_iterator_destroy( tl_iterator* super )
 {
     dir_iterator* this = (dir_iterator*)super;
 
-    tl_string_cleanup( &this->current );
     closedir( this->dir );
     free( this );
 }
@@ -60,14 +74,8 @@ static void dir_iterator_destroy( tl_iterator* super )
 static void dir_iterator_reset( tl_iterator* super )
 {
     dir_iterator* this = (dir_iterator*)super;
-
     rewinddir( this->dir );
-    this->ent = readdir( this->dir );
-
-    tl_string_clear( &this->current );
-
-    if( this->ent )
-        tl_string_append_utf8( &this->current, this->ent->d_name );
+    find_next( this );
 }
 
 static int dir_iterator_has_data( tl_iterator* this )
@@ -79,38 +87,15 @@ static void dir_iterator_next( tl_iterator* super )
 {
     dir_iterator* this = (dir_iterator*)super;
 
-    if( !this->ent )
-        return;
-
-    tl_string_clear( &this->current );
-
-    while( 1 )
-    {
-        this->ent = readdir( this->dir );
-
-        if( !this->ent )
-            break;
-
-        if( !strcmp( this->ent->d_name, "." ) )
-            continue;
-
-        if( !strcmp( this->ent->d_name, ".." ) )
-            continue;
-
-        tl_string_append_utf8( &this->current, this->ent->d_name );
-        break;
-    }
+    if( this->ent )
+        find_next( this );
 }
 
-static void* dir_iterator_get_key( tl_iterator* super )
+static void* dir_iterator_get_value( tl_iterator* super )
 {
-    (void)super;
-    return NULL;
-}
+    dir_iterator* this = (dir_iterator*)super;
 
-static void* dir_iterator_get_value( tl_iterator* this )
-{
-    return &(((dir_iterator*)this)->current);
+    return this->ent ? &this->current : NULL;
 }
 
 static void dir_iterator_remove( tl_iterator* this )
@@ -128,76 +113,44 @@ int tl_dir_scan( const char* path, tl_array* list )
 
     assert( list && path );
 
-    /* open directory */
     if( !(dir = opendir( path )) )
         return errno_to_fs( errno );
-
-    /* read contents */
-    tl_string_init( &str );
 
     while( (ent=readdir( dir )) )
     {
         if( strcmp( ent->d_name, "." )!=0 && strcmp( ent->d_name, ".." )!=0 )
         {
-            tl_string_append_utf8( &str, ent->d_name );
+            tl_string_init_local( &str, ent->d_name );
             tl_array_append( list, &str );
-            tl_string_clear( &str );
         }
     }
 
-    tl_string_cleanup( &str );
-
-    /* cleanup */
     closedir( dir );
     return 0;
 }
 
 tl_iterator* tl_dir_iterate( const char* path )
 {
-    struct dirent* first;
     dir_iterator* it;
     DIR* dir;
 
-    /* try to open the directory */
     if( !(dir = opendir( path )) )
         return NULL;
 
-    /* allocate iterator */
     if( !(it = malloc( sizeof(dir_iterator) )) )
     {
         closedir( dir );
         return NULL;
     }
 
-    if( !tl_string_init( &it->current ) )
-    {
-        closedir( dir );
-        free( it );
-        return NULL;
-    }
+    memset( it, 0, sizeof(*it) );
+    it->dir = dir;
+    find_next( it );
 
-    /* find first entry */
-    first = NULL;
-    while( 1 )
-    {
-        if( !(first = readdir( dir )) )
-            break;
-
-        if( strcmp(first->d_name,".")!=0 && strcmp(first->d_name,"..")!=0 )
-            break;
-    }
-
-    /* init */
-    if( first )
-        tl_string_append_utf8( &it->current, first->d_name );
-
-    it->dir             = dir;
-    it->ent             = first;
     it->super.destroy   = dir_iterator_destroy;
     it->super.reset     = dir_iterator_reset;
     it->super.has_data  = dir_iterator_has_data;
     it->super.next      = dir_iterator_next;
-    it->super.get_key   = dir_iterator_get_key;
     it->super.get_value = dir_iterator_get_value;
     it->super.remove    = dir_iterator_remove;
     return (tl_iterator*)it;

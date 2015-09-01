@@ -119,12 +119,6 @@ retry:
     tl_string_append_utf16( &this->current, this->ent.cFileName );
 }
 
-static void* dir_iterator_get_key( tl_iterator* this )
-{
-    (void)this;
-    return NULL;
-}
-
 static void* dir_iterator_get_value( tl_iterator* this )
 {
     assert( this );
@@ -261,7 +255,6 @@ retry:
     super->destroy   = dir_iterator_destroy;
     super->next      = dir_iterator_next;
     super->has_data  = dir_iterator_has_data;
-    super->get_key   = dir_iterator_get_key;
     super->get_value = dir_iterator_get_value;
     super->reset     = dir_iterator_reset;
     super->remove    = dir_iterator_remove;
