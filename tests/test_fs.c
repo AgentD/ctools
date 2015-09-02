@@ -18,15 +18,12 @@ int main( void )
     FILE* f;
 
     /* print system & setup dependend values */
-    tl_string_init( &str );
-
     printf( "OS dir seperator: '%s'\n", tl_fs_get_dir_sep( ) );
 
     tl_fs_get_user_dir( &str );
     printf( "User home directory: '%s'\n", tl_string_cstr( &str ) );
     tl_string_cleanup( &str );
 
-    tl_string_init( &str );
     tl_fs_get_wd( &str );
     printf( "Current working directory: '%s'\n", tl_string_cstr( &str ) );
     tl_string_cleanup( &str );

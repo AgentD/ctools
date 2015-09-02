@@ -130,7 +130,7 @@ TLOSAPI int tl_fs_cwd( const char* path );
 /**
  * \brief Get the working directory of the calling process
  *
- * \param path A pointer to a string to write the working directory to
+ * \param path A pointer to an uninitialized string
  *
  * \return Non-zero on success, zero on failure
  */
@@ -146,7 +146,7 @@ TLOSAPI int tl_fs_get_wd( tl_string* path );
  * The home directory returned always ends with the systems directory
  * seperator, so filenames can be directly appended to it.
  *
- * \param path Returns the user home directory
+ * \param path A pointer to an uninitialized string
  *
  * \return Non-zero on success, zero on failure
  */

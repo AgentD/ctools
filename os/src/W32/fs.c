@@ -49,7 +49,6 @@ int tl_fs_get_wd( tl_string* path )
 
     assert( path );
 
-    tl_string_clear( path );
     length = GetCurrentDirectoryW( 0, NULL );
 
     if( !(wpath = malloc( length*2 )) )
@@ -58,18 +57,22 @@ int tl_fs_get_wd( tl_string* path )
     if( !GetCurrentDirectoryW( length, wpath ) )
         goto fail;
 
-    if( !tl_string_append_utf16( path, wpath ) )
+    if( !tl_string_init( path ) )
         goto fail;
+
+    if( !tl_string_append_utf16( path, wpath ) )
+        goto failstr;
 
     if( tl_string_last( path )!='\\' &&
         !tl_string_append_code_point( path, '\\' ) )
     {
-        goto fail;
+        goto failstr;
     }
     return 1;
+failstr:
+    tl_string_cleanup( path );
 fail:
     free( wpath );
-    tl_string_clear( path );
     return 0;
 }
 
@@ -80,8 +83,6 @@ int tl_fs_get_user_dir( tl_string* path )
     DWORD size = 0;
 
     assert( path );
-
-    tl_string_clear( path );
 
     if( !OpenProcessToken( GetCurrentProcess(), TOKEN_QUERY, &token ) )
         return 0;
@@ -97,17 +98,21 @@ int tl_fs_get_user_dir( tl_string* path )
 
     CloseHandle( token );
 
-    if( !tl_string_append_utf16( path, wpath ) )
+    if( !tl_string_init( path ) )
         goto fail;
+
+    if( !tl_string_append_utf16( path, wpath ) )
+        goto failstr;
 
     if( tl_string_last( path )!='\\' &&
         !tl_string_append_code_point( path, '\\' ) )
     {
-        goto fail;
+        goto failstr;
     }
     return 1;
+failstr:
+    tl_string_cleanup( path );
 fail:
-    tl_string_clear( path );
     CloseHandle( token );
     free( wpath );
     return 0;

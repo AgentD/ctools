@@ -102,20 +102,16 @@ int tl_fs_delete( const char* path )
 
 int tl_fs_get_wd( tl_string* path )
 {
-    size_t size = 256;
-    char* str = NULL;
-    char* new;
+    char *str, *new;
+    size_t size;
 
     assert( path );
 
     /* Benny Hill theme starts playing */
-    while( 1 )
+    for( size=256, str=NULL; ; size*=2 )
     {
         if( !(new = realloc( str, size )) )
-        {
-            free( str );
-            return TL_ERR_INTERNAL;
-        }
+            goto fail;
 
         str = new;
 
@@ -123,22 +119,23 @@ int tl_fs_get_wd( tl_string* path )
             break;
 
         if( errno!=ERANGE )
-        {
-            free( str );
-            return errno_to_fs( errno );
-        }
-
-        size *= 2;
+            goto fail;
     }
 
-    /* copy to string & cleanup */
-    tl_string_clear( path );
-    tl_string_append_utf8( path, str );
-    free( str );
+    /* copy to string */
+    tl_string_init_local( path, str );
+    path->data.reserved = size;
 
-    if( tl_string_last( path )!='/' )
-        tl_string_append_code_point( path, '/' );
-    return 1;
+    if( tl_string_last( path )!='/' &&
+        !tl_string_append_code_point( path, '/' ) )
+    {
+        tl_string_cleanup( path );
+        return TL_ERR_ALLOC;
+    }
+    return 0;
+fail:
+    free( str );
+    return errno_to_fs( errno );
 }
 
 int tl_fs_get_user_dir( tl_string* path )
@@ -177,11 +174,14 @@ int tl_fs_get_user_dir( tl_string* path )
 
     return 0;
 done:
-    tl_string_clear( path );
-    tl_string_append_utf8( path, dir );
+    tl_string_init_cstr( path, dir );
 
-    if( tl_string_last( path )!='/' )
-        tl_string_append_code_point( path, '/' );
+    if( tl_string_last( path )!='/' &&
+        !tl_string_append_code_point( path, '/' ) )
+    {
+        tl_string_cleanup( path );
+        return 0;
+    }
     return 1;
 }
 
