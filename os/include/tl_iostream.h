@@ -34,7 +34,7 @@
 /**
  * \page interfaces Interfaces
  *
- * \section tl_iostream The tl_iostream interface
+ * \section iostream The tl_iostream interface
  *
  * The tl_iostream interface represents an abstract end-to-end connection over
  * an input/output device that sends and receives data as a stream of bytes or
@@ -49,6 +49,24 @@
  * concept of addresses. It abstracts end-to-end communication. Address
  * multiplexing is handled by functions that return an implementation of a
  * tl_iostream.
+ *
+ * Not all tl_iostream implementations are strictly stream based. For
+ * instance, there is a tl_stream implementation for UDP based communication.
+ * You have to be aware that those streams only \a emulate a stream based
+ * communacation. The underlying (e.g. UDP) communication can still be
+ * connection less (so it is not possible to tell if the other end is still
+ * listening) and based on discrete packets that can get re-ordered or lost
+ * during transmission.
+ *
+ * The stream interface itself is only concerned with reading and writing
+ * chunks of data. A number of helper functions exist for enhancing the
+ * functionality of abastract streams:
+ * \li \ref tl_iostream_write_string
+ * \li \ref tl_iostream_write_blob
+ * \li \ref tl_iostream_read_blob
+ * \li \ref tl_iostream_read_line
+ * \li \ref tl_iostream_printf
+ * \li \ref tl_iostream_splice
  */
 
 
@@ -103,6 +121,8 @@ TL_READ_LINE_FLAG;
  *
  * \brief Represents an end-to-end connection between two processes, possibly
  *        via a stream or packet based I/O device.
+ *
+ * \see \ref iostream
  */
 struct tl_iostream
 {
@@ -279,7 +299,7 @@ TLOSAPI int tl_iostream_printf( tl_iostream* stream,
 /**
  * \brief Read data from an input steam and write it to an output stream
  *
- * If the underlying streams wrap OS specific objects and the systems supports
+ * If the underlying streams wrap OS specific objects and the system supports
  * it, this could actually use zero-copy overhead APIs.
  *
  * \param out    The stream to write to

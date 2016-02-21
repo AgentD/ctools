@@ -34,7 +34,7 @@
 /**
  * \page interfaces Interfaces
  *
- * \section tl_packetserver The tl_packetserver interface
+ * \section packetserver The tl_packetserver interface
  *
  * The tl_packetserver interface abstracts stateless, one-to-many
  * communication over an input/output device that sends and receives discrete
@@ -69,6 +69,8 @@
  *
  * \brief Abstracts stateless, one-to-many commication via a purely packet
  *        based I/O device.
+ *
+ * \see \ref packetserver
  */
 struct tl_packetserver
 {

@@ -34,10 +34,10 @@
 /**
  * \page interfaces Interfaces
  *
- * \section tl_server The tl_server interface
+ * \section server The tl_server interface
  *
  * The tl_server interface abstracts stream based communication of a single
- * process with an arbitrary number client processes. The client
+ * end-point with an arbitrary number clients. The client
  * communications are abstracted in the form of tl_iostream instances that the
  * server creates when a new client connects or (for non-connection based
  * communications) when the first data from a particular client is received.
@@ -60,6 +60,9 @@
  * There are also tl_server implementations for purely packet based, or
  * non-connection based communcations (e.g. UDP) that internally handle
  * client demultiplexing and emulate connection based communication.
+ * Be aware that those servers only \a emulate a stream based communacation.
+ * The underlying (e.g. UDP) communication is still based on discrete
+ * packets that can get re-ordered or lost during transmission.
  *
  * For "raw" packet based, non-connection oriented communications, use the
  * tl_packetserver interface.
@@ -76,6 +79,8 @@
  *
  * \brief An interface that abstracts stream or packet based one-to-many
  *        communication on the "one" end.
+ *
+ * \see \ref server
  */
 struct tl_server
 {
