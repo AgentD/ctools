@@ -95,7 +95,12 @@ static int fd_stream_read( tl_iostream* super, void* buffer,
     result = read( this->readfd, buffer, size );
 
     if( result==0 )
+    {
+        if( (super->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_FILE )
+            return TL_EOF;
+
         return TL_ERR_CLOSED;
+    }
 
     if( result < 0 )
     {

@@ -92,10 +92,7 @@ typedef enum
     TL_LINE_READ_LATIN1 = 0x00,
 
     /** \brief Assume the input data is UTF-8 */
-    TL_LINE_READ_UTF8 = 0x01,
-
-    /** \brief Always treat end of file or disconnect as failure */
-    TL_LINE_READ_FAIL_ON_EOF = 0x02
+    TL_LINE_READ_UTF8 = 0x01
 }
 TL_READ_LINE_FLAG;
 
@@ -168,8 +165,9 @@ struct tl_iostream
      * \param actual If not NULL, returns the number of bytes actually read.
      *
      * \return Zero on success, TL_ERR_CLOSED if the connection was closed,
-     *         TL_ERR_TIMEOUT if a timeout occoured, TL_ERR_INTERNAL if an
-     *         internal error occoured.
+     *         TL_ERR_TIMEOUT if a timeout occoured, TL_EOF if data couldn't
+     *         be read because the end of a file was reached, TL_ERR_INTERNAL
+     *         if an internal or unknown error occoured.
      */
     int (* read )( tl_iostream* stream, void* buffer, size_t size,
                    size_t* actual );
@@ -250,14 +248,13 @@ TLOSAPI int tl_iostream_read_blob( tl_iostream* stream, tl_blob* blob,
  * the string. The given string is assumed to be uninitialized and cleaned up
  * in case of failure.
  *
- * Depending on a combination of flags, the function can perform sanity
- * checking and encoding transformations.
- *
  * If the end of the stream is reached (EOF or disconnect), but it was
  * possible to read characters before that, the function returns with success
- * state. It only reports end of file (or connection closed) if it was not
- * able to read any characters, excpet if the TL_LINE_READ_FAIL_ON_EOF flag is
- * set. In this case, it will always fail on end-of-stream.
+ * state. The next read that attempts to read past the end-of-file or from a
+ * closed connection reports TL_EOF or TL_ERR_CLOSED status.
+ *
+ * Depending on a combination of flags, the function can perform sanity
+ * checking and encoding transformations.
  *
  * \param stream A pointer to a stream object
  * \param line   A pointer to an unitialized tl_string

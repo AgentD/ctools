@@ -127,6 +127,9 @@ typedef enum
     /** \brief Out of memory */
     TL_ERR_ALLOC = -11,
 
+    /** \brief End of file has been reached */
+    TL_EOF = -12,
+
     /** \brief A function was called with an invalid argument */
     TL_ERR_ARG = -100
 }

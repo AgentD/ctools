@@ -108,11 +108,8 @@ int tl_iostream_read_line( tl_iostream* this, tl_string* line, int flags )
 
     return status;
 statfail:
-    if( status==TL_ERR_CLOSED && !(flags & TL_LINE_READ_FAIL_ON_EOF) )
-    {
-        if( !tl_string_is_empty( line ) )
-            return 0;
-    }
+    if( (status==TL_ERR_CLOSED||status==TL_EOF) && !tl_string_is_empty(line) )
+        return 0;
 fail:
     tl_string_cleanup( line );
     return status;
