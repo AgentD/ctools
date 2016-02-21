@@ -276,6 +276,22 @@ TLOSAPI int tl_iostream_read_line( tl_iostream* stream, tl_string* line,
 TLOSAPI int tl_iostream_printf( tl_iostream* stream,
                                 const char* format, ... ) TL_FORMATSTR;
 
+/**
+ * \brief Read data from an input steam and write it to an output stream
+ *
+ * If the underlying streams wrap OS specific objects and the systems supports
+ * it, this could actually use zero-copy overhead APIs.
+ *
+ * \param out    The stream to write to
+ * \param in     The stream to read from
+ * \param count  The number of bytes to copy
+ * \param actual If not NULL, returns the number of bytes actually copied
+ *
+ * \return Zeron on success, a negative value (\ref TL_ERROR_CODE) on failure
+ */
+TLOSAPI int tl_iostream_splice( tl_iostream* out, tl_iostream* in,
+                                size_t count, size_t* actual );
+
 #ifdef __cplusplus
 }
 #endif

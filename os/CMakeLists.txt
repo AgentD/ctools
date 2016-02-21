@@ -10,7 +10,8 @@ if( UNIX )
                      src/unix/tcpserver.c
                      src/unix/udpstream.c
                      src/unix/udpserver.c
-                     src/unix/packetserver.c )
+                     src/unix/packetserver.c
+                     src/unix/iostream.c )
 elseif( WIN32 )
   set( CTOOLS_SYSDEP src/W32/os.c
                      src/W32/fs.c
@@ -24,7 +25,8 @@ elseif( WIN32 )
                      src/W32/tcpserver.c
                      src/W32/udpstream.c
                      src/W32/udpserver.c
-                     src/W32/packetserver.c )
+                     src/W32/packetserver.c
+                     src/W32/iostream.c )
 endif( )
 
 add_library( tlos ${TYPE} src/iostream.c
