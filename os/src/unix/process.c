@@ -26,11 +26,6 @@
 #include "tl_process.h"
 #include "os.h"
 
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <signal.h>
-#include <assert.h>
-
 
 
 struct tl_process
@@ -138,8 +133,11 @@ void tl_process_destroy( tl_process* this )
 {
     assert( this );
 
-    kill( this->pid, SIGKILL );
-    waitpid( this->pid, NULL, 0 );
+    if( this->pid > 0 )
+    {
+        kill( this->pid, SIGKILL );
+        waitpid( this->pid, NULL, 0 );
+    }
 
     if( this->errpipe )
         this->errpipe->destroy( this->errpipe );
@@ -163,58 +161,40 @@ tl_iostream* tl_process_get_stderr( tl_process* this )
 void tl_process_kill( tl_process* this )
 {
     assert( this );
-    kill( this->pid, SIGKILL );
+    if( this->pid > 0 )
+        kill( this->pid, SIGKILL );
 }
 
 void tl_process_terminate( tl_process* this )
 {
     assert( this );
-    kill( this->pid, SIGTERM );
+    if( this->pid > 0 )
+        kill( this->pid, SIGTERM );
 }
 
 int tl_process_wait( tl_process* this, int* status,
                      unsigned int timeout )
 {
-    struct timeval before, after;
-    unsigned long delta;
-    struct timespec ts;
-    sigset_t mask;
-    int result;
+    pid_t pid;
 
     assert( this );
 
-    while( timeout && kill( this->pid, 0 )==0 )
-    {
-        /* setup timeout structure and signal mask */
-        ts.tv_sec  = timeout / 1000;
-        ts.tv_nsec = ((long)timeout - ts.tv_sec*1000L)*1000000L;
+    if( this->pid <= 0 )
+        return TL_ERR_NOT_EXIST;
 
-        sigemptyset( &mask );
-        sigaddset( &mask, SIGCHLD );
+    pid = timeout ? wait_pid_ms( this->pid, status, timeout ) :
+                    waitpid( this->pid, status, 0 );
 
-        /* wait for a signal */
-        gettimeofday( &before, NULL );
-        result = pselect( 0, NULL, NULL, NULL, &ts, &mask );
+    if( pid == 0 )
+        return TL_ERR_TIMEOUT;
 
-        if( result==0 )
-            return TL_ERR_TIMEOUT;
-        if( result==-1 && errno!=EINTR )
-            return TL_ERR_INTERNAL;
-        if( kill( this->pid, 0 )!=0 )
-            break;
-
-        /* subtract elapsed time from timeout */
-        gettimeofday( &after, NULL );
-
-        delta  = (after.tv_sec  - before.tv_sec )*1000;
-        delta += (after.tv_usec - before.tv_usec)/1000;
-        timeout = (delta >= timeout) ? 0 : (timeout - delta);
-    }
-
-    waitpid( this->pid, status, 0 );
+    if( pid != this->pid )
+        return TL_ERR_INTERNAL;
 
     if( status )
         *status = WEXITSTATUS(*status);
+
+    this->pid = -1;
     return 0;
 }
 

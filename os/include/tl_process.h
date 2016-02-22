@@ -230,7 +230,9 @@ TLOSAPI void tl_process_terminate( tl_process* proc );
  * \param timeout A number of milliseconds to wait for the process to
  *                terminate, or 0 for infinite
  *
- * \return Non-zero if the process terminated, zero if not
+ * \return Zero if the process terminated, TL_ERR_TIMEOUT if a timeout
+ *         occoured, TL_ERR_NOT_EXIST if the process does not exist and
+ *         TL_ERR_INTERNAL if another kind of error occoured.
  */
 TLOSAPI int tl_process_wait( tl_process* proc, int* status,
                              unsigned int timeout );

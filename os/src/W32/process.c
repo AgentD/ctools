@@ -29,12 +29,15 @@
 #include <assert.h>
 
 
+#define FLAG_RUNNING 0x01
+
 
 struct tl_process
 {
     PROCESS_INFORMATION info;
     tl_iostream* iostream;
     tl_iostream* errstream;
+    int flags;
 };
 
 
@@ -172,6 +175,7 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
 out:
     free( wargs );
     free( wfilename );
+    this->flags = FLAG_RUNNING;
     return this;
 procfail:
     if( this->iostream  ) this->iostream->destroy( this->iostream );
@@ -200,7 +204,8 @@ void tl_process_destroy( tl_process* this )
         this->iostream->destroy( this->iostream );
     if( this->errstream )
         this->errstream->destroy( this->errstream );
-    TerminateProcess( this->info.hProcess, EXIT_FAILURE );
+    if( this->flags & FLAG_RUNNING )
+        TerminateProcess( this->info.hProcess, EXIT_FAILURE );
     CloseHandle( this->info.hThread );
     CloseHandle( this->info.hProcess );
     free( this );
@@ -221,31 +226,42 @@ tl_iostream* tl_process_get_stderr( tl_process* this )
 void tl_process_kill( tl_process* this )
 {
     assert( this );
-    TerminateProcess( this->info.hProcess, EXIT_FAILURE );
+    if( this->flags & FLAG_RUNNING )
+        TerminateProcess( this->info.hProcess, EXIT_FAILURE );
 }
 
 void tl_process_terminate( tl_process* this )
 {
     assert( this );
-    PostThreadMessage( GetThreadId( this->info.hThread ), WM_QUIT, 0, 0 );
+    if( this->flags & FLAG_RUNNING )
+        PostThreadMessage( this->info.dwThreadId, WM_QUIT, 0, 0 );
 }
 
 int tl_process_wait( tl_process* this, int* status,
                      unsigned int timeout )
 {
-    DWORD exitcode;
+    DWORD exitcode, ret;
 
     assert( this );
 
-    if( WaitForSingleObject( this->info.hProcess,
-                             timeout ? timeout : INFINITE )!=0 )
-        return 0;
+    if( !(this->flags & FLAG_RUNNING) )
+        return TL_ERR_NOT_EXIST;
+
+    ret = WaitForSingleObject( this->info.hProcess,
+                               timeout ? timeout : INFINITE );
+
+    if( ret == WAIT_TIMEOUT )
+        return TL_ERR_TIMEOUT;
+    if( ret != 0 )
+        return TL_ERR_INTERNAL;
+
+    this->flags &= ~FLAG_RUNNING;
 
     if( !GetExitCodeProcess( this->info.hProcess, &exitcode ) )
-        return 0;
+        return TL_ERR_INTERNAL;
 
     *status = exitcode;
-    return 1;
+    return 0;
 }
 
 void tl_sleep( unsigned long ms )

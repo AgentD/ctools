@@ -216,3 +216,46 @@ void timeout_to_abs( unsigned long timeout, struct timespec* ts )
     ts->tv_nsec += now.tv_nsec;
 }
 
+pid_t wait_pid_ms( pid_t pid, int* status, unsigned long timeout )
+{
+    struct timeval before, after;
+    unsigned long delta;
+    struct timespec ts;
+    sigset_t mask;
+    int result;
+    pid_t ret;
+
+    while( timeout )
+    {
+        ret = waitpid( pid, status, WNOHANG );
+
+        if( ret!=0 )
+            return ret;
+
+        /* setup timeout structure and signal mask */
+        ts.tv_sec  = timeout / 1000;
+        ts.tv_nsec = ((long)timeout - ts.tv_sec*1000L)*1000000L;
+
+        sigemptyset( &mask );
+        sigaddset( &mask, SIGCHLD );
+
+        /* wait for a signal */
+        gettimeofday( &before, NULL );
+        result = pselect( 0, NULL, NULL, NULL, &ts, &mask );
+
+        if( result==0 )
+            return 0;
+        if( result==-1 && errno!=EINTR )
+            return -1;
+
+        /* subtract elapsed time from timeout */
+        gettimeofday( &after, NULL );
+
+        delta  = (after.tv_sec  - before.tv_sec )*1000;
+        delta += (after.tv_usec - before.tv_usec)/1000;
+        timeout = (delta >= (unsigned long)timeout) ? 0 : (timeout - delta);
+    }
+
+    return 0;
+}
+

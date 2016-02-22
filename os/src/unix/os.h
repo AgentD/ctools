@@ -39,6 +39,7 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
@@ -46,8 +47,10 @@
 #include <netdb.h>
 #include <fcntl.h>
 
+#include <signal.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <errno.h>
@@ -231,6 +234,18 @@ void tl_monitor_cleanup( tl_monitor* monitor );
  * \param ts      Returns the absolute time stamp when the timeout occoures
  */
 void timeout_to_abs( unsigned long timeout, struct timespec* ts );
+
+/**
+ * \brief A version of waitpid that has a millisecond timeout
+ *
+ * \param pid     The process ID to wait for
+ * \param status  If not NULL, returns the exit status of the process
+ * \param timeout Maximum number of milli seconds to wait for the process
+ *
+ * \return The pid of the process on success, 0 if a timeout occoured, a
+ *         negative value on error.
+ */
+pid_t wait_pid_ms( pid_t pid, int* status, unsigned long timeout );
 
 #ifdef __cplusplus
 }
