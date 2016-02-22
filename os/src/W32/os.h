@@ -34,6 +34,8 @@
 #include "tl_array.h"
 #include "tl_fs.h"
 
+#include "../platform.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 

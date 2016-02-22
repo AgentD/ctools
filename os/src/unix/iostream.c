@@ -26,12 +26,9 @@
 #include "tl_iostream.h"
 #include "os.h"
 
-#include <assert.h>
-
-
 #ifdef __linux__
-static int try_splice( tl_iostream* out, tl_iostream* in,
-                       size_t count, size_t* actual )
+int __tl_os_splice( tl_iostream* out, tl_iostream* in,
+                    size_t count, size_t* actual )
 {
     int outtype, intype, infd, outfd;
     ssize_t res;
@@ -70,7 +67,7 @@ static int try_splice( tl_iostream* out, tl_iostream* in,
 
     res = splice( infd, NULL, outfd, NULL, count, SPLICE_F_MOVE );
 
-    /* let the fallback implementation retry figure that out */
+    /* let the fallback implementation retry and figure that out */
     if( res <= 0 )
         return TL_ERR_NOT_SUPPORTED;
 
@@ -78,62 +75,12 @@ static int try_splice( tl_iostream* out, tl_iostream* in,
         *actual = res;
     return 0;
 }
-#endif  /* __linux__ */
-
-static int copy_data( tl_iostream* out, tl_iostream* in,
-                      size_t count, size_t* actual )
+#else /* __linux__ */
+int __tl_os_splice( tl_iostream* out, tl_iostream* in,
+                    size_t count, size_t* actual )
 {
-    size_t indiff, outdiff, outcount = 0;
-    char buffer[ 1024 ];
-    int res = 0;
-
-    while( count )
-    {
-        res = in->read( in, buffer, sizeof(buffer), &indiff );
-
-        if( res!=0 )
-            break;
-
-        while( indiff )
-        {
-            res = out->write( out, buffer, indiff, &outdiff );
-
-            if( res!=0 )
-                break;
-
-            indiff -= outdiff;
-            count -= outdiff;
-            outcount += outdiff;
-        }
-    }
-
-    if( *actual )
-        *actual = outcount;
-
-    return res;
+    (void)out; (void)in; (void)count; (void)actual;
+    return TL_ERR_NOT_SUPPORTED;
 }
-
-int tl_iostream_splice( tl_iostream* out, tl_iostream* in,
-                        size_t count, size_t* actual )
-{
-    int res;
-
-    assert( out && in );
-
-    if( actual )
-        *actual = 0;
-
-    if( !count )
-        return 0;
-
-#ifdef __linux__
-    res = try_splice( out, in, count, actual );
-
-    if( res != TL_ERR_NOT_SUPPORTED )
-        return res;
 #endif
-
-    res = copy_data( out, in, count, actual );
-    return res;
-}
 

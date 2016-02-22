@@ -25,6 +25,7 @@
 #define TL_OS_EXPORT
 #include "tl_iostream.h"
 #include "tl_string.h"
+#include "platform.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -148,5 +149,61 @@ int tl_iostream_printf( tl_iostream* this, const char* format, ... )
 
     free( buffer );
     return status;
+}
+
+/* fallback for tl_iostream_splice */
+static int splice_copy( tl_iostream* out, tl_iostream* in,
+                        size_t count, size_t* actual )
+{
+    size_t indiff, outdiff, outcount = 0;
+    char buffer[ 1024 ];
+    int res = 0;
+
+    while( count )
+    {
+        res = in->read( in, buffer, sizeof(buffer), &indiff );
+
+        if( res!=0 )
+            break;
+
+        while( indiff )
+        {
+            res = out->write( out, buffer, indiff, &outdiff );
+
+            if( res!=0 )
+                goto out;
+
+            indiff -= outdiff;
+            count -= outdiff;
+            outcount += outdiff;
+        }
+    }
+out:
+    if( *actual )
+        *actual = outcount;
+
+    return res;
+}
+
+int tl_iostream_splice( tl_iostream* out, tl_iostream* in,
+                        size_t count, size_t* actual )
+{
+    int res;
+
+    assert( out && in );
+
+    if( actual )
+        *actual = 0;
+
+    if( !count )
+        return 0;
+
+    res = __tl_os_splice( out, in, count, actual );
+
+    if( res != TL_ERR_NOT_SUPPORTED )
+        return res;
+
+    res = splice_copy( out, in, count, actual );
+    return res;
 }
 

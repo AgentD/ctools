@@ -1,5 +1,5 @@
 /*
- * iostream.c
+ * platform.h
  * This file is part of ctools
  *
  * Copyright (C) 2015 - David Oberhollenzer
@@ -22,14 +22,24 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#define TL_OS_EXPORT
-#include "tl_iostream.h"
-#include "os.h"
+#ifndef TL_INTERNAL_PLATFORM_H
+#define TL_INTERNAL_PLATFORM_H
 
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Possible implementation of tl_iostream_splice. Pointers and count are
+   already sanity checked. If this returns TL_ERR_NOT_SUPPORTED, a fallback
+   is used that copies chunks manually. */
 int __tl_os_splice( tl_iostream* out, tl_iostream* in,
-                    size_t count, size_t* actual )
-{
-    (void)out; (void)in; (void)count; (void)actual;
-    return TL_ERR_NOT_SUPPORTED;
+                    size_t count, size_t* actual );
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* TL_INTERNAL_PLATFORM_H */
 
