@@ -46,7 +46,8 @@
  * \li tl_rwlock for managing parallel read and exclusive write access
  * \li tl_monitor combining a mutex and waiting/signifying condition mechanics
  * \li \ref tl_sleep for pausing the calling thread for a specified time
- * \li \ref tl_thread_get_id for getting the calling threads ID
+ * \li \ref tl_thread_get_id for getting an integer ID of either the calling
+ *     thread or a specific thread object.
  *
  * \subsection createthread Creating Threads
  *
@@ -55,7 +56,7 @@
  * void* thread_function( void* arg )
  * {
  *     printf( "Thread argument: %d\n", *((int*)arg) );
- *     printf( "ID of thread: %d\n", tl_thread_get_id( ) );
+ *     printf( "ID of thread: %d\n", tl_thread_get_id(NULL) );
  *     return NULL;
  * }
  *
@@ -64,9 +65,11 @@
  *     tl_thread* thread;
  *     int i = 42;
  *
- *     printf( "ID of main thread: %d\n", tl_thread_get_id( ) );
+ *     printf( "ID of main thread: %d\n", tl_thread_get_id(NULL) );
  *
  *     thread = tl_thread_create( thread_function, &i );
+ *
+ *     printf( "ID of thread (from main): %d\n", tl_thread_get_id(thread) );
  *
  *     tl_thread_join( thread, 0 );
  *     tl_thread_destroy( thread );
@@ -428,7 +431,7 @@ TLOSAPI int tl_thread_get_state( tl_thread* thread );
 TLOSAPI void tl_thread_destroy( tl_thread* thread );
 
 /**
- * \brief Return a unique thread ID of the calling thread
+ * \brief Return a unique ID of a specific thread, or the calling thread
  *
  * \memberof tl_thread
  *
@@ -436,9 +439,12 @@ TLOSAPI void tl_thread_destroy( tl_thread* thread );
  *
  * \note Once a thread terminates, its id can be reused
  *
+ * \param thread A pointer to a thread to get the ID from, or NULL to get the
+ *               ID of the calling thread.
+ *
  * \return A unique thread ID
  */
-TLOSAPI int tl_thread_get_id( void );
+TLOSAPI int tl_thread_get_id( tl_thread* thread );
 
 #ifdef __cplusplus
 }

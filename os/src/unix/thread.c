@@ -365,8 +365,8 @@ void tl_thread_destroy( tl_thread* this )
     free( this );
 }
 
-int tl_thread_get_id( void )
+int tl_thread_get_id( tl_thread* this )
 {
-    return pthread_self( );
+    return this ? this->thread : pthread_self( );
 }
 
