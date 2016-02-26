@@ -44,12 +44,14 @@
 #include <assert.h>
 
 #ifdef _MSC_VER
+    typedef unsigned __int8 tl_u8;
     typedef unsigned __int16 tl_u16;
     typedef unsigned __int32 tl_u32;
     typedef unsigned __int64 tl_u64;
 #else
     #include <stdint.h>
 
+    typedef uint8_t tl_u8;
     typedef uint16_t tl_u16;
     typedef uint32_t tl_u32;
     typedef uint64_t tl_u64;
