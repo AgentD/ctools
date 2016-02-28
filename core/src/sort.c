@@ -70,8 +70,7 @@ static INLINE void* median3( void* a, void* b, void* c, tl_compare cmp )
 
 /****************************************************************************/
 
-INLINE void tl_insertionsort( void* data, size_t n, size_t size,
-                              tl_compare cmp )
+void tl_insertionsort( void* data, size_t n, size_t size, tl_compare cmp )
 {
     char* first = (char*)data + size;
     char* limit = (char*)data + n*size;
