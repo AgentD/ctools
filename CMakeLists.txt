@@ -121,6 +121,7 @@ endif( )
 
 add_subdirectory( core )
 add_subdirectory( os )
+add_subdirectory( samples )
 
 #----------------------------------------------------------------------
 # Configure tests
