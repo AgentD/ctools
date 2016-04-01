@@ -4,6 +4,7 @@
 \page kvcontainers Key-Value-Containers
 \page sorting Sorting Algorithms
 \page hash Hash and Check Sum Algorithms
+\page comp Compression Algorithms
 \page stringproc String processing functions
 \page filesystem Filesystem
 \page io Input/Output

@@ -110,6 +110,10 @@ The following build options are supported:
 \li \b SHARED If set, generate a shared library. If not set, generate a static
     library. If this is set, the pre-processor definition \b TL_SHARED is set
     in the library source code. Default is \b OFF.
+\li \b HAVE_DEFLATE If set, \ref tl_compress and \ref tl_uncompress support
+    deflate compression via zlib. Setting this will set the pre-processor
+    definition \b TL_HAVE_DEFLATE in the library source code.
+    Default is \b ON.
 \li \b USEWINE This option is only available when compiling for a Windows
     target. It is intended for cross compiling via MinGW. When this is set,
     the unit test programs are run with \b wine. Default is \b OFF.

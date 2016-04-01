@@ -8,6 +8,7 @@ add_library( tlcore ${TYPE} src/array.c
                             src/utf16.c
                             src/allocator.c
                             src/blob.c
+                            src/compress.c
                             src/opt.c
                             src/hash.c )
 
@@ -16,6 +17,16 @@ if( SHARED )
 
   if( WIN32 )
     set_target_properties( tlcore PROPERTIES PREFIX "" )
+  endif( )
+endif( )
+
+if( HAVE_DEFLATE )
+  find_package( ZLIB REQUIRED )
+  if( ZLIB_FOUND )
+    include_directories( ${ZLIB_INCLUDE_DIRS} )
+    target_link_libraries( tlcore ${ZLIB_LIBRARIES} )
+  else( )
+    message( FATAL_ERROR "Could not find zlib!" )
   endif( )
 endif( )
 
@@ -33,6 +44,7 @@ install( FILES include/tl_allocator.h
                include/tl_string.h
                include/tl_utf16.h
                include/tl_utf8.h
+               include/tl_compress.h
          DESTINATION include )
 
 install( TARGETS tlcore LIBRARY DESTINATION lib

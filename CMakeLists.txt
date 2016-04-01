@@ -14,6 +14,7 @@ set( PROJECT_BRIEF "A collection of tools and utillities for C programs" )
 
 option( ALLIGN "Add padding to container structures and allign data addresses" ON )
 option( SHARED "Build a dynamic instead of a static library" OFF )
+option( HAVE_DEFLATE "Support deflate compression" ON )
 
 if( WIN32 )
   option( USEWINE "Run test programms through wine" OFF )
@@ -25,6 +26,10 @@ endif( )
 
 if( ALLIGN )
   add_definitions( -DTL_ALLIGN_MEMORY )
+endif( )
+
+if( HAVE_DEFLATE )
+  add_definitions( -DTL_HAVE_DEFLATE )
 endif( )
 
 #----------------------------------------------------------------------
