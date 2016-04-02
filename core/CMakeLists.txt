@@ -1,3 +1,43 @@
+if( HAVE_DEFLATE )
+  if( NOT WIN32 )
+    find_package( ZLIB )
+  endif( )
+
+  if( ZLIB_FOUND )
+    include_directories( ${ZLIB_INCLUDE_DIRS} )
+  else( )
+    set( ZLIB_DIR ${CMAKE_SOURCE_DIR}/3rdparty/zlib )
+
+    if( MSVC )
+      add_definitions( /D_CRT_NONSTDC_NO_DEPRECATE )
+    endif( )
+
+    if( NOT WIN32 )
+      add_definitions(-D_LARGEFILE64_SOURCE=1)
+    endif( )
+
+    add_definitions(-DZLIB_CONST=1)
+    add_definitions(-DNO_GZCOMPRESS=1)
+    add_definitions(-DNO_GZIP=1)
+    add_definitions(-DHAVE_MEMCPY=1)
+
+    include_directories( ${ZLIB_DIR}/${ZLIB_INCLUDE_DIRS} )
+
+    set( ZLIB_SRCS ${ZLIB_DIR}/adler32.c
+                   ${ZLIB_DIR}/deflate.c
+                   ${ZLIB_DIR}/inffast.c
+                   ${ZLIB_DIR}/trees.c
+                   ${ZLIB_DIR}/compress.c
+                   ${ZLIB_DIR}/inflate.c
+                   ${ZLIB_DIR}/uncompr.c
+                   ${ZLIB_DIR}/infback.c
+                   ${ZLIB_DIR}/inftrees.c
+                   ${ZLIB_DIR}/zutil.c )
+
+    message( STATUS "Using our own zlib copy" )
+  endif( )
+endif( )
+
 add_library( tlcore ${TYPE} src/array.c
                             src/list.c
                             src/rbtree.c
@@ -10,23 +50,18 @@ add_library( tlcore ${TYPE} src/array.c
                             src/blob.c
                             src/compress.c
                             src/opt.c
-                            src/hash.c )
+                            src/hash.c
+                            ${ZLIB_SRCS} )
+
+if( ZLIB_FOUND )
+  target_link_libraries( tlcore ${ZLIB_LIBRARIES} )
+endif( )
 
 if( SHARED )
   set_target_properties( tlcore PROPERTIES SOVERSION "0.0.0" )
 
   if( WIN32 )
     set_target_properties( tlcore PROPERTIES PREFIX "" )
-  endif( )
-endif( )
-
-if( HAVE_DEFLATE )
-  find_package( ZLIB REQUIRED )
-  if( ZLIB_FOUND )
-    include_directories( ${ZLIB_INCLUDE_DIRS} )
-    target_link_libraries( tlcore ${ZLIB_LIBRARIES} )
-  else( )
-    message( FATAL_ERROR "Could not find zlib!" )
   endif( )
 endif( )
 
