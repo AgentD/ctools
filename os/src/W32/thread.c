@@ -408,6 +408,6 @@ void tl_thread_destroy( tl_thread* this )
 
 int tl_thread_get_id( tl_thread* this )
 {
-    return this ? GetThreadId( this->thread ) : GetCurrentThreadId( );
+    return this ? (int)this->thread : (int)GetCurrentThread( );
 }
 
