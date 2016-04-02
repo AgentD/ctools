@@ -1,3 +1,7 @@
+/*
+    Cumbersome to use command line tool that compresses or
+    uncompresses an input file.
+ */
 #include "tl_compress.h"
 #include "tl_opt.h"
 #include "tl_fs.h"

@@ -1,3 +1,8 @@
+/*
+    Renders a partial image of the Mandelbrot set and writes it
+    out to a PNG file. tl_compress is used to deflate compress
+    the image data for the PNG file.
+ */
 #include "tl_compress.h"
 #include "tl_blob.h"
 #include "tl_hash.h"
