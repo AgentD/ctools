@@ -129,7 +129,8 @@ Changes made for inclusion in the ctools collection:
   April 1, 2016.
 
   An attempt has been made at removing the entire build system, samples,
-  tests, documentation, 3rd party contributions and gzip support.
+  tests, documentation, 3rd party contributions, gzip support and various
+  utility functions.
 
   The following sub-directories were removed with all there contents:
     amiga/
@@ -153,6 +154,9 @@ Changes made for inclusion in the ctools collection:
     crc32.c
     crc32.h
     gzguts.h
+    compress.c
+    uncompr.c
+    infback.c
 
   The following source files were modified (modifications marked with a
   comment in the source):

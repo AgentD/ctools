@@ -27,10 +27,7 @@ if( HAVE_DEFLATE )
                    ${ZLIB_DIR}/deflate.c
                    ${ZLIB_DIR}/inffast.c
                    ${ZLIB_DIR}/trees.c
-                   ${ZLIB_DIR}/compress.c
                    ${ZLIB_DIR}/inflate.c
-                   ${ZLIB_DIR}/uncompr.c
-                   ${ZLIB_DIR}/infback.c
                    ${ZLIB_DIR}/inftrees.c
                    ${ZLIB_DIR}/zutil.c )
 
