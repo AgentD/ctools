@@ -114,9 +114,11 @@ static int is_in_mandelbrot( float X0, float Y0, float* r )
     return i == MAX_ITERATIONS;
 }
 
+static unsigned char image[ 800 * 600 * 3 ];
+
 int main( void )
 {
-    unsigned char image[ 800 * 600 * 3 ], *ptr = image;
+    unsigned char *ptr = image;
     unsigned int x, y;
     float r;
     FILE* f;
