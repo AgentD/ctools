@@ -30,8 +30,10 @@ static void fd_stream_destroy( tl_iostream* super )
 {
     fd_stream* this = (fd_stream*)super;
     assert( this );
-    close( this->readfd );
-    close( this->writefd );
+    if( this->readfd >= 0 )
+        close( this->readfd );
+    if( (this->readfd != this->writefd) && (this->writefd >= 0) )
+        close( this->writefd );
     free( this );
 }
 
