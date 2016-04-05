@@ -48,6 +48,7 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <fcntl.h>
+#include <poll.h>
 
 #include <signal.h>
 #include <string.h>
@@ -113,11 +114,11 @@ int errno_to_fs( int code );
  * \brief Wait for a file descriptor to become read or writeable
  *
  * \param fd        The file descriptor
- * \param timeout   The timeout in milli seconds (zero for infinite)
+ * \param timeoutms Timeout in milli seconds (zero for infinite)
  * \param writeable Zero to wait for the descriptor to become readable,
  *                  non-zero to wait for it to become writeable
  */
-int wait_for_fd( int fd, unsigned long timeout, int readfd );
+int wait_for_fd( int fd, unsigned long timeoutms, int writeable );
 
 /**
  * \brief Convert an in6_addr structure to a tl_net_addr

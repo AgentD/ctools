@@ -54,34 +54,17 @@ int errno_to_fs( int code )
     return code==0 ? 0 : TL_ERR_INTERNAL;
 }
 
-int wait_for_fd( int fd, unsigned long timeout, int writeable )
+int wait_for_fd( int fd, unsigned long timeoutms, int writeable )
 {
-    struct timeval tv;
-    fd_set fds;
+    int ret, mask = writeable ? POLLOUT : POLLIN;
+    struct pollfd pfd;
 
-    if( timeout > 0 )
-    {
-        FD_ZERO( &fds );
-        FD_SET( fd, &fds );
+    pfd.fd = fd;
+    pfd.events = mask;
 
-        tv.tv_sec = timeout / 1000;
-        tv.tv_usec = (timeout - tv.tv_sec * 1000) * 1000;
+    ret = poll( &pfd, 1, timeoutms > 0 ? (long)timeoutms : -1L );
 
-        if( writeable )
-        {
-            if( select( fd+1, 0, &fds, 0, &tv ) <= 0 )
-                return 0;
-        }
-        else
-        {
-            if( select( fd+1, &fds, 0, 0, &tv ) <= 0 )
-                return 0;
-        }
-        if( !FD_ISSET( fd, &fds ) )
-            return 0;
-    }
-
-    return 1;
+    return (ret == 1) && (pfd.revents & mask);
 }
 
 void convert_ipv6( const struct in6_addr* v6, tl_net_addr* addr )
