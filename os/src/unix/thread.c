@@ -26,8 +26,6 @@
 #include "tl_thread.h"
 #include "os.h"
 
-#include <assert.h>
-
 
 
 int tl_monitor_init( tl_monitor* this )

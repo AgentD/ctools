@@ -25,10 +25,6 @@
 #define TL_OS_EXPORT
 #include "os.h"
 #include "tl_server.h"
-#include <sys/select.h>
-#include <sys/time.h>
-
-#include <assert.h>
 
 
 

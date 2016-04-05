@@ -1,4 +1,3 @@
-
 /*
  * fdstream.c
  * This file is part of ctools
@@ -26,9 +25,6 @@
 #define TL_OS_EXPORT
 #include "os.h"
 #include "tl_iostream.h"
-#include <sys/select.h>
-#include <sys/time.h>
-#include <assert.h>
 
 static void fd_stream_destroy( tl_iostream* super )
 {

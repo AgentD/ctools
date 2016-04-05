@@ -26,13 +26,7 @@
 #include "tl_fs.h"
 #include "os.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <assert.h>
 #include <pwd.h>
-
-
 
 const char* tl_fs_get_dir_sep( void )
 {

@@ -25,8 +25,6 @@
 #define TL_OS_EXPORT
 #include "os.h"
 
-#include <assert.h>
-
 
 
 static volatile int run = 0;
