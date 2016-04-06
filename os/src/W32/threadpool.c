@@ -137,11 +137,10 @@ tl_threadpool* tl_threadpool_create( unsigned int num_workers,
     if( !num_workers )
         return NULL;
 
-    this = malloc( sizeof(tl_threadpool) + sizeof(HANDLE)*(num_workers-1) );
+    this = calloc( 1, sizeof(tl_threadpool)+sizeof(HANDLE)*(num_workers-1) );
     if( !this )
         return NULL;
 
-    memset( this, 0, sizeof(*this) );
     this->init = init;
     this->cleanup = cleanup;
     this->initarg = initarg;
@@ -219,11 +218,9 @@ int tl_threadpool_add_task( tl_threadpool* this,
 
     assert( this && function );
 
-    task = malloc( sizeof(tl_task) + tasksize );
+    task = calloc( 1, sizeof(tl_task) + tasksize );
     if( !task )
         return 0;
-
-    memset( task, 0, sizeof(tl_task) );
 
     /* create task */
     task->function = function;

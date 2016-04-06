@@ -65,7 +65,7 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 
 tl_server* tcp_server_create( int sockfd, unsigned int backlog )
 {
-    tcp_server* this = malloc( sizeof(tcp_server) );
+    tcp_server* this = calloc( 1, sizeof(tcp_server) );
     tl_server* super = (tl_server*)this;
 
     if( listen( sockfd, backlog ) < 0 )

@@ -159,13 +159,12 @@ void udp_stream_add_data( udp_stream* this, void* buffer, size_t size )
 
 udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen )
 {
-    udp_stream* this = malloc( sizeof(udp_stream)+addrlen );
+    udp_stream* this = calloc( 1, sizeof(udp_stream)+addrlen );
     tl_iostream* super = (tl_iostream*)this;
 
     if( !this )
         return NULL;
 
-    memset( this, 0, sizeof(udp_stream)+addrlen );
     memcpy( this->address, addr, addrlen );
 
     if( !tl_monitor_init( &(this->monitor) ) )
@@ -176,7 +175,6 @@ udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen )
 
     tl_array_init( &(this->buffer), 1, NULL );
 
-    this->timeout      = 0;
     this->parent       = parent;
     this->addrlen      = addrlen;
     super->flags       = TL_STREAM_TYPE_UDPBUF|TL_STREAM_UDP;

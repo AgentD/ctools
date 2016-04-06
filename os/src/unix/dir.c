@@ -133,13 +133,12 @@ tl_iterator* tl_dir_iterate( const char* path )
     if( !(dir = opendir( path )) )
         return NULL;
 
-    if( !(it = malloc( sizeof(dir_iterator) )) )
+    if( !(it = calloc(1, sizeof(*it))) )
     {
         closedir( dir );
         return NULL;
     }
 
-    memset( it, 0, sizeof(*it) );
     it->dir = dir;
     find_next( it );
 

@@ -145,7 +145,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
         return NULL;
 
     /* allocate structure */
-    this = malloc( sizeof(tl_udp_packetserver) );
+    this = calloc( 1, sizeof(tl_udp_packetserver) );
     super = (tl_packetserver*)this;
 
     if( !this )

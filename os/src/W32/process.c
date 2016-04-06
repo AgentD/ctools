@@ -144,10 +144,9 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
     }
 
     /* create process data */
-    this = malloc( sizeof(*this) );
+    this = calloc( 1, sizeof(*this) );
     if( !this )
         goto perrfail;
-    memset( this, 0, sizeof(*this) );
 
     if( flags & (TL_PIPE_STDOUT|TL_PIPE_STDIN) )
     {

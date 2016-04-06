@@ -216,13 +216,11 @@ static tl_iostream* udp_wait_for_client( tl_server* super, int timeout )
 
 tl_server* udp_server_create( int sockfd )
 {
-    udp_server* this = malloc( sizeof(udp_server) );
+    udp_server* this = calloc( 1, sizeof(udp_server) );
     tl_server* super = (tl_server*)this;
 
     if( !this )
         return NULL;
-
-    memset( this, 0, sizeof(udp_server) );
 
     if( !tl_monitor_init( &(this->monitor) ) )
     {

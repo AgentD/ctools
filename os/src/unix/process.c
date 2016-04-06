@@ -45,10 +45,8 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
 
     assert( filename && argv );
 
-    if( !(this = malloc( sizeof(tl_process) )) )
+    if( !(this = calloc( 1, sizeof(tl_process) )) )
         return NULL;
-
-    memset( this, 0, sizeof(tl_process) );
 
     /* create pipes */
     if( (flags & TL_PIPE_STDIN) && pipe( inpipe )!=0 )

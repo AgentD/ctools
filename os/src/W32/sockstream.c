@@ -96,7 +96,7 @@ static int sockstream_read_raw( tl_iostream* super, void* buffer,
 
 tl_iostream* sock_stream_create( SOCKET sockfd, int flags )
 {
-    sockstream* this = malloc( sizeof(sockstream) );
+    sockstream* this = calloc( 1, sizeof(sockstream) );
     tl_iostream* super = (tl_iostream*)this;
 
     if( !this )

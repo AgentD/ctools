@@ -117,7 +117,7 @@ static int fd_stream_read( tl_iostream* super, void* buffer,
 
 tl_iostream* pipe_stream_create( int readfd, int writefd, int flags )
 {
-    fd_stream* this = malloc( sizeof(fd_stream) );
+    fd_stream* this = calloc( 1, sizeof(fd_stream) );
     tl_iostream* super = (tl_iostream*)this;
 
     if( !this )

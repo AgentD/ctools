@@ -127,7 +127,7 @@ static int pipestream_read( tl_iostream* super, void* buffer, size_t size,
 
 tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd )
 {
-    pipestream* this = malloc( sizeof(pipestream) );
+    pipestream* this = calloc( 1, sizeof(pipestream) );
     tl_iostream* super = (tl_iostream*)this;
 
     if( this )

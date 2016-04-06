@@ -63,7 +63,7 @@ void tl_monitor_cleanup( tl_monitor* this )
 
 tl_monitor* tl_monitor_create( void )
 {
-    tl_monitor* this = malloc( sizeof(tl_monitor) );
+    tl_monitor* this = calloc( 1, sizeof(tl_monitor) );
 
     if( !tl_monitor_init( this ) )
     {
@@ -166,7 +166,7 @@ struct tl_rwlock
 
 tl_rwlock* tl_rwlock_create( void )
 {
-    tl_rwlock* this = malloc( sizeof(tl_rwlock) );
+    tl_rwlock* this = calloc( 1, sizeof(tl_rwlock) );
 
     if( !this )
         return NULL;
@@ -260,7 +260,7 @@ void tl_rwlock_destroy( tl_rwlock* this )
 
 tl_mutex* tl_mutex_create( int recursive )
 {
-    CRITICAL_SECTION* this = malloc( sizeof(CRITICAL_SECTION) );
+    CRITICAL_SECTION* this = calloc( 1, sizeof(CRITICAL_SECTION) );
     (void)recursive;
 
     assert( this );
@@ -343,7 +343,7 @@ static DWORD WINAPI thread_wrapper( LPVOID param )
 
 tl_thread* tl_thread_create( tl_thread_function function, void* arg )
 {
-    tl_thread* this = malloc( sizeof(tl_thread) );
+    tl_thread* this = calloc( 1, sizeof(tl_thread) );
 
     if( !this )
         return NULL;

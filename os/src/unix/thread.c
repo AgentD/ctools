@@ -53,7 +53,7 @@ void tl_monitor_cleanup( tl_monitor* this )
 
 tl_monitor* tl_monitor_create( void )
 {
-    tl_monitor* this = malloc( sizeof(tl_monitor) );
+    tl_monitor* this = calloc( 1, sizeof(tl_monitor) );
 
     if( this && !tl_monitor_init( this ) )
     {
@@ -114,7 +114,7 @@ void tl_monitor_destroy( tl_monitor* this )
 
 tl_rwlock* tl_rwlock_create( void )
 {
-    pthread_rwlock_t* this = malloc( sizeof(pthread_rwlock_t) );
+    pthread_rwlock_t* this = calloc( 1, sizeof(pthread_rwlock_t) );
 
     if( this && pthread_rwlock_init( this, NULL )!=0 )
     {
@@ -178,7 +178,7 @@ void tl_rwlock_destroy( tl_rwlock* this )
 
 tl_mutex* tl_mutex_create( int recursive )
 {
-    pthread_mutex_t* this = malloc( sizeof(pthread_mutex_t) );
+    pthread_mutex_t* this = calloc( 1, sizeof(pthread_mutex_t) );
     pthread_mutexattr_t attr;
 
     if( !this )
@@ -279,7 +279,7 @@ tl_thread* tl_thread_create( tl_thread_function function, void* arg )
 
     assert( function );
 
-    this = malloc( sizeof(tl_thread) );
+    this = calloc( 1, sizeof(tl_thread) );
     if( !this )
         return NULL;
 

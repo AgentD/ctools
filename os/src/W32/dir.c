@@ -203,11 +203,10 @@ tl_iterator* tl_dir_iterate( const char* path )
 
     assert( path );
 
-    if( !(this = malloc(sizeof(dir_iterator))) )
+    if( !(this = calloc(1, sizeof(*this))) )
         return NULL;
 
     super = (tl_iterator*)this;
-    memset( this, 0, sizeof(*this) );
 
     if( !tl_string_init( &this->current ) )
         goto fail;
