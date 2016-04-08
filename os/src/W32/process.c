@@ -71,19 +71,22 @@ static int create_pipe( HANDLE* out, int dontshare )
     secattr.bInheritHandle = TRUE;
 
     if( !CreatePipe( out, out+1, &secattr, 0 ) )
-        return 0;
+        goto fail;
     if( !SetHandleInformation( out[dontshare], HANDLE_FLAG_INHERIT, 0 ) )
-        return 0;
+        goto fail;
     return 1;
+fail:
+    *out = NULL;
+    return 0;
 }
 
 
 tl_process* tl_process_create( const char* filename, const char* const* argv,
                                const char* const* env, int flags )
 {
-    HANDLE outpipe[2]={INVALID_HANDLE_VALUE,INVALID_HANDLE_VALUE};
-    HANDLE errpipe[2]={INVALID_HANDLE_VALUE,INVALID_HANDLE_VALUE};
-    HANDLE inpipe[2]={INVALID_HANDLE_VALUE,INVALID_HANDLE_VALUE};
+    HANDLE outpipe[2]={NULL,NULL};
+    HANDLE errpipe[2]={NULL,NULL};
+    HANDLE inpipe[2]={NULL,NULL};
     tl_process* this = NULL;
     WCHAR* wfilename = NULL;
     STARTUPINFOW startinfo;
@@ -154,7 +157,7 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
     }
     if( flags & TL_PIPE_STDERR )
     {
-        this->errstream = pipe_stream_create(errpipe[0],INVALID_HANDLE_VALUE);
+        this->errstream = pipe_stream_create( errpipe[0], NULL );
         if( !this->errstream )
             goto procfail;
     }

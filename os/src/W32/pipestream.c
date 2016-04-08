@@ -31,9 +31,9 @@ static void pipestream_destroy( tl_iostream* super )
     pipestream* this = (pipestream*)super;
 
     assert( this );
-    if( this->rhnd!=INVALID_HANDLE_VALUE )
+    if( this->rhnd )
         CloseHandle( this->rhnd );
-    if( this->rhnd!=INVALID_HANDLE_VALUE && (this->rhnd != this->whnd) )
+    if( this->whnd && (this->rhnd != this->whnd) )
         CloseHandle( this->whnd );
     free( this );
 }
@@ -62,9 +62,9 @@ static int pipestream_set_timeout( tl_iostream* super, unsigned int timeout )
         ct.WriteTotalTimeoutConstant   = MAXDWORD;
     }
 
-    if( this->rhnd!=INVALID_HANDLE_VALUE )
+    if( this->rhnd )
         SetCommTimeouts( this->rhnd, &ct );
-    if( this->whnd!=INVALID_HANDLE_VALUE )
+    if( this->whnd )
         SetCommTimeouts( this->whnd, &ct );
 
     return 0;
@@ -81,7 +81,7 @@ static int pipestream_write( tl_iostream* super, const void* buffer,
 
     assert( this && buffer );
 
-    if( this->whnd==INVALID_HANDLE_VALUE )
+    if( !this->whnd )
         return TL_ERR_NOT_SUPPORTED;
 
     if( !WriteFile( this->whnd, buffer, size, &result, NULL ) )
@@ -108,7 +108,7 @@ static int pipestream_read( tl_iostream* super, void* buffer, size_t size,
 
     assert( this && buffer );
 
-    if( this->rhnd==INVALID_HANDLE_VALUE )
+    if( !this->rhnd )
         return TL_ERR_NOT_SUPPORTED;
 
     if( !ReadFile( this->rhnd, buffer, size, &result, NULL ) )
