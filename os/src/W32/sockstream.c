@@ -26,10 +26,6 @@
 #include "os.h"
 #include "tl_iostream.h"
 
-#include <assert.h>
-
-
-
 static void sockstream_destroy( tl_iostream* super )
 {
     sockstream* this = (sockstream*)super;

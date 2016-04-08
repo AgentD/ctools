@@ -25,10 +25,6 @@
 #define TL_OS_EXPORT
 #include "os.h"
 
-#include <assert.h>
-
-
-
 static void udp_stream_destroy( tl_iostream* super )
 {
     udp_stream* this = (udp_stream*)super;

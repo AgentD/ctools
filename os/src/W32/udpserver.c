@@ -26,11 +26,9 @@
 #include "os.h"
 
 
-
 static volatile int run = 0;
 static volatile udp_server* servers = NULL;
 static HANDLE listen_thread;
-
 
 
 static DWORD WINAPI udp_server_listen_thread( LPVOID arg )

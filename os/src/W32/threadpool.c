@@ -27,8 +27,6 @@
 #include "tl_allocator.h"
 #include "os.h"
 
-#include <assert.h>
-
 
 
 typedef struct tl_task

@@ -26,8 +26,6 @@
 #include "tl_server.h"
 #include "os.h"
 
-#include <assert.h>
-
 
 
 typedef struct

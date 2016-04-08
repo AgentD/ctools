@@ -27,14 +27,11 @@
 #include "os.h"
 
 
-
 /**
  * XXX: GetUserProfileDirectoryW is only available on NT 4.0 and later,
  *      so WinDOS 95/98/ME need a work around
  */
 #include <userenv.h>
-#include <assert.h>
-
 
 
 const char* tl_fs_get_dir_sep( void )

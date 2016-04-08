@@ -26,8 +26,6 @@
 #include "tl_process.h"
 #include "os.h"
 
-#include <assert.h>
-
 
 #define FLAG_RUNNING 0x01
 

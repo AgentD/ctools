@@ -26,10 +26,6 @@
 #include "tl_iostream.h"
 #include "os.h"
 
-#include <assert.h>
-
-
-
 static void pipestream_destroy( tl_iostream* super )
 {
     pipestream* this = (pipestream*)super;

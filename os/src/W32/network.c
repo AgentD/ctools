@@ -26,10 +26,6 @@
 #include "tl_network.h"
 #include "os.h"
 
-#include <assert.h>
-
-
-
 static int parse_ipv4( const char* s, void* a0 )
 {
     unsigned char* a = a0;

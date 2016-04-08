@@ -29,8 +29,6 @@
 #include "tl_fs.h"
 #include "os.h"
 
-#include <assert.h>
-
 
 
 typedef struct
