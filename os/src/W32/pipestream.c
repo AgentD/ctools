@@ -30,11 +30,15 @@
 
 
 
-static void pipestream_destroy( tl_iostream* this )
+static void pipestream_destroy( tl_iostream* super )
 {
+    pipestream* this = (pipestream*)super;
+
     assert( this );
-    CloseHandle( ((pipestream*)this)->rhnd );
-    CloseHandle( ((pipestream*)this)->whnd );
+    if( this->rhnd!=INVALID_HANDLE_VALUE )
+        CloseHandle( this->rhnd );
+    if( this->rhnd!=INVALID_HANDLE_VALUE && (this->rhnd != this->whnd) )
+        CloseHandle( this->whnd );
     free( this );
 }
 
