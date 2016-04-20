@@ -36,27 +36,15 @@
  *
  * \section iostream The tl_iostream interface
  *
- * The tl_iostream interface represents an abstract end-to-end connection over
- * an input/output device that sends and receives data as a stream of bytes or
- * discrete packets. In contrast to a regular file, a stream has no read or
- * write position and does not support seek or rewind operations.
+ * The tl_iostream interface represents an abstract end-to-end, byte stream
+ * based communication channel.
  *
  * Examples for an abstract stream implentation could be a TCP connection,
- * a pipe, a connection over an I2C bus, et cetera.
- *
- * Altough some of the examples list conenctions where sender and receiver use
- * addresses (e.g. IP address and port number), the tl_iostream object has no
- * concept of addresses. It abstracts end-to-end communication. Address
- * multiplexing is handled by functions that return an implementation of a
- * tl_iostream.
- *
- * Not all tl_iostream implementations are strictly stream based. For
- * instance, there is a tl_stream implementation for UDP based communication.
- * You have to be aware that those streams only \a emulate a stream based
- * communacation. The underlying (e.g. UDP) communication can still be
- * connection less (so it is not possible to tell if the other end is still
- * listening) and based on discrete packets that can get re-ordered or lost
- * during transmission.
+ * a pipe, et cetera. While some implementations may use sender and receiver
+ * addresses, (e.g. IP and port number), the tl_iostream itself has no concept
+ * of addresses. It only abstracts end-to-end communication. Address
+ * multiplexing is handled by the backend that instanciates tl_iostream
+ * implementations.
  *
  * The stream interface itself is only concerned with reading and writing
  * chunks of data. A number of helper functions exist for enhancing the

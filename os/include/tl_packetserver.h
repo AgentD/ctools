@@ -89,7 +89,8 @@ struct tl_packetserver
      * \param server  A pointer to the server object
      * \param buffer  A pointer to the buffer to write data to
      * \param address A pointer to an implementation specific structure to
-     *                write the sender address to.
+     *                write the sender address to. E.g. for a network server,
+     *                this is a pointer to a \ref tl_net_addr
      * \param size    The size of the buffer, i.e. maximum bytes to receive
      * \param actual  Returns the number of bytes actually received
      *
@@ -104,7 +105,8 @@ struct tl_packetserver
      * \param server  A pointer to the server object
      * \param buffer  A pointer to the data to send
      * \param address A pointer to an implementation specific structure
-     *                holding the destination address.
+     *                holding the destination address. E.g. for a network
+     *                server, this is a pointer to a \ref tl_net_addr
      * \param size    The number of bytes to send
      * \param actual  Returns the number of bytes actually sent
      *

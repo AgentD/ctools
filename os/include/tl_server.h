@@ -37,10 +37,11 @@
  * \section server The tl_server interface
  *
  * The tl_server interface abstracts stream based communication of a single
- * end-point with an arbitrary number clients. The client
- * communications are abstracted in the form of tl_iostream instances that the
- * server creates when a new client connects or (for non-connection based
- * communications) when the first data from a particular client is received.
+ * end-point with an arbitrary number of clients (e.g. a TCP server). The
+ * client communications are abstracted in the form of tl_iostream instances
+ * that the server creates when a new client connects or (for non-connection
+ * based communications) when the first data from a particular client is
+ * received.
  *
  * Usage example:
  * \code{.c}

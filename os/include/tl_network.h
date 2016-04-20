@@ -50,7 +50,7 @@
  *
  * \subsection names Name Resolution
  *
- * Checking if a DNS name can be resolved:
+ * Checking if a host name can be resolved:
  * \code{.c}
  * if( tl_network_resolve_name( "www.example.com", TL_IPV4, NULL, 0 ) )
  *     puts( "Found an IPv4 address for this domain!" );
@@ -59,7 +59,7 @@
  *     puts( "Found an IPv6 address for this domain!" );
  * \endcode
  *
- * Resolving DNS names or host names:
+ * Resolving host names:
  * \code{.c}
  * tl_net_addr addr;
  *
@@ -96,7 +96,7 @@
  * }
  * \endcode
  *
- * Creating a UDP server:
+ * Creating a UDP server with built-in client demultiplexing:
  * \code{.c}
  * tl_net_addr addr;
  * tl_server* srv;
@@ -152,7 +152,7 @@
  * char buffer[32];
  * size_t len;
  *
- * tl_network_get_special_address( &addr, TL_ANY, TL_IPV4 );
+ * tl_network_get_special_address( &addr, TL_ALL, TL_IPV4 );
  * addr.transport = TL_UDP;
  * addr.port = 15000;
  * srv = tl_network_create_packet_server( &addr, TL_ALLOW_BROADCAST );
@@ -184,7 +184,13 @@
  */
 typedef enum
 {
-    TL_ANY  = 0,    /**< \brief Use either IPv4 or IPv6 */
+    /**
+     * \brief Use any layer 3 protocol available
+     *
+     * Only valid for resolving addresses to indicate no preference over
+     * any network layer protocol.
+     */
+    TL_ANY  = 0,
     TL_IPV4 = 1,    /**< \brief Use IPv4 */
     TL_IPV6 = 2     /**< \brief Use IPv6 */
 }
@@ -214,25 +220,36 @@ typedef enum
     /**
      * \brief Address that sends to the local host only
      *
-     * Typically used with tl_network_create_server to accept local
-     * connections only, or with tl_network_create_client to connect to
-     * the local machine via the loopback device.
+     * Can be used with tl_network_create_server to bind to the loop back
+     * device, or with tl_network_create_client to connect to the local
+     * machine via the loopback device.
      */
     TL_LOOPBACK = 0,
 
     /**
-     * \brief Address that sends to all devices
+     * \brief Generic broad cast address that sends at least to all devices
+     *        on the same link
      *
      * Typically used with tl_packetserver on a not connection oriented
      * protocol (e.g. UDP) to send broadcast packets.
+     *
+     * For protocols like IPv4 \ref tl_network_get_special_address returns a
+     * generic global broad cast address. Since IPv4 routers \a typically
+     * don't forward global broad cast packets, sending packets there results
+     * \a usually in sending to all machines on the same link (i.e. layer 2
+     * broadcast).
+     *
+     * For protocols like IPv6 that don't have generic broadcasts, things are
+     * a little more involved and \ref tl_network_get_special_address can't
+     * return a sensible, generic answer.
      */
     TL_BROADCAST = 1,
 
     /**
-     * \brief Used to accept connections from all source address
+     * \brief Used to accept connections from all interfaces
      *
-     * Typically used with tl_network_create_server to accept connections from
-     * all possible source addresses.
+     * Typically used with tl_network_create_server to not bind to any
+     * particular interface and accept connections from everywhere.
      */
     TL_ALL = 2
 }
@@ -267,7 +284,7 @@ struct tl_net_addr
 
         /**
          * \brief IPv6 address in the systems native byte order, least
-         *        significant to most significant
+         *        significant to most significant (i.e. from right to left)
          */
         tl_u16 ipv6[8];
     }
@@ -296,7 +313,7 @@ extern "C" {
  * \param count    The number of aray elements, i.e. maximum number of
  *                 addresses to resolve.
  *
- * \return Non-zero on success, zero on failure
+ * \return On success, the number of addresses found, zero on failure
  */
 TLOSAPI int tl_network_resolve_name( const char* hostname, int proto,
                                      tl_net_addr* addr, size_t count );
@@ -304,7 +321,7 @@ TLOSAPI int tl_network_resolve_name( const char* hostname, int proto,
 /**
  * \brief Create a server instance
  *
- * \param addr    Specifies from what addresses to accept connections, on
+ * \param addr    Specifies the local address to bind to, on
  *                what port to listen and what protocols to use.
  * \param backlog The maximum number of incomming connections kept waiting.
  *
@@ -316,8 +333,7 @@ TLOSAPI tl_server* tl_network_create_server( const tl_net_addr* addr,
 /**
  * \brief Create a connection to a server
  *
- * \param peer A tl_net_address specifying the address of the peer
- *             to connect to and what protocol to use
+ * \param peer The address of the peer to connect to
  *
  * \return A pointer to a tl_iostream instance or NULL on failure
  */
@@ -326,16 +342,15 @@ TLOSAPI tl_iostream* tl_network_create_client( const tl_net_addr* peer );
 /**
  * \brief Get a special network address
  *
- * Fields of the address structure other than "net" and "addr" are left
- * untouched.
+ * Only sets protocol type and address ("net" and "addr" fields). All other
+ * fields are left untouched.
  *
  * \param addr A pointer to a tl_net_addr to write the address to
- * \param type A \ref TL_SPECIAL_ADDRESS identifyer
- * \param net  A \ref TL_NETWORK_PROTOCOL also written to the address
- *             structure
+ * \param type A \ref TL_SPECIAL_ADDRESS identifier
+ * \param net  A \ref TL_NETWORK_PROTOCOL network protocol identifier
  *
- * \return Non-zero on success, zero on failure (addr is NULL,
- *         unknown protocol, or the special address is not support)
+ * \return Non-zero on success, zero on failure (unsuported protocol, or the
+ *         protocol doesn't support the special address type)
  */
 TLOSAPI int tl_network_get_special_address( tl_net_addr* addr, int type,
                                             int net );
@@ -368,9 +383,6 @@ TLOSAPI int tl_network_get_local_address( tl_iostream* stream,
 
 /**
  * \brief Create a low-level state-less, packet based server implementation
- *
- * \note Use pointers to tl_net_addr for functions that expect a pointer to
- *       an address structure.
  *
  * The tl_packetserver implementation sends and recevies packets through the
  * given port number to/from any remote port number.
