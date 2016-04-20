@@ -62,11 +62,11 @@ static int run_test( int net, int transport, int aport, int bport )
     b_addr.port = bport;
 
     /* create servers */
-    a = tl_network_create_packet_server( &a_addr, 0 );
+    a = tl_network_create_packet_server( &a_addr, TL_DONT_FRAGMENT );
     if( !a )
         return 0;
 
-    b = tl_network_create_packet_server( &b_addr, 0 );
+    b = tl_network_create_packet_server( &b_addr, TL_DONT_FRAGMENT );
     if( !b )
         return 0;
 

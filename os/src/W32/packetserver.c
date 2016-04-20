@@ -159,6 +159,13 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
                     (void*)&val, sizeof(BOOL) );
     }
 
+    if( (flags & TL_DONT_FRAGMENT) && (addr->net==TL_IPV4) )
+    {
+        DWORD opt = 1;
+        setsockopt( this->sockfd, IPPROTO_IP, IP_DONTFRAGMENT,
+                    (void*)&opt, sizeof(DWORD) );
+    }
+
     if( !bind_socket( this->sockfd, addrbuffer, size ) )
         goto failclose;
 

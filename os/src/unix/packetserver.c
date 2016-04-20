@@ -160,6 +160,22 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
         setsockopt(this->sockfd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(int));
     }
 
+    if( flags & TL_DONT_FRAGMENT )
+    {
+        if( addr->net==TL_IPV6 )
+        {
+            val = IPV6_PMTUDISC_DO;
+            setsockopt( this->sockfd, IPPROTO_IPV6, IPV6_MTU_DISCOVER,
+                        &val, sizeof(int) );
+        }
+        else
+        {
+            val = IP_PMTUDISC_DO;
+            setsockopt( this->sockfd, IPPROTO_IP, IP_MTU_DISCOVER,
+                        &val, sizeof(int) );
+        }
+    }
+
     if( !bind_socket( this->sockfd, addrbuffer, size ) )
         goto failclose;
 

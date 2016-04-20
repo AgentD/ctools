@@ -259,7 +259,10 @@ TL_SPECIAL_ADDRESS;
 typedef enum
 {
     /** \brief If set, allow sending broadcast packets */
-    TL_ALLOW_BROADCAST = 0x01
+    TL_ALLOW_BROADCAST = 0x01,
+
+    /** \brief If set, IPv4 packets have the don't fragment bit set */
+    TL_DONT_FRAGMENT = 0x02
 }
 TL_PACKETSERVER_FLAGS;
 
