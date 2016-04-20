@@ -72,28 +72,26 @@ static int udp_stream_write_raw( tl_iostream* super, const void* buffer,
     udp_server* p = this->parent;
     ssize_t result;
 
+    assert( this && buffer );
+
     if( actual )
         *actual = 0;
-    if( !this || !buffer )
-        return TL_ERR_ARG;
     if( !size )
         return 0;
     if( !p )
         return TL_ERR_CLOSED;
+    if( !tl_monitor_lock( &(p->monitor), this->timeout ) )
+        return TL_ERR_TIMEOUT;
 
-    if( size )
-    {
-        tl_monitor_lock( &(p->monitor), this->timeout );
-        result = sendto( p->socket, buffer, size, 0,
-                         (void*)this->address, this->addrlen );
-        tl_monitor_unlock( &(p->monitor) );
+    result = sendto( p->socket, buffer, size, 0,
+                     (void*)this->address, this->addrlen );
 
-        if( result < 0 )
-            return TL_ERR_INTERNAL;
-        if( actual )
-            *actual = result;
-    }
+    tl_monitor_unlock( &(p->monitor) );
 
+    if( result < 0 )
+        return TL_ERR_INTERNAL;
+    if( actual )
+        *actual = result;
     return 0;
 }
 
@@ -103,15 +101,16 @@ static int udp_stream_read_raw( tl_iostream* super, void* buffer,
     udp_stream* this = (udp_stream*)super;
     int result = 0;
 
+    assert( this && buffer );
+
     if( actual )
         *actual = 0;
-    if( !this || !buffer )
-        return TL_ERR_ARG;
     if( !size )
         return 0;
+    if( !tl_monitor_lock( &(this->monitor), this->timeout ) )
+        return TL_ERR_TIMEOUT;
 
-    tl_monitor_lock( &(this->monitor), this->timeout );
-    if( this->buffer.used==0 )
+    while( this->buffer.used==0 )
     {
         if( !tl_monitor_wait( &(this->monitor), this->timeout ) )
         {
@@ -120,22 +119,14 @@ static int udp_stream_read_raw( tl_iostream* super, void* buffer,
         }
     }
 
-    if( this->buffer.used==0 )
-    {
-        result = TL_ERR_INTERNAL;
-    }
-    else
-    {
-        if( size > this->buffer.used )
-            size = this->buffer.used;
+    if( size > this->buffer.used )
+        size = this->buffer.used;
 
-        memcpy( buffer, this->buffer.data, size );
-        tl_array_remove( &(this->buffer), 0, size );
+    memcpy( buffer, this->buffer.data, size );
+    tl_array_remove( &(this->buffer), 0, size );
 
-        if( actual )
-            *actual = size;
-    }
-
+    if( actual )
+        *actual = size;
 done:
     tl_monitor_unlock( &(this->monitor) );
     return result;
@@ -147,7 +138,7 @@ void udp_stream_add_data( udp_stream* this, void* buffer, size_t size )
 {
     if( this && buffer && size )
     {
-        tl_monitor_lock( &(this->monitor), this->timeout );
+        tl_monitor_lock( &(this->monitor), 0 );
         tl_array_append_array( &(this->buffer), buffer, size );
         tl_monitor_notify( &(this->monitor) );
         tl_monitor_unlock( &(this->monitor) );
