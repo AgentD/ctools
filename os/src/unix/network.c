@@ -103,6 +103,10 @@ int tl_network_resolve_name( const char* hostname, int proto,
             ++i;
             ++addr;
         }
+        else if( !addr )
+        {
+            ++i;
+        }
     }
 
     freeaddrinfo( info );
