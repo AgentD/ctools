@@ -263,7 +263,7 @@ struct tl_net_addr
     union
     {
         /** \brief IPv4 address in the systems native byte order */
-        unsigned int ipv4;
+        tl_u32 ipv4;
 
         /**
          * \brief IPv6 address in the systems native byte order, least
