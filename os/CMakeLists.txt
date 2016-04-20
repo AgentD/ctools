@@ -30,6 +30,7 @@ elseif( WIN32 )
 endif( )
 
 add_library( tlos ${TYPE} src/iostream.c
+                          src/network.c
                           ${CTOOLS_SYSDEP} )
 
 target_link_libraries( tlos tlcore )

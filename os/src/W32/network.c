@@ -280,33 +280,6 @@ fail:
     return NULL;
 }
 
-int tl_network_get_special_address( tl_net_addr* addr, int type, int net )
-{
-    assert( addr );
-
-    addr->net = net;
-
-    if( net==TL_IPV4 )
-    {
-        switch( type )
-        {
-        case TL_LOOPBACK:   addr->addr.ipv4 = INADDR_LOOPBACK;  return 1;
-        case TL_BROADCAST:  addr->addr.ipv4 = INADDR_BROADCAST; return 1;
-        case TL_ALL:        addr->addr.ipv4 = INADDR_ANY;       return 1;
-        }
-    }
-    else if( net==TL_IPV6 )
-    {
-        switch( type )
-        {
-        case TL_LOOPBACK:  convert_ipv6( &in6addr_loopback, addr ); return 1;
-        case TL_ALL:       convert_ipv6( &in6addr_any,      addr ); return 1;
-        }
-    }
-
-    return 0;
-}
-
 int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 {
     sockstream* sock = (sockstream*)stream;
