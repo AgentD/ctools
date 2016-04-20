@@ -55,11 +55,10 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
     socklen_t addrlen = sizeof(addrbuf);
     ssize_t result;
 
-    assert( this && buffer );
+    assert( this );
 
-    if( actual ) *actual = 0;
-    if( !size  ) return 0;
-
+    if( actual )
+        *actual = 0;
     if( !wait_for_fd( this->sockfd, this->timeout, 0 ) )
         return TL_ERR_TIMEOUT;
 
@@ -93,11 +92,10 @@ static int udp_send( tl_packetserver* super, const void* buffer,
     ssize_t result;
     int addrsize;
 
-    assert( this && buffer && address );
+    assert( this && address );
 
     if( actual                                          ) *actual = 0;
     if( !encode_sockaddr( address, addrbuf, &addrsize ) ) return TL_ERR_ARG;
-    if( !size                                           ) return 0;
 
     if( !wait_for_fd( this->sockfd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;

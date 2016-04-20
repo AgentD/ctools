@@ -72,12 +72,10 @@ static int udp_stream_write_raw( tl_iostream* super, const void* buffer,
     udp_server* p = this->parent;
     ssize_t result;
 
-    assert( this && buffer );
+    assert( this );
 
     if( actual )
         *actual = 0;
-    if( !size )
-        return 0;
     if( !p )
         return TL_ERR_CLOSED;
     if( !tl_monitor_lock( &(p->monitor), this->timeout ) )

@@ -25,7 +25,7 @@ static int test_send( tl_packetserver* src, tl_packetserver* dst,
                       tl_net_addr* srcaddr, tl_net_addr* dstaddr,
                       const char* msg )
 {
-    size_t val, len=strlen(msg);
+    size_t val, len = msg ? strlen(msg) : 0;
     tl_net_addr temp;
     char buffer[32];
 
@@ -35,7 +35,7 @@ static int test_send( tl_packetserver* src, tl_packetserver* dst,
         return 0;
     if( val!=len )
         return 0;
-    if( strncmp( buffer, msg, len )!=0 )
+    if( msg && strncmp( buffer, msg, len )!=0 )
         return 0;
     if( !addrcmp( &temp, srcaddr ) )
         return 0;
@@ -81,6 +81,12 @@ static int run_test( int net, int transport, int aport, int bport )
         sprintf( buffer, "Hello B %c", 'a'+i );
 
         if( !test_send( b, a, &b_addr, &a_addr, buffer ) )
+            return 0;
+
+        if( !test_send( a, b, &a_addr, &b_addr, NULL ) )
+            return 0;
+
+        if( !test_send( b, a, &b_addr, &a_addr, NULL ) )
             return 0;
     }
 
