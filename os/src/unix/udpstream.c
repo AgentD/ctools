@@ -69,8 +69,8 @@ static int udp_stream_write_raw( tl_iostream* super, const void* buffer,
                                  size_t size, size_t* actual )
 {
     udp_stream* this = (udp_stream*)super;
+    ssize_t result, intr_count = 0;
     udp_server* p = this->parent;
-    ssize_t result;
 
     assert( this );
 
@@ -81,13 +81,16 @@ static int udp_stream_write_raw( tl_iostream* super, const void* buffer,
     if( !tl_monitor_lock( &(p->monitor), this->timeout ) )
         return TL_ERR_TIMEOUT;
 
-    result = sendto( p->socket, buffer, size, 0,
+retry:
+    result = sendto( p->socket, buffer, size, MSG_NOSIGNAL,
                      (void*)this->address, this->addrlen );
+    if( result<0 && errno==EINTR && (intr_count++)<3 )
+        goto retry;
 
     tl_monitor_unlock( &(p->monitor) );
 
     if( result < 0 )
-        return TL_ERR_INTERNAL;
+        return errno_to_fs( errno );
     if( actual )
         *actual = result;
     return 0;

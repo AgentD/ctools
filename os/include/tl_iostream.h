@@ -137,9 +137,7 @@ struct tl_iostream
      * \param stream  A pointer to the stream object
      * \param timeout A timeout value in milli seconds, 0 for infinite
      *
-     * \return Zero on success, TL_ERR_NOT_SUPPORTED if the operation is not
-     *         supported by the implementation, TL_ERR_INTERNAL if an internal
-     *         error occoured.
+     * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
      */
     int (* set_timeout )( tl_iostream* stream, unsigned int timeout );
 
@@ -151,9 +149,7 @@ struct tl_iostream
      * \param size   The number of bytes to send
      * \param actual If not NULL, returns the number of bytes actually written
      *
-     * \return Zero on success, TL_ERR_CLOSED if the connection was closed,
-     *         TL_ERR_TIMEOUT if a timeout occoured or TL_ERR_INTERNAL if an
-     *         internal error occoured.
+     * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
      */
     int (* write )( tl_iostream* stream, const void* buffer,
                     size_t size, size_t* actual );
@@ -172,10 +168,7 @@ struct tl_iostream
      * \param size   The size of the buffer
      * \param actual If not NULL, returns the number of bytes actually read.
      *
-     * \return Zero on success, TL_ERR_CLOSED if the connection was closed,
-     *         TL_ERR_TIMEOUT if a timeout occoured, TL_EOF if data couldn't
-     *         be read because the end of a file was reached, TL_ERR_INTERNAL
-     *         if an internal or unknown error occoured.
+     * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
      */
     int (* read )( tl_iostream* stream, void* buffer, size_t size,
                    size_t* actual );
@@ -196,9 +189,7 @@ extern "C" {
  * \param blob   A pointer to a blob object to write
  * \param actual If not NULL, returns the number of bytes actually written
  *
- * \return Zero on success, TL_ERR_CLOSED if the connection was closed,
- *         TL_ERR_TIMEOUT if a timeout occoured or TL_ERR_INTERNAL if an
- *         internal error occoured.
+ * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
 static TL_INLINE int tl_iostream_write_blob( tl_iostream* stream,
                                              const tl_blob* blob,
@@ -217,9 +208,7 @@ static TL_INLINE int tl_iostream_write_blob( tl_iostream* stream,
  *               terminator)
  * \param actual If not NULL, returns the number of bytes actually written
  *
- * \return Zero on success, TL_ERR_CLOSED if the connection was closed,
- *         TL_ERR_TIMEOUT if a timeout occoured or TL_ERR_INTERNAL if an
- *         internal error occoured.
+ * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
 static TL_INLINE int tl_iostream_write_string( tl_iostream* stream,
                                                const tl_string* str,
@@ -238,9 +227,7 @@ static TL_INLINE int tl_iostream_write_string( tl_iostream* stream,
  *                the data to.
  * \param maximum The maximum number of bytes to read.
  *
- * \return Zero on success, TL_ERR_CLOSED if the connection was closed,
- *         TL_ERR_TIMEOUT if a timeout occoured, TL_ERR_INTERNAL if an
- *         internal error occoured.
+ * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
 TLOSAPI int tl_iostream_read_blob( tl_iostream* stream, tl_blob* blob,
                                    size_t maximum );

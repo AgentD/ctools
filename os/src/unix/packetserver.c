@@ -53,23 +53,25 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
     unsigned char addrbuf[ 64 ];
     socklen_t addrlen = sizeof(addrbuf);
-    ssize_t result;
+    ssize_t result, intr_count = 0;
 
     assert( this );
 
     if( actual )
         *actual = 0;
+
+retry:
     if( !wait_for_fd( this->sockfd, this->timeout, 0 ) )
         return TL_ERR_TIMEOUT;
 
-    result = recvfrom(this->sockfd,buffer,size,0,(void*)addrbuf,&addrlen);
+    result = recvfrom( this->sockfd, buffer, size, MSG_NOSIGNAL,
+                       (void*)addrbuf, &addrlen );
+
+    if( result<0 && errno==EINTR && (intr_count++)<3 )
+        goto retry;
 
     if( result<0 )
-    {
-        if( errno==EAGAIN || errno==EWOULDBLOCK )
-            return TL_ERR_TIMEOUT;
-        return TL_ERR_INTERNAL;
-    }
+        return errno_to_fs( errno );
 
     if( address )
     {
@@ -88,8 +90,8 @@ static int udp_send( tl_packetserver* super, const void* buffer,
                      const void* address, size_t size, size_t* actual )
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
+    ssize_t result, intr_count = 0;
     unsigned char addrbuf[ 64 ];
-    ssize_t result;
     int addrsize;
 
     assert( this && address );
@@ -100,15 +102,15 @@ static int udp_send( tl_packetserver* super, const void* buffer,
     if( !wait_for_fd( this->sockfd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;
 
-    result = sendto(this->sockfd, buffer, size, 0, (void*)addrbuf, addrsize);
+retry:
+    result = sendto( this->sockfd, buffer, size, MSG_NOSIGNAL,
+                     (void*)addrbuf, addrsize );
+
+    if( result<0 && errno==EINTR && (intr_count++)<3 )
+        goto retry;
 
     if( result<0 )
-    {
-        if( errno==EAGAIN || errno==EWOULDBLOCK )
-            return TL_ERR_TIMEOUT;
-        return TL_ERR_INTERNAL;
-    }
-
+        return errno_to_fs( errno );
     if( actual )
         *actual = result;
     return 0;

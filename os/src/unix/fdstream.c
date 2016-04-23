@@ -48,7 +48,7 @@ static int fd_stream_write( tl_iostream* super, const void* buffer,
                             size_t size, size_t* actual )
 {
     fd_stream* this = (fd_stream*)super;
-    ssize_t result;
+    ssize_t result, intr_count = 0;
 
     assert( this && buffer );
 
@@ -56,18 +56,23 @@ static int fd_stream_write( tl_iostream* super, const void* buffer,
     if( this->writefd<0  ) return TL_ERR_NOT_SUPPORTED;
     if( !size            ) return 0;
 
+retry:
     if( !wait_for_fd( this->writefd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;
 
-    result = write( this->writefd, buffer, size );
+    if( (super->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
+        result = sendto( this->writefd, buffer, size, MSG_NOSIGNAL, NULL, 0 );
+    else
+        result = write( this->writefd, buffer, size );
+
+    if( result<0 && errno==EINTR && (intr_count++)<3 )
+        goto retry;
 
     if( result<0 )
     {
-        if( errno==EAGAIN || errno==EWOULDBLOCK )
-            return TL_ERR_TIMEOUT;
         if( errno==EBADF || errno==EINVAL || errno==EPIPE )
             return TL_ERR_CLOSED;
-        return TL_ERR_INTERNAL;
+        return errno_to_fs( errno );
     }
 
     if( actual )
@@ -79,7 +84,7 @@ static int fd_stream_read( tl_iostream* super, void* buffer,
                            size_t size, size_t* actual )
 {
     fd_stream* this = (fd_stream*)super;
-    ssize_t result;
+    ssize_t result, intr_count = 0;
 
     assert( this && buffer );
 
@@ -87,26 +92,27 @@ static int fd_stream_read( tl_iostream* super, void* buffer,
     if( this->readfd<0   ) return TL_ERR_NOT_SUPPORTED;
     if( !size            ) return 0;
 
+retry:
     if( !wait_for_fd( this->readfd, this->timeout, 0 ) )
         return TL_ERR_TIMEOUT;
 
-    result = read( this->readfd, buffer, size );
+    if( (super->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
+        result = recvfrom(this->readfd, buffer,size,MSG_NOSIGNAL,NULL,NULL);
+    else
+        result = read( this->readfd, buffer, size );
+
+    if( result<0 && errno==EINTR && (intr_count++)<3 )
+        goto retry;
 
     if( result==0 )
     {
         if( (super->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_FILE )
             return TL_EOF;
-
         return TL_ERR_CLOSED;
     }
 
     if( result < 0 )
-    {
-        if( errno==EAGAIN || errno==EWOULDBLOCK )
-            return TL_ERR_TIMEOUT;
-
-        return TL_ERR_INTERNAL;
-    }
+        return errno_to_fs( errno );
 
     if( actual )
         *actual = result;

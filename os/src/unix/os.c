@@ -49,6 +49,24 @@ int errno_to_fs( int code )
         return TL_ERR_NOT_EMPTY;
     case ENOMEM:
         return TL_ERR_ALLOC;
+    case EFBIG:
+    case EMSGSIZE:
+        return TL_ERR_TOO_LARGE;
+    case EAGAIN:
+#if EWOULDBLOCK != EAGAIN       /* for hysterical raisins */
+    case EWOULDBLOCK:
+#endif
+        return TL_ERR_TIMEOUT;
+    case EHOSTUNREACH:
+        return TL_ERR_HOST_UNREACH;
+    case ENETDOWN:
+        return TL_ERR_NET_DOWN;
+    case ENETUNREACH:
+        return TL_ERR_NET_UNREACH;
+    case ECONNRESET:
+        return TL_ERR_NET_RESET;
+    case EAFNOSUPPORT:
+        return TL_ERR_NET_ADDR;
     }
 
     return code==0 ? 0 : TL_ERR_INTERNAL;

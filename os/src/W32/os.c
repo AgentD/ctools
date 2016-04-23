@@ -141,14 +141,34 @@ int WSAHandleFuckup( void )
 {
     int status = WSAGetLastError( );
 
-    if( status==WSAENOPROTOOPT || status==WSAEINVAL )
-        return TL_ERR_NOT_SUPPORTED;
-    if( status==WSAETIMEDOUT || status==WSAEWOULDBLOCK )
-        return TL_ERR_TIMEOUT;
-    if( status==WSAECONNRESET || status==WSAECONNABORTED ||
-        status==WSAESHUTDOWN || status==WSAENOTSOCK ||
-        status==WSAENOTCONN || status==WSAENETRESET )
+    switch( status )
     {
+    case WSAENOPROTOOPT:
+    case WSAEINVAL:
+        return TL_ERR_NOT_SUPPORTED;
+    case WSAETIMEDOUT:
+    case WSAEWOULDBLOCK:
+        return TL_ERR_TIMEOUT;
+    case WSAEHOSTDOWN:
+    case WSAEHOSTUNREACH:
+        return TL_ERR_HOST_UNREACH;
+    case WSAECONNRESET:
+        return TL_ERR_NET_RESET;
+    case WSAENETUNREACH:
+        return TL_ERR_NET_UNREACH;
+    case WSAENETDOWN:
+        return TL_ERR_NET_DOWN;
+    case WSAEAFNOSUPPORT:
+        return TL_ERR_NET_ADDR;
+    case WSAEMSGSIZE:
+        return TL_ERR_TOO_LARGE;
+    case WSAEACCES:
+        return TL_ERR_ACCESS;
+    case WSAECONNABORTED:
+    case WSAESHUTDOWN:
+    case WSAENOTSOCK:
+    case WSAENOTCONN:
+    case WSAENETRESET:
         return TL_ERR_CLOSED;
     }
     return TL_ERR_INTERNAL;

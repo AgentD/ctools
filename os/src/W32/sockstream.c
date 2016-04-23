@@ -37,17 +37,12 @@ static void sockstream_destroy( tl_iostream* super )
     winsock_release( );
 }
 
-static int sockstream_set_timeout( tl_iostream* super, unsigned int timeout )
+static int sockstream_set_timeout( tl_iostream* this, unsigned int timeout )
 {
-    sockstream* this = (sockstream*)super;
-    int status;
-
     assert( this );
 
-    this->timeout = timeout;
-    status = setsockopt(this->socket,SOL_SOCKET,SO_SNDTIMEO,
-                        (char*)&this->timeout,sizeof(this->timeout));
-    return status ? WSAHandleFuckup( ) : 0;
+    ((sockstream*)this)->timeout = timeout;
+    return 0;
 }
 
 static int sockstream_write_raw( tl_iostream* super, const void* buffer,
@@ -60,6 +55,9 @@ static int sockstream_write_raw( tl_iostream* super, const void* buffer,
 
     if( actual ) *actual = 0;
     if( !size  ) return 0;
+
+    if( !wait_for_socket(this->socket, this->timeout, 1) )
+        return TL_ERR_TIMEOUT;
 
     status = send( ((sockstream*)this)->socket, buffer, size, 0 );
 
@@ -78,7 +76,8 @@ static int sockstream_read_raw( tl_iostream* super, void* buffer,
 
     if( actual                                           ) *actual = 0;
     if( !size                                            ) return 0;
-    if( !wait_for_socket(this->socket, this->timeout, 0) ) return 0;
+    if( !wait_for_socket(this->socket, this->timeout, 0) )
+        return TL_ERR_TIMEOUT;
 
     status = recv( this->socket, buffer, size, 0 );
 

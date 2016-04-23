@@ -132,6 +132,31 @@ typedef enum
     /** \brief End of file has been reached */
     TL_EOF = -12,
 
+    /**
+     * \brief Too large for file system or packet payload
+     *
+     * When writing to a file, indicates that the desired file size is not
+     * supported by the underlying filesystem. When sending data over an I/O
+     * device, indicates that the supplied data block is too large to fit
+     * into a single packet.
+     */
+    TL_ERR_TOO_LARGE = -13,
+
+    /** \brief Host is unreachable */
+    TL_ERR_HOST_UNREACH = -14,
+
+    /** \brief Network is unreachable */
+    TL_ERR_NET_UNREACH = -15,
+
+    /** \brief Network is down */
+    TL_ERR_NET_DOWN = -16,
+
+    /** \brief Connection was reset (e.g. TCP reset flag) */
+    TL_ERR_NET_RESET = -17,
+
+    /** \brief Network address type is not supported */
+    TL_ERR_NET_ADDR = -18,
+
     /** \brief A function was called with an invalid argument */
     TL_ERR_ARG = -100
 }

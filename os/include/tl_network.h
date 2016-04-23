@@ -365,8 +365,7 @@ TLOSAPI int tl_network_get_special_address( tl_net_addr* addr, int type,
  * \param addr   A pointer to a tl_net_addr to retrieve the address that we
  *               are sending to.
  *
- * \return Non-zero on success, zero on failure (e.g. one of the arguments
- *         is NULL)
+ * \return Non-zero on success, zero on failure
  */
 TLOSAPI int tl_network_get_peer_address( tl_iostream* stream,
                                          tl_net_addr* addr );
@@ -378,8 +377,7 @@ TLOSAPI int tl_network_get_peer_address( tl_iostream* stream,
  * \param addr   A pointer to a tl_net_addr to retrieve the address that we
  *               are using as a source address when sending.
  *
- * \return Non-zero on success, zero on failure (e.g. one of the arguments
- *         is NULL)
+ * \return Non-zero on success, zero on failure
  */
 TLOSAPI int tl_network_get_local_address( tl_iostream* stream,
                                           tl_net_addr* addr );
