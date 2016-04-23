@@ -199,7 +199,8 @@ static tl_iostream* udp_wait_for_client( tl_server* super, int timeout )
 
     assert( this );
 
-    tl_monitor_lock( &(this->monitor), timeout );
+    if( !tl_monitor_lock( &(this->monitor), timeout ) )
+        return NULL;
     if( this->pending == 0 )
         tl_monitor_wait( &(this->monitor), timeout );
 
