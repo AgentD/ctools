@@ -26,30 +26,27 @@
 #include "tl_network.h"
 #include "os.h"
 
-static int parse_ipv4( const char* s, void* a0 )
+static int parse_ipv4( const char* s, tl_u32* addr )
 {
-    unsigned char* a = a0;
     int i, j, v;
+    tl_u8 a[4];
 
-    for( i=0; i<4; ++i, ++s )
+    for( i=0; i<4; ++i )
     {
-        for( v=j=0; j<3 && isdigit(s[j]); ++j )
-            v = 10*v + s[j] - '0';
+        for( v=j=0; j<3 && isdigit(*s); ++j )
+            v = 10*v + *(s++) - '0';
 
-        if( v>255 || !j || (j>1 && s[0]=='0') )
+        if( v>255 || !j )
             return 0;
 
         a[i] = v;
-        s += j;
 
-        if( !(*s) && i==3 )
-            return 1;
-
-        if( *s!='.' )
+        if( i<3 && *(s++)!='.' )
             return 0;
     }
 
-    return 0;
+    *addr = (a[0]<<24) | (a[1]<<16) | (a[2]<<8) | a[3];
+    return *s == '\0';
 }
 
 static int xdigit( int c )
@@ -58,32 +55,35 @@ static int xdigit( int c )
 }
 
 /* based on musl libc inet_pton by Rich Felker, et al. */
-static int parse_ipv6( const char* s, void* a0 )
+static int parse_ipv6( const char* s, tl_net_addr* addr )
 {
-    int i, j, brk=-1, need_v4=0;
-    unsigned char* a = a0;
-    WORD ip[8];
+    int i, j, v, brk=-1, need_v4=0;
+    tl_u16 ip[16];
+    tl_u32 v4;
 
     if( *s==':' && *(++s)!=':' )
         return 0;
-
-    memset( ip, 0, sizeof(ip) );
 
     for( i=0; ; ++i )
     {
         if( *s==':' && brk<0 )
         {
             brk = i;
-            if( !*(++s) )
+            ip[i & 7] = 0;
+            if( !(*(++s)) )
                 break;
+            if( i==7 )
+                return 0;
         }
         else
         {
-            for( j=0; j<4 && isxdigit(s[j]); ++j )
-                ip[i] = 16*ip[i] + xdigit(s[j]);
+            for( v=j=0; j<4 && isxdigit(s[j]); ++j )
+                v = (v<<4) | xdigit(s[j]);
 
             if( !j )
                 return 0;
+
+            ip[i & 7] = v;
 
             if( !s[j] && (brk>=0 || i==7) )
                 break;
@@ -107,17 +107,26 @@ static int parse_ipv6( const char* s, void* a0 )
 
     if( brk>=0 )
     {
-        memmove( ip+brk+7-i, ip+brk, 2*(i+1-brk) );
-        memset( ip+brk, 0, 2*(7-i) );
+        memmove( ip + brk + 7 - i, ip + brk, 2 * (i + 1 - brk) );
+        for( j=0; j<7-i; ++j )
+            ip[brk + j] = 0;
     }
 
-    for( i=0; i<8; ++i )
+    if( need_v4 )
     {
-        *(a++) = ip[i]>>8;
-        *(a++) = ip[i];
+        if( !parse_ipv4( s, &v4 ) )
+            return 0;
+        ip[7] =  v4      & 0xFFFF;
+        ip[6] = (v4>>16) & 0xFFFF;
     }
 
-    return need_v4 ? parse_ipv4( s, a-4 ) : 1;
+    if( addr )
+    {
+        addr->net = TL_IPV6;
+        for( j=0; j<8; ++j )
+            addr->addr.ipv6[j] = ip[(~j) & 7];
+    }
+    return 1;
 }
 
 /****************************************************************************/
@@ -127,38 +136,23 @@ int tl_network_resolve_name( const char* hostname, int proto,
 {
     ADDRINFOA hints, *info, *p;
     IN6_ADDR addr6;
-    IN_ADDR addr4;
     size_t i = 0;
+    tl_u32 v4;
 
     assert( hostname );
 
-    /* check if hostname is actually a numeric IPv4 address */
-    if( parse_ipv4( hostname, &addr4 )>0 )
+    if( parse_ipv4( hostname, &v4 ) )
     {
-        if( proto!=TL_IPV4 && proto!=TL_ANY )
-            return 0;
-
         if( addr && count>0 )
         {
-            addr->addr.ipv4 = ntohl( addr4.S_un.S_addr );
+            addr->addr.ipv4 = v4;
             addr->net = TL_IPV4;
         }
-        return 1;
+        return proto==TL_IPV4 || proto==TL_ANY;
     }
 
-    /* check if hostname is acutally a numeric IPv6 address */
-    if( parse_ipv6( hostname, &addr6 )>0 )
-    {
-        if( proto!=TL_IPV6 && proto!=TL_ANY )
-            return 0;
-
-        if( addr && count>0 )
-        {
-            convert_ipv6( &addr6, addr );
-            addr->net = TL_IPV6;
-        }
-        return 1;
-    }
+    if( parse_ipv6( hostname, count > 0 ? addr : NULL ) )
+        return proto==TL_IPV6 || proto==TL_ANY;
 
     /* try to resolve hostname */
     proto =  (proto==TL_IPV6) ? AF_INET6 : 
@@ -190,8 +184,8 @@ int tl_network_resolve_name( const char* hostname, int proto,
             }
             else
             {
-                addr4 = ((struct sockaddr_in*)p->ai_addr)->sin_addr;
-                addr->addr.ipv4 = ntohl( addr4.s_addr );
+                v4 = ((struct sockaddr_in*)p->ai_addr)->sin_addr.s_addr;
+                addr->addr.ipv4 = ntohl( v4 );
             }
 
             addr->net = p->ai_family==AF_INET6 ? TL_IPV6 : TL_IPV4;

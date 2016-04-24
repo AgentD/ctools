@@ -152,7 +152,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( this->sockfd == INVALID_SOCKET )
         goto fail;
 
-    if( flags & TL_ALLOW_BROADCAST )
+    if( (flags & TL_ALLOW_BROADCAST) && (addr->net==TL_IPV4) )
     {
         val = TRUE;
         setsockopt( this->sockfd, SOL_SOCKET, SO_BROADCAST,
