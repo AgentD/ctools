@@ -124,7 +124,6 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     unsigned char addrbuffer[64];
     tl_udp_packetserver* this;
     tl_packetserver* super;
-    BOOL val;
     int size;
 
     assert( addr );
@@ -152,19 +151,8 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( this->sockfd == INVALID_SOCKET )
         goto fail;
 
-    if( (flags & TL_ALLOW_BROADCAST) && (addr->net==TL_IPV4) )
-    {
-        val = TRUE;
-        setsockopt( this->sockfd, SOL_SOCKET, SO_BROADCAST,
-                    (void*)&val, sizeof(BOOL) );
-    }
-
-    if( (flags & TL_DONT_FRAGMENT) && (addr->net==TL_IPV4) )
-    {
-        DWORD opt = 1;
-        setsockopt( this->sockfd, IPPROTO_IP, IP_DONTFRAGMENT,
-                    (void*)&opt, sizeof(DWORD) );
-    }
+    if( !set_socket_flags( this->sockfd, addr->net, flags ) )
+        goto fail;
 
     if( !bind_socket( this->sockfd, addrbuffer, size ) )
         goto failclose;

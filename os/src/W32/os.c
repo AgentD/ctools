@@ -295,3 +295,23 @@ int bind_socket( SOCKET sockfd, void* addrbuffer, int size )
     return bind( sockfd, addrbuffer, size ) >= 0;
 }
 
+int set_socket_flags( SOCKET fd, int netlayer, int flags )
+{
+    if( flags & (~TL_ALL_NETWORK_FLAGS) )   /* unknown flags */
+        return 0;
+
+    if( (flags & TL_ALLOW_BROADCAST) && (netlayer == TL_IPV4) )
+    {
+        BOOL val = TRUE;
+        setsockopt( fd, SOL_SOCKET, SO_BROADCAST, (void*)&val, sizeof(BOOL) );
+    }
+
+    if( (flags & TL_DONT_FRAGMENT) && (netlayer == TL_IPV4) )
+    {
+        DWORD opt = 1;
+        setsockopt( fd, IPPROTO_IP, IP_DONTFRAGMENT,
+                    (void*)&opt, sizeof(DWORD) );
+    }
+    return 1;
+}
+

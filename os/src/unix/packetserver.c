@@ -133,7 +133,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     unsigned char addrbuffer[64];
     tl_udp_packetserver* this;
     tl_packetserver* super;
-    int val, size;
+    int size;
 
     assert( addr );
 
@@ -156,27 +156,8 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( this->sockfd < 0 )
         goto fail;
 
-    if( (flags & TL_ALLOW_BROADCAST) && addr->net==TL_IPV4 )
-    {
-        val = 1;
-        setsockopt(this->sockfd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(int));
-    }
-
-    if( flags & TL_DONT_FRAGMENT )
-    {
-        if( addr->net==TL_IPV6 )
-        {
-            val = IPV6_PMTUDISC_DO;
-            setsockopt( this->sockfd, IPPROTO_IPV6, IPV6_MTU_DISCOVER,
-                        &val, sizeof(int) );
-        }
-        else
-        {
-            val = IP_PMTUDISC_DO;
-            setsockopt( this->sockfd, IPPROTO_IP, IP_MTU_DISCOVER,
-                        &val, sizeof(int) );
-        }
-    }
+    if( !set_socket_flags( this->sockfd, addr->net, flags ) )
+        goto failclose;
 
     if( !bind_socket( this->sockfd, addrbuffer, size ) )
         goto failclose;

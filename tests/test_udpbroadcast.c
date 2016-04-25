@@ -23,7 +23,7 @@ int main( void )
     addr.transport = TL_UDP;
     addr.port = 15000;
 
-    server = tl_network_create_server( &addr, 10 );
+    server = tl_network_create_server( &addr, 10, 0 );
     if( !server )
         return EXIT_FAILURE;
 

@@ -250,6 +250,17 @@ void timeout_to_abs( unsigned long timeout, struct timespec* ts );
  */
 pid_t wait_pid_ms( pid_t pid, int* status, unsigned long timeout );
 
+/**
+ * \brief Apply \ref TL_NETWORK_FLAGS to a socket
+ *
+ * \param fd       Socket file descriptor
+ * \param netlayer A \ref TL_NETWORK_PROTOCOL value
+ * \param flags    The flags to apply to the socket
+ *
+ * \return Non-zero on success, zero on failure
+ */
+int set_socket_flags( int fd, int netlayer, int flags );
+
 #ifdef __cplusplus
 }
 #endif

@@ -189,6 +189,9 @@ void tl_monitor_cleanup( tl_monitor* monitor );
 /** \brief Create a stream object that uses pipe HANDLE objects */
 tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd );
 
+/** \brief Set flags on socket */
+int set_socket_flags( SOCKET fd, int netlayer, int flags );
+
 #ifdef __cplusplus
 }
 #endif

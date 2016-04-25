@@ -260,3 +260,34 @@ pid_t wait_pid_ms( pid_t pid, int* status, unsigned long timeout )
     return 0;
 }
 
+int set_socket_flags( int fd, int netlayer, int flags )
+{
+    int val;
+
+    if( flags & (~TL_ALL_NETWORK_FLAGS) )   /* unknown flags? */
+        return 0;
+
+    if( (flags & TL_ALLOW_BROADCAST) && (netlayer == TL_IPV4) )
+    {
+        val = 1;
+        setsockopt( fd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(int) );
+    }
+
+    if( flags & TL_DONT_FRAGMENT )
+    {
+        if( netlayer == TL_IPV6 )
+        {
+            val = IPV6_PMTUDISC_DO;
+            setsockopt( fd, IPPROTO_IPV6, IPV6_MTU_DISCOVER,
+                        &val, sizeof(int) );
+        }
+        else if( netlayer == TL_IPV4 )
+        {
+            val = IP_PMTUDISC_DO;
+            setsockopt( fd, IPPROTO_IP, IP_MTU_DISCOVER,
+                        &val, sizeof(int) );
+        }
+    }
+    return 1;
+}
+

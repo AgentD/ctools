@@ -262,9 +262,12 @@ typedef enum
     TL_ALLOW_BROADCAST = 0x01,
 
     /** \brief If set, IPv4 packets have the don't fragment bit set */
-    TL_DONT_FRAGMENT = 0x02
+    TL_DONT_FRAGMENT = 0x02,
+
+    /** \brief Enum value with all possible/allowed flags set */
+    TL_ALL_NETWORK_FLAGS = 0x03
 }
-TL_PACKETSERVER_FLAGS;
+TL_NETWORK_FLAGS;
 
 
 /**
@@ -327,20 +330,24 @@ TLOSAPI int tl_network_resolve_name( const char* hostname, int proto,
  * \param addr    Specifies the local address to bind to, on
  *                what port to listen and what protocols to use.
  * \param backlog The maximum number of incomming connections kept waiting.
+ * \param flags A combination of \ref TL_NETWORK_FLAGS fields
  *
  * \return A pointer to a new server instance or NULL on failure
  */
 TLOSAPI tl_server* tl_network_create_server( const tl_net_addr* addr,
-                                             unsigned int backlog );
+                                             unsigned int backlog,
+                                             int flags );
 
 /**
  * \brief Create a connection to a server
  *
  * \param peer The address of the peer to connect to
+ * \param flags A combination of \ref TL_NETWORK_FLAGS fields
  *
  * \return A pointer to a tl_iostream instance or NULL on failure
  */
-TLOSAPI tl_iostream* tl_network_create_client( const tl_net_addr* peer );
+TLOSAPI tl_iostream* tl_network_create_client( const tl_net_addr* peer,
+                                               int flags );
 
 /**
  * \brief Get a special network address
@@ -390,7 +397,7 @@ TLOSAPI int tl_network_get_local_address( tl_iostream* stream,
  *
  * \param addr  Specifies from what addresses to accept connections, on
  *              what port to listen and what protocols to use.
- * \param flags A combination of TL_PACKETSERVER_FLAGS fields
+ * \param flags A combination of \ref TL_NETWORK_FLAGS fields
  *
  * \return A pointer to a server interface on success, NULL on failure
  */

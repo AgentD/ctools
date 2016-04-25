@@ -114,7 +114,7 @@ int tl_network_resolve_name( const char* hostname, int proto,
 }
 
 tl_server* tl_network_create_server( const tl_net_addr* addr,
-                                     unsigned int backlog )
+                                     unsigned int backlog, int flags )
 {
     unsigned char addrbuffer[128];
     tl_server* server;
@@ -125,6 +125,9 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
     sockfd = create_socket( addr, (void*)addrbuffer, &size );
     if( sockfd < 0 )
         return NULL;
+
+    if( !set_socket_flags( sockfd, addr->net, flags ) )
+        goto fail;
 
     if( !bind_socket( sockfd, addrbuffer, size ) )
         goto fail;
@@ -144,17 +147,20 @@ fail:
     return NULL;
 }
 
-tl_iostream* tl_network_create_client( const tl_net_addr* peer )
+tl_iostream* tl_network_create_client( const tl_net_addr* peer, int flags )
 {
     unsigned char addrbuffer[128];
     tl_iostream* stream;
-    int sockfd, size, flags;
+    int sockfd, size;
 
     assert( peer );
 
     sockfd = create_socket( peer, (void*)addrbuffer, &size );
     if( sockfd < 0 )
         return NULL;
+
+    if( !set_socket_flags( sockfd, peer->net, flags ) )
+        goto fail;
 
     if( connect( sockfd, (void*)addrbuffer, size ) < 0 )
         goto fail;

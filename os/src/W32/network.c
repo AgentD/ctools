@@ -205,7 +205,7 @@ out:
 }
 
 tl_server* tl_network_create_server( const tl_net_addr* addr,
-                                     unsigned int backlog )
+                                     unsigned int backlog, int flags )
 {
     unsigned char addrbuffer[128];
     tl_server* server;
@@ -219,6 +219,9 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
     sockfd = create_socket( addr, (void*)addrbuffer, &size );
     if( sockfd == INVALID_SOCKET )
         goto fail;
+
+    if( !set_socket_flags( sockfd, addr->net, flags ) )
+        goto failclose;
 
     if( !bind_socket( sockfd, addrbuffer, size ) )
         goto failclose;
@@ -239,12 +242,12 @@ fail:
     return NULL;
 }
 
-tl_iostream* tl_network_create_client( const tl_net_addr* peer )
+tl_iostream* tl_network_create_client( const tl_net_addr* peer, int flags )
 {
     unsigned char addrbuffer[128];
     tl_iostream* stream;
-    int size, flags;
     SOCKET sockfd;
+    int size;
 
     assert( peer );
 
@@ -257,6 +260,9 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer )
         winsock_release( );
         return NULL;
     }
+
+    if( !set_socket_flags( sockfd, peer->net, flags ) )
+        goto fail;
 
     if( connect( sockfd, (void*)addrbuffer, size ) == SOCKET_ERROR )
         goto fail;
