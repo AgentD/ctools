@@ -416,6 +416,42 @@ TLOSAPI int tl_network_get_local_address( tl_iostream* stream,
 TLOSAPI tl_packetserver*
 tl_network_create_packet_server( const tl_net_addr* addr, int flags );
 
+/**
+ * \brief Convert a network address type to a different address type
+ *
+ * This functions can be used to convert one network layer address type to
+ * another address type, for instance converting an IPv4 address to a v4
+ * mapped IPv6 address and vice versa (or SIIT addresses).
+ *
+ * Protocol types and transport layer addresses (port numbers) are simply
+ * copied through to the destination.
+ *
+ * \param dst    The destination address to write to
+ * \param src    The source address to convert
+ * \param target The target \ref TL_NETWORK_PROTOCOL to convert to
+ *
+ * \return Non-zero on success, zero if the conversion is not possible
+ */
+TLOSAPI int tl_net_addr_convert( tl_net_addr* dst, const tl_net_addr* src,
+                                 int target );
+
+/**
+ * \brief Compare two network addresses for equality
+ *
+ * This function compares two addresses for equality, comparing both port
+ * numbers, transport protocols and network addresses.
+ *
+ * This function correctly compares network layer addresses of different
+ * types that are compatible to each other (e.g. an IPv4 addresses and the
+ * coresponding v4 mapped v6 address or SIIT version).
+ *
+ * \param a The first address
+ * \param b The second address
+ *
+ * \return Non-zero if the addresses are equal, zero if not
+ */
+TLOSAPI int tl_net_addr_equal( const tl_net_addr* a, const tl_net_addr* b );
+
 #ifdef __cplusplus
 }
 #endif
