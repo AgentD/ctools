@@ -255,7 +255,7 @@ typedef enum
 }
 TL_SPECIAL_ADDRESS;
 
-/** \brief Flags for tl_network_create_packet_server */
+/** \brief Flags for network servers and connections */
 typedef enum
 {
     /** \brief If set, allow sending broadcast packets */
@@ -309,6 +309,9 @@ extern "C" {
  * This function takes a string that may contain a host name, a string
  * representation of a network address, a DNS name or similar and tries
  * to resolve it to a tl_net_addr network address.
+ *
+ * \note This call is blocking and may (e.g. if talking to a slow DNS server)
+ *       block for multiple seconds before succeeding or giving up.
  *
  * \param hostname The string to resolve to an address
  * \param proto    A \ref TL_NETWORK_PROTOCOL value specifying a prefered
