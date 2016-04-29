@@ -262,7 +262,7 @@ pid_t wait_pid_ms( pid_t pid, int* status, unsigned long timeout )
 
 int set_socket_flags( int fd, int netlayer, int flags )
 {
-    int val;
+    int val, level, opt;
 
     if( flags & (~TL_ALL_NETWORK_FLAGS) )   /* unknown flags? */
         return 0;
@@ -275,19 +275,19 @@ int set_socket_flags( int fd, int netlayer, int flags )
 
     if( flags & TL_DONT_FRAGMENT )
     {
-        if( netlayer == TL_IPV6 )
+        switch( netlayer )
         {
-            val = IPV6_PMTUDISC_DO;
-            setsockopt( fd, IPPROTO_IPV6, IPV6_MTU_DISCOVER,
-                        &val, sizeof(int) );
+#ifdef __linux__
+        case TL_IPV6: opt = IPV6_MTU_DISCOVER; val = IPV6_PMTUDISC_DO; break;
+        case TL_IPV4: opt = IP_MTU_DISCOVER;   val = IP_PMTUDISC_DO;   break;
+#endif
+        default:
+            goto skip;
         }
-        else if( netlayer == TL_IPV4 )
-        {
-            val = IP_PMTUDISC_DO;
-            setsockopt( fd, IPPROTO_IP, IP_MTU_DISCOVER,
-                        &val, sizeof(int) );
-        }
+        level = netlayer==TL_IPV6 ? IPPROTO_IPV6 : IPPROTO_IP;
+        setsockopt( fd, level, opt, &val, sizeof(int) );
     }
+skip:
     return 1;
 }
 
