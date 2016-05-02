@@ -280,6 +280,9 @@ int set_socket_flags( int fd, int netlayer, int flags )
 #ifdef __linux__
         case TL_IPV6: opt = IPV6_MTU_DISCOVER; val = IPV6_PMTUDISC_DO; break;
         case TL_IPV4: opt = IP_MTU_DISCOVER;   val = IP_PMTUDISC_DO;   break;
+#elif defined(__FreeBSD__)
+        case TL_IPV6: opt = IPV6_USE_MIN_MTU;  val = 1; break;
+        case TL_IPV4: opt = IP_DONTFRAG;       val = 1; break;
 #endif
         default:
             goto skip;
