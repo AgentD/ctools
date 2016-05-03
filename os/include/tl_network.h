@@ -261,7 +261,16 @@ typedef enum
     /** \brief If set, allow sending broadcast packets */
     TL_ALLOW_BROADCAST = 0x01,
 
-    /** \brief If set, IPv4 packets have the don't fragment bit set */
+    /**
+     * \brief If set, IPv4 packets have the don't fragment bit set
+     *
+     * The underlying implementation may not support this directly
+     * (e.g. Mac OS X) or might do path MTU discovery (e.g. Linux).
+     *
+     * Failure to set this flag is not treated as an error. Even if the OS
+     * sets it and does path MTU discovery, naughty network hops in between
+     * might fragment packets any way (hopefully rare).
+     */
     TL_DONT_FRAGMENT = 0x02,
 
     /** \brief Enum value with all possible/allowed flags set */
