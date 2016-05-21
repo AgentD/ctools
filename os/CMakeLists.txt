@@ -5,6 +5,9 @@ if( UNIX )
                      src/unix/network.c
                      src/unix/process.c
                      src/unix/thread.c
+                     src/unix/monitor.c
+                     src/unix/rwlock.c
+                     src/unix/mutex.c
                      src/unix/threadpool.c
                      src/unix/fdstream.c
                      src/unix/tcpserver.c
@@ -17,6 +20,9 @@ elseif( WIN32 )
                      src/W32/network.c
                      src/W32/process.c
                      src/W32/thread.c
+                     src/W32/monitor.c
+                     src/W32/rwlock.c
+                     src/W32/mutex.c
                      src/W32/threadpool.c
                      src/W32/sockstream.c
                      src/W32/pipestream.c
