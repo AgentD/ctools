@@ -84,3 +84,21 @@ int __tl_os_splice( tl_iostream* out, tl_iostream* in,
 }
 #endif
 
+void tl_unix_iostream_fd( tl_iostream* str, int* fds )
+{
+    int type = str->flags & TL_STREAM_TYPE_MASK;
+
+    fds[0] = -1;
+    fds[1] = -1;
+
+    switch( type )
+    {
+    case TL_STREAM_TYPE_PIPE:
+    case TL_STREAM_TYPE_FILE:
+    case TL_STREAM_TYPE_SOCK:
+        fds[0] = ((fd_stream*)str)->readfd;
+        fds[1] = ((fd_stream*)str)->writefd;
+        break;
+    }
+}
+

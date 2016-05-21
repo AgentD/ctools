@@ -176,3 +176,8 @@ fail:
     return NULL;
 }
 
+int tl_unix_packetserver_fd( tl_packetserver* srv )
+{
+    return ((tl_udp_packetserver*)srv)->sockfd;
+}
+

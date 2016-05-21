@@ -55,6 +55,7 @@ install( FILES include/tl_dir.h
                include/tl_server.h
                include/tl_thread.h
                include/tl_threadpool.h
+               include/tl_unix.h
          DESTINATION include )
 
 install( TARGETS tlos LIBRARY DESTINATION lib

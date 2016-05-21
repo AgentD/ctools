@@ -80,3 +80,8 @@ tl_server* tcp_server_create( int sockfd, unsigned int backlog )
     return super;
 }
 
+int tl_unix_server_fd( tl_server* srv )
+{
+    return ((tcp_server*)srv)->socket;
+}
+
