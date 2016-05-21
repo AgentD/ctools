@@ -39,9 +39,7 @@
  * The tl_server interface abstracts stream based communication of a single
  * end-point with an arbitrary number of clients (e.g. a TCP server). The
  * client communications are abstracted in the form of tl_iostream instances
- * that the server creates when a new client connects or (for non-connection
- * based communications) when the first data from a particular client is
- * received.
+ * that the server creates when a new client connects.
  *
  * Usage example:
  * \code{.c}
@@ -58,15 +56,8 @@
  * srv->destroy( destroy );
  * \endcode
  *
- * There are also tl_server implementations for purely packet based, or
- * non-connection based communcations (e.g. UDP) that internally handle
- * client demultiplexing and emulate connection based communication.
- * Be aware that those servers only \a emulate a stream based communacation.
- * The underlying (e.g. UDP) communication is still based on discrete
- * packets that can get re-ordered or lost during transmission.
- *
- * For "raw" packet based, non-connection oriented communications, use the
- * tl_packetserver interface.
+ * For "raw" packet based, non-connection oriented communications (e.g. UDP),
+ * the \ref tl_packetserver interface is used.
  */
 
 
@@ -78,7 +69,7 @@
 /**
  * \interface tl_server
  *
- * \brief An interface that abstracts stream or packet based one-to-many
+ * \brief An interface that abstracts byte stream based one-to-many
  *        communication on the "one" end.
  *
  * \see \ref server
@@ -94,17 +85,7 @@ struct tl_server
     void(* destroy )( tl_server* server );
 
     /**
-     * \brife Wait until a client connects
-     *
-     * For connection based network protocols, this function simply waits for
-     * a new incomming connection and creates a tl_iostream implementation
-     * object for the connection.
-     *
-     * For protocols that are not connection based, or other cases where the
-     * API used by the implementation does not support seperate client
-     * connections, this function is responsible for handling client
-     * demultiplexing internally and the returned stream is a demultiplexed
-     * stream that only handles communication with a specific client.
+     * \brief Wait until a new client connects
      *
      * \param server  A pointer to a server object
      * \param timeout A timeout in milliseconds, or zero (or a negative value)

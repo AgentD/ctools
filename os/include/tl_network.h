@@ -47,6 +47,7 @@
  * \li \ref tl_network_create_client
  * \li \ref tl_network_get_peer_address
  * \li \ref tl_network_get_local_address
+ * \li \ref tl_network_create_packet_server
  *
  * \subsection names Name Resolution
  *
@@ -96,23 +97,26 @@
  * }
  * \endcode
  *
- * Creating a UDP server with built-in client demultiplexing:
+ * Creating a UDP server:
  * \code{.c}
+ * tl_packetserver* srv;
  * tl_net_addr addr;
- * tl_server* srv;
- * int run = 1;
+ * char buffer[32];
+ * size_t len;
  *
  * tl_network_get_special_address( &addr, TL_ALL, TL_IPV4 );
  * addr.transport = TL_UDP;
  * addr.port = 15000;
- * srv = tl_network_create_server( &addr, 10 );
+ * srv = tl_network_create_packet_server( &addr, 0 );
  *
- * while( run )
+ * while( srv->receive( srv, buffer, &addr, sizeof(buffer), &len )==0 )
  * {
- *     tl_iostream* client = srv->wait_for_client( srv, 0 );
- *
- *     handle_client( client );
+ *     buffer[ len ] = '\0';
+ *     printf( "Got a message from IP 0x%04X\n", addr.addr.ipv4 );
+ *     printf( "Response message: '%s\n'", buffer );
  * }
+ *
+ * srv->destroy( srv );
  * \endcode
  *
  * \subsection netclient Network Client Objects
@@ -126,7 +130,7 @@
  * addr.transport = TL_TCP;
  * addr.port = 80;
  *
- * str = tl_network_create_client( &addr );
+ * str = tl_network_create_client( &addr, 0 );
  * \endcode
  *
  * Creating a UDP client:
@@ -138,7 +142,7 @@
  * addr.transport = TL_UDP;
  * addr.port = 53;
  *
- * str = tl_network_create_client( &addr );
+ * str = tl_network_create_client( &addr, 0 );
  * \endcode
  *
  * \subsection udpbroadcast Sending UDP broadcasts
@@ -407,8 +411,8 @@ TLOSAPI int tl_network_get_local_address( tl_iostream* stream,
  * The tl_packetserver implementation sends and recevies packets through the
  * given port number to/from any remote port number.
  *
- * \param addr  Specifies from what addresses to accept connections, on
- *              what port to listen and what protocols to use.
+ * \param addr    Specifies the local address to bind to, on
+ *                what port to listen and what protocols to use.
  * \param flags A combination of \ref TL_NETWORK_FLAGS fields
  *
  * \return A pointer to a server interface on success, NULL on failure

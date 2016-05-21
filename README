@@ -35,7 +35,7 @@
   - abstract network I/O
     - IPv4 and IPv6 support
     - abstract byte stream oriented TCP and UDP client
-    - TCP and UDP server with client demultiplexing
+    - TCP server that creates client streams for connections
     - packet oriented UDP server
     - name resolving
   - data compression

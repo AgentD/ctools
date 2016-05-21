@@ -48,8 +48,6 @@
 
 
 
-typedef struct udp_stream udp_stream;
-typedef struct udp_server udp_server;
 typedef struct pipestream pipestream;
 typedef struct sockstream sockstream;
 
@@ -75,38 +73,6 @@ struct sockstream
     DWORD timeout;
     SOCKET socket;
 };
-
-struct udp_stream
-{
-    tl_iostream super;
-    tl_monitor monitor;
-    unsigned long timeout;
-    udp_stream* next;           /* linked list pointer */
-    tl_array buffer;            /* incoming data waiting to be read */
-    int addrlen;                /* size of peer address */
-    udp_server* parent;         /* parent server */
-    unsigned char address[1];   /* peer address */
-};
-
-struct udp_server
-{
-    tl_server super;
-    tl_monitor monitor;
-    int socket;                 /* udp socket */
-    int pending;                /* number of streams not yet accepted */
-    udp_stream* streams;        /* list of server-to-client */
-    udp_server* next;           /* linked list pointer */
-};
-
-/**
- * \brief UDP server list socket
- *
- * Gets initialized by winsock_acquire( ) and released by winsock_release( )
- * together with the winsock API.
- */
-extern CRITICAL_SECTION udp_server_mutex;
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -141,27 +107,6 @@ tl_iostream* sock_stream_create( SOCKET sockfd, int flags );
 
 /** \brief Create a winsock based TCP server implementation */
 tl_server* tcp_server_create( SOCKET sockfd, unsigned int backlog );
-
-/** \brief Create a winsock based UDP server implementation */
-tl_server* udp_server_create( SOCKET sockfd );
-
-/**
- * \brief Create a UDP server to client stream
- *
- * \param parent  The UDP server that the stream belongs to
- * \param addr    The address of the client
- * \param addrlen The size of the address structure
- */
-udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen );
-
-/**
- * \brief Add received data to a UDP client stream
- *
- * \param stream A pointer to the stream object
- * \param buffer A pointer to the received data
- * \param size   The number of bytes received
- */
-void udp_stream_add_data( udp_stream* stream, void* buffer, size_t size );
 
 int wait_for_socket( SOCKET socket, unsigned long timeout, int write );
 

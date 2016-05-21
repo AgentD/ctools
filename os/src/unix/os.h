@@ -60,8 +60,6 @@
 
 
 
-typedef struct udp_stream udp_stream;
-typedef struct udp_server udp_server;
 typedef struct fd_stream fd_stream;
 
 struct fd_stream
@@ -77,31 +75,6 @@ struct tl_monitor
     pthread_mutex_t mutex;
     pthread_cond_t cond;
 };
-
-struct udp_stream
-{
-    tl_iostream super;
-    tl_monitor monitor;
-    unsigned int timeout;
-    udp_stream* next;           /* linked list pointer */
-    tl_array buffer;            /* incoming data waiting to be read */
-    int addrlen;                /* size of peer address */
-    udp_server* parent;         /* parent server */
-    unsigned char address[1];   /* peer address */
-};
-
-struct udp_server
-{
-    tl_server super;
-    tl_monitor monitor;
-    int socket;                 /* udp socket */
-    int pending;                /* number of streams not yet accepted */
-    udp_stream* streams;        /* list of server-to-client */
-    udp_server* next;           /* linked list pointer */
-};
-
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -152,31 +125,6 @@ tl_iostream* pipe_stream_create( int readpipe, int writepipe, int flags );
  * \param backlog The connection backlog for the listen syscall
  */
 tl_server* tcp_server_create( int sockfd, unsigned int backlog );
-
-/**
- * \brief Create a server to client UDP stream implementation
- *
- * \param parent  The server that the stream belongs to
- * \param addr    The peer address
- * \param addrlen The size of the peer address
- */
-udp_stream* udp_stream_create( udp_server* parent, void* addr, int addrlen );
-
-/**
- * \brief Append received data to a UDP stream
- *
- * \param stream A pointer to the stream object
- * \param buffer A pointer to the buffer to append
- * \param size   The number of bytes to copy
- */
-void udp_stream_add_data( udp_stream* stream, void* buffer, size_t size );
-
-/**
- * \brief Create a UDP tl_server implementation
- *
- * \param sockfd The server socket to use
- */
-tl_server* udp_server_create( int sockfd );
 
 /**
  * \brief Convert a tl_net_addr structure to a sockaddr_in

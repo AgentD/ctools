@@ -8,8 +8,6 @@ if( UNIX )
                      src/unix/threadpool.c
                      src/unix/fdstream.c
                      src/unix/tcpserver.c
-                     src/unix/udpstream.c
-                     src/unix/udpserver.c
                      src/unix/packetserver.c
                      src/unix/iostream.c )
 elseif( WIN32 )
@@ -23,8 +21,6 @@ elseif( WIN32 )
                      src/W32/sockstream.c
                      src/W32/pipestream.c
                      src/W32/tcpserver.c
-                     src/W32/udpstream.c
-                     src/W32/udpserver.c
                      src/W32/packetserver.c
                      src/W32/iostream.c )
 endif( )

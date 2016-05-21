@@ -26,7 +26,7 @@
 /**
  * \file tl_iostream.h
  *
- * \brief Contains an abstract data type for streamed or packetized I/O
+ * \brief Contains an abstract data type for byte streamed based I/O
  */
 #ifndef TOOL_IOSTREAM_H
 #define TOOL_IOSTREAM_H
@@ -43,12 +43,12 @@
  * a pipe, et cetera. While some implementations may use sender and receiver
  * addresses, (e.g. IP and port number), the tl_iostream itself has no concept
  * of addresses. It only abstracts end-to-end communication. Address
- * multiplexing is handled by the backend that instanciates tl_iostream
+ * multiplexing is handled by the backend that instantiates tl_iostream
  * implementations.
  *
  * The stream interface itself is only concerned with reading and writing
  * chunks of data. A number of helper functions exist for enhancing the
- * functionality of abastract streams:
+ * functionality of abstract streams:
  * \li \ref tl_iostream_write_string
  * \li \ref tl_iostream_write_blob
  * \li \ref tl_iostream_read_blob
@@ -78,9 +78,6 @@ typedef enum
     TL_STREAM_TYPE_PIPE = 0x0000,   /**< \brief The stream is a pipe */
     TL_STREAM_TYPE_FILE = 0x0001,   /**< \brief The stream is a file */
     TL_STREAM_TYPE_SOCK = 0x0002,   /**< \brief The stream is a socket */
-
-    /** \brief The stream is a wrapper for a demultiplexed UDP socket */
-    TL_STREAM_TYPE_UDPBUF = 0x0003,
 
     TL_STREAM_UDP = 0x0100,         /**< \brief Set for UDP sockets */
     TL_STREAM_TCP = 0x0200          /**< \brief Set for TCP sockets */

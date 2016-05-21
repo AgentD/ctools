@@ -37,10 +37,6 @@
     static volatile int refcount = 0;
 #endif
 
-CRITICAL_SECTION udp_server_mutex;
-
-
-
 int errno_to_fs( int code )
 {
     switch( code )
@@ -96,8 +92,6 @@ int winsock_acquire( void )
         return 1;
 #endif
 
-    InitializeCriticalSection( &udp_server_mutex );
-
     return WSAStartup( version, &data )==0;
 }
 
@@ -109,7 +103,6 @@ void winsock_release( void )
     if( __sync_fetch_and_sub( &refcount, 1 )==1 )
 #endif
     {
-        DeleteCriticalSection( &udp_server_mutex );
         WSACleanup( );
     }
 }

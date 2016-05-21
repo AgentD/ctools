@@ -229,7 +229,6 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
     switch( addr->transport )
     {
     case TL_TCP: server = tcp_server_create( sockfd, backlog ); break;
-    case TL_UDP: server = udp_server_create( sockfd );          break;
     default:     server = NULL;                                 break;
     }
 
@@ -283,18 +282,12 @@ fail:
 int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 {
     sockstream* sock = (sockstream*)stream;
-    udp_stream* udp = (udp_stream*)stream;
     unsigned char buffer[ 64 ];
     int len;
 
     assert( stream && addr );
 
-    if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_UDPBUF )
-    {
-        addr->transport = TL_UDP;
-        return decode_sockaddr_in( udp->address, udp->addrlen, addr );
-    }
-    else if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
+    if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
     {
         addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
         len = sizeof(buffer);
@@ -309,24 +302,13 @@ int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
 {
     sockstream* sock = (sockstream*)stream;
-    udp_stream* udp = (udp_stream*)stream;
     unsigned char buffer[ 64 ];
     int len = sizeof(buffer);
     int status;
 
     assert( stream && addr );
 
-    if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_UDPBUF )
-    {
-        addr->transport = TL_UDP;
-
-        tl_monitor_lock( &(udp->parent->monitor), 0 );
-        status = getsockname( udp->parent->socket, (void*)buffer, &len );
-        tl_monitor_unlock( &(udp->parent->monitor) );
-
-        return status==0 && decode_sockaddr_in( buffer, len, addr );
-    }
-    else if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
+    if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
     {
         addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
         status = getsockname( sock->socket, (void*)buffer, &len );

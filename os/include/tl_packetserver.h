@@ -36,9 +36,8 @@
  *
  * \section packetserver The tl_packetserver interface
  *
- * The tl_packetserver interface abstracts stateless, one-to-many
- * communication over an input/output device that sends and receives discrete
- * packets of data and does not have a conecpt of connections.
+ * The tl_packetserver interface abstracts packet based,
+ * one-to-many communication.
  *
  * Examples for an implentation could be a UDP server, an I2C bus, et cetera.
  *
@@ -48,14 +47,6 @@
  * end-to-end byte streams whereas the tl_packetserver has methods for
  * sending and receiving packets and exposes the peer addresses, expecting the
  * code using it to handle packets and addresses propperly.
- *
- * Note that for some tl_packetserver implementations there are also tl_server
- * implementations that emulate connection based communication and handle
- * client demultiplexing internally.
- *
- * A tl_packetserver is prefereable for applications like sending broadcast
- * packets and receiving answers to broadcasts, or implementing protocols
- * that don't need client demultiplexing and are easier to implement that way.
  */
 
 
