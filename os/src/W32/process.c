@@ -172,10 +172,10 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
     if( flags & TL_PIPE_STDOUT ) CloseHandle( outpipe[1] );
     if( flags & TL_PIPE_STDERR ) CloseHandle( errpipe[1] );
     if( flags & TL_PIPE_STDIN  ) CloseHandle( inpipe[0] );
+    this->flags = FLAG_RUNNING;
 out:
     free( wargs );
     free( wfilename );
-    this->flags = FLAG_RUNNING;
     return this;
 procfail:
     if( this->iostream  ) this->iostream->destroy( this->iostream );
