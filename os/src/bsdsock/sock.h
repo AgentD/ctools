@@ -32,6 +32,10 @@
     #include <winsock2.h>
     #include <in6addr.h>
     #include <ws2tcpip.h>
+
+    typedef int ssize_t;
+
+    #define MSG_NOSIGNAL 0
 #else
     #include <sys/types.h>
     #include <sys/socket.h>

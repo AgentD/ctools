@@ -25,15 +25,25 @@
 #define TL_OS_EXPORT
 #include "tl_network.h"
 #include "tl_packetserver.h"
-#include "os.h"
+#include "sock.h"
+
+#if defined(MACHINE_OS_WINDOWS)
+    #include "../W32/os.h"
+#elif defined(MACHINE_OS_UNIX)
+    #include "../unix/os.h"
+#else
+    #error "OS macro undefined"
+#endif
+
 
 
 
 typedef struct
 {
     tl_packetserver super;
-    DWORD timeout;
+    unsigned long timeout;
     SOCKET sockfd;
+    int flags;
 }
 tl_udp_packetserver;
 
@@ -53,53 +63,117 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
     struct sockaddr_storage addrbuf;
     socklen_t addrlen = sizeof(addrbuf);
-    int result;
+    ssize_t result, intr_count = 0;
+    tl_net_addr src;
+    tl_u16 x;
 
     assert( this );
 
     if( actual )
         *actual = 0;
+
+retry:
     if( !wait_for_fd( this->sockfd, this->timeout, 0 ) )
         return TL_ERR_TIMEOUT;
 
-    result = recvfrom(this->sockfd,buffer,size,0,(void*)&addrbuf,&addrlen);
+    result = recvfrom( this->sockfd, buffer, size, MSG_NOSIGNAL,
+                       (void*)&addrbuf, &addrlen );
 
     if( result<0 )
+    {
+#ifdef MACHINE_OS_WINDOWS
         return WSAHandleFuckup( );
+#else
+        if( errno==EINTR && (intr_count++)<3 )
+            goto retry;
+        if( result<0 )
+            return errno_to_fs( errno );
+#endif
+    }
+
+    if( !decode_sockaddr_in( &addrbuf, addrlen, &src ) )
+        return TL_ERR_INTERNAL;
 
     if( address )
     {
-        if( !decode_sockaddr_in( &addrbuf, addrlen, address ) )
-            return TL_ERR_INTERNAL;
+        src.transport = TL_UDP;
+        *((tl_net_addr*)address) = src;
+    }
 
-        ((tl_net_addr*)address)->transport = TL_UDP;
+    if( this->flags & TL_ENFORCE_V6_ONLY )
+    {
+        if( src.net!=TL_IPV6 )
+            goto fail_net;
+
+        x = src.addr.ipv6[7] | src.addr.ipv6[6] | src.addr.ipv6[5] |
+            src.addr.ipv6[4] | src.addr.ipv6[3];
+
+        if( x==0 && src.addr.ipv6[2]==0xFFFF )
+            goto fail_net;
     }
 
     if( actual )
         *actual = result;
     return 0;
+fail_net:
+    if( (intr_count++)<3 )
+        goto retry;
+    return TL_ERR_INTERNAL;
 }
 
 static int udp_send( tl_packetserver* super, const void* buffer,
                      const void* address, size_t size, size_t* actual )
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
+    const tl_net_addr* dst = address;
     struct sockaddr_storage addrbuf;
-    socklen_t addrsize;
+#ifdef MACHINE_OS_WINDOWS
     int result;
+#else
+    ssize_t result, intr_count = 0;
+#endif
+    socklen_t addrsize;
+    tl_u16 x;
 
     assert( this && address );
 
-    if( actual                                           ) *actual = 0;
-    if( !encode_sockaddr( address, &addrbuf, &addrsize ) ) return TL_ERR_ARG;
+    if( actual )
+        *actual = 0;
+
+    if( this->flags & TL_ENFORCE_V6_ONLY )
+    {
+        if( dst->net!=TL_IPV6 )
+            return TL_ERR_NET_ADDR;
+
+        x = dst->addr.ipv6[7] | dst->addr.ipv6[6] | dst->addr.ipv6[5] |
+            dst->addr.ipv6[4] | dst->addr.ipv6[3];
+
+        if( x==0 && dst->addr.ipv6[2]==0xFFFF )
+            return TL_ERR_NET_ADDR;
+    }
+
+    if( !encode_sockaddr( address, &addrbuf, &addrsize ) )
+        return TL_ERR_NET_ADDR;
 
     if( !wait_for_fd( this->sockfd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;
 
-    result = sendto(this->sockfd, buffer, size, 0, (void*)&addrbuf, addrsize);
+#ifndef MACHINE_OS_WINDOWS
+retry:
+#endif
+    result = sendto( this->sockfd, buffer, size, MSG_NOSIGNAL,
+                     (void*)&addrbuf, addrsize );
 
     if( result<0 )
+    {
+#ifdef MACHINE_OS_WINDOWS
         return WSAHandleFuckup( );
+#else
+        if( errno==EINTR && (intr_count++)<3 )
+            goto retry;
+        return errno_to_fs( errno );
+#endif
+    }
 
     if( actual )
         *actual = result;
@@ -111,7 +185,6 @@ static void udp_destroy( tl_packetserver* super )
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
 
     assert( this );
-
     closesocket( this->sockfd );
     free( this );
     winsock_release( );
@@ -144,22 +217,21 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
         return NULL;
 
     /* create socket */
-    if( !winsock_acquire( ) )
-        goto fail;
+    winsock_acquire( );
 
     this->sockfd = create_socket( addr->net, addr->transport );
-
     if( this->sockfd == INVALID_SOCKET )
         goto fail;
 
     if( !set_socket_flags( this->sockfd, addr->net, &flags ) )
-        goto fail;
+        goto failclose;
 
     if( bind( this->sockfd, (void*)&addrbuffer, size ) < 0 )
         goto failclose;
 
     /* initialization */
     this->timeout = 0;
+    this->flags = flags;
     super->destroy = udp_destroy;
     super->send = udp_send;
     super->receive = udp_receive;
@@ -172,4 +244,11 @@ fail:
     winsock_release( );
     return NULL;
 }
+
+#ifdef MACHINE_OS_UNIX
+int tl_unix_packetserver_fd( tl_packetserver* srv )
+{
+    return ((tl_udp_packetserver*)srv)->sockfd;
+}
+#endif
 

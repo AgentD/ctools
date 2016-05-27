@@ -1,6 +1,7 @@
 set( CTOOLS_BSDSOCK src/bsdsock/sock.c
                     src/bsdsock/network.c
-                    src/bsdsock/tcpserver.c )
+                    src/bsdsock/tcpserver.c
+                    src/bsdsock/packetserver.c )
 
 if( UNIX )
   set( CTOOLS_SYSDEP src/unix/os.c
@@ -14,7 +15,6 @@ if( UNIX )
                      src/unix/mutex.c
                      src/unix/threadpool.c
                      src/unix/fdstream.c
-                     src/unix/packetserver.c
                      src/unix/iostream.c
                      ${CTOOLS_BSDSOCK} )
 elseif( WIN32 )
@@ -30,7 +30,6 @@ elseif( WIN32 )
                      src/W32/threadpool.c
                      src/W32/sockstream.c
                      src/W32/pipestream.c
-                     src/W32/packetserver.c
                      src/W32/iostream.c
                      ${CTOOLS_BSDSOCK} )
 endif( )
