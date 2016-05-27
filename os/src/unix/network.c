@@ -126,7 +126,7 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
     if( sockfd < 0 )
         return NULL;
 
-    if( !set_socket_flags( sockfd, addr->net, flags ) )
+    if( !set_socket_flags( sockfd, addr->net, &flags ) )
         goto fail;
 
     if( !bind_socket( sockfd, addrbuffer, size ) )
@@ -134,8 +134,8 @@ tl_server* tl_network_create_server( const tl_net_addr* addr,
 
     switch( addr->transport )
     {
-    case TL_TCP: server = tcp_server_create( sockfd, backlog ); break;
-    default:     server = NULL;                                 break;
+    case TL_TCP: server = tcp_server_create( sockfd, backlog, flags ); break;
+    default:     server = NULL;                                        break;
     }
 
     if( !server )
@@ -158,7 +158,7 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer, int flags )
     if( sockfd < 0 )
         return NULL;
 
-    if( !set_socket_flags( sockfd, peer->net, flags ) )
+    if( !set_socket_flags( sockfd, peer->net, &flags ) )
         goto fail;
 
     if( connect( sockfd, (void*)addrbuffer, size ) < 0 )

@@ -34,6 +34,7 @@ typedef struct
     tl_packetserver super;
     unsigned long timeout;
     int sockfd;
+    int flags;
 }
 tl_udp_packetserver;
 
@@ -54,6 +55,8 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
     unsigned char addrbuf[ 64 ];
     socklen_t addrlen = sizeof(addrbuf);
     ssize_t result, intr_count = 0;
+    tl_net_addr src;
+    tl_u16 x;
 
     assert( this );
 
@@ -73,31 +76,65 @@ retry:
     if( result<0 )
         return errno_to_fs( errno );
 
+    if( !decode_sockaddr_in( addrbuf, addrlen, &src ) )
+        return TL_ERR_INTERNAL;
+
     if( address )
     {
-        if( !decode_sockaddr_in( addrbuf, addrlen, address ) )
-            return TL_ERR_INTERNAL;
+        src.transport = TL_UDP;
+        *((tl_net_addr*)address) = src;
+    }
 
-        ((tl_net_addr*)address)->transport = TL_UDP;
+    if( this->flags & TL_ENFORCE_V6_ONLY )
+    {
+        if( src.net!=TL_IPV6 )
+            goto fail_net;
+
+        x = src.addr.ipv6[7] | src.addr.ipv6[6] | src.addr.ipv6[5] |
+            src.addr.ipv6[4] | src.addr.ipv6[3];
+
+        if( x==0 && src.addr.ipv6[2]==0xFFFF )
+            goto fail_net;
     }
 
     if( actual )
         *actual = result;
     return 0;
+fail_net:
+    if( (intr_count++)<3 )
+        goto retry;
+    return TL_ERR_INTERNAL;
 }
 
 static int udp_send( tl_packetserver* super, const void* buffer,
                      const void* address, size_t size, size_t* actual )
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
+    const tl_net_addr* dst = address;
     ssize_t result, intr_count = 0;
     unsigned char addrbuf[ 64 ];
     int addrsize;
+    tl_u16 x;
 
     assert( this && address );
 
-    if( actual                                          ) *actual = 0;
-    if( !encode_sockaddr( address, addrbuf, &addrsize ) ) return TL_ERR_ARG;
+    if( actual )
+        *actual = 0;
+
+    if( this->flags & TL_ENFORCE_V6_ONLY )
+    {
+        if( dst->net!=TL_IPV6 )
+            return TL_ERR_NET_ADDR;
+
+        x = dst->addr.ipv6[7] | dst->addr.ipv6[6] | dst->addr.ipv6[5] |
+            dst->addr.ipv6[4] | dst->addr.ipv6[3];
+
+        if( x==0 && dst->addr.ipv6[2]==0xFFFF )
+            return TL_ERR_NET_ADDR;
+    }
+
+    if( !encode_sockaddr( address, addrbuf, &addrsize ) )
+        return TL_ERR_NET_ADDR;
 
     if( !wait_for_fd( this->sockfd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;
@@ -156,7 +193,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( this->sockfd < 0 )
         goto fail;
 
-    if( !set_socket_flags( this->sockfd, addr->net, flags ) )
+    if( !set_socket_flags( this->sockfd, addr->net, &flags ) )
         goto failclose;
 
     if( !bind_socket( this->sockfd, addrbuffer, size ) )
@@ -164,6 +201,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
 
     /* initialization */
     this->timeout = 0;
+    this->flags = flags;
     super->destroy = udp_destroy;
     super->send = udp_send;
     super->receive = udp_receive;

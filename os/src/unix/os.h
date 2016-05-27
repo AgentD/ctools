@@ -76,6 +76,12 @@ struct tl_monitor
     pthread_cond_t cond;
 };
 
+typedef enum
+{
+    TL_ENFORCE_V6_ONLY = 0x1000
+}
+TL_NETWORK_INTERNAL_FLAGS;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -124,7 +130,7 @@ tl_iostream* pipe_stream_create( int readpipe, int writepipe, int flags );
  * \param sockfd  A server socket file descriptor
  * \param backlog The connection backlog for the listen syscall
  */
-tl_server* tcp_server_create( int sockfd, unsigned int backlog );
+tl_server* tcp_server_create( int sockfd, unsigned int backlog, int flags );
 
 /**
  * \brief Convert a tl_net_addr structure to a sockaddr_in
@@ -203,11 +209,13 @@ pid_t wait_pid_ms( pid_t pid, int* status, unsigned long timeout );
  *
  * \param fd       Socket file descriptor
  * \param netlayer A \ref TL_NETWORK_PROTOCOL value
- * \param flags    The flags to apply to the socket
+ * \param flags    Pointer to the flags to apply to the socket. Returns the
+ *                 successfully set flags, possibly combined with
+ *                 \ref TL_NETWORK_INTERNAL_FLAGS values.
  *
  * \return Non-zero on success, zero on failure
  */
-int set_socket_flags( int fd, int netlayer, int flags );
+int set_socket_flags( int fd, int netlayer, int* flags );
 
 #ifdef __cplusplus
 }

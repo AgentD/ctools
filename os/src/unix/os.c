@@ -260,21 +260,21 @@ pid_t wait_pid_ms( pid_t pid, int* status, unsigned long timeout )
     return 0;
 }
 
-int set_socket_flags( int fd, int netlayer, int flags )
+int set_socket_flags( int fd, int netlayer, int* flags )
 {
     int val, level, opt;
 
-    if( flags & (~TL_ALL_NETWORK_FLAGS) )   /* unknown flags? */
+    if( (*flags) & (~TL_ALL_NETWORK_FLAGS) )   /* unknown flags? */
         return 0;
 
-    if( (flags & TL_ALLOW_BROADCAST) && (netlayer == TL_IPV4) )
+    if( ((*flags) & TL_ALLOW_BROADCAST) && (netlayer == TL_IPV4) )
     {
         val = 1;
         if( setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(int)) < 0 )
             return 0;
     }
 
-    if( flags & TL_DONT_FRAGMENT )
+    if( (*flags) & TL_DONT_FRAGMENT )
     {
         switch( netlayer )
         {
@@ -286,12 +286,20 @@ int set_socket_flags( int fd, int netlayer, int flags )
         case TL_IPV4: opt = IP_DONTFRAG;       val = 1; break;
 #endif
         default:
+            *flags &= ~TL_DONT_FRAGMENT;
             goto skip;
         }
         level = netlayer==TL_IPV6 ? IPPROTO_IPV6 : IPPROTO_IP;
-        setsockopt( fd, level, opt, &val, sizeof(int) );
+        if( setsockopt( fd, level, opt, &val, sizeof(int) ) < 0 )
+            *flags &= ~TL_DONT_FRAGMENT;
     }
 skip:
+    if( netlayer == TL_IPV6 )
+    {
+        val = 1;
+        if( setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val)) < 0 )
+            *flags |= TL_ENFORCE_V6_ONLY;
+    }
     return 1;
 }
 

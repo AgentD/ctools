@@ -32,6 +32,7 @@ typedef struct
 {
     tl_server super;
     int socket;
+    int flags;
 }
 tcp_server;
 
@@ -47,7 +48,10 @@ static void tcp_destroy( tl_server* this )
 static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 {
     tcp_server* this = (tcp_server*)super;
-    int peer, flags;
+    struct sockaddr_storage addr;
+    struct sockaddr_in6* v6;
+    int peer, flags, x, y;
+    socklen_t len = sizeof(addr);
 
     assert( this );
 
@@ -56,14 +60,38 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 
     peer = accept( this->socket, NULL, 0 );
 
+    if( this->flags & TL_ENFORCE_V6_ONLY )
+    {
+        if( getpeername( peer, (void*)&addr, &len ) != 0 )
+            goto ignore;
+        if( addr.ss_family != AF_INET6 )
+            goto ignore;
+
+        v6 = (struct sockaddr_in6*)&addr;
+
+        x = v6->sin6_addr.s6_addr[0] | v6->sin6_addr.s6_addr[1] |
+            v6->sin6_addr.s6_addr[2] | v6->sin6_addr.s6_addr[3] |
+            v6->sin6_addr.s6_addr[4] | v6->sin6_addr.s6_addr[5] |
+            v6->sin6_addr.s6_addr[6] | v6->sin6_addr.s6_addr[7] |
+            v6->sin6_addr.s6_addr[8] | v6->sin6_addr.s6_addr[9];
+
+        y = v6->sin6_addr.s6_addr[10] & v6->sin6_addr.s6_addr[11];
+
+        if( x==0 && y==0xFF )
+            goto ignore;
+    }
+
     flags = TL_STREAM_TYPE_SOCK|TL_STREAM_TCP;
 
     return peer<0 ? NULL : pipe_stream_create(peer,peer,flags);
+ignore:
+    close( peer );
+    return NULL;
 }
 
 /****************************************************************************/
 
-tl_server* tcp_server_create( int sockfd, unsigned int backlog )
+tl_server* tcp_server_create( int sockfd, unsigned int backlog, int flags )
 {
     tcp_server* this = calloc( 1, sizeof(tcp_server) );
     tl_server* super = (tl_server*)this;
@@ -74,6 +102,7 @@ tl_server* tcp_server_create( int sockfd, unsigned int backlog )
         return NULL;
     }
 
+    this->flags            = flags;
     this->socket           = sockfd;
     super->destroy         = tcp_destroy;
     super->wait_for_client = tcp_wait_for_client;
