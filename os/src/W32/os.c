@@ -296,7 +296,8 @@ int set_socket_flags( SOCKET fd, int netlayer, int flags )
     if( (flags & TL_ALLOW_BROADCAST) && (netlayer == TL_IPV4) )
     {
         BOOL val = TRUE;
-        setsockopt( fd, SOL_SOCKET, SO_BROADCAST, (void*)&val, sizeof(BOOL) );
+        if( setsockopt(fd,SOL_SOCKET,SO_BROADCAST,(void*)&val,sizeof(BOOL)) )
+            return 0;
     }
 
     if( (flags & TL_DONT_FRAGMENT) && (netlayer == TL_IPV4) )
