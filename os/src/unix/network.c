@@ -116,52 +116,34 @@ int tl_network_resolve_name( const char* hostname, int proto,
 tl_server* tl_network_create_server( const tl_net_addr* addr,
                                      unsigned int backlog, int flags )
 {
-    unsigned char addrbuffer[128];
-    tl_server* server;
-    int sockfd, size;
-
     assert( addr );
 
-    sockfd = create_socket( addr, (void*)addrbuffer, &size );
-    if( sockfd < 0 )
-        return NULL;
+    if( addr->transport == TL_TCP )
+        return tcp_server_create( addr, backlog, flags );
 
-    if( !set_socket_flags( sockfd, addr->net, &flags ) )
-        goto fail;
-
-    if( !bind_socket( sockfd, addrbuffer, size ) )
-        goto fail;
-
-    switch( addr->transport )
-    {
-    case TL_TCP: server = tcp_server_create( sockfd, backlog, flags ); break;
-    default:     server = NULL;                                        break;
-    }
-
-    if( !server )
-        goto fail;
-    return server;
-fail:
-    close( sockfd );
     return NULL;
 }
 
 tl_iostream* tl_network_create_client( const tl_net_addr* peer, int flags )
 {
-    unsigned char addrbuffer[128];
+    struct sockaddr_storage addrbuffer;
     tl_iostream* stream;
-    int sockfd, size;
+    socklen_t size;
+    int sockfd;
 
     assert( peer );
 
-    sockfd = create_socket( peer, (void*)addrbuffer, &size );
+    if( !encode_sockaddr( peer, &addrbuffer, &size ) )
+        return NULL;
+
+    sockfd = create_socket( peer->net, peer->transport );
     if( sockfd < 0 )
         return NULL;
 
     if( !set_socket_flags( sockfd, peer->net, &flags ) )
         goto fail;
 
-    if( connect( sockfd, (void*)addrbuffer, size ) < 0 )
+    if( connect( sockfd, (void*)&addrbuffer, size ) < 0 )
         goto fail;
 
     flags = TL_STREAM_TYPE_SOCK;
@@ -179,18 +161,17 @@ fail:
 int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 {
     fd_stream* fd = (fd_stream*)stream;
-    unsigned char buffer[ 64 ];
-    socklen_t len;
+    struct sockaddr_storage buffer;
+    socklen_t len = sizeof(buffer);
 
     assert( stream && addr );
 
     if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
     {
         addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
-        len = sizeof(buffer);
 
-        if( getpeername( fd->writefd, (void*)buffer, &len )==0 )
-            return decode_sockaddr_in( buffer, len, addr );
+        if( getpeername( fd->writefd, (void*)&buffer, &len )==0 )
+            return decode_sockaddr_in( &buffer, len, addr );
     }
 
     return 0;
@@ -199,17 +180,17 @@ int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
 {
     fd_stream* fd = (fd_stream*)stream;
-    unsigned char buffer[ 64 ];
+    struct sockaddr_storage buffer;
     socklen_t len = sizeof(buffer);
-    int status;
 
     assert( stream && addr );
 
     if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
     {
         addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
-        status = getsockname( fd->writefd, (void*)buffer, &len );
-        return status==0 && decode_sockaddr_in( buffer, len, addr );
+
+        if( getsockname( fd->writefd, (void*)&buffer, &len )==0 )
+            return decode_sockaddr_in( &buffer, len, addr );
     }
 
     return 0;

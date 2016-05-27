@@ -91,22 +91,44 @@ ignore:
 
 /****************************************************************************/
 
-tl_server* tcp_server_create( int sockfd, unsigned int backlog, int flags )
+tl_server* tcp_server_create( const tl_net_addr* addr, unsigned int backlog,
+                              int flags )
 {
-    tcp_server* this = calloc( 1, sizeof(tcp_server) );
-    tl_server* super = (tl_server*)this;
+    struct sockaddr_storage addrbuffer;
+    tcp_server* this;
+    tl_server* super;
+    socklen_t size;
+    int sockfd;
+
+    if( !encode_sockaddr( addr, &addrbuffer, &size ) )
+        return NULL;
+
+    sockfd = create_socket( addr->net, addr->transport );
+    if( sockfd < 0 )
+        return NULL;
+
+    if( !set_socket_flags( sockfd, addr->net, &flags ) )
+        goto fail;
+
+    if( bind( sockfd, (void*)&addrbuffer, size ) < 0 )
+        goto fail;
 
     if( listen( sockfd, backlog ) < 0 )
-    {
-        free( this );
-        return NULL;
-    }
+        goto fail;
+
+    this = calloc( 1, sizeof(tcp_server) );
+    super = (tl_server*)this;
+    if( !this )
+        goto fail;
 
     this->flags            = flags;
     this->socket           = sockfd;
     super->destroy         = tcp_destroy;
     super->wait_for_client = tcp_wait_for_client;
     return super;
+fail:
+    close( sockfd );
+    return NULL;
 }
 
 int tl_unix_server_fd( tl_server* srv )

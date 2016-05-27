@@ -63,20 +63,47 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 
 /****************************************************************************/
 
-tl_server* tcp_server_create( SOCKET sockfd, unsigned int backlog )
+tl_server* tcp_server_create( const tl_net_addr* addr,
+                              unsigned int backlog, int flags )
 {
-    tcp_server* this = calloc( 1, sizeof(tcp_server) );
-    tl_server* super = (tl_server*)this;
+    struct sockaddr_storage addrbuffer;
+    tcp_server* this;
+    tl_server* super;
+    socklen_t size;
+    SOCKET sockfd;
+
+    winsock_acquire( );
+
+    if( !encode_sockaddr( addr, (void*)&addrbuffer, &size ) )
+        goto fail;
+
+    sockfd = create_socket( addr->net, addr->transport );
+    if( sockfd == INVALID_SOCKET )
+        goto fail;
+
+    if( !set_socket_flags( sockfd, addr->net, flags ) )
+        goto failclose;
+
+    if( bind( sockfd, (void*)&addrbuffer, size ) < 0 )
+        goto failclose;
 
     if( listen( sockfd, backlog ) == SOCKET_ERROR )
-    {
-        free( this );
-        return NULL;
-    }
+        goto failclose;
+
+    this = calloc( 1, sizeof(tcp_server) );
+    super = (tl_server*)this;
+
+    if( !this )
+        goto failclose;
 
     this->socket           = sockfd;
     super->destroy         = tcp_destroy;
     super->wait_for_client = tcp_wait_for_client;
     return super;
+failclose:
+    closesocket( sockfd );
+fail:
+    winsock_release( );
+    return NULL;
 }
 

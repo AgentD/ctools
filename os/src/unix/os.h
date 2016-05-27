@@ -28,6 +28,7 @@
 
 
 #include "tl_iostream.h"
+#include "tl_network.h"
 #include "tl_thread.h"
 #include "tl_server.h"
 #include "tl_string.h"
@@ -124,13 +125,9 @@ void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 );
  */
 tl_iostream* pipe_stream_create( int readpipe, int writepipe, int flags );
 
-/**
- * \brief Create a tl_server implementation instance that offers a TCP server
- *
- * \param sockfd  A server socket file descriptor
- * \param backlog The connection backlog for the listen syscall
- */
-tl_server* tcp_server_create( int sockfd, unsigned int backlog, int flags );
+/** \brief tl_network_create_server implementation for TCP */
+tl_server* tcp_server_create( const tl_net_addr* addr,
+                              unsigned int backlog, int flags );
 
 /**
  * \brief Convert a tl_net_addr structure to a sockaddr_in
@@ -142,30 +139,18 @@ tl_server* tcp_server_create( int sockfd, unsigned int backlog, int flags );
  *
  * \return Non-zero on success, zero on failure
  */
-int encode_sockaddr( const tl_net_addr* peer, void* addrbuffer, int* size );
+int encode_sockaddr( const tl_net_addr* peer,
+                     struct sockaddr_storage* addrbuffer, socklen_t* size );
 
 /**
  * \brief Create a socket
  *
- * \param peer       The address to bind to
- * \param addrbuffer A pointer to a buffer to write the sockaddr_in structure
- *                   data to
- * \param size       Returns the number of bytes written to the addrbuffer
+ * \param net       A \ref TL_NETWORK_PROTOCOL enumerator vaule
+ * \param transport A \ref TL_TRANSPORT_PROTOCOL enumerator vaule
  *
  * \return A socket file descriptor on success, -1 on failrue
  */
-int create_socket( const tl_net_addr* peer, void* addrbuffer, int* size );
-
-/**
- * \brief Bind a socket to an address
- *
- * \param sockfd   The socket file descriptor
- * \param address  A pointer to the address structure
- * \param addrsize The size of the address structure
- *
- * \return Non-zero on success, zero on failure
- */
-int bind_socket( int sockfd, void* address, int addrsize );
+int create_socket( int net, int transport );
 
 /**
  * \brief Decode a sockaddr_in or sockaddr_in6 structure to a tl_net_addr
@@ -176,7 +161,8 @@ int bind_socket( int sockfd, void* address, int addrsize );
  *
  * \return Non-zero on success, zero on failure
  */
-int decode_sockaddr_in( const void* addr, size_t len, tl_net_addr* out );
+int decode_sockaddr_in( const struct sockaddr_storage* addr, socklen_t len,
+                        tl_net_addr* out );
 
 /** \brief Initialize a monitor object */
 int tl_monitor_init( tl_monitor* monitor );

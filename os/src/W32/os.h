@@ -28,6 +28,7 @@
 
 
 #include "tl_iostream.h"
+#include "tl_network.h"
 #include "tl_thread.h"
 #include "tl_server.h"
 #include "tl_string.h"
@@ -105,25 +106,25 @@ void winsock_release( void );
 /** \brief Create a stream operating on a winsock socket */
 tl_iostream* sock_stream_create( SOCKET sockfd, int flags );
 
-/** \brief Create a winsock based TCP server implementation */
-tl_server* tcp_server_create( SOCKET sockfd, unsigned int backlog );
+/** \brief tl_network_create_server implementation for TCP */
+tl_server* tcp_server_create( const tl_net_addr* addr,
+                              unsigned int backlog, int flags );
 
 int wait_for_socket( SOCKET socket, unsigned long timeout, int write );
 
-void convert_ipv6( const IN6_ADDR* v6, tl_net_addr* addr );
+void convert_ipv6( const struct in6_addr* v6, tl_net_addr* addr );
 
-void convert_in6addr( const tl_net_addr* addr, IN6_ADDR* v6 );
+void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 );
 
-SOCKET create_socket( const tl_net_addr* peer, void* addrbuffer,
-                      int* size );
+SOCKET create_socket( int net, int transport );
 
 int WSAHandleFuckup( void );
 
-int encode_sockaddr( const tl_net_addr* peer, void* addrbuffer, int* size );
+int encode_sockaddr( const tl_net_addr* peer,
+                     struct sockaddr_storage* addrbuffer, socklen_t* size );
 
-int decode_sockaddr_in( const void* addr, size_t len, tl_net_addr* out );
-
-int bind_socket( SOCKET sockfd, void* addrbuffer, int size );
+int decode_sockaddr_in( const struct sockaddr_storage* addr, socklen_t len,
+                        tl_net_addr* out );
 
 /** \brief Initialize a monitor object */
 int tl_monitor_init( tl_monitor* monitor );

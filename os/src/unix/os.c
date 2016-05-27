@@ -117,10 +117,11 @@ void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 )
     v6->s6_addr[15] =  addr->addr.ipv6[0]     & 0xFF;
 }
 
-int encode_sockaddr( const tl_net_addr* peer, void* addrbuffer, int* size )
+int encode_sockaddr( const tl_net_addr* peer,
+                     struct sockaddr_storage* addrbuffer, socklen_t* size )
 {
-    struct sockaddr_in6* v6addr = addrbuffer;
-    struct sockaddr_in* v4addr = addrbuffer;
+    struct sockaddr_in6* v6addr = (struct sockaddr_in6*)addrbuffer;
+    struct sockaddr_in* v4addr = (struct sockaddr_in*)addrbuffer;
 
     if( !peer )
         return 0;
@@ -148,21 +149,18 @@ int encode_sockaddr( const tl_net_addr* peer, void* addrbuffer, int* size )
     return 1;
 }
 
-int create_socket( const tl_net_addr* peer, void* addrbuffer, int* size )
+int create_socket( int net, int transport )
 {
     int family, type, proto;
 
-    if( !encode_sockaddr( peer, addrbuffer, size ) )
-        return -1;
-
-    switch( peer->net )
+    switch( net )
     {
-    case TL_IPV4: family = PF_INET;  break;
-    case TL_IPV6: family = PF_INET6; break;
+    case TL_IPV4: family = AF_INET;  break;
+    case TL_IPV6: family = AF_INET6; break;
     default:      return -1;
     }
 
-    switch( peer->transport )
+    switch( transport )
     {
     case TL_TCP: type = SOCK_STREAM; proto = IPPROTO_TCP; break;
     case TL_UDP: type = SOCK_DGRAM;  proto = IPPROTO_UDP; break;
@@ -172,19 +170,11 @@ int create_socket( const tl_net_addr* peer, void* addrbuffer, int* size )
     return socket( family, type, proto );
 }
 
-int bind_socket( int sockfd, void* address, int addrsize )
+int decode_sockaddr_in( const struct sockaddr_storage* addr, socklen_t len,
+                        tl_net_addr* out )
 {
-    int val;
-    val=1; setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val) );
-    val=1; setsockopt( sockfd, SOL_SOCKET, SO_REUSEPORT, &val, sizeof(val) );
-
-    return bind( sockfd, address, addrsize ) >= 0;
-}
-
-int decode_sockaddr_in( const void* addr, size_t len, tl_net_addr* out )
-{
-    const struct sockaddr_in6* ipv6 = addr;
-    const struct sockaddr_in* ipv4 = addr;
+    const struct sockaddr_in6* ipv6 = (const void*)addr;
+    const struct sockaddr_in* ipv4 = (const void*)addr;
 
     if( len==sizeof(struct sockaddr_in) && ipv4->sin_family==AF_INET )
     {
@@ -266,6 +256,9 @@ int set_socket_flags( int fd, int netlayer, int* flags )
 
     if( (*flags) & (~TL_ALL_NETWORK_FLAGS) )   /* unknown flags? */
         return 0;
+
+    val = 1; setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val) );
+    val = 1; setsockopt( fd, SOL_SOCKET, SO_REUSEPORT, &val, sizeof(val) );
 
     if( ((*flags) & TL_ALLOW_BROADCAST) && (netlayer == TL_IPV4) )
     {

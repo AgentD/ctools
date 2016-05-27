@@ -52,7 +52,7 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
                         size_t size, size_t* actual )
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
-    unsigned char addrbuf[ 64 ];
+    struct sockaddr_storage addrbuf;
     socklen_t addrlen = sizeof(addrbuf);
     ssize_t result, intr_count = 0;
     tl_net_addr src;
@@ -68,7 +68,7 @@ retry:
         return TL_ERR_TIMEOUT;
 
     result = recvfrom( this->sockfd, buffer, size, MSG_NOSIGNAL,
-                       (void*)addrbuf, &addrlen );
+                       (void*)&addrbuf, &addrlen );
 
     if( result<0 && errno==EINTR && (intr_count++)<3 )
         goto retry;
@@ -76,7 +76,7 @@ retry:
     if( result<0 )
         return errno_to_fs( errno );
 
-    if( !decode_sockaddr_in( addrbuf, addrlen, &src ) )
+    if( !decode_sockaddr_in( &addrbuf, addrlen, &src ) )
         return TL_ERR_INTERNAL;
 
     if( address )
@@ -111,9 +111,9 @@ static int udp_send( tl_packetserver* super, const void* buffer,
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
     const tl_net_addr* dst = address;
+    struct sockaddr_storage addrbuf;
     ssize_t result, intr_count = 0;
-    unsigned char addrbuf[ 64 ];
-    int addrsize;
+    socklen_t addrsize;
     tl_u16 x;
 
     assert( this && address );
@@ -133,7 +133,7 @@ static int udp_send( tl_packetserver* super, const void* buffer,
             return TL_ERR_NET_ADDR;
     }
 
-    if( !encode_sockaddr( address, addrbuf, &addrsize ) )
+    if( !encode_sockaddr( address, &addrbuf, &addrsize ) )
         return TL_ERR_NET_ADDR;
 
     if( !wait_for_fd( this->sockfd, this->timeout, 1 ) )
@@ -141,7 +141,7 @@ static int udp_send( tl_packetserver* super, const void* buffer,
 
 retry:
     result = sendto( this->sockfd, buffer, size, MSG_NOSIGNAL,
-                     (void*)addrbuf, addrsize );
+                     (void*)&addrbuf, addrsize );
 
     if( result<0 && errno==EINTR && (intr_count++)<3 )
         goto retry;
@@ -167,10 +167,10 @@ static void udp_destroy( tl_packetserver* super )
 tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
                                                   int flags )
 {
-    unsigned char addrbuffer[64];
+    struct sockaddr_storage addrbuffer;
     tl_udp_packetserver* this;
     tl_packetserver* super;
-    int size;
+    socklen_t size;
 
     assert( addr );
 
@@ -178,7 +178,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( addr->transport!=TL_UDP )
         return NULL;
 
-    if( addr->net!=TL_IPV4 && addr->net!=TL_IPV6 )
+    if( !encode_sockaddr( addr, &addrbuffer, &size ) )
         return NULL;
 
     /* allocate structure */
@@ -189,14 +189,14 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
         return NULL;
 
     /* create socket */
-    this->sockfd = create_socket( addr, addrbuffer, &size );
+    this->sockfd = create_socket( addr->net, addr->transport );
     if( this->sockfd < 0 )
         goto fail;
 
     if( !set_socket_flags( this->sockfd, addr->net, &flags ) )
         goto failclose;
 
-    if( !bind_socket( this->sockfd, addrbuffer, size ) )
+    if( bind( this->sockfd, (void*)&addrbuffer, size ) < 0 )
         goto failclose;
 
     /* initialization */

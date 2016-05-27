@@ -51,7 +51,7 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
                         size_t size, size_t* actual )
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
-    unsigned char addrbuf[ 64 ];
+    struct sockaddr_storage addrbuf;
     socklen_t addrlen = sizeof(addrbuf);
     int result;
 
@@ -62,14 +62,14 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
     if( !wait_for_socket( this->sockfd, this->timeout, 0 ) )
         return TL_ERR_TIMEOUT;
 
-    result = recvfrom(this->sockfd,buffer,size,0,(void*)addrbuf,&addrlen);
+    result = recvfrom(this->sockfd,buffer,size,0,(void*)&addrbuf,&addrlen);
 
     if( result<0 )
         return WSAHandleFuckup( );
 
     if( address )
     {
-        if( !decode_sockaddr_in( addrbuf, addrlen, address ) )
+        if( !decode_sockaddr_in( &addrbuf, addrlen, address ) )
             return TL_ERR_INTERNAL;
 
         ((tl_net_addr*)address)->transport = TL_UDP;
@@ -84,18 +84,19 @@ static int udp_send( tl_packetserver* super, const void* buffer,
                      const void* address, size_t size, size_t* actual )
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
-    unsigned char addrbuf[ 64 ];
-    int result, addrsize;
+    struct sockaddr_storage addrbuf;
+    socklen_t addrsize;
+    int result;
 
     assert( this && address );
 
-    if( actual                                          ) *actual = 0;
-    if( !encode_sockaddr( address, addrbuf, &addrsize ) ) return TL_ERR_ARG;
+    if( actual                                           ) *actual = 0;
+    if( !encode_sockaddr( address, &addrbuf, &addrsize ) ) return TL_ERR_ARG;
 
     if( !wait_for_socket( this->sockfd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;
 
-    result = sendto(this->sockfd, buffer, size, 0, (void*)addrbuf, addrsize);
+    result = sendto(this->sockfd, buffer, size, 0, (void*)&addrbuf, addrsize);
 
     if( result<0 )
         return WSAHandleFuckup( );
@@ -121,10 +122,10 @@ static void udp_destroy( tl_packetserver* super )
 tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
                                                   int flags )
 {
-    unsigned char addrbuffer[64];
+    struct sockaddr_storage addrbuffer;
     tl_udp_packetserver* this;
     tl_packetserver* super;
-    int size;
+    socklen_t size;
 
     assert( addr );
 
@@ -132,7 +133,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( addr->transport!=TL_UDP )
         return NULL;
 
-    if( addr->net!=TL_IPV4 && addr->net!=TL_IPV6 )
+    if( !encode_sockaddr( addr, &addrbuffer, &size ) )
         return NULL;
 
     /* allocate structure */
@@ -146,7 +147,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( !winsock_acquire( ) )
         goto fail;
 
-    this->sockfd = create_socket( addr, addrbuffer, &size );
+    this->sockfd = create_socket( addr->net, addr->transport );
 
     if( this->sockfd == INVALID_SOCKET )
         goto fail;
@@ -154,7 +155,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( !set_socket_flags( this->sockfd, addr->net, flags ) )
         goto fail;
 
-    if( !bind_socket( this->sockfd, addrbuffer, size ) )
+    if( bind( this->sockfd, (void*)&addrbuffer, size ) < 0 )
         goto failclose;
 
     /* initialization */

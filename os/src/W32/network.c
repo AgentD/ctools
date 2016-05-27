@@ -207,63 +207,37 @@ out:
 tl_server* tl_network_create_server( const tl_net_addr* addr,
                                      unsigned int backlog, int flags )
 {
-    unsigned char addrbuffer[128];
-    tl_server* server;
-    SOCKET sockfd;
-    int size;
-
     assert( addr );
 
-    winsock_acquire( );
+    if( addr->transport == TL_TCP )
+        return tcp_server_create( addr, backlog, flags );
 
-    sockfd = create_socket( addr, (void*)addrbuffer, &size );
-    if( sockfd == INVALID_SOCKET )
-        goto fail;
-
-    if( !set_socket_flags( sockfd, addr->net, flags ) )
-        goto failclose;
-
-    if( !bind_socket( sockfd, addrbuffer, size ) )
-        goto failclose;
-
-    switch( addr->transport )
-    {
-    case TL_TCP: server = tcp_server_create( sockfd, backlog ); break;
-    default:     server = NULL;                                 break;
-    }
-
-    if( server )
-        return server;
-failclose:
-    closesocket( sockfd );
-fail:
-    winsock_release( );
     return NULL;
 }
 
 tl_iostream* tl_network_create_client( const tl_net_addr* peer, int flags )
 {
-    unsigned char addrbuffer[128];
+    struct sockaddr_storage addrbuffer;
     tl_iostream* stream;
+    socklen_t size;
     SOCKET sockfd;
-    int size;
 
     assert( peer );
 
     winsock_acquire( );
 
-    sockfd = create_socket( peer, addrbuffer, &size );
+    if( !encode_sockaddr( peer, (void*)&addrbuffer, &size ) )
+        goto fail_release;
+
+    sockfd = create_socket( peer->net, peer->transport );
 
     if( sockfd == INVALID_SOCKET )
-    {
-        winsock_release( );
-        return NULL;
-    }
+        goto fail_release;
 
     if( !set_socket_flags( sockfd, peer->net, flags ) )
         goto fail;
 
-    if( connect( sockfd, (void*)addrbuffer, size ) == SOCKET_ERROR )
+    if( connect( sockfd, (void*)&addrbuffer, size ) == SOCKET_ERROR )
         goto fail;
 
     flags = TL_STREAM_TYPE_SOCK;
@@ -275,6 +249,7 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer, int flags )
     return stream;
 fail:
     closesocket( sockfd );
+fail_release:
     winsock_release( );
     return NULL;
 }
@@ -282,18 +257,17 @@ fail:
 int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 {
     sockstream* sock = (sockstream*)stream;
-    unsigned char buffer[ 64 ];
-    int len;
+    struct sockaddr_storage buffer;
+    socklen_t len = sizeof(buffer);
 
     assert( stream && addr );
 
     if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
     {
         addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
-        len = sizeof(buffer);
 
-        if( getpeername( sock->socket, (void*)buffer, &len )==0 )
-            return decode_sockaddr_in( buffer, len, addr );
+        if( getpeername( sock->socket, (void*)&buffer, &len )==0 )
+            return decode_sockaddr_in( &buffer, len, addr );
     }
 
     return 0;
@@ -302,17 +276,17 @@ int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
 {
     sockstream* sock = (sockstream*)stream;
-    unsigned char buffer[ 64 ];
-    int len = sizeof(buffer);
-    int status;
+    struct sockaddr_storage buffer;
+    socklen_t len = sizeof(buffer);
 
     assert( stream && addr );
 
     if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
     {
         addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
-        status = getsockname( sock->socket, (void*)buffer, &len );
-        return status==0 && decode_sockaddr_in( buffer, len, addr );
+
+        if( getsockname( sock->socket, (void*)&buffer, &len )==0 )
+            return decode_sockaddr_in( &buffer, len, addr );
     }
 
     return 0;
