@@ -24,16 +24,7 @@
  */
 #define TL_OS_EXPORT
 #include "sock.h"
-
-#if defined(MACHINE_OS_WINDOWS)
-    #include "../W32/os.h"
-#elif defined(MACHINE_OS_UNIX)
-    #include "../unix/os.h"
-#else
-    #error "OS macro undefined"
-#endif
-
-
+#include "os.h"
 
 tl_server* tl_network_create_server( const tl_net_addr* addr,
                                      unsigned int backlog, int flags )

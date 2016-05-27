@@ -26,28 +26,7 @@
 #include "tl_network.h"
 #include "tl_packetserver.h"
 #include "sock.h"
-
-#if defined(MACHINE_OS_WINDOWS)
-    #include "../W32/os.h"
-#elif defined(MACHINE_OS_UNIX)
-    #include "../unix/os.h"
-#else
-    #error "OS macro undefined"
-#endif
-
-
-
-
-typedef struct
-{
-    tl_packetserver super;
-    unsigned long timeout;
-    SOCKET sockfd;
-    int flags;
-}
-tl_udp_packetserver;
-
-
+#include "os.h"
 
 static void udp_set_timeout( tl_packetserver* super, unsigned int timeout )
 {
@@ -244,11 +223,4 @@ fail:
     winsock_release( );
     return NULL;
 }
-
-#ifdef MACHINE_OS_UNIX
-int tl_unix_packetserver_fd( tl_packetserver* srv )
-{
-    return ((tl_udp_packetserver*)srv)->sockfd;
-}
-#endif
 

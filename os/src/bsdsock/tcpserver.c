@@ -25,26 +25,7 @@
 #define TL_OS_EXPORT
 #include "tl_server.h"
 #include "sock.h"
-
-#if defined(MACHINE_OS_WINDOWS)
-    #include "../W32/os.h"
-#elif defined(MACHINE_OS_UNIX)
-    #include "../unix/os.h"
-#else
-    #error "OS macro undefined"
-#endif
-
-
-
-typedef struct
-{
-    tl_server super;
-    SOCKET socket;
-    int flags;
-}
-tcp_server;
-
-
+#include "os.h"
 
 static void tcp_destroy( tl_server* this )
 {
@@ -144,11 +125,4 @@ fail:
     winsock_release( );
     return NULL;
 }
-
-#ifdef MACHINE_OS_UNIX
-int tl_unix_server_fd( tl_server* srv )
-{
-    return ((tcp_server*)srv)->socket;
-}
-#endif
 

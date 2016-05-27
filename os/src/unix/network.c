@@ -144,3 +144,13 @@ int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
     return 0;
 }
 
+int tl_unix_packetserver_fd( tl_packetserver* srv )
+{
+    return ((tl_udp_packetserver*)srv)->sockfd;
+}
+
+int tl_unix_server_fd( tl_server* srv )
+{
+    return ((tcp_server*)srv)->socket;
+}
+

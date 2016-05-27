@@ -45,14 +45,31 @@
 
     typedef int SOCKET;
 
-    #define winsock_acquire( )
-    #define winsock_release( )
     #define closesocket close
     #define INVALID_SOCKET (-1)
     #define SOCKET_ERROR (-1)
 #endif
 
+#include "tl_packetserver.h"
 #include "tl_network.h"
+#include "tl_server.h"
+
+typedef struct
+{
+    tl_server super;
+    SOCKET socket;
+    int flags;
+}
+tcp_server;
+
+typedef struct
+{
+    tl_packetserver super;
+    unsigned long timeout;
+    SOCKET sockfd;
+    int flags;
+}
+tl_udp_packetserver;
 
 typedef enum
 {
