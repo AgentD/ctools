@@ -137,6 +137,10 @@ SOCKET create_socket( int net, int transport );
 tl_server* tcp_server_create( const tl_net_addr* addr,
                               unsigned int backlog, int flags );
 
+/** \brief Perform actual name resolution */
+int resolve_name( const char* hostname, int proto,
+                  tl_net_addr* addr, size_t count );
+
 #ifdef __cplusplus
 }
 #endif

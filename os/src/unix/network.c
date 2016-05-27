@@ -28,10 +28,8 @@
 int tl_network_resolve_name( const char* hostname, int proto,
                              tl_net_addr* addr, size_t count )
 {
-    struct addrinfo hints, *info, *p;
     struct in6_addr addr6;
     struct in_addr addr4;
-    size_t i = 0;
 
     assert( hostname );
 
@@ -61,49 +59,7 @@ int tl_network_resolve_name( const char* hostname, int proto,
         return 1;
     }
 
-    /* try to resolve hostname */
-    proto =  (proto==TL_IPV6) ? AF_INET6 : 
-            ((proto==TL_IPV4) ? AF_INET : AF_UNSPEC);
-
-    memset( &hints, 0, sizeof(hints) );
-    hints.ai_family = proto;
-
-    if( getaddrinfo( hostname, NULL, &hints, &info )!=0 )
-        return 0;
-
-    for( p=info; p!=NULL; p=p->ai_next )
-    {
-        if( p->ai_family!=AF_INET && p->ai_family!=AF_INET6 )
-            continue;
-
-        if( proto!=AF_UNSPEC && p->ai_family!=proto )
-            continue;
-
-        if( addr && i<count )
-        {
-            if( p->ai_family==AF_INET6 )
-            {
-                addr6 = ((struct sockaddr_in6*)p->ai_addr)->sin6_addr;
-                convert_ipv6( &addr6, addr );
-            }
-            else
-            {
-                addr4 = ((struct sockaddr_in*)p->ai_addr)->sin_addr;
-                addr->addr.ipv4 = ntohl( addr4.s_addr );
-            }
-
-            addr->net = p->ai_family==AF_INET6 ? TL_IPV6 : TL_IPV4;
-            ++i;
-            ++addr;
-        }
-        else if( !addr )
-        {
-            ++i;
-        }
-    }
-
-    freeaddrinfo( info );
-    return i;
+    return resolve_name( hostname, proto, addr, count );
 }
 
 int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
