@@ -70,6 +70,9 @@ static int run_test( int net, int transport, int aport, int bport )
     if( !b )
         return 0;
 
+    a->set_timeout( a, 1500 );
+    b->set_timeout( b, 1500 );
+
     /* test transmissions */
     for( i=0; i<20; ++i )
     {

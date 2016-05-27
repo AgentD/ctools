@@ -54,6 +54,11 @@ static int run_test( tl_net_addr* peer, tl_net_addr* accept )
     if( !(b_down = server->wait_for_client( server, 1000 )) )
         return 0;
 
+    a->set_timeout( a, 1500 );
+    b->set_timeout( b, 1500 );
+    a_down->set_timeout( a_down, 1500 );
+    b_down->set_timeout( b_down, 1500 );
+
     if( !test_transmission( a, a_down, "Hello From A" ) ) return 0;
     if( !test_transmission( b, b_down, "Hello From B" ) ) return 0;
     if( !test_transmission( a_down, a, "Greetings For A" ) ) return 0;

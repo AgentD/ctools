@@ -31,6 +31,9 @@ int main( void )
     if( !pserver2 )
         return EXIT_FAILURE;
 
+    pserver1->set_timeout( pserver1, 1500 );
+    pserver2->set_timeout( pserver2, 1500 );
+
     /* send broadcast from first server */
     if( !tl_network_get_special_address( &addr, TL_BROADCAST, TL_IPV4 ) )
         return EXIT_FAILURE;

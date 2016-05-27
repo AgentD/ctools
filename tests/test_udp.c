@@ -24,6 +24,8 @@ int main( void )
     if( !pserver )
         return EXIT_FAILURE;
 
+    pserver->set_timeout( pserver, 1500 );
+
     /* create client */
     if( !tl_network_resolve_name( "127.0.0.1", TL_IPV4, &addr, 1 ) )
         return EXIT_FAILURE;
@@ -34,6 +36,8 @@ int main( void )
     str = tl_network_create_client( &addr, 0 );
     if( !str )
         return EXIT_FAILURE;
+
+    str->set_timeout( str, 1500 );
 
     /* send packet to server */
     if( str->write( str, "Hello", 5, &val )!=0 || val!=5 )
