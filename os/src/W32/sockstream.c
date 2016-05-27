@@ -56,7 +56,7 @@ static int sockstream_write_raw( tl_iostream* super, const void* buffer,
     if( actual ) *actual = 0;
     if( !size  ) return 0;
 
-    if( !wait_for_socket(this->socket, this->timeout, 1) )
+    if( !wait_for_fd(this->socket, this->timeout, 1) )
         return TL_ERR_TIMEOUT;
 
     status = send( ((sockstream*)this)->socket, buffer, size, 0 );
@@ -74,9 +74,9 @@ static int sockstream_read_raw( tl_iostream* super, void* buffer,
 
     assert( this && buffer );
 
-    if( actual                                           ) *actual = 0;
-    if( !size                                            ) return 0;
-    if( !wait_for_socket(this->socket, this->timeout, 0) )
+    if( actual                                       ) *actual = 0;
+    if( !size                                        ) return 0;
+    if( !wait_for_fd(this->socket, this->timeout, 0) )
         return TL_ERR_TIMEOUT;
 
     status = recv( this->socket, buffer, size, 0 );

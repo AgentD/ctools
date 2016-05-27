@@ -59,7 +59,7 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
 
     if( actual )
         *actual = 0;
-    if( !wait_for_socket( this->sockfd, this->timeout, 0 ) )
+    if( !wait_for_fd( this->sockfd, this->timeout, 0 ) )
         return TL_ERR_TIMEOUT;
 
     result = recvfrom(this->sockfd,buffer,size,0,(void*)&addrbuf,&addrlen);
@@ -93,7 +93,7 @@ static int udp_send( tl_packetserver* super, const void* buffer,
     if( actual                                           ) *actual = 0;
     if( !encode_sockaddr( address, &addrbuf, &addrsize ) ) return TL_ERR_ARG;
 
-    if( !wait_for_socket( this->sockfd, this->timeout, 1 ) )
+    if( !wait_for_fd( this->sockfd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;
 
     result = sendto(this->sockfd, buffer, size, 0, (void*)&addrbuf, addrsize);
@@ -152,7 +152,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( this->sockfd == INVALID_SOCKET )
         goto fail;
 
-    if( !set_socket_flags( this->sockfd, addr->net, flags ) )
+    if( !set_socket_flags( this->sockfd, addr->net, &flags ) )
         goto fail;
 
     if( bind( this->sockfd, (void*)&addrbuffer, size ) < 0 )

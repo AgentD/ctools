@@ -22,13 +22,20 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#define TL_OS_EXPORT
 #include "sock.h"
 
 #include <string.h>
 
-
-#if defined(MACHINE_OS_WINDOWS) && !defined(s6_addr)
-    #define s6_addr u.Byte
+#if defined(MACHINE_OS_WINDOWS)
+    #ifndef s6_addr
+        #define s6_addr u.Byte
+    #endif
+    #include "../W32/os.h"
+#elif defined(MACHINE_OS_UNIX)
+    #include "../unix/os.h"
+#else
+    #error "OS macro undefined"
 #endif
 
 

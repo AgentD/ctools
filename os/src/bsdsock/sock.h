@@ -37,13 +37,24 @@
     #include <sys/socket.h>
     #include <netinet/in.h>
     #include <arpa/inet.h>
+    #include <unistd.h>
 
     typedef int SOCKET;
 
+    #define winsock_acquire( )
+    #define winsock_release( )
+    #define closesocket close
     #define INVALID_SOCKET (-1)
+    #define SOCKET_ERROR (-1)
 #endif
 
 #include "tl_network.h"
+
+typedef enum
+{
+    TL_ENFORCE_V6_ONLY = 0x1000
+}
+TL_NETWORK_INTERNAL_FLAGS;
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,6 +111,10 @@ int decode_sockaddr_in( const struct sockaddr_storage* addr, socklen_t len,
  * \return A socket file descriptor on success, -1 on failrue
  */
 SOCKET create_socket( int net, int transport );
+
+/** \brief tl_network_create_server implementation for TCP */
+tl_server* tcp_server_create( const tl_net_addr* addr,
+                              unsigned int backlog, int flags );
 
 #ifdef __cplusplus
 }

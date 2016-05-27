@@ -1,3 +1,7 @@
+set( CTOOLS_BSDSOCK src/bsdsock/sock.c
+                    src/bsdsock/network.c
+                    src/bsdsock/tcpserver.c )
+
 if( UNIX )
   set( CTOOLS_SYSDEP src/unix/os.c
                      src/unix/fs.c
@@ -10,10 +14,9 @@ if( UNIX )
                      src/unix/mutex.c
                      src/unix/threadpool.c
                      src/unix/fdstream.c
-                     src/unix/tcpserver.c
                      src/unix/packetserver.c
                      src/unix/iostream.c
-                     src/bsdsock/sock.c )
+                     ${CTOOLS_BSDSOCK} )
 elseif( WIN32 )
   set( CTOOLS_SYSDEP src/W32/os.c
                      src/W32/fs.c
@@ -27,10 +30,9 @@ elseif( WIN32 )
                      src/W32/threadpool.c
                      src/W32/sockstream.c
                      src/W32/pipestream.c
-                     src/W32/tcpserver.c
                      src/W32/packetserver.c
                      src/W32/iostream.c
-                     src/bsdsock/sock.c )
+                     ${CTOOLS_BSDSOCK} )
 endif( )
 
 add_library( tlos ${TYPE} src/iostream.c

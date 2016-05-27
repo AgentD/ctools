@@ -23,9 +23,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #define TL_OS_EXPORT
-#include "tl_network.h"
-#include "tl_iostream.h"
-#include "tl_blob.h"
 #include "os.h"
 
 int tl_network_resolve_name( const char* hostname, int proto,
@@ -107,51 +104,6 @@ int tl_network_resolve_name( const char* hostname, int proto,
 
     freeaddrinfo( info );
     return i;
-}
-
-tl_server* tl_network_create_server( const tl_net_addr* addr,
-                                     unsigned int backlog, int flags )
-{
-    assert( addr );
-
-    if( addr->transport == TL_TCP )
-        return tcp_server_create( addr, backlog, flags );
-
-    return NULL;
-}
-
-tl_iostream* tl_network_create_client( const tl_net_addr* peer, int flags )
-{
-    struct sockaddr_storage addrbuffer;
-    tl_iostream* stream;
-    socklen_t size;
-    int sockfd;
-
-    assert( peer );
-
-    if( !encode_sockaddr( peer, &addrbuffer, &size ) )
-        return NULL;
-
-    sockfd = create_socket( peer->net, peer->transport );
-    if( sockfd < 0 )
-        return NULL;
-
-    if( !set_socket_flags( sockfd, peer->net, &flags ) )
-        goto fail;
-
-    if( connect( sockfd, (void*)&addrbuffer, size ) < 0 )
-        goto fail;
-
-    flags = TL_STREAM_TYPE_SOCK;
-    flags |= (peer->transport==TL_UDP ? TL_STREAM_UDP : TL_STREAM_TCP);
-
-    if( !(stream = pipe_stream_create( sockfd, sockfd, flags )) )
-        goto fail;
-
-    return stream;
-fail:
-    close( sockfd );
-    return NULL;
 }
 
 int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )

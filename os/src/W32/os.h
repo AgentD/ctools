@@ -101,11 +101,7 @@ void winsock_release( void );
 /** \brief Create a stream operating on a winsock socket */
 tl_iostream* sock_stream_create( SOCKET sockfd, int flags );
 
-/** \brief tl_network_create_server implementation for TCP */
-tl_server* tcp_server_create( const tl_net_addr* addr,
-                              unsigned int backlog, int flags );
-
-int wait_for_socket( SOCKET socket, unsigned long timeout, int write );
+int wait_for_fd( SOCKET socket, unsigned long timeout, int write );
 
 int WSAHandleFuckup( void );
 
@@ -119,7 +115,7 @@ void tl_monitor_cleanup( tl_monitor* monitor );
 tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd );
 
 /** \brief Set flags on socket */
-int set_socket_flags( SOCKET fd, int netlayer, int flags );
+int set_socket_flags( SOCKET fd, int netlayer, int* flags );
 
 #ifdef __cplusplus
 }

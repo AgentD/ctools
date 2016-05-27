@@ -107,7 +107,7 @@ void winsock_release( void )
     }
 }
 
-int wait_for_socket( SOCKET socket, unsigned long timeout, int write )
+int wait_for_fd( SOCKET socket, unsigned long timeout, int write )
 {
     struct timeval tv;
     fd_set fds;
@@ -167,23 +167,23 @@ int WSAHandleFuckup( void )
     return TL_ERR_INTERNAL;
 }
 
-int set_socket_flags( SOCKET fd, int netlayer, int flags )
+int set_socket_flags( SOCKET fd, int netlayer, int* flags )
 {
     BOOL bval = TRUE;
 
-    if( flags & (~TL_ALL_NETWORK_FLAGS) )   /* unknown flags */
+    if( (*flags) & (~TL_ALL_NETWORK_FLAGS) )   /* unknown flags */
         return 0;
 
     setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, (char*)&bval, sizeof(bval) );
 
-    if( (flags & TL_ALLOW_BROADCAST) && (netlayer == TL_IPV4) )
+    if( ((*flags) & TL_ALLOW_BROADCAST) && (netlayer == TL_IPV4) )
     {
         bval = TRUE;
         if( setsockopt(fd,SOL_SOCKET,SO_BROADCAST,(void*)&bval,sizeof(bval)) )
             return 0;
     }
 
-    if( (flags & TL_DONT_FRAGMENT) && (netlayer == TL_IPV4) )
+    if( ((*flags) & TL_DONT_FRAGMENT) && (netlayer == TL_IPV4) )
     {
         DWORD opt = 1;
         setsockopt( fd, IPPROTO_IP, IP_DONTFRAGMENT,

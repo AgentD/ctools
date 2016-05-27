@@ -24,7 +24,15 @@
  */
 #define TL_OS_EXPORT
 #include "tl_server.h"
-#include "os.h"
+#include "sock.h"
+
+#if defined(MACHINE_OS_WINDOWS)
+    #include "../W32/os.h"
+#elif defined(MACHINE_OS_UNIX)
+    #include "../unix/os.h"
+#else
+    #error "OS macro undefined"
+#endif
 
 
 
@@ -32,6 +40,7 @@ typedef struct
 {
     tl_server super;
     SOCKET socket;
+    int flags;
 }
 tcp_server;
 
@@ -40,7 +49,6 @@ tcp_server;
 static void tcp_destroy( tl_server* this )
 {
     assert( this );
-
     closesocket( ((tcp_server*)this)->socket );
     free( this );
     winsock_release( );
@@ -48,23 +56,53 @@ static void tcp_destroy( tl_server* this )
 
 static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 {
+    struct sockaddr_storage addr;
+    struct sockaddr_in6* v6;
     tcp_server* this = (tcp_server*)super;
+    socklen_t len = sizeof(addr);
+    int x, y, flags = TL_STREAM_TYPE_SOCK|TL_STREAM_TCP;
     SOCKET peer;
 
     assert( this );
 
-    if( !wait_for_socket( this->socket, timeout, 0 ) )
+    if( !wait_for_fd( this->socket, timeout, 0 ) )
         return NULL;
 
-    peer = accept( this->socket, NULL, 0 );
-    return peer==INVALID_SOCKET ? NULL :
-           sock_stream_create( peer, TL_STREAM_TYPE_SOCK|TL_STREAM_TCP );
+    peer = accept( this->socket, 0, 0 );
+    if( peer == INVALID_SOCKET )
+        return NULL;
+
+    if( this->flags & TL_ENFORCE_V6_ONLY )
+    {
+        if( getpeername( peer, (void*)&addr, &len ) != 0 )
+            goto ignore;
+        if( addr.ss_family != AF_INET6 )
+            goto ignore;
+
+        v6 = (struct sockaddr_in6*)&addr;
+
+        x = v6->sin6_addr.s6_addr[0] | v6->sin6_addr.s6_addr[1] |
+            v6->sin6_addr.s6_addr[2] | v6->sin6_addr.s6_addr[3] |
+            v6->sin6_addr.s6_addr[4] | v6->sin6_addr.s6_addr[5] |
+            v6->sin6_addr.s6_addr[6] | v6->sin6_addr.s6_addr[7] |
+            v6->sin6_addr.s6_addr[8] | v6->sin6_addr.s6_addr[9];
+
+        y = v6->sin6_addr.s6_addr[10] & v6->sin6_addr.s6_addr[11];
+
+        if( x==0 && y==0xFF )
+            goto ignore;
+    }
+
+    return peer==INVALID_SOCKET ? NULL : sock_stream_create( peer, flags );
+ignore:
+    closesocket( peer );
+    return NULL;
 }
 
 /****************************************************************************/
 
-tl_server* tcp_server_create( const tl_net_addr* addr,
-                              unsigned int backlog, int flags )
+tl_server* tcp_server_create( const tl_net_addr* addr, unsigned int backlog,
+                              int flags )
 {
     struct sockaddr_storage addrbuffer;
     tcp_server* this;
@@ -74,14 +112,14 @@ tl_server* tcp_server_create( const tl_net_addr* addr,
 
     winsock_acquire( );
 
-    if( !encode_sockaddr( addr, (void*)&addrbuffer, &size ) )
-        goto fail;
+    if( !encode_sockaddr( addr, &addrbuffer, &size ) )
+        return NULL;
 
     sockfd = create_socket( addr->net, addr->transport );
     if( sockfd == INVALID_SOCKET )
         goto fail;
 
-    if( !set_socket_flags( sockfd, addr->net, flags ) )
+    if( !set_socket_flags( sockfd, addr->net, &flags ) )
         goto failclose;
 
     if( bind( sockfd, (void*)&addrbuffer, size ) < 0 )
@@ -92,10 +130,10 @@ tl_server* tcp_server_create( const tl_net_addr* addr,
 
     this = calloc( 1, sizeof(tcp_server) );
     super = (tl_server*)this;
-
     if( !this )
-        goto failclose;
+        goto fail;
 
+    this->flags            = flags;
     this->socket           = sockfd;
     super->destroy         = tcp_destroy;
     super->wait_for_client = tcp_wait_for_client;
@@ -106,4 +144,11 @@ fail:
     winsock_release( );
     return NULL;
 }
+
+#ifdef MACHINE_OS_UNIX
+int tl_unix_server_fd( tl_server* srv )
+{
+    return ((tcp_server*)srv)->socket;
+}
+#endif
 

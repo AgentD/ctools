@@ -74,11 +74,7 @@ struct tl_monitor
     pthread_cond_t cond;
 };
 
-typedef enum
-{
-    TL_ENFORCE_V6_ONLY = 0x1000
-}
-TL_NETWORK_INTERNAL_FLAGS;
+#define sock_stream_create( fd, flags ) pipe_stream_create(fd,fd,flags)
 
 #ifdef __cplusplus
 extern "C" {
@@ -105,10 +101,6 @@ int wait_for_fd( int fd, unsigned long timeoutms, int writeable );
  * \param flags     Flags to set for the underlying tl_iostream structure
  */
 tl_iostream* pipe_stream_create( int readpipe, int writepipe, int flags );
-
-/** \brief tl_network_create_server implementation for TCP */
-tl_server* tcp_server_create( const tl_net_addr* addr,
-                              unsigned int backlog, int flags );
 
 /** \brief Initialize a monitor object */
 int tl_monitor_init( tl_monitor* monitor );
