@@ -73,8 +73,14 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
         if( x==0 && y==0xFF )
             goto ignore;
     }
-
-    return peer==INVALID_SOCKET ? NULL : sock_stream_create( peer, flags );
+#ifdef MACHINE_OS_UNIX
+    if( fcntl( peer, F_SETFD, FD_CLOEXEC ) == -1 )
+    {
+        close( peer );
+        return NULL;
+    }
+#endif
+    return sock_stream_create( peer, flags );
 ignore:
     closesocket( peer );
     return NULL;

@@ -124,6 +124,7 @@ int encode_sockaddr( const tl_net_addr* peer,
 SOCKET create_socket( int net, int transport )
 {
     int family, type, proto;
+    SOCKET fd;
 
     switch( net )
     {
@@ -139,7 +140,15 @@ SOCKET create_socket( int net, int transport )
     default:     return INVALID_SOCKET;
     }
 
-    return socket( family, type, proto );
+    fd = socket( family, type, proto );
+#ifdef MACHINE_OS_UNIX
+    if( fd >= 0 && fcntl( fd, F_SETFD, FD_CLOEXEC ) == -1 )
+    {
+        close( fd );
+        return INVALID_SOCKET;
+    }
+#endif
+    return fd;
 }
 
 int resolve_name( const char* hostname, int proto,

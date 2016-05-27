@@ -36,6 +36,17 @@ struct tl_process
 };
 
 
+static int mkpipe( int* pfd )
+{
+    if( pipe( pfd )!=0 )
+        return -1;
+    if( fcntl( pfd[0], F_SETFD, FD_CLOEXEC ) == -1 )
+        return -1;
+    if( fcntl( pfd[1], F_SETFD, FD_CLOEXEC ) == -1 )
+        return -1;
+    return 0;
+}
+
 
 tl_process* tl_process_create( const char* filename, const char* const* argv,
                                const char* const* env, int flags )
@@ -49,15 +60,17 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
         return NULL;
 
     /* create pipes */
-    if( (flags & TL_PIPE_STDIN) && pipe( inpipe )!=0 )
+    if( (flags & TL_PIPE_STDIN) && mkpipe( inpipe )!=0 )
         goto fail;
 
-    if( (flags & TL_PIPE_STDOUT) && pipe( outpipe )!=0 )
+    if( (flags & TL_PIPE_STDOUT) && mkpipe( outpipe )!=0 )
         goto fail;
 
-    if( (flags & TL_PIPE_STDERR) &&
-        !(flags & TL_STDERR_TO_STDOUT) && pipe( errpipe )!=0 )
-        goto fail;
+    if( (flags & TL_PIPE_STDERR) && !(flags & TL_STDERR_TO_STDOUT) )
+    {
+        if( mkpipe( errpipe )!=0 )
+            goto fail;
+    }
 
     /* create pipe stream wrappers */
     if( flags & (TL_PIPE_STDIN|TL_PIPE_STDOUT) )
@@ -84,10 +97,6 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
 
     if( this->pid==0 )        /* in child process */
     {
-        close( outpipe[0] );
-        close( errpipe[0] );
-        close( inpipe[1] );
-
         if( flags & TL_PIPE_STDOUT )
             dup2( outpipe[1], STDOUT_FILENO );
 
