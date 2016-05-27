@@ -28,10 +28,6 @@
 #include "tl_blob.h"
 #include "os.h"
 
-#include <assert.h>
-
-
-
 int tl_network_resolve_name( const char* hostname, int proto,
                              tl_net_addr* addr, size_t count )
 {

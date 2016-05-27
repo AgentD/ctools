@@ -28,7 +28,6 @@
 
 
 #include "tl_iostream.h"
-#include "tl_network.h"
 #include "tl_thread.h"
 #include "tl_server.h"
 #include "tl_string.h"
@@ -36,6 +35,7 @@
 #include "tl_fs.h"
 
 #include "../platform.h"
+#include "../bsdsock/sock.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -43,11 +43,6 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <winsock2.h>
-#include <in6addr.h>
-#include <ws2tcpip.h>
-
-
 
 typedef struct pipestream pipestream;
 typedef struct sockstream sockstream;
@@ -112,19 +107,7 @@ tl_server* tcp_server_create( const tl_net_addr* addr,
 
 int wait_for_socket( SOCKET socket, unsigned long timeout, int write );
 
-void convert_ipv6( const struct in6_addr* v6, tl_net_addr* addr );
-
-void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 );
-
-SOCKET create_socket( int net, int transport );
-
 int WSAHandleFuckup( void );
-
-int encode_sockaddr( const tl_net_addr* peer,
-                     struct sockaddr_storage* addrbuffer, socklen_t* size );
-
-int decode_sockaddr_in( const struct sockaddr_storage* addr, socklen_t len,
-                        tl_net_addr* out );
 
 /** \brief Initialize a monitor object */
 int tl_monitor_init( tl_monitor* monitor );

@@ -28,7 +28,6 @@
 
 
 #include "tl_iostream.h"
-#include "tl_network.h"
 #include "tl_thread.h"
 #include "tl_server.h"
 #include "tl_string.h"
@@ -36,15 +35,13 @@
 #include "tl_fs.h"
 
 #include "../platform.h"
+#include "../bsdsock/sock.h"
 
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <sys/wait.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <netdb.h>
@@ -101,22 +98,6 @@ int errno_to_fs( int code );
 int wait_for_fd( int fd, unsigned long timeoutms, int writeable );
 
 /**
- * \brief Convert an in6_addr structure to a tl_net_addr
- *
- * \param v6   Pointer to input data
- * \param addr Pointer to output structure
- */
-void convert_ipv6( const struct in6_addr* v6, tl_net_addr* addr );
-
-/**
- * \brief Convert a tl_net_addr structure to an in6_addr
- *
- * \param addr Pointer to input data
- * \param v6   Pointer to output structure
- */
-void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 );
-
-/**
  * \brief Create a tl_iostream implementation that operates on a pipe
  *
  * \param readpipe  A file descriptor to read from
@@ -128,41 +109,6 @@ tl_iostream* pipe_stream_create( int readpipe, int writepipe, int flags );
 /** \brief tl_network_create_server implementation for TCP */
 tl_server* tcp_server_create( const tl_net_addr* addr,
                               unsigned int backlog, int flags );
-
-/**
- * \brief Convert a tl_net_addr structure to a sockaddr_in
- *
- * \param peer       The intput address
- * \param addrbuffer A pointer to a buffer to write the sockaddr_in structure
- *                   data to
- * \param size       Returns the number of bytes written to the addrbuffer
- *
- * \return Non-zero on success, zero on failure
- */
-int encode_sockaddr( const tl_net_addr* peer,
-                     struct sockaddr_storage* addrbuffer, socklen_t* size );
-
-/**
- * \brief Create a socket
- *
- * \param net       A \ref TL_NETWORK_PROTOCOL enumerator vaule
- * \param transport A \ref TL_TRANSPORT_PROTOCOL enumerator vaule
- *
- * \return A socket file descriptor on success, -1 on failrue
- */
-int create_socket( int net, int transport );
-
-/**
- * \brief Decode a sockaddr_in or sockaddr_in6 structure to a tl_net_addr
- *
- * \param addr A pointer to the address structure
- * \param len  The size of the address structure
- * \param out  A pointer to the tl_net_addr structure to write to
- *
- * \return Non-zero on success, zero on failure
- */
-int decode_sockaddr_in( const struct sockaddr_storage* addr, socklen_t len,
-                        tl_net_addr* out );
 
 /** \brief Initialize a monitor object */
 int tl_monitor_init( tl_monitor* monitor );
