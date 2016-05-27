@@ -46,7 +46,8 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer, int flags )
 
     assert( peer );
 
-    winsock_acquire( );
+    if( !winsock_acquire( ) )
+        return NULL;
 
     if( !encode_sockaddr( peer, &addrbuffer, &size ) )
         goto fail_release;

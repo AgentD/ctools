@@ -91,7 +91,8 @@ tl_server* tcp_server_create( const tl_net_addr* addr, unsigned int backlog,
     socklen_t size;
     SOCKET sockfd;
 
-    winsock_acquire( );
+    if( !winsock_acquire( ) )
+        return NULL;
 
     if( !encode_sockaddr( addr, &addrbuffer, &size ) )
         return NULL;

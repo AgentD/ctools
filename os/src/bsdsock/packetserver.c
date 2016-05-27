@@ -188,6 +188,9 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( !encode_sockaddr( addr, &addrbuffer, &size ) )
         return NULL;
 
+    if( !winsock_acquire( ) )
+        return NULL;
+
     /* allocate structure */
     this = calloc( 1, sizeof(tl_udp_packetserver) );
     super = (tl_packetserver*)this;
@@ -196,8 +199,6 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
         return NULL;
 
     /* create socket */
-    winsock_acquire( );
-
     this->sockfd = create_socket( addr->net, addr->transport );
     if( this->sockfd == INVALID_SOCKET )
         goto fail;
