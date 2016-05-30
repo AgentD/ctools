@@ -104,6 +104,20 @@ struct tl_array
 
 
 
+/**
+ * \enum TL_ARRAY_FLAGS
+ *
+ * \brief Miscellaneous flags for tl_array operations
+ */
+typedef enum
+{
+    /** \brief Tell \ref tl_array_resize to initialize new elements */
+    TL_ARRAY_INIT = 0x01
+}
+TL_ARRAY_FLAGS;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -231,19 +245,19 @@ TLAPI int tl_array_concat( tl_array* dst, const tl_array* src );
  * \memberof tl_array
  *
  * \note This function runs in linear time
+ * \note This function fails if an unsupported flag is set
  *
  * If the new size is less than the current size, the array is trucated, if it
  * is larget than the current size, the new elements are initialized with
  * zero.
  *
- * \param vec        A pinter to an array
- * \param size       Size of the array to set (number of used elements)
- * \param initialize Non-zero to initialize newly allocated elements, zero to
- *                   leave the uninitialized
+ * \param vec   A pinter to an array
+ * \param size  Size of the array to set (number of used elements)
+ * \param flags Set \ref TL_ARRAY_INIT to initialize newly allocated elements
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-TLAPI int tl_array_resize( tl_array* vec, size_t size, int initialize );
+TLAPI int tl_array_resize( tl_array* vec, size_t size, int flags );
 
 /**
  * \brief Make sure an array has at least a certain capacity

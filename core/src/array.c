@@ -198,11 +198,14 @@ int tl_array_concat( tl_array* this, const tl_array* src )
     return 1;
 }
 
-int tl_array_resize( tl_array* this, size_t size, int initialize )
+int tl_array_resize( tl_array* this, size_t size, int flags )
 {
     void* newdata;
 
     assert( this );
+
+    if( flags & (~TL_ARRAY_INIT) )
+        return 0;
 
     if( size == this->used )
         return 1;
@@ -215,7 +218,7 @@ int tl_array_resize( tl_array* this, size_t size, int initialize )
                                   (char*)this->data + this->unitsize*size,
                                   this->unitsize, this->used - size );
         }
-        else if( (size > this->used) && initialize )
+        else if( (size > this->used) && (flags & TL_ARRAY_INIT) )
         {
             tl_allocator_init( this->alloc,
                                (char*)this->data + this->unitsize*this->used,
@@ -234,7 +237,7 @@ int tl_array_resize( tl_array* this, size_t size, int initialize )
             return 0;
 
         /* clear new entries */
-        if( initialize )
+        if( flags & TL_ARRAY_INIT )
         {
             tl_allocator_init( this->alloc,
                                (char*)this->data + this->unitsize*this->used,

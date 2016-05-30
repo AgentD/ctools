@@ -68,6 +68,21 @@ struct tl_blob
     size_t size;
 };
 
+/**
+ * \enum TL_BLOB_FLAGS
+ *
+ * \brief Miscellaneous flags for tl_blob operations
+ */
+typedef enum
+{
+    /** \brief If set, ignore invalid characters when decoding base 64 */
+    TL_BLOB_BASE64_IGNORE_GARBAGE = 0x01,
+
+    /** \brief If set, use '-' and '_' for 62 and 63 instead of '+' and '/' */
+    TL_BLOB_BASE64_ALT_ENC = 0x02
+}
+TL_BLOB_FLAGS;
+
 
 
 #ifdef __cplusplus
@@ -110,7 +125,7 @@ static TL_INLINE void tl_blob_cleanup( tl_blob* blob )
  * \param dst A pointer to an uninitialized blob object
  * \param src A pointer to a blob to copy
  *
- * \return Non-zero on success, zero if out of memory or dst or src is NULL.
+ * \return Non-zero on success, zero on failure (e.g. out of memory)
  */
 static TL_INLINE int tl_blob_copy( tl_blob* dst, const tl_blob* src )
 {
@@ -130,7 +145,7 @@ static TL_INLINE int tl_blob_copy( tl_blob* dst, const tl_blob* src )
  *               bytes are requested than there are left in the source blob,
  *               the value is clamped.
  *
- * \return Non-zero on success, zero if out of memory or dst or src is NULL
+ * \return Non-zero on success, zero on failure (e.g. out of memory)
  */
 TLAPI int tl_blob_copy_range( tl_blob* dst, const tl_blob* src,
                               size_t offset, size_t size );
@@ -147,8 +162,7 @@ TLAPI int tl_blob_copy_range( tl_blob* dst, const tl_blob* src,
  *               bytes are requested than there are left in the source blob,
  *               the value is clamped.
  *
- * \return Non-zero on success, zero if out of memory or if src or
- *         blob is NULL.
+ * \return Non-zero on success, zero on failure (e.g. out of memory)
  */
 TLAPI int tl_blob_append_range( tl_blob* blob, const tl_blob* src,
                                 size_t offset, size_t size );
@@ -163,7 +177,7 @@ TLAPI int tl_blob_append_range( tl_blob* blob, const tl_blob* src,
  *             leave it uninitialized
  * \param size The number of bytes to insert
  *
- * \return Non-zero on success, zero if out of memory or blob is NULL.
+ * \return Non-zero on success, zero on failure (e.g. out of memory)
  */
 TLAPI int tl_blob_append_raw( tl_blob* blob, const void* src, size_t size );
 
@@ -175,7 +189,7 @@ TLAPI int tl_blob_append_raw( tl_blob* blob, const void* src, size_t size );
  * \param dst A pointer to the destination blob object
  * \param src A pointer to the source data to copy to the end
  *
- * \return Non-zero on success, zero if out of memory or if src or dst is NULL
+ * \return Non-zero on success, zero on failure (e.g. out of memory)
  */
 static TL_INLINE int tl_blob_append( tl_blob* dst, const tl_blob* src )
 {
@@ -194,8 +208,7 @@ static TL_INLINE int tl_blob_append( tl_blob* dst, const tl_blob* src )
  *               offset is moved to the destination blob and the source blob
  *               is truncated to this offset.
  *
- * \return Non-zero on success, zero if insufficient memory or if dst or src
- *         is NULL.
+ * \return Non-zero on success, zero on failure (e.g. out of memory)
  */
 TLAPI int tl_blob_split( tl_blob* dst, tl_blob* src, size_t offset );
 
@@ -212,8 +225,7 @@ TLAPI int tl_blob_split( tl_blob* dst, tl_blob* src, size_t offset );
  *               value is clamped. Everything after offset+length-1 remains
  *               in the destination buffer after the given offset.
  *
- * \return Non-zero on success, zero if out of memory or if dst or src
- *         is NULL.
+ * \return Non-zero on success, zero on failure (e.g. out of memory)
  */
 TLAPI int tl_blob_cut_range( tl_blob* dst, tl_blob* src,
                              size_t offset, size_t length );
@@ -230,7 +242,7 @@ TLAPI int tl_blob_cut_range( tl_blob* dst, tl_blob* src,
  *               the size of the blob, the data is appended
  * \param length The number of bytes to insert into the blob.
  *
- * \return Non-zero on success, zero if out of memory or blob is NULL
+ * \return Non-zero on success, zero on failure (e.g. out of memory)
  */
 TLAPI int tl_blob_insert_raw( tl_blob* blob, const void* src,
                               size_t offset, size_t length );
@@ -249,7 +261,7 @@ TLAPI int tl_blob_insert_raw( tl_blob* blob, const void* src,
  *                  This is truncated to the size of the source blob after the
  *                  source offset.
  *
- * \return Non-zero on success, zero if out of memory or blob is NULL
+ * \return Non-zero on success, zero on failure (e.g. out of memory)
  */
 TLAPI int tl_blob_insert( tl_blob* dst, const tl_blob* src,
                           size_t dstoffset, size_t srcoffset, size_t length );
@@ -281,32 +293,33 @@ TLAPI void tl_blob_truncate( tl_blob* blob, size_t offset );
  *
  * \memberof tl_blob
  *
+ * \note This function fails if an unsupported flag is set
+ *
  * \param dst A pointer to an uninitialized destinaton blob
  * \param src A pointer to the source blob to encode.
- * \param alt If non-zero use '-' and '_' for indices 62 and 63, otherwise
- *            use '+' and '/'.
+ * \param alt If \ref TL_BLOB_BASE64_ALT_ENC is set, '-' and '_' are used
+ *            for indices 62 and 63, otherwise '+' and '/' are used.
  *
- * \return Non-zero on success, zero if there is not enough memory or
- *         dst or src are NULL
+ * \return Non-zero on success, zero on failure
  */
-TLAPI int tl_blob_encode_base64( tl_blob* dst, const tl_blob* src, int alt );
+TLAPI int tl_blob_encode_base64(tl_blob* dst, const tl_blob* src, int flags);
 
 /**
  * \brief Decode base64 encoded data from a blob
  *
  * \memberof tl_blob
  *
- * \param dst           A pointer to an uninitialized destinatioin blob
- * \param src           A pointer to the source blob to decode.
- * \param ignoregarbage If non-zero, "garbage" characters that are not valid
- *                      base64 characters are ignored. If zero, only space
- *                      characters are ignored.
+ * \note This function fails if an unsupported flag is set
  *
- * \return Non-zero on success, zero if not enough memory or
- *         if dst or src is NULL
+ * \param dst   A pointer to an uninitialized destinatioin blob
+ * \param src   A pointer to the source blob to decode.
+ * \param flags If \ref TL_BLOB_BASE64_IGNORE_GARBAGE is set, "garbage"
+ *              characters that are not valid base64 characters are ignored.
+ *              If not set, only space characters are ignored.
+ *
+ * \return Non-zero on success, zero on failure
  */
-TLAPI int tl_blob_decode_base64( tl_blob* dst, const tl_blob* src,
-                                 int ignoregarbage );
+TLAPI int tl_blob_decode_base64(tl_blob* dst, const tl_blob* src, int flags);
 
 /**
  * \brief Treat a blob as an array of integers and byteswap them

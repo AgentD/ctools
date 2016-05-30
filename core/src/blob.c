@@ -215,7 +215,7 @@ void tl_blob_truncate( tl_blob* this, size_t offset )
     }
 }
 
-int tl_blob_encode_base64( tl_blob* this, const tl_blob* input, int use_alt )
+int tl_blob_encode_base64( tl_blob* this, const tl_blob* input, int flags )
 {
     unsigned char* src;
     const char* map;
@@ -223,6 +223,9 @@ int tl_blob_encode_base64( tl_blob* this, const tl_blob* input, int use_alt )
     char* dst;
 
     assert( this && input );
+
+    if( flags & (~TL_BLOB_BASE64_ALT_ENC) )
+        return 0;
 
     /* determine size */
     size = 4 * (input->size / 3);
@@ -236,7 +239,7 @@ int tl_blob_encode_base64( tl_blob* this, const tl_blob* input, int use_alt )
     /* get source destination and converstion buffer */
     src = input->data;
     dst = this->data;
-    map = use_alt ? base64_chars_alt : base64_chars;
+    map = (flags & TL_BLOB_BASE64_ALT_ENC) ? base64_chars_alt : base64_chars;
 
     /* convert tripples */
     for( i=0; i<(input->size/3); ++i )
@@ -268,8 +271,7 @@ int tl_blob_encode_base64( tl_blob* this, const tl_blob* input, int use_alt )
     return 1;
 }
 
-int tl_blob_decode_base64( tl_blob* this, const tl_blob* input,
-                           int ignoregarbage )
+int tl_blob_decode_base64( tl_blob* this, const tl_blob* input, int flags )
 {
     unsigned char c, group[4], *dst;
     size_t size, outsize, i;
@@ -277,6 +279,9 @@ int tl_blob_decode_base64( tl_blob* this, const tl_blob* input,
     int idx;
 
     assert( this && input );
+
+    if( flags & (~TL_BLOB_BASE64_IGNORE_GARBAGE) )
+        return 0;
 
     /* determine exact size of decoded data and sanity check the input */
     src = input->data;
@@ -296,13 +301,16 @@ int tl_blob_decode_base64( tl_blob* this, const tl_blob* input,
                 {
                     if( *src=='=' )
                         goto done;
-                    if( !ignoregarbage && !isspace(*src) )
-                        return 0;
+                    if( !isspace(*src) )
+                    {
+                        if( !(flags & TL_BLOB_BASE64_IGNORE_GARBAGE) )
+                            return 0;
+                    }
                 }
             }
             return 0;
         }
-        else if( !isspace(*src) && !ignoregarbage )
+        else if( !isspace(*src) && !(flags & TL_BLOB_BASE64_IGNORE_GARBAGE) )
             return 0;
     }
 done:
