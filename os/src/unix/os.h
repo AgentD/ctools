@@ -75,6 +75,9 @@ struct tl_monitor
 
 #define sock_stream_create( fd, flags ) pipe_stream_create(fd,fd,flags)
 
+extern fd_stream tl_stdio;
+extern fd_stream tl_stderr;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

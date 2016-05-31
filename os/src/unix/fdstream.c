@@ -121,6 +121,36 @@ retry:
 
 /****************************************************************************/
 
+fd_stream tl_stdio =
+{
+    {
+        TL_STREAM_TYPE_FILE,
+        NULL,
+        fd_stream_set_timeout,
+        fd_stream_write,
+        fd_stream_read
+    },
+    STDIN_FILENO,
+    STDOUT_FILENO,
+    0
+};
+
+fd_stream tl_stderr =
+{
+    {
+        TL_STREAM_TYPE_FILE,
+        NULL,
+        fd_stream_set_timeout,
+        fd_stream_write,
+        fd_stream_read
+    },
+    -1,
+    STDERR_FILENO,
+    0
+};
+
+/****************************************************************************/
+
 tl_iostream* pipe_stream_create( int readfd, int writefd, int flags )
 {
     fd_stream* this = calloc( 1, sizeof(fd_stream) );

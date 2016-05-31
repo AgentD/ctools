@@ -125,6 +125,34 @@ static int pipestream_read( tl_iostream* super, void* buffer, size_t size,
 
 /****************************************************************************/
 
+pipestream tl_stdio =
+{
+    {
+        TL_STREAM_TYPE_FILE,
+        NULL,
+        pipestream_set_timeout,
+        pipestream_write,
+        pipestream_read
+    },
+    NULL,
+    NULL
+};
+
+pipestream tl_stderr =
+{
+    {
+        TL_STREAM_TYPE_FILE,
+        NULL,
+        pipestream_set_timeout,
+        pipestream_write,
+        pipestream_read
+    },
+    NULL,
+    NULL
+};
+
+/****************************************************************************/
+
 tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd )
 {
     pipestream* this = calloc( 1, sizeof(pipestream) );

@@ -155,14 +155,12 @@ void tl_process_destroy( tl_process* this )
 
 tl_iostream* tl_process_get_stdio( tl_process* this )
 {
-    assert( this );
-    return this->iopipe;
+    return this ? this->iopipe : (tl_iostream*)&tl_stdio;
 }
 
 tl_iostream* tl_process_get_stderr( tl_process* this )
 {
-    assert( this );
-    return this->errpipe;
+    return this ? this->errpipe : (tl_iostream*)&tl_stderr;
 }
 
 void tl_process_kill( tl_process* this )

@@ -153,16 +153,18 @@ TLOSAPI void tl_process_destroy( tl_process* proc );
  *
  * \memberof tl_process
  *
- * If the process was created with the TL_PIPE_STDIN flag, data written to the
- * stream is sent to STDIN of the child process. If the process was created
- * with the TL_PIPE_STDOUT flag, data written by the process to STDOUT can be
- * read from the iostream object. If the flag TL_STDERR_TO_STDOUT was set,
- * STDERR data also appears on the stream object.
+ * A NULL pointer can be passed to this function to get the stdio stream of
+ * the calling process. Do not attempt to destroy this stream.
  *
- * If neither TL_PIPE_STDOUT nor TL_PIPE_STDIN was set,
+ * For a child process that was created with the TL_PIPE_STDIN flag, data
+ * written to the stream is sent to STDIN of the child process. If the process
+ * was created with the TL_PIPE_STDOUT flag, data written by the process to
+ * STDOUT can be read from the iostream object. If the flag
+ * TL_STDERR_TO_STDOUT was set,  STDERR data also appears on the
+ * stream object. If neither TL_PIPE_STDOUT nor TL_PIPE_STDIN was set,
  * this function returns NULL.
  *
- * \param proc A pointer to the process object
+ * \param proc A pointer to the process object or NULL for the calling process
  *
  * \return A pointer to a stream encapsulating the STDOUT and STDIN streams of
  *         the child, or NULL if they are not redirected.
@@ -174,16 +176,17 @@ TLOSAPI tl_iostream* tl_process_get_stdio( tl_process* proc );
  *
  * \memberof tl_process
  *
- * If the process was created with TL_PIPE_STDERR flag set, this
- * function returns a stream object that allows reading the data a child
- * process writes to STDERR.
+ * A NULL pointer can be passed to this function to get the stderr stream of
+ * the calling process. Do not attempt to destroy this stream.
  *
- * If TL_PIPE_STDERR was not set, or TL_STDERR_TO_STDOUT is set,
+ * For child processes created with TL_PIPE_STDERR flag set, this function
+ * returns a stream object that allows reading the data a child process writes
+ * to STDERR. If TL_PIPE_STDERR was not set, or TL_STDERR_TO_STDOUT is set,
  * this returns NULL.
  *
- * Data writen to the stream is discarded.
+ * Data cannot be writen to the stream.
  *
- * \param proc A pointer to the process objet
+ * \param proc A pointer to the process objet or NULL for the calling process
  *
  * \return A pointer to a stream encapsulating the STDERR stream or NULL if
  *         it is not redirected

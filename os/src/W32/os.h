@@ -69,6 +69,9 @@ struct sockstream
     SOCKET socket;
 };
 
+extern pipestream tl_stdio;
+extern pipestream tl_stderr;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
