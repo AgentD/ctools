@@ -68,12 +68,12 @@ extern "C" {
  * software projects (e.g. libstdc++, Perl, nginx, ...).
  *
  * \note The hash function accepts a "seed" value. This value can be used to
- *       randomize the hash function when using it for a hash table. That way,
- *       different hashes can be generated every time the application is run
- *       and an attacke cannot DOS the application by exploting hash table
- *       behaviour as an attacker can no longer predict what hash values are
- *       generated for an input and what values collide, even when knowing
- *       the hash algorithm and hash table implementation.
+ *       randomize the hash function when using it for a hash table. If an
+ *       attacker knows the hash-table implementation and hash function, they
+ *       can produce input that degrades the map to a list in order to DOS an
+ *       application. An unpredictable seed ensures that an attacker cannot
+ *       guess the hash values even if they know the hash function that is
+ *       used.
  *
  * \param data The block of data to process
  * \param len  The size fo the block in bytes

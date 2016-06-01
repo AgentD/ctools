@@ -108,7 +108,7 @@ typedef enum
      *
      * Example:
      * \code
-     * -A -b -C -abc
+     * -A -b -C -AbC
      * \endcode
      */
     TL_SHORT_FLAG = 1,
