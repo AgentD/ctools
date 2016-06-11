@@ -49,6 +49,7 @@ static int fd_stream_write( tl_iostream* super, const void* buffer,
 {
     fd_stream* this = (fd_stream*)super;
     ssize_t result, intr_count = 0;
+    off_t old = 0;
 
     assert( this && buffer );
 
@@ -60,6 +61,13 @@ retry:
     if( !wait_for_fd( this->writefd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;
 
+    if( super->flags & TL_STREAM_APPEND )
+    {
+        old = lseek( this->writefd, 0, SEEK_END );
+        if( old == (off_t)-1 )
+            return TL_ERR_INTERNAL;
+    }
+
     if( (super->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
         result = sendto( this->writefd, buffer, size, MSG_NOSIGNAL, NULL, 0 );
     else
@@ -67,6 +75,9 @@ retry:
 
     if( result<0 && errno==EINTR && (intr_count++)<3 )
         goto retry;
+
+    if( super->flags & TL_STREAM_APPEND )
+        lseek( this->writefd, old, SEEK_SET );
 
     if( result<0 )
     {

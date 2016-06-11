@@ -192,3 +192,16 @@ int set_socket_flags( SOCKET fd, int netlayer, int* flags )
     return 1;
 }
 
+tl_s64 w32_lseek(HANDLE hf, tl_s64 pos, DWORD MoveMethod)
+{
+    LARGE_INTEGER li;
+
+    li.QuadPart = pos;
+    li.LowPart = SetFilePointer( hf, li.LowPart, &li.HighPart, MoveMethod );
+
+    if( li.LowPart == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR )
+        li.QuadPart = -1;
+
+    return li.QuadPart;
+}
+

@@ -80,7 +80,8 @@ typedef enum
     TL_STREAM_TYPE_SOCK = 0x0002,   /**< \brief The stream is a socket */
 
     TL_STREAM_UDP = 0x0100,         /**< \brief Set for UDP sockets */
-    TL_STREAM_TCP = 0x0200          /**< \brief Set for TCP sockets */
+    TL_STREAM_TCP = 0x0200,         /**< \brief Set for TCP sockets */
+    TL_STREAM_APPEND = 0x0400       /**< \brief File opened in append mode */
 }
 TL_STREAM_FLAG;
 

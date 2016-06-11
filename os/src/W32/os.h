@@ -119,6 +119,9 @@ tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd );
 /** \brief Set flags on socket */
 int set_socket_flags( SOCKET fd, int netlayer, int* flags );
 
+/** \brief Sane wrapper for SetFilePointer */
+tl_s64 w32_lseek( HANDLE hf, tl_s64 pos, DWORD MoveMethod );
+
 #ifdef __cplusplus
 }
 #endif
