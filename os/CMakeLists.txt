@@ -31,6 +31,7 @@ elseif( WIN32 )
                      src/W32/sockstream.c
                      src/W32/pipestream.c
                      src/W32/iostream.c
+                     src/W32/path.c
                      ${CTOOLS_BSDSOCK} )
 endif( )
 

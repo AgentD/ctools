@@ -122,7 +122,7 @@ int tl_fs_exists( const char* path )
 
     assert( path );
 
-    if( !(wpath = utf8_to_utf16( path )) )
+    if( get_absolute_path( &wpath, path ) != 0 )
         return 0;
 
     status = GetFileAttributesW( wpath ) != INVALID_FILE_ATTRIBUTES;
@@ -139,7 +139,7 @@ int tl_fs_is_directory( const char* path )
 
     assert( path );
 
-    if( !(wpath = utf8_to_utf16( path )) )
+    if( get_absolute_path( &wpath, path ) != 0 )
         return 0;
 
     attr = GetFileAttributesW( wpath );
@@ -160,7 +160,7 @@ int tl_fs_is_symlink( const char* path )
 
     assert( path );
 
-    if( !(wpath = utf8_to_utf16( path )) )
+    if( get_absolute_path( &wpath, path ) != 0 )
         return 0;
 
     attr = GetFileAttributesW( wpath );
@@ -191,8 +191,9 @@ int tl_fs_cwd( const char* path )
 
     assert( path );
 
-    if( !(wpath = utf8_to_utf16( path )) )
-        return TL_ERR_ALLOC;
+    status = get_absolute_path( &wpath, path );
+    if( status != 0 )
+        return status;
 
     status = SetCurrentDirectoryW( wpath ) ? 0 : errno_to_fs(GetLastError());
 
@@ -208,8 +209,9 @@ int tl_fs_mkdir( const char* path )
 
     assert( path );
 
-    if( !(wpath = utf8_to_utf16( path )) )
-        return TL_ERR_ALLOC;
+    status = get_absolute_path( &wpath, path );
+    if( status != 0 )
+        return status;
 
     attr = GetFileAttributesW( wpath );
 
@@ -238,8 +240,9 @@ int tl_fs_delete( const char* path )
 
     assert( path );
 
-    if( !(wpath = utf8_to_utf16( path )) )
-        return TL_ERR_ALLOC;
+    status = get_absolute_path( &wpath, path );
+    if( status != 0 )
+        return status;
 
     attr = GetFileAttributesW( wpath );
 
@@ -273,7 +276,7 @@ tl_u64 tl_fs_get_file_size( const char* path )
     assert( path );
 
     /* check if path actually names an existing file */
-    if( !(wpath = utf8_to_utf16( path )) )
+    if( get_absolute_path( &wpath, path ) != 0 )
         return 0;
 
     attr = GetFileAttributesW( wpath );

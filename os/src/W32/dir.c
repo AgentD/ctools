@@ -139,37 +139,26 @@ static void dir_iterator_remove( tl_iterator* this )
 int tl_dir_scan( const char* path, tl_array* list )
 {
     WIN32_FIND_DATAW ent;
-    unsigned int c;
     tl_string str;
     HANDLE hnd;
     WCHAR* ptr;
+    int ret;
 
     assert( path && list );
-
-    if( !tl_fs_exists( path ) )
-        return TL_ERR_NOT_EXIST;
 
     /* paste path string */
     tl_string_init( &str );
     tl_string_append_utf8( &str, path );
-
-    do
-    {
-        c = tl_string_last( &str );
-        if( c=='/' || c=='\\' )
-            tl_string_drop_last( &str );
-    }
-    while( c=='/' || c=='\\' );
-
     tl_string_append_utf8( &str, "\\*" );
 
-    ptr = utf8_to_utf16( str.data.data );
-    if( !ptr )
+    ret = get_absolute_path( &ptr, str.data.data );
+    if( ret != 0 )
         goto out;
 
     hnd = FindFirstFileW( ptr, &ent );
     free( ptr );
 
+    ret = TL_ERR_NOT_EXIST;
     if( hnd == INVALID_HANDLE_VALUE )
         goto out;
 
@@ -186,18 +175,19 @@ int tl_dir_scan( const char* path, tl_array* list )
     }
     while( FindNextFileW( hnd, &ent ) );
 
+    ret = 0;
     FindClose( hnd );
 out:
     tl_string_cleanup( &str );
-    return 0;
+    return ret;
 }
 
 tl_iterator* tl_dir_iterate( const char* path )
 {
     tl_iterator* super;
     dir_iterator* this;
-    unsigned int c;
     WCHAR* str;
+    int ret;
 
     assert( path );
 
@@ -210,18 +200,10 @@ tl_iterator* tl_dir_iterate( const char* path )
         goto fail;
 
     tl_string_append_utf8( &this->current, path );
-
-    do
-    {
-        c = tl_string_last( &this->current );
-        if( c=='/' || c=='\\' )
-            tl_string_drop_last( &this->current );
-    }
-    while( c=='/' || c=='\\' );
-
     tl_string_append_utf8( &this->current, "\\*" );
 
-    if( !(this->wpath = utf8_to_utf16( tl_string_cstr( &this->current ) )) )
+    ret = get_absolute_path( &this->wpath, tl_string_cstr( &this->current ) );
+    if( ret != 0 )
         goto fail;
 
     /* open */

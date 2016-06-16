@@ -122,6 +122,8 @@ int set_socket_flags( SOCKET fd, int netlayer, int* flags );
 /** \brief Sane wrapper for SetFilePointer */
 tl_s64 w32_lseek( HANDLE hf, tl_s64 pos, DWORD MoveMethod );
 
+int get_absolute_path( WCHAR** out, const char* path );
+
 #ifdef __cplusplus
 }
 #endif
