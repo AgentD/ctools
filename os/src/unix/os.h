@@ -41,6 +41,7 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <netdb.h>
