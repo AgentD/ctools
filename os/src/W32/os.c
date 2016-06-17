@@ -60,6 +60,11 @@ int errno_to_fs( int code )
     case ERROR_DIR_NOT_EMPTY:
         return TL_ERR_NOT_EMPTY;
 
+    case ERROR_BROKEN_PIPE:
+        return TL_ERR_CLOSED;
+    case ERROR_HANDLE_EOF:
+        return TL_EOF;
+
         /*return TL_ERR_NOT_DIR;*/
     }
 

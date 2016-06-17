@@ -93,11 +93,7 @@ static int pipestream_write( tl_iostream* super, const void* buffer,
     }
 
     if( !WriteFile( this->whnd, buffer, size, &result, NULL ) )
-    {
-        if( GetLastError( )==ERROR_BROKEN_PIPE )
-            return TL_ERR_CLOSED;
-        return TL_ERR_INTERNAL;
-    }
+        return errno_to_fs( GetLastError( ) );
 
     if( super->flags & TL_STREAM_APPEND )
         w32_lseek( this->whnd, pos, FILE_BEGIN );
@@ -123,15 +119,18 @@ static int pipestream_read( tl_iostream* super, void* buffer, size_t size,
         return TL_ERR_NOT_SUPPORTED;
 
     if( !ReadFile( this->rhnd, buffer, size, &result, NULL ) )
-    {
-        if( GetLastError( )==ERROR_BROKEN_PIPE )
-            return TL_ERR_CLOSED;
-        return TL_ERR_INTERNAL;
-    }
+        return errno_to_fs( GetLastError( ) );
 
     if( actual )
         *actual = result;
-    return result ? 0 : TL_ERR_CLOSED;
+
+    if( !result )
+    {
+        if( (super->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_FILE )
+            return TL_EOF;
+        return TL_ERR_CLOSED;
+    }
+    return 0;
 }
 
 /****************************************************************************/
