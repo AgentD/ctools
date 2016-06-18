@@ -60,6 +60,11 @@ int errno_to_fs( int code )
     case ERROR_DIR_NOT_EMPTY:
         return TL_ERR_NOT_EMPTY;
 
+    case ERROR_BROKEN_PIPE:
+        return TL_ERR_CLOSED;
+    case ERROR_HANDLE_EOF:
+        return TL_EOF;
+
         /*return TL_ERR_NOT_DIR;*/
     }
 
@@ -190,5 +195,18 @@ int set_socket_flags( SOCKET fd, int netlayer, int* flags )
                     (void*)&opt, sizeof(DWORD) );
     }
     return 1;
+}
+
+tl_s64 w32_lseek(HANDLE hf, tl_s64 pos, DWORD MoveMethod)
+{
+    LARGE_INTEGER li;
+
+    li.QuadPart = pos;
+    li.LowPart = SetFilePointer( hf, li.LowPart, &li.HighPart, MoveMethod );
+
+    if( li.LowPart == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR )
+        li.QuadPart = -1;
+
+    return li.QuadPart;
 }
 

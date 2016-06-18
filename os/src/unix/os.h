@@ -41,6 +41,7 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <netdb.h>
@@ -74,6 +75,9 @@ struct tl_monitor
 };
 
 #define sock_stream_create( fd, flags ) pipe_stream_create(fd,fd,flags)
+
+extern fd_stream tl_stdio;
+extern fd_stream tl_stderr;
 
 #ifdef __cplusplus
 extern "C" {

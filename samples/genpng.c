@@ -4,10 +4,10 @@
     the image data for the PNG file.
  */
 #include "tl_compress.h"
+#include "tl_iostream.h"
 #include "tl_blob.h"
 #include "tl_hash.h"
-
-#include <stdio.h>
+#include "tl_file.h"
 
 #define MAX_ITERATIONS 40
 
@@ -22,28 +22,29 @@ static void mk_be32( unsigned char* temp, tl_u32 value )
     temp[3] =  value        & 0xFF;
 }
 
-static void write_chunk( FILE* f, const char* id, const tl_blob* chunk )
+static void write_chunk(tl_iostream* f, const char* id, const tl_blob* chunk)
 {
     unsigned char temp[4];
     tl_u32 crc;
 
     mk_be32( temp, chunk ? chunk->size : 0 );
-    fwrite( temp, 1, 4, f );
-    fwrite( id, 1, 4, f );
+    f->write( f, temp, 4, NULL );
+    f->write( f, id, 4, NULL );
 
     crc = tl_hash_crc32( 0, id, 4 );
 
     if( chunk )
     {
-        fwrite( chunk->data, 1, chunk->size, f );
+        tl_iostream_write_blob( f, chunk, NULL );
         crc = tl_hash_crc32( crc, chunk->data, chunk->size );
     }
 
     mk_be32( temp, crc );
-    fwrite( temp, 1, 4, f );
+    f->write( f, temp, 4, NULL );
 }
 
-static void write_header( FILE* f, tl_u32 width, tl_u32 height, tl_u8 type )
+static void write_header( tl_iostream* f, tl_u32 width, tl_u32 height,
+                          tl_u8 type )
 {
     tl_u8 buffer[13];
     tl_blob temp;
@@ -61,7 +62,7 @@ static void write_header( FILE* f, tl_u32 width, tl_u32 height, tl_u8 type )
     write_chunk( f, "IHDR", &temp );
 }
 
-static void write_image( FILE* f, unsigned char* data,
+static void write_image( tl_iostream* f, unsigned char* data,
                          tl_u32 width, tl_u32 height, tl_u8 colortype )
 {
     unsigned int bpp = colortype == COLOR_RGBA ? 4 : 3, y, dx = width * bpp;
@@ -88,11 +89,11 @@ static void write_image( FILE* f, unsigned char* data,
     tl_blob_cleanup( &img );
 }
 
-static void write_png_file( FILE* f, unsigned char* image,
+static void write_png_file( tl_iostream* f, unsigned char* image,
                             unsigned int width, unsigned int height,
                             int colortype )
 {
-    fwrite( "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 1, 8, f );
+    f->write( f, "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8, NULL );
     write_header( f, width, height, colortype );
     write_image( f, image, width, height, colortype );
     write_chunk( f, "IEND", NULL );
@@ -120,8 +121,8 @@ int main( void )
 {
     unsigned char *ptr = image;
     unsigned int x, y;
+    tl_iostream* f;
     float r;
-    FILE* f;
 
     for( y=0; y<600; ++y )
     {
@@ -139,9 +140,10 @@ int main( void )
         }
     }
 
-    f = fopen( "test.png", "wb" );
+
+    tl_file_open( "test.png", &f, TL_WRITE|TL_CREATE|TL_OVERWRITE );
     write_png_file( f, image, 800, 600, COLOR_RGB );
-    fclose( f );
+    f->destroy( f );
     return 0;
 }
 

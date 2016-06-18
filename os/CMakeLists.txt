@@ -16,6 +16,7 @@ if( UNIX )
                      src/unix/threadpool.c
                      src/unix/fdstream.c
                      src/unix/iostream.c
+                     src/unix/file.c
                      ${CTOOLS_BSDSOCK} )
 elseif( WIN32 )
   set( CTOOLS_SYSDEP src/W32/os.c
@@ -31,6 +32,8 @@ elseif( WIN32 )
                      src/W32/sockstream.c
                      src/W32/pipestream.c
                      src/W32/iostream.c
+                     src/W32/file.c
+                     src/W32/path.c
                      ${CTOOLS_BSDSOCK} )
 endif( )
 
@@ -59,6 +62,7 @@ install( FILES include/tl_dir.h
                include/tl_thread.h
                include/tl_threadpool.h
                include/tl_unix.h
+               include/tl_file.h
          DESTINATION include )
 
 install( TARGETS tlos LIBRARY DESTINATION lib

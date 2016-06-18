@@ -69,6 +69,9 @@ struct sockstream
     SOCKET socket;
 };
 
+extern pipestream tl_stdio;
+extern pipestream tl_stderr;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -115,6 +118,11 @@ tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd );
 
 /** \brief Set flags on socket */
 int set_socket_flags( SOCKET fd, int netlayer, int* flags );
+
+/** \brief Sane wrapper for SetFilePointer */
+tl_s64 w32_lseek( HANDLE hf, tl_s64 pos, DWORD MoveMethod );
+
+int get_absolute_path( WCHAR** out, const char* path );
 
 #ifdef __cplusplus
 }

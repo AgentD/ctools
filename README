@@ -24,6 +24,10 @@
   - various non-cryptgraphic hash functions
   - command line option parsing
   - abstract filesystem and directory access
+    - automatic long path handling on Windows(R)
+  - file I/O
+    - arbitrary length UTF-8 paths on all supported platforms
+    - memory mapping support
   - creating and managing child processes
   - creating and managing threads
     - thread abstraction

@@ -74,6 +74,7 @@ static int pipestream_write( tl_iostream* super, const void* buffer,
                              size_t size, size_t* actual )
 {
     pipestream* this = (pipestream*)super;
+    tl_s64 pos = 0;
     DWORD result;
 
     if( actual )
@@ -84,12 +85,18 @@ static int pipestream_write( tl_iostream* super, const void* buffer,
     if( !this->whnd )
         return TL_ERR_NOT_SUPPORTED;
 
-    if( !WriteFile( this->whnd, buffer, size, &result, NULL ) )
+    if( super->flags & TL_STREAM_APPEND )
     {
-        if( GetLastError( )==ERROR_BROKEN_PIPE )
-            return TL_ERR_CLOSED;
-        return TL_ERR_INTERNAL;
+        pos = w32_lseek( this->whnd, 0, FILE_END );
+        if( pos < 0 )
+            return TL_ERR_INTERNAL;
     }
+
+    if( !WriteFile( this->whnd, buffer, size, &result, NULL ) )
+        return errno_to_fs( GetLastError( ) );
+
+    if( super->flags & TL_STREAM_APPEND )
+        w32_lseek( this->whnd, pos, FILE_BEGIN );
 
     if( actual )
         *actual = result;
@@ -112,16 +119,47 @@ static int pipestream_read( tl_iostream* super, void* buffer, size_t size,
         return TL_ERR_NOT_SUPPORTED;
 
     if( !ReadFile( this->rhnd, buffer, size, &result, NULL ) )
-    {
-        if( GetLastError( )==ERROR_BROKEN_PIPE )
-            return TL_ERR_CLOSED;
-        return TL_ERR_INTERNAL;
-    }
+        return errno_to_fs( GetLastError( ) );
 
     if( actual )
         *actual = result;
-    return result ? 0 : TL_ERR_CLOSED;
+
+    if( !result )
+    {
+        if( (super->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_FILE )
+            return TL_EOF;
+        return TL_ERR_CLOSED;
+    }
+    return 0;
 }
+
+/****************************************************************************/
+
+pipestream tl_stdio =
+{
+    {
+        TL_STREAM_TYPE_FILE,
+        NULL,
+        pipestream_set_timeout,
+        pipestream_write,
+        pipestream_read
+    },
+    NULL,
+    NULL
+};
+
+pipestream tl_stderr =
+{
+    {
+        TL_STREAM_TYPE_FILE,
+        NULL,
+        pipestream_set_timeout,
+        pipestream_write,
+        pipestream_read
+    },
+    NULL,
+    NULL
+};
 
 /****************************************************************************/
 

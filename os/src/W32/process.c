@@ -213,13 +213,23 @@ void tl_process_destroy( tl_process* this )
 
 tl_iostream* tl_process_get_stdio( tl_process* this )
 {
-    assert( this );
+    if( !this )
+    {
+        tl_stdio.rhnd = GetStdHandle( STD_INPUT_HANDLE );
+        tl_stdio.whnd = GetStdHandle( STD_OUTPUT_HANDLE );
+        return (tl_iostream*)&tl_stdio;
+    }
     return this->iostream;
 }
 
 tl_iostream* tl_process_get_stderr( tl_process* this )
 {
-    assert( this );
+    if( !this )
+    {
+        tl_stderr.rhnd = NULL;
+        tl_stderr.whnd = GetStdHandle( STD_ERROR_HANDLE );
+        return (tl_iostream*)&tl_stderr;
+    }
     return this->errstream;
 }
 
