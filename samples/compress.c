@@ -3,6 +3,8 @@
     uncompresses an input file.
  */
 #include "tl_compress.h"
+#include "tl_iostream.h"
+#include "tl_file.h"
 #include "tl_opt.h"
 #include "tl_fs.h"
 
@@ -118,8 +120,9 @@ int main( int argc, char** argv )
 {
     size_t numoptions = sizeof(options)/sizeof(options[0]);
     int i, status = EXIT_FAILURE, ret;
-    char line[128], *buffer;
-    FILE *infile, *outfile;
+    tl_iostream *infile, *outfile;
+    const tl_blob* map;
+    char line[128];
     tl_blob dst;
     tl_u64 size;
 
@@ -164,41 +167,34 @@ int main( int argc, char** argv )
     }
 
     /* open files */
-    infile = fopen( in, "rb" );
-    if( !infile )
+    if( tl_file_open( in, &infile, TL_READ ) != 0 )
     {
-        fprintf( stderr, "%s: %s\n", in, strerror(errno) );
+        fprintf( stderr, "error opening %s\n", in );
         return EXIT_FAILURE;
     }
 
-    outfile = fopen( out, "wb" );
-    if( !outfile )
+    if( tl_file_open( out, &outfile, TL_WRITE|TL_CREATE|TL_OVERWRITE ) != 0 )
     {
-        fprintf( stderr, "%s: %s\n", out, strerror(errno) );
+        fprintf( stderr, "error opening %s\n", out );
         goto outinf;
     }
 
-    /* read input file into buffer */
+    /* map input file into memory */
     size = tl_fs_get_file_size( in );
-    buffer = malloc( size );
 
-    if( !buffer )
+    map = tl_file_map( infile, 0, size, TL_MAP_READ );
+
+    if( !map )
     {
-        fputs( "Out of memory\n", stderr );
+        fprintf( stderr, "Error mapping %s\n", in );
         goto outfiles;
     }
 
-    if( fread( buffer, 1, size, infile ) != size )
-    {
-        fprintf( stderr, "fread: %s\n", strerror(errno) );
-        goto outbuf;
-    }
-
-    /* process input buffer */
+    /* process input */
     if( compress == COMP )
-        ret = tl_compress( &dst, buffer, size, algo, flags );
+        ret = tl_compress_blob( &dst, map, algo, flags );
     else
-        ret = tl_uncompress( &dst, buffer, size, algo );
+        ret = tl_uncompress_blob( &dst, map, algo );
 
     switch( ret )
     {
@@ -216,18 +212,18 @@ int main( int argc, char** argv )
     }
 
     /* write out result */
-    if( fwrite( dst.data, 1, dst.size, outfile ) != dst.size )
+    if( tl_iostream_write_blob( outfile, &dst, NULL ) != 0 )
     {
-        fprintf( stderr, "fwrite: %s\n", strerror(errno) );
+        fprintf( stderr, "write: %s\n", out );
         goto outblob;
     }
 
     /* cleanup */
     status = EXIT_SUCCESS;
 outblob:  tl_blob_cleanup( &dst );
-outbuf:   free( buffer );
-outfiles: fclose( outfile );
-outinf:   fclose( infile );
+outbuf:   tl_file_unmap( map );
+outfiles: outfile->destroy( outfile );
+outinf:   infile->destroy( infile );
     return status;
 }
 
