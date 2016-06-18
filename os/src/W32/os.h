@@ -43,7 +43,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-typedef struct pipestream pipestream;
+typedef struct fstream fstream;
 typedef struct sockstream sockstream;
 
 struct tl_monitor
@@ -55,7 +55,7 @@ struct tl_monitor
     unsigned int wait_count;
 };
 
-struct pipestream
+struct fstream
 {
     tl_iostream super;
     HANDLE rhnd;
@@ -69,8 +69,8 @@ struct sockstream
     SOCKET socket;
 };
 
-extern pipestream tl_stdio;
-extern pipestream tl_stderr;
+extern fstream tl_stdio;
+extern fstream tl_stderr;
 
 #ifdef __cplusplus
 extern "C" {
@@ -113,8 +113,8 @@ int tl_monitor_init( tl_monitor* monitor );
 /** \brief Destroy a monitor object */
 void tl_monitor_cleanup( tl_monitor* monitor );
 
-/** \brief Create a stream object that uses pipe HANDLE objects */
-tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd );
+/** \brief Create a stream object that uses pipe or file HANDLE objects */
+tl_iostream* fstream_create( HANDLE readhnd, HANDLE writehnd, int flags );
 
 /** \brief Set flags on socket */
 int set_socket_flags( SOCKET fd, int netlayer, int* flags );

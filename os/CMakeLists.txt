@@ -30,7 +30,7 @@ elseif( WIN32 )
                      src/W32/mutex.c
                      src/W32/threadpool.c
                      src/W32/sockstream.c
-                     src/W32/pipestream.c
+                     src/W32/fstream.c
                      src/W32/iostream.c
                      src/W32/file.c
                      src/W32/path.c

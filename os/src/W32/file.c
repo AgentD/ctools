@@ -40,10 +40,10 @@ tl_mmap_blob;
 int tl_file_open( const char* path, tl_iostream** file, int flags )
 {
     DWORD share = FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE;
+    int ret = 0, strflags = TL_STREAM_TYPE_FILE;
     DWORD access = 0, disp = OPEN_EXISTING;
     WCHAR* wpath;
     HANDLE fhnd;
-    int ret = 0;
 
     assert( file && path );
 
@@ -68,6 +68,9 @@ int tl_file_open( const char* path, tl_iostream** file, int flags )
     else if( flags & TL_CREATE )
         disp = OPEN_ALWAYS;
 
+    if( flags & TL_APPEND )
+        strflags |= TL_STREAM_APPEND;
+
     /* open file */
     ret = get_absolute_path( &wpath, path );
     if( ret!=0 )
@@ -83,13 +86,12 @@ int tl_file_open( const char* path, tl_iostream** file, int flags )
     }
 
     /* create stream */
-    *file = pipe_stream_create( flags & TL_READ  ? fhnd : NULL,
-                                flags & TL_WRITE ? fhnd : NULL );
+    *file = fstream_create( flags & TL_READ  ? fhnd : NULL,
+                            flags & TL_WRITE ? fhnd : NULL,
+                            strflags );
 
     if( !(*file) )
         ret = TL_ERR_ALLOC;
-
-    (*file)->flags = TL_STREAM_TYPE_FILE;
 out:
     free( wpath );
     return ret;
@@ -97,7 +99,7 @@ out:
 
 int tl_file_seek( tl_iostream* super, tl_u64 position )
 {
-    pipestream* this = (pipestream*)super;
+    fstream* this = (fstream*)super;
     HANDLE fhnd;
 
     assert( this );
@@ -116,7 +118,7 @@ int tl_file_seek( tl_iostream* super, tl_u64 position )
 
 int tl_file_tell( tl_iostream* super, tl_u64* position )
 {
-    pipestream* this = (pipestream*)super;
+    fstream* this = (fstream*)super;
     HANDLE fhnd;
     tl_s64 pos;
 
@@ -139,7 +141,7 @@ int tl_file_tell( tl_iostream* super, tl_u64* position )
 const tl_blob* tl_file_map( tl_iostream* super, tl_u64 offset,
                             size_t count, int flags )
 {
-    pipestream* this = (pipestream*)super;
+    fstream* this = (fstream*)super;
     DWORD prot = 0, viewprot = 0;
     tl_mmap_blob* blob;
     HANDLE fhnd, mhnd;

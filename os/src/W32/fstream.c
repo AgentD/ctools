@@ -1,5 +1,5 @@
 /*
- * pipestream.c
+ * fstream.c
  * This file is part of ctools
  *
  * Copyright (C) 2015 - David Oberhollenzer
@@ -26,9 +26,9 @@
 #include "tl_iostream.h"
 #include "os.h"
 
-static void pipestream_destroy( tl_iostream* super )
+static void fstream_destroy( tl_iostream* super )
 {
-    pipestream* this = (pipestream*)super;
+    fstream* this = (fstream*)super;
 
     assert( this );
     if( this->rhnd )
@@ -38,9 +38,9 @@ static void pipestream_destroy( tl_iostream* super )
     free( this );
 }
 
-static int pipestream_set_timeout( tl_iostream* super, unsigned int timeout )
+static int fstream_set_timeout( tl_iostream* super, unsigned int timeout )
 {
-    pipestream* this = (pipestream*)super;
+    fstream* this = (fstream*)super;
     COMMTIMEOUTS ct;
 
     assert( this );
@@ -70,10 +70,10 @@ static int pipestream_set_timeout( tl_iostream* super, unsigned int timeout )
     return 0;
 }
 
-static int pipestream_write( tl_iostream* super, const void* buffer,
-                             size_t size, size_t* actual )
+static int fstream_write( tl_iostream* super, const void* buffer,
+                          size_t size, size_t* actual )
 {
-    pipestream* this = (pipestream*)super;
+    fstream* this = (fstream*)super;
     tl_s64 pos = 0;
     DWORD result;
 
@@ -104,10 +104,10 @@ static int pipestream_write( tl_iostream* super, const void* buffer,
     return 0;
 }
 
-static int pipestream_read( tl_iostream* super, void* buffer, size_t size,
-                            size_t* actual )
+static int fstream_read( tl_iostream* super, void* buffer, size_t size,
+                         size_t* actual )
 {
-    pipestream* this = (pipestream*)super;
+    fstream* this = (fstream*)super;
     DWORD result;
 
     if( actual )
@@ -135,27 +135,27 @@ static int pipestream_read( tl_iostream* super, void* buffer, size_t size,
 
 /****************************************************************************/
 
-pipestream tl_stdio =
+fstream tl_stdio =
 {
     {
         TL_STREAM_TYPE_FILE,
         NULL,
-        pipestream_set_timeout,
-        pipestream_write,
-        pipestream_read
+        fstream_set_timeout,
+        fstream_write,
+        fstream_read
     },
     NULL,
     NULL
 };
 
-pipestream tl_stderr =
+fstream tl_stderr =
 {
     {
         TL_STREAM_TYPE_FILE,
         NULL,
-        pipestream_set_timeout,
-        pipestream_write,
-        pipestream_read
+        fstream_set_timeout,
+        fstream_write,
+        fstream_read
     },
     NULL,
     NULL
@@ -163,20 +163,20 @@ pipestream tl_stderr =
 
 /****************************************************************************/
 
-tl_iostream* pipe_stream_create( HANDLE readhnd, HANDLE writehnd )
+tl_iostream* fstream_create( HANDLE readhnd, HANDLE writehnd, int flags )
 {
-    pipestream* this = calloc( 1, sizeof(pipestream) );
+    fstream* this = calloc( 1, sizeof(fstream) );
     tl_iostream* super = (tl_iostream*)this;
 
     if( this )
     {
         this->rhnd         = readhnd;
         this->whnd         = writehnd;
-        super->flags       = TL_STREAM_TYPE_PIPE;
-        super->read        = pipestream_read;
-        super->write       = pipestream_write;
-        super->destroy     = pipestream_destroy;
-        super->set_timeout = pipestream_set_timeout;
+        super->flags       = flags;
+        super->read        = fstream_read;
+        super->write       = fstream_write;
+        super->destroy     = fstream_destroy;
+        super->set_timeout = fstream_set_timeout;
     }
     return super;
 }
