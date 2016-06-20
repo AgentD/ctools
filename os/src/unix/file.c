@@ -59,7 +59,7 @@ int tl_file_open( const char* path, tl_iostream** file, int flags )
     readfd = flags & TL_READ ? fd : -1;
     writefd = flags & TL_WRITE ? fd : -1;
 
-    *file = pipe_stream_create( readfd, writefd, sf );
+    *file = fdstream_create( readfd, writefd, sf );
     if( !(*file) )
     {
         close( fd );

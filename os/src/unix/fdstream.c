@@ -162,7 +162,7 @@ fd_stream tl_stderr =
 
 /****************************************************************************/
 
-tl_iostream* pipe_stream_create( int readfd, int writefd, int flags )
+tl_iostream* fdstream_create( int readfd, int writefd, int flags )
 {
     fd_stream* this = calloc( 1, sizeof(fd_stream) );
     tl_iostream* super = (tl_iostream*)this;

@@ -74,7 +74,7 @@ struct tl_monitor
     pthread_cond_t cond;
 };
 
-#define sock_stream_create( fd, flags ) pipe_stream_create(fd,fd,flags)
+#define sock_stream_create( fd, flags ) fdstream_create(fd,fd,flags)
 
 extern fd_stream tl_stdio;
 extern fd_stream tl_stderr;
@@ -103,7 +103,7 @@ int wait_for_fd( int fd, unsigned long timeoutms, int writeable );
  * \param writepipe A file descriptor to write to
  * \param flags     Flags to set for the underlying tl_iostream structure
  */
-tl_iostream* pipe_stream_create( int readpipe, int writepipe, int flags );
+tl_iostream* fdstream_create( int readpipe, int writepipe, int flags );
 
 /** \brief Initialize a monitor object */
 int tl_monitor_init( tl_monitor* monitor );
