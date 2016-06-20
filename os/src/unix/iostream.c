@@ -35,6 +35,7 @@ int __tl_os_splice( tl_iostream* out, tl_iostream* in,
 {
     int outtype, intype, infd, outfd, fds[2];
     ssize_t res = -1;
+    off_t old = 0;
 
     /* get fds */
     tl_unix_iostream_fd( in, fds );
@@ -56,10 +57,20 @@ int __tl_os_splice( tl_iostream* out, tl_iostream* in,
     outtype = out->flags & TL_STREAM_TYPE_MASK;
     intype  = in->flags  & TL_STREAM_TYPE_MASK;
 
+    if( out->flags & TL_STREAM_APPEND )
+    {
+        old = lseek( outfd, 0, SEEK_END );
+        if( old == (off_t)-1 )
+            return TL_ERR_INTERNAL;
+    }
+
     if( (intype == TL_STREAM_TYPE_PIPE) || (outtype == TL_STREAM_TYPE_PIPE) )
         res = splice( infd, NULL, outfd, NULL, count, SPLICE_F_MOVE );
     else if( intype == TL_STREAM_TYPE_FILE )
         res = sendfile( outfd, infd, NULL, count );
+
+    if( out->flags & TL_STREAM_APPEND )
+        lseek( outfd, old, SEEK_SET );
 
     /* let the fallback implementation retry and figure that out */
     if( res <= 0 )
