@@ -24,48 +24,42 @@
  */
 #define TL_OS_EXPORT
 #include "tl_iostream.h"
+#include "tl_unix.h"
 #include "os.h"
 
 #ifdef __linux__
+#include <sys/sendfile.h>
+
 int __tl_os_splice( tl_iostream* out, tl_iostream* in,
                     size_t count, size_t* actual )
 {
-    int outtype, intype, infd, outfd;
-    ssize_t res;
+    int outtype, intype, infd, outfd, fds[2];
+    ssize_t res = -1;
 
+    /* get fds */
+    tl_unix_iostream_fd( in, fds );
+    infd = fds[0];
+
+    tl_unix_iostream_fd( out, fds );
+    outfd = fds[1];
+
+    if( infd==-1 || outfd==-1 )
+        return TL_ERR_NOT_SUPPORTED;
+
+    if( !wait_for_fd( infd, ((fd_stream*)in)->timeout, 0 ) )
+        return TL_ERR_TIMEOUT;
+
+    if( !wait_for_fd( outfd, ((fd_stream*)out)->timeout, 1 ) )
+        return TL_ERR_TIMEOUT;
+
+    /* splice */
     outtype = out->flags & TL_STREAM_TYPE_MASK;
     intype  = in->flags  & TL_STREAM_TYPE_MASK;
 
-    if( (intype != TL_STREAM_TYPE_PIPE) && (outtype != TL_STREAM_TYPE_PIPE) )
-        return TL_ERR_NOT_SUPPORTED;
-
-    switch( intype )
-    {
-    case TL_STREAM_TYPE_PIPE:
-    case TL_STREAM_TYPE_FILE:
-    case TL_STREAM_TYPE_SOCK:
-        infd = ((fd_stream*)in)->readfd;
-        if( !wait_for_fd( infd, ((fd_stream*)in)->timeout, 0 ) )
-            return TL_ERR_TIMEOUT;
-        break;
-    default:
-        return TL_ERR_NOT_SUPPORTED;
-    }
-
-    switch( outtype )
-    {
-    case TL_STREAM_TYPE_PIPE:
-    case TL_STREAM_TYPE_FILE:
-    case TL_STREAM_TYPE_SOCK:
-        outfd = ((fd_stream*)out)->writefd;
-        if( !wait_for_fd( infd, ((fd_stream*)out)->timeout, 1 ) )
-            return TL_ERR_TIMEOUT;
-        break;
-    default:
-        return TL_ERR_NOT_SUPPORTED;
-    }
-
-    res = splice( infd, NULL, outfd, NULL, count, SPLICE_F_MOVE );
+    if( (intype == TL_STREAM_TYPE_PIPE) || (outtype == TL_STREAM_TYPE_PIPE) )
+        res = splice( infd, NULL, outfd, NULL, count, SPLICE_F_MOVE );
+    else if( intype == TL_STREAM_TYPE_FILE )
+        res = sendfile( outfd, infd, NULL, count );
 
     /* let the fallback implementation retry and figure that out */
     if( res <= 0 )
