@@ -37,6 +37,8 @@ int tl_file_open( const char* path, tl_iostream** file, int flags )
 
     if( flags & TL_APPEND )
         flags |= TL_WRITE;
+    if( flags & TL_EXECUTE )
+        flags |= TL_READ;
 
     if( (flags & (~TL_ALL_OPEN_FLAGS)) || !(flags & (TL_READ|TL_WRITE)) )
         return TL_ERR_ARG;

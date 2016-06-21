@@ -63,7 +63,11 @@ typedef enum
     /** \brief Open a file for writing */
     TL_WRITE = 0x02,
 
-    /** \brief The file is intended for mapping with execute permissions */
+    /**
+     * \brief The file is going to be mapped with execute permissions
+     *
+     * Implies TL_READ
+     */
     TL_EXECUTE = 0x04,
 
     /** \brief Write all data to the end of a file. Implies TL_WRITE */
