@@ -43,6 +43,11 @@
  * \ref TL_COMPRESS_FLAGS for possible flags that can be used to tweek data
  * compression.
  *
+ * Alternatively, the functions implementing the algorithms can be called
+ * directly:
+ * \li \ref tl_deflate
+ * \li \ref tl_inflate
+ *
  * A few wrapper functions are provided for compressing and uncompressing
  * tl_blob or tl_string objects:
  * \li \ref tl_compress_blob
@@ -98,6 +103,14 @@ extern "C" {
 /**
  * \brief Compress a chunk of data
  *
+ * This function is a convinience wrapper for the various built in
+ * compression routines like \ref tl_deflate. It calls an actual
+ * compression routine based on an algorithm ID.
+ *
+ * In custom builds, some algorithms may not be compiled in. This function
+ * has a compile time check and returns \ref TL_ERR_NOT_SUPPORTED if an
+ * algorithm is specified that has not been compiled in.
+ *
  * \param dst   A pointer to an \b uninitialized blob object to write
  *              the compressed output to.
  * \param src   A pointer to a block of data to compress
@@ -116,8 +129,16 @@ TLAPI int tl_compress( tl_blob* dst, const void* src, size_t size,
 /**
  * \brief Uncompress a chunk of data
  *
+ * This function is a convinience wrapper for the various built in
+ * uncompression routines like \ref tl_inflate. It calls an actual
+ * uncompression routine based on an algorithm ID.
+ *
+ * In custom builds, some algorithms may not be compiled in. This function
+ * has a compile time check and returns \ref TL_ERR_NOT_SUPPORTED if an
+ * algorithm is specified that has not been compiled in.
+ *
  * \param dst   A pointer to an \b uninitialized blob object to write
- *              the compressed output to.
+ *              the uncompressed output to.
  * \param src   A pointer to a block of compressed data
  * \param size  The number of bytes to read from the input block
  * \param algo  What compression algorithm to use (see \ref TL_COMPRESSION)
@@ -128,6 +149,42 @@ TLAPI int tl_compress( tl_blob* dst, const void* src, size_t size,
  */
 TLAPI int tl_uncompress( tl_blob* dst, const void* src,
                          size_t size, int algo );
+
+/**
+ * \brief Deflate compress a chunk of data
+ *
+ * \note In some custom builds of the library, this function may not
+ *       be compiled in. Only use this function if you are absolutely sure
+ *       you must use deflate. Otherwise, use \ref tl_compress.
+ *
+ * \param dst   A pointer to an \b uninitialized blob object to write
+ *              the compressed output to.
+ * \param src   A pointer to a block of data to compress
+ * \param size  The number of bytes in the input block to compress
+ * \param flags Flags that can be used to tweek the compression algorithm
+ *              (see \ref TL_COMPRESS_FLAGS)
+ *
+ * \return Zero on success, a negative value on failure
+ *         (see \ref TL_ERROR_CODE).
+ */
+TLAPI int tl_deflate(tl_blob* dst, const void* data, size_t size, int flags);
+
+/**
+ * \brief Uncompress a deflate compressed chunk of data
+ *
+ * \note In some custom builds of the library, this function may not
+ *       be compiled in. Only use this function if you are absolutely sure
+ *       you must use inflate. Otherwise, use \ref tl_uncompress.
+ *
+ * \param dst  A pointer to an \b uninitialized blob object to write
+ *             the uncompressed output to.
+ * \param src  A pointer to a block of compressed data
+ * \param size The number of bytes to read from the input block
+ *
+ * \return Zero on success, a negative value on failure
+ *         (see \ref TL_ERROR_CODE).
+ */
+TLAPI int tl_inflate( tl_blob* dst, const void* data, size_t size );
 
 /**
  * \brief A wrapper for tl_compress that uses a tl_blob object as input
@@ -186,26 +243,6 @@ static TL_INLINE int tl_compress_string( tl_blob* dst, const tl_string* str,
 {
     return tl_compress(dst, str->data.data, str->data.used - 1, algo, flags);
 }
-
-/**
- * \brief Uncompress a block of data into a string
- *
- * The data is uncompressed into a tl_string with the apropriate character
- * count and length fields computed. It is assumed that the compressed block
- * does not contain a null-terminator; it is added to the string.
- *
- * \param dst  A pointer to an \b uninitialized string to initialize with
- *             the uncompressed data.
- * \param src  A chunk of data to uncompress
- * \param size The number of bytes to read and uncompress
- * \param algo The compression algorithms used (see \ref TL_COMPRESSION)
- *
- * \return Zero on success, a negative value on failure
- *         (see \ref TL_ERROR_CODE). TL_ERR_NOT_SUPPORTED if the algorithm
- *         is unknown.
- */
-TLAPI int tl_uncompress_string( tl_string* dst, const void* src,
-                                size_t size, int algo );
 
 #ifdef __cplusplus
 }

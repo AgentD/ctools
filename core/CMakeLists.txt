@@ -33,6 +33,8 @@ if( HAVE_DEFLATE )
 
     message( STATUS "Using our own zlib copy" )
   endif( )
+
+  set( ZLIB_SRCS ${ZLIB_SRCS} src/deflate )
 endif( )
 
 add_library( tlcore ${TYPE} src/array.c
