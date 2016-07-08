@@ -50,6 +50,7 @@ add_library( tlcore ${TYPE} src/array.c
                             src/compress.c
                             src/opt.c
                             src/hash.c
+                            src/base64.c
                             ${ZLIB_SRCS} )
 
 if( ZLIB_FOUND )
@@ -79,6 +80,7 @@ install( FILES include/tl_allocator.h
                include/tl_utf16.h
                include/tl_utf8.h
                include/tl_compress.h
+               include/tl_convert.h
          DESTINATION include )
 
 install( TARGETS tlcore LIBRARY DESTINATION lib

@@ -68,23 +68,6 @@ struct tl_blob
     size_t size;
 };
 
-/**
- * \enum TL_BLOB_FLAGS
- *
- * \brief Miscellaneous flags for tl_blob operations
- */
-typedef enum
-{
-    /** \brief If set, ignore invalid characters when decoding base 64 */
-    TL_BLOB_BASE64_IGNORE_GARBAGE = 0x01,
-
-    /** \brief If set, use '-' and '_' for 62 and 63 instead of '+' and '/' */
-    TL_BLOB_BASE64_ALT_ENC = 0x02
-}
-TL_BLOB_FLAGS;
-
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -287,39 +270,6 @@ TLAPI void tl_blob_remove( tl_blob* blob, size_t offset, size_t length );
  *               at this offset is removed.
  */
 TLAPI void tl_blob_truncate( tl_blob* blob, size_t offset );
-
-/**
- * \brief Encode a blob using base64
- *
- * \memberof tl_blob
- *
- * \note This function fails if an unsupported flag is set
- *
- * \param dst A pointer to an uninitialized destinaton blob
- * \param src A pointer to the source blob to encode.
- * \param alt If \ref TL_BLOB_BASE64_ALT_ENC is set, '-' and '_' are used
- *            for indices 62 and 63, otherwise '+' and '/' are used.
- *
- * \return Non-zero on success, zero on failure
- */
-TLAPI int tl_blob_encode_base64(tl_blob* dst, const tl_blob* src, int flags);
-
-/**
- * \brief Decode base64 encoded data from a blob
- *
- * \memberof tl_blob
- *
- * \note This function fails if an unsupported flag is set
- *
- * \param dst   A pointer to an uninitialized destinatioin blob
- * \param src   A pointer to the source blob to decode.
- * \param flags If \ref TL_BLOB_BASE64_IGNORE_GARBAGE is set, "garbage"
- *              characters that are not valid base64 characters are ignored.
- *              If not set, only space characters are ignored.
- *
- * \return Non-zero on success, zero on failure
- */
-TLAPI int tl_blob_decode_base64(tl_blob* dst, const tl_blob* src, int flags);
 
 #ifdef __cplusplus
 }

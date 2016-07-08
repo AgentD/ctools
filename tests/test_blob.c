@@ -5,22 +5,6 @@
 
 
 
-const char* strings[] =
-{
-    "",            "",
-    "A",           "QQ==",
-    "AA",          "QUE=",
-    "AAA",         "QUFB",
-    "AAAA",        "QUFBQQ==",
-    "AAAAA",       "QUFBQUE=",
-    "AAAAAA",      "QUFBQUFB",
-    "Foobar Test", "Rm9vYmFyIFRlc3Q=",
-    "Foobartest",  "Rm9vYmFydGVzdA==",
-    "Foobar",      "Rm9vYmFy",
-};
-
-
-
 int main( void )
 {
     unsigned char buffer[ 256 ];
@@ -88,27 +72,6 @@ int main( void )
     }
     tl_blob_cleanup( &b0 );
     tl_blob_cleanup( &b1 );
-
-    /********** base64 **********/
-    for( i=0; i<sizeof(strings)/sizeof(strings[0]); i+=2 )
-    {
-        tl_blob_init( &b0, strlen( strings[ i ] ), strings[ i ] );
-        if( !tl_blob_encode_base64( &b1, &b0, 0 ) )
-            return EXIT_FAILURE;
-        if( strncmp( b1.data, strings[i+1], strlen( strings[i+1] ) ) )
-            return EXIT_FAILURE;
-
-        tl_blob_cleanup( &b0 );
-        if( !tl_blob_decode_base64( &b0, &b1, 0 ) )
-            return EXIT_FAILURE;
-        if( b0.size!=strlen(strings[i]) )
-            return EXIT_FAILURE;
-        if( strncmp( b0.data, strings[ i ], strlen( strings[ i ] ) ) )
-            return EXIT_FAILURE;
-
-        tl_blob_cleanup( &b0 );
-        tl_blob_cleanup( &b1 );
-    }
 
     /********** append **********/
     for( i=0; i<sizeof(buffer); ++i )
@@ -300,5 +263,4 @@ int main( void )
 
     return EXIT_SUCCESS;
 }
-
 
