@@ -321,16 +321,6 @@ TLAPI int tl_blob_encode_base64(tl_blob* dst, const tl_blob* src, int flags);
  */
 TLAPI int tl_blob_decode_base64(tl_blob* dst, const tl_blob* src, int flags);
 
-/**
- * \brief Treat a blob as an array of integers and byteswap them
- *
- * \memberof tl_blob
- *
- * \param blob A pointer to a blob
- * \param size The sizeof of a signle integer
- */
-TLAPI void tl_blob_byteswap( tl_blob* blob, int size );
-
 #ifdef __cplusplus
 }
 #endif
