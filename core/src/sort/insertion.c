@@ -1,5 +1,5 @@
 /*
- * compress.c
+ * insertion.c
  * This file is part of ctools
  *
  * Copyright (C) 2015 - David Oberhollenzer
@@ -23,25 +23,36 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #define TL_EXPORT
-#include "tl_compress.h"
+#include "tl_sort.h"
 
 #include <string.h>
 #include <stdlib.h>
 
-
-int tl_compress( tl_blob* dst, const void* src, size_t size,
-                 int algo, int flags )
+static TL_INLINE void swap( char* a, char* b, size_t n )
 {
-    switch( algo )
-    {
-#ifdef TL_HAVE_DEFLATE
-    case TL_DEFLATE:
-        return tl_deflate( dst, src, size, flags );
-#endif
-    default:
-        break;
-    }
+    size_t i;
+    char t;
 
-    return TL_ERR_NOT_SUPPORTED;
+    for( i=0; i<n; ++i )
+    {
+        t = *a;
+        *a++ = *b;
+        *b++ = t;
+    }
+}
+
+void tl_insertionsort( void* data, size_t n, size_t size, tl_compare cmp )
+{
+    char* first = (char*)data + size;
+    char* limit = (char*)data + n*size;
+    char *ptr, *pl;
+
+    for( ptr=first; ptr<limit; ptr+=size )
+    {
+        for( pl=ptr; pl>(char*)data && cmp(pl-size, pl)>0; pl-=size )
+        {
+            swap( pl, pl - size, size );
+        }
+    }
 }
 

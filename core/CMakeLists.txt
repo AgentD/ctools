@@ -34,23 +34,38 @@ if( HAVE_DEFLATE )
     message( STATUS "Using our own zlib copy" )
   endif( )
 
-  set( ZLIB_SRCS ${ZLIB_SRCS} src/deflate.c )
+  set( COMP_SRC src/comp/deflate.c
+                src/comp/inflate.c )
 endif( )
+
+set( HASH_SRC src/hash/crc32.c
+              src/hash/murmur3.c )
+
+set( SORT_SRC src/sort/heap.c
+              src/sort/insertion.c
+              src/sort/merge.c
+              src/sort/merge_ip.c
+              src/sort/quick.c )
+
+set( CONV_SRC src/conv/base64_dec.c
+              src/conv/base64_enc.c )
 
 add_library( tlcore ${TYPE} src/array.c
                             src/list.c
                             src/rbtree.c
                             src/string.c
-                            src/sort.c
                             src/hashmap.c
                             src/utf8.c
                             src/utf16.c
                             src/allocator.c
                             src/blob.c
                             src/compress.c
+                            src/uncompress.c
                             src/opt.c
-                            src/hash.c
-                            src/base64.c
+                            ${SORT_SRC}
+                            ${HASH_SRC}
+                            ${CONV_SRC}
+                            ${COMP_SRC}
                             ${ZLIB_SRCS} )
 
 if( ZLIB_FOUND )
