@@ -8,6 +8,12 @@
 #ifndef TL_INTERNAL_PLATFORM_H
 #define TL_INTERNAL_PLATFORM_H
 
+#if defined(MACHINE_OS_WINDOWS)
+    #include "W32/os.h"
+#elif defined(MACHINE_OS_UNIX)
+    #include "unix/os.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

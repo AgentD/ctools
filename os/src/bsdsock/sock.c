@@ -6,8 +6,8 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 #define TL_OS_EXPORT
+#include "../platform.h"
 #include "sock.h"
-#include "os.h"
 
 #include <string.h>
 

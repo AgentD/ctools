@@ -31,6 +31,10 @@
     #define closesocket close
     #define INVALID_SOCKET (-1)
     #define SOCKET_ERROR (-1)
+
+    static TL_INLINE int winsock_acquire(void) { return 1; }
+
+    #define winsock_release( )
 #endif
 
 #include "tl_packetserver.h"

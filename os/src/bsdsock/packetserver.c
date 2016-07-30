@@ -8,8 +8,8 @@
 #define TL_OS_EXPORT
 #include "tl_network.h"
 #include "tl_packetserver.h"
+#include "../platform.h"
 #include "sock.h"
-#include "os.h"
 
 static void udp_set_timeout( tl_packetserver* super, unsigned int timeout )
 {

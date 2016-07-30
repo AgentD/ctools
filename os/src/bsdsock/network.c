@@ -6,8 +6,8 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 #define TL_OS_EXPORT
+#include "../platform.h"
 #include "sock.h"
-#include "os.h"
 
 tl_server* tl_network_create_server( const tl_net_addr* addr,
                                      unsigned int backlog, int flags )
