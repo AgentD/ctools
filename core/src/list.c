@@ -7,7 +7,6 @@
  */
 #define TL_EXPORT
 #include "tl_allocator.h"
-#include "tl_iterator.h"
 #include "tl_list.h"
 
 #include <stdlib.h>
@@ -25,122 +24,6 @@
     #define ALLIGN( ptr )
 #endif
 
-
-
-typedef struct
-{
-    tl_iterator super;  /* inherits iterator interface */
-    tl_list_node* node; /* pointer to current node */
-    tl_list* list;      /* pointer to list that created the iterator */
-    int forward;        /* nonzero: from head to tail. zero: reverse */
-}
-tl_list_iterator;
-
-
-
-static void tl_list_iterator_destroy( tl_iterator* this )
-{
-    free( this );
-}
-
-static void tl_list_iterator_reset( tl_iterator* super )
-{
-    tl_list_iterator* this = (tl_list_iterator*)super;
-
-    this->node = this->forward ? this->list->first : this->list->last;
-}
-
-static int tl_list_iterator_has_data( tl_iterator* super )
-{
-    tl_list_iterator* this = (tl_list_iterator*)super;
-
-    return this->node != NULL;
-}
-
-static void tl_list_iterator_next( tl_iterator* super )
-{
-    tl_list_iterator* this = (tl_list_iterator*)super;
-
-    if( this->node )
-        this->node = this->forward ? this->node->next : this->node->prev;
-}
-
-static void* tl_list_iterator_get_key( tl_iterator* this )
-{
-    (void)this;
-    return NULL;
-}
-
-static void* tl_list_iterator_get_value( tl_iterator* super )
-{
-    tl_list_iterator* this = (tl_list_iterator*)super;
-    return this->node ? tl_list_node_get_data( this->node ) : NULL;
-}
-
-static void tl_list_iterator_remove( tl_iterator* super )
-{
-    tl_list_iterator* this = (tl_list_iterator*)super;
-    tl_list_node* old;
-
-    if( !this->node )
-        return;
-
-    old = this->node;
-
-    if( this->list->size )
-        --this->list->size;
-
-    if( this->node == this->list->first )       /* node is first in list */
-    {
-        this->node = this->node->next;
-        this->list->first = this->node;
-
-        if( this->node )
-            this->node->prev = NULL;
-        else
-            this->list->last = NULL;
-    }
-    else if( this->node == this->list->last )   /* node is last in list */
-    {
-        this->node = this->node->prev;
-        this->list->last = this->node;
-
-        if( this->node )
-            this->node->next = NULL;
-        else
-            this->list->first = NULL;
-    }
-    else
-    {
-        this->node->prev->next = this->node->next;
-        this->node->next->prev = this->node->prev;
-        this->node = this->forward ? this->node->next : this->node->prev;
-    }
-
-    /* destroy node */
-    tl_list_node_destroy( old, this->list );
-}
-
-static tl_iterator* tl_list_iterator_create( tl_list* list, int first )
-{
-    tl_list_iterator* this = malloc( sizeof(tl_list_iterator) );
-    tl_iterator* super = (tl_iterator*)this;
-
-    this->list = list;
-    this->node = first ? list->first : list->last;
-    this->forward = first;
-
-    super->destroy = tl_list_iterator_destroy;
-    super->reset = tl_list_iterator_reset;
-    super->has_data = tl_list_iterator_has_data;
-    super->next = tl_list_iterator_next;
-    super->get_key = tl_list_iterator_get_key;
-    super->get_value = tl_list_iterator_get_value;
-    super->remove = tl_list_iterator_remove;
-    return super;
-}
-
-/****************************************************************************/
 
 tl_list_node* tl_list_node_create( const tl_list* this, const void* data )
 {
@@ -721,17 +604,5 @@ tl_list_node* tl_list_drop_last( tl_list* this )
     }
 
     return n;
-}
-
-tl_iterator* tl_list_first( tl_list* this )
-{
-    assert( this );
-    return tl_list_iterator_create( this, 1 );
-}
-
-tl_iterator* tl_list_last( tl_list* this )
-{
-    assert( this );
-    return tl_list_iterator_create( this, 0 );
 }
 

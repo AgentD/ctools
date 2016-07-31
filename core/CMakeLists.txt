@@ -52,6 +52,10 @@ set( SORT_SRC src/sort/heap.c
 set( CONV_SRC src/conv/base64_dec.c
               src/conv/base64_enc.c )
 
+set( ITER_SRC src/iterator/array.c
+              src/iterator/list.c
+              src/iterator/hashmap.c )
+
 add_library( tlcore ${TYPE} src/array.c
                             src/list.c
                             src/rbtree.c
@@ -68,6 +72,7 @@ add_library( tlcore ${TYPE} src/array.c
                             ${HASH_SRC}
                             ${CONV_SRC}
                             ${COMP_SRC}
+                            ${ITER_SRC}
                             ${ZLIB_SRCS} )
 
 if( ZLIB_FOUND )
