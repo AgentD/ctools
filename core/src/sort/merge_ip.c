@@ -1,4 +1,4 @@
-/* merge_ip.c -- This file is part of ctools
+/* merge_list.c -- This file is part of ctools
  *
  * Copyright (C) 2015 - David Oberhollenzer
  *

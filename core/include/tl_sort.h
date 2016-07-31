@@ -198,6 +198,26 @@ TLAPI int tl_mergesort( void* data, size_t elements, size_t size,
 TLAPI void tl_mergesort_inplace( void* data, size_t elements,
                                  size_t size, tl_compare cmp );
 
+/**
+ * \brief Sort a linked list using merge sort
+ *
+ * Merge sort is guaranteed to run in linearithmic time (or linear if
+ * already sorted). The linked list implementation only needs logarithmic
+ * stack space and has no other memory overhead. A linear number of steps
+ * is requried at each recursion level to split the list in half.
+ *
+ * Merge sort is a stable sorting algorithm.
+ *
+ * \param list     A pointer to the head of the list
+ * \param elements The number of elements in the list
+ * \param cmp      A function used for comparing the data stored
+ *                 in two elements
+ *
+ * \return A pointer to the new head of the list
+ */
+TLAPI tl_list_node* tl_mergesort_list( tl_list_node* list, size_t elements,
+                                       tl_compare cmp );
+
 #ifdef __cplusplus
 }
 #endif

@@ -45,6 +45,8 @@ set( SORT_SRC src/sort/heap.c
               src/sort/insertion.c
               src/sort/merge.c
               src/sort/merge_ip.c
+              src/sort/merge_list.c
+              src/sort/merge_array.c
               src/sort/quick.c )
 
 set( CONV_SRC src/conv/base64_dec.c
