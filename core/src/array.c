@@ -280,40 +280,6 @@ int tl_array_append_array( tl_array* this, const void* data, size_t count )
     return 1;
 }
 
-int tl_array_insert_sorted( tl_array* this, tl_compare cmp,
-                            const void* element )
-{
-    size_t i = 0;
-    char* ptr;
-
-    assert( this && cmp && element );
-
-    /* for each element */
-    for( ptr=this->data, i=0; i<this->used; ++i, ptr+=this->unitsize )
-    {
-        /* if we found the first element that is larger */
-        if( cmp( ptr, element )>0 )
-        {
-            /* allocate space for one more element */
-            if( !tl_array_resize( this, this->used+1, 0 ) )
-                return 0;
-
-            /* move rest of the array ahead */
-            ptr = (char*)this->data + i*this->unitsize;
-
-            memmove( ptr + this->unitsize, ptr,
-                     (this->used-1-i) * this->unitsize );
-
-            /* insert and return success */
-            tl_allocator_copy( this->alloc, ptr, element, this->unitsize, 1 );
-            return 1;
-        }
-    }
-
-    /* no element found that is smaller? */
-    return tl_array_append( this, element );
-}
-
 void tl_array_remove_first( tl_array* this )
 {
     assert( this );
@@ -331,54 +297,6 @@ void tl_array_remove_first( tl_array* this )
         this->used -= 1;
         tl_array_try_shrink( this );
     }
-}
-
-void* tl_array_search( const tl_array* this, tl_compare cmp, const void* key )
-{
-    size_t i, l, u;
-    char* ptr;
-    int cv;
-
-    assert( this && cmp && key );
-
-    if( !this->used )
-        return NULL;
-
-    l = 0;
-    u = this->used;
-
-    while( l < u )
-    {
-        i = (l + u) >> 1;
-        ptr = (char*)this->data + i*this->unitsize;
-        cv = cmp( key, ptr );
-
-        if( cv<0 )
-            u = i;
-        else if( cv>0 )
-            l = i + 1;
-        else
-            return ptr;
-    }
-
-    return NULL;
-}
-
-void* tl_array_search_unsorted( const tl_array* this, tl_compare cmp,
-                                const void* key )
-{
-    char* ptr;
-    size_t i;
-
-    assert( this && cmp && key );
-
-    for( ptr=this->data, i=0; i<this->used; ++i, ptr+=this->unitsize )
-    {
-        if( cmp( ptr, key )==0 )
-            return ptr;
-    }
-
-    return NULL;
 }
 
 void tl_array_try_shrink( tl_array* this )

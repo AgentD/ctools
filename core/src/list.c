@@ -434,50 +434,6 @@ int tl_list_insert( tl_list* this, size_t idx,
     return 1;
 }
 
-int tl_list_insert_sorted( tl_list* this, tl_compare cmp,
-                           const void* element )
-{
-    tl_list_node *n, *t;
-
-    assert( this && cmp && element );
-
-    if( !(t = tl_list_node_create( this, element )) )
-        return 0;
-
-    if( !this->size )
-    {
-        this->first = this->last = t;
-    }
-    else if( cmp( element, tl_list_node_get_data(this->first) )<=0 )
-    {
-        t->next = this->first;
-        this->first->prev = t;
-        this->first = t;
-    }
-    else
-    {
-        for( n=this->first; n; n=n->next )
-        {
-            if( cmp( tl_list_node_get_data(n), element )>0 )
-            {
-                t->next = n;
-                t->prev = n->prev;
-
-                t->next->prev = t;
-                t->prev->next = t;
-                goto done;
-            }
-        }
-
-        t->prev = this->last;
-        this->last->next = t;
-        this->last = t;
-    }
-done:
-    this->size += 1;
-    return 1;
-}
-
 void tl_list_remove_first( tl_list* this )
 {
     tl_list_node* n;
@@ -546,22 +502,6 @@ void tl_list_clear( tl_list* this )
         n = n->next;
         tl_list_node_destroy( old, this );
     }
-}
-
-tl_list_node* tl_list_search( const tl_list* this, tl_compare cmp,
-                              const void* key )
-{
-    tl_list_node* n;
-
-    assert( this && cmp && key );
-
-    for( n=this->first; n; n=n->next )
-    {
-        if( cmp( tl_list_node_get_data( n ), key )==0 )
-            return n;
-    }
-
-    return NULL;
 }
 
 tl_list_node* tl_list_drop_first( tl_list* this )

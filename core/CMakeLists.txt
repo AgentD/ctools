@@ -38,6 +38,12 @@ if( HAVE_DEFLATE )
                 src/comp/inflate.c )
 endif( )
 
+set( SEARCH_SRC src/search/array.c
+                src/search/array_insert_sorted.c
+                src/search/array_unsorted.c
+                src/search/list.c
+                src/search/list_insert_sorted.c )
+
 set( HASH_SRC src/hash/crc32.c
               src/hash/murmur3.c )
 
@@ -68,6 +74,7 @@ add_library( tlcore ${TYPE} src/array.c
                             src/compress.c
                             src/uncompress.c
                             src/opt.c
+                            ${SEARCH_SRC}
                             ${SORT_SRC}
                             ${HASH_SRC}
                             ${CONV_SRC}
