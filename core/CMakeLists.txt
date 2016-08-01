@@ -64,6 +64,7 @@ set( ITER_SRC src/iterator/array.c
 
 add_library( tlcore ${TYPE} src/array.c
                             src/list.c
+                            src/list_node.c
                             src/rbtree.c
                             src/string.c
                             src/hashmap.c
