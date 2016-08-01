@@ -62,11 +62,18 @@ set( ITER_SRC src/iterator/array.c
               src/iterator/list.c
               src/iterator/hashmap.c )
 
+set( STRING_SRC src/string.c
+                src/string/append_utf8.c
+                src/string/append_utf16.c
+                src/string/append_latin1.c
+                src/string/to_utf16.c
+                src/string/tokenize.c
+                src/string/allocator.c )
+
 add_library( tlcore ${TYPE} src/array.c
                             src/list.c
                             src/list_node.c
                             src/rbtree.c
-                            src/string.c
                             src/hashmap.c
                             src/utf8.c
                             src/utf16.c
@@ -75,6 +82,7 @@ add_library( tlcore ${TYPE} src/array.c
                             src/compress.c
                             src/uncompress.c
                             src/opt.c
+                            ${STRING_SRC}
                             ${SEARCH_SRC}
                             ${SORT_SRC}
                             ${HASH_SRC}
