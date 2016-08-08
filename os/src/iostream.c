@@ -144,7 +144,8 @@ static int splice_copy( tl_iostream* out, tl_iostream* in,
 
     while( count )
     {
-        res = in->read( in, buffer, sizeof(buffer), &indiff );
+        indiff = count > sizeof(buffer) ? sizeof(buffer) : count;
+        res = in->read( in, buffer, indiff, &indiff );
 
         if( res!=0 )
             break;
@@ -169,7 +170,7 @@ out:
 }
 
 int tl_iostream_splice( tl_iostream* out, tl_iostream* in,
-                        size_t count, size_t* actual )
+                        size_t count, size_t* actual, int flags )
 {
     int res;
 
@@ -181,12 +182,14 @@ int tl_iostream_splice( tl_iostream* out, tl_iostream* in,
     if( !count )
         return 0;
 
+    if( flags & (~TL_SPLICE_ALL_FLAGS) )
+        return TL_ERR_ARG;
+
     res = __tl_os_splice( out, in, count, actual );
 
-    if( res != TL_ERR_NOT_SUPPORTED )
-        return res;
+    if( (res == TL_ERR_NOT_SUPPORTED) && !(flags & TL_SPLICE_NO_FALLBACK) )
+        res = splice_copy( out, in, count, actual );
 
-    res = splice_copy( out, in, count, actual );
     return res;
 }
 
