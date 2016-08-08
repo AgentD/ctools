@@ -17,7 +17,7 @@
 #include "tl_fs.h"
 
 #include "../platform.h"
-#include "../bsdsock/sock.h"
+#include "../bsdsock/bsdsock.h"
 
 #include <assert.h>
 #include <stdlib.h>

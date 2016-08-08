@@ -1,4 +1,4 @@
-/* sock.h -- This file is part of ctools
+/* bsdsock.h -- This file is part of ctools
  *
  * Copyright (C) 2015 - David Oberhollenzer
  *
@@ -32,8 +32,7 @@
     #define INVALID_SOCKET (-1)
     #define SOCKET_ERROR (-1)
 
-    static TL_INLINE int winsock_acquire(void) { return 1; }
-
+    #define winsock_acquire( ) (1)
     #define winsock_release( )
 #endif
 
@@ -119,10 +118,6 @@ int decode_sockaddr_in( const struct sockaddr_storage* addr, socklen_t len,
  * \return A socket file descriptor on success, -1 on failrue
  */
 SOCKET create_socket( int net, int transport );
-
-/** \brief tl_network_create_server implementation for TCP */
-tl_server* tcp_server_create( const tl_net_addr* addr,
-                              unsigned int backlog, int flags );
 
 /** \brief Perform actual name resolution */
 int resolve_name( const char* hostname, int proto,

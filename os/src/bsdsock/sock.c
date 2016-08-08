@@ -7,46 +7,9 @@
  */
 #define TL_OS_EXPORT
 #include "../platform.h"
-#include "sock.h"
+#include "bsdsock.h"
 
 #include <string.h>
-
-#if defined(MACHINE_OS_WINDOWS) && !defined(s6_addr)
-    #define s6_addr u.Byte
-#endif
-
-
-void convert_ipv6( const struct in6_addr* v6, tl_net_addr* addr )
-{
-    addr->addr.ipv6[7] = (v6->s6_addr[ 0]<<8) | v6->s6_addr[ 1];
-    addr->addr.ipv6[6] = (v6->s6_addr[ 2]<<8) | v6->s6_addr[ 3];
-    addr->addr.ipv6[5] = (v6->s6_addr[ 4]<<8) | v6->s6_addr[ 5];
-    addr->addr.ipv6[4] = (v6->s6_addr[ 6]<<8) | v6->s6_addr[ 7];
-    addr->addr.ipv6[3] = (v6->s6_addr[ 8]<<8) | v6->s6_addr[ 9];
-    addr->addr.ipv6[2] = (v6->s6_addr[10]<<8) | v6->s6_addr[11];
-    addr->addr.ipv6[1] = (v6->s6_addr[12]<<8) | v6->s6_addr[13];
-    addr->addr.ipv6[0] = (v6->s6_addr[14]<<8) | v6->s6_addr[15];
-}
-
-void convert_in6addr( const tl_net_addr* addr, struct in6_addr* v6 )
-{
-    v6->s6_addr[ 0] = (addr->addr.ipv6[7]>>8) & 0xFF;
-    v6->s6_addr[ 1] =  addr->addr.ipv6[7]     & 0xFF;
-    v6->s6_addr[ 2] = (addr->addr.ipv6[6]>>8) & 0xFF;
-    v6->s6_addr[ 3] =  addr->addr.ipv6[6]     & 0xFF;
-    v6->s6_addr[ 4] = (addr->addr.ipv6[5]>>8) & 0xFF;
-    v6->s6_addr[ 5] =  addr->addr.ipv6[5]     & 0xFF;
-    v6->s6_addr[ 6] = (addr->addr.ipv6[4]>>8) & 0xFF;
-    v6->s6_addr[ 7] =  addr->addr.ipv6[4]     & 0xFF;
-    v6->s6_addr[ 8] = (addr->addr.ipv6[3]>>8) & 0xFF;
-    v6->s6_addr[ 9] =  addr->addr.ipv6[3]     & 0xFF;
-    v6->s6_addr[10] = (addr->addr.ipv6[2]>>8) & 0xFF;
-    v6->s6_addr[11] =  addr->addr.ipv6[2]     & 0xFF;
-    v6->s6_addr[12] = (addr->addr.ipv6[1]>>8) & 0xFF;
-    v6->s6_addr[13] =  addr->addr.ipv6[1]     & 0xFF;
-    v6->s6_addr[14] = (addr->addr.ipv6[0]>>8) & 0xFF;
-    v6->s6_addr[15] =  addr->addr.ipv6[0]     & 0xFF;
-}
 
 int decode_sockaddr_in( const struct sockaddr_storage* addr, socklen_t len,
                         tl_net_addr* out )
@@ -132,61 +95,5 @@ SOCKET create_socket( int net, int transport )
     }
 #endif
     return fd;
-}
-
-int resolve_name( const char* hostname, int proto,
-                  tl_net_addr* addr, size_t count )
-{
-    struct addrinfo hints, *info, *p;
-    struct in6_addr addr6;
-    struct in_addr addr4;
-    size_t i = 0;
-
-    proto =  (proto==TL_IPV6) ? AF_INET6 : 
-            ((proto==TL_IPV4) ? AF_INET : AF_UNSPEC);
-
-    memset( &hints, 0, sizeof(hints) );
-    hints.ai_family = proto;
-
-    winsock_acquire( );
-
-    if( getaddrinfo( hostname, NULL, &hints, &info )!=0 )
-        goto out;
-
-    for( p=info; p!=NULL; p=p->ai_next )
-    {
-        if( p->ai_family!=AF_INET && p->ai_family!=AF_INET6 )
-            continue;
-
-        if( proto!=AF_UNSPEC && p->ai_family!=proto )
-            continue;
-
-        if( addr && i<count )
-        {
-            if( p->ai_family==AF_INET6 )
-            {
-                addr6 = ((struct sockaddr_in6*)p->ai_addr)->sin6_addr;
-                convert_ipv6( &addr6, addr );
-            }
-            else
-            {
-                addr4 = ((struct sockaddr_in*)p->ai_addr)->sin_addr;
-                addr->addr.ipv4 = ntohl( addr4.s_addr );
-            }
-
-            addr->net = p->ai_family==AF_INET6 ? TL_IPV6 : TL_IPV4;
-            ++i;
-            ++addr;
-        }
-        else if( !addr )
-        {
-            ++i;
-        }
-    }
-
-    freeaddrinfo( info );
-out:
-    winsock_release( );
-    return i;
 }
 

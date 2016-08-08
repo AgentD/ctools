@@ -9,7 +9,7 @@
 #include "tl_network.h"
 #include "tl_packetserver.h"
 #include "../platform.h"
-#include "sock.h"
+#include "bsdsock.h"
 
 static void udp_set_timeout( tl_packetserver* super, unsigned int timeout )
 {

@@ -1,7 +1,9 @@
 set( CTOOLS_BSDSOCK src/bsdsock/sock.c
                     src/bsdsock/network.c
+                    src/bsdsock/addr_v6.c
                     src/bsdsock/tcpserver.c
-                    src/bsdsock/packetserver.c )
+                    src/bsdsock/resolve_name.c
+                    src/bsdsock/udpserver.c )
 
 if( UNIX )
   set( CTOOLS_SYSDEP src/unix/os.c

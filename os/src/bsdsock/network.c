@@ -7,18 +7,7 @@
  */
 #define TL_OS_EXPORT
 #include "../platform.h"
-#include "sock.h"
-
-tl_server* tl_network_create_server( const tl_net_addr* addr,
-                                     unsigned int backlog, int flags )
-{
-    assert( addr );
-
-    if( addr->transport == TL_TCP )
-        return tcp_server_create( addr, backlog, flags );
-
-    return NULL;
-}
+#include "bsdsock.h"
 
 tl_iostream* tl_network_create_client( const tl_net_addr* peer, int flags )
 {

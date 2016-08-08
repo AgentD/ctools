@@ -8,7 +8,7 @@
 #define TL_OS_EXPORT
 #include "../platform.h"
 #include "tl_server.h"
-#include "sock.h"
+#include "bsdsock.h"
 
 static void tcp_destroy( tl_server* this )
 {
@@ -69,10 +69,9 @@ ignore:
     return NULL;
 }
 
-/****************************************************************************/
-
-tl_server* tcp_server_create( const tl_net_addr* addr, unsigned int backlog,
-                              int flags )
+static tl_server* tcp_server_create( const tl_net_addr* addr,
+                                     unsigned int backlog,
+                                     int flags )
 {
     struct sockaddr_storage addrbuffer;
     tcp_server* this;
@@ -113,6 +112,19 @@ failclose:
     closesocket( sockfd );
 fail:
     winsock_release( );
+    return NULL;
+}
+
+/****************************************************************************/
+
+tl_server* tl_network_create_server( const tl_net_addr* addr,
+                                     unsigned int backlog, int flags )
+{
+    assert( addr );
+
+    if( addr->transport == TL_TCP )
+        return tcp_server_create( addr, backlog, flags );
+
     return NULL;
 }
 
