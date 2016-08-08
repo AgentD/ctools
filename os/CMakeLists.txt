@@ -37,8 +37,11 @@ elseif( WIN32 )
                      ${CTOOLS_BSDSOCK} )
 endif( )
 
-add_library( tlos ${TYPE} src/iostream.c
-                          src/network.c
+add_library( tlos ${TYPE} src/network.c
+                          src/printf.c
+                          src/read_blob.c
+                          src/read_line.c
+                          src/splice.c
                           ${CTOOLS_SYSDEP} )
 
 target_link_libraries( tlos tlcore )
