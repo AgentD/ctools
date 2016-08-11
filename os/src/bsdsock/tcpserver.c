@@ -25,6 +25,7 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
     tcp_server* this = (tcp_server*)super;
     socklen_t len = sizeof(addr);
     int x, y, flags = TL_STREAM_TYPE_SOCK|TL_STREAM_TCP;
+    tl_iostream* client;
     SOCKET peer;
 
     assert( this );
@@ -63,7 +64,10 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
         return NULL;
     }
 #endif
-    return sock_stream_create( peer, flags );
+    client = sock_stream_create( peer, flags );
+    if( !client )
+        goto ignore;
+    return client;
 ignore:
     closesocket( peer );
     return NULL;
@@ -101,7 +105,7 @@ static tl_server* tcp_server_create( const tl_net_addr* addr,
     this = calloc( 1, sizeof(tcp_server) );
     super = (tl_server*)this;
     if( !this )
-        goto fail;
+        goto failclose;
 
     this->flags            = flags;
     this->socket           = sockfd;
