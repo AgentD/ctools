@@ -19,6 +19,10 @@
     typedef int ssize_t;
 
     #define MSG_NOSIGNAL 0
+
+    #define convert_errno( ) WSAHandleFuckup( )
+    #define is_intr( ) (0)
+    #define set_cloexec( fd ) (0)
 #else
     #include <sys/types.h>
     #include <sys/socket.h>
@@ -34,6 +38,10 @@
 
     #define winsock_acquire( ) (1)
     #define winsock_release( )
+
+    #define convert_errno( ) errno_to_fs( errno )
+    #define is_intr( ) (errno == EINTR)
+    #define set_cloexec( fd ) (fcntl( fd, F_SETFD, FD_CLOEXEC ))
 #endif
 
 #include "tl_packetserver.h"

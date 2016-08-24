@@ -11,6 +11,7 @@
 #include "../platform.h"
 #include "bsdsock.h"
 
+
 static void udp_set_timeout( tl_packetserver* super, unsigned int timeout )
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
@@ -26,35 +27,26 @@ static int udp_receive( tl_packetserver* super, void* buffer, void* address,
     struct sockaddr_storage addrbuf;
     socklen_t addrlen = sizeof(addrbuf);
     ssize_t result;
-#ifndef MACHINE_OS_WINDOWS
-    int intr_count = 0;
-#endif
+    int intr_count;
 
     assert( this );
 
     if( actual )
         *actual = 0;
 
-#ifndef MACHINE_OS_WINDOWS
-retry:
-#endif
     if( !wait_for_fd( this->sockfd, this->timeout, 0 ) )
         return TL_ERR_TIMEOUT;
 
-    result = recvfrom( this->sockfd, buffer, size, MSG_NOSIGNAL,
-                       (void*)&addrbuf, &addrlen );
-
-    if( result<0 )
+    for( intr_count = 0; intr_count < 3; ++intr_count )
     {
-#ifdef MACHINE_OS_WINDOWS
-        return WSAHandleFuckup( );
-#else
-        if( errno==EINTR && (intr_count++)<3 )
-            goto retry;
-        if( result<0 )
-            return errno_to_fs( errno );
-#endif
+        result = recvfrom( this->sockfd, buffer, size, MSG_NOSIGNAL,
+                           (void*)&addrbuf, &addrlen );
+        if( result >= 0 || !is_intr( ) )
+            break;
     }
+
+    if( result < 0 )
+        return convert_errno( );
 
     if( address )
     {
@@ -74,12 +66,9 @@ static int udp_send( tl_packetserver* super, const void* buffer,
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
     struct sockaddr_storage addrbuf;
-#ifdef MACHINE_OS_WINDOWS
-    int result;
-#else
-    ssize_t result, intr_count = 0;
-#endif
     socklen_t addrsize;
+    ssize_t result;
+    int intr_count;
 
     assert( this && address );
 
@@ -92,23 +81,16 @@ static int udp_send( tl_packetserver* super, const void* buffer,
     if( !wait_for_fd( this->sockfd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;
 
-#ifndef MACHINE_OS_WINDOWS
-retry:
-#endif
-    result = sendto( this->sockfd, buffer, size, MSG_NOSIGNAL,
-                     (void*)&addrbuf, addrsize );
-
-    if( result<0 )
+    for( intr_count = 0; intr_count < 3; ++intr_count )
     {
-#ifdef MACHINE_OS_WINDOWS
-        return WSAHandleFuckup( );
-#else
-        if( errno==EINTR && (intr_count++)<3 )
-            goto retry;
-        return errno_to_fs( errno );
-#endif
+        result = sendto( this->sockfd, buffer, size, MSG_NOSIGNAL,
+                         (void*)&addrbuf, addrsize );
+        if( result >= 0 || !is_intr( ) )
+            break;
     }
 
+    if( result < 0 )
+        return convert_errno( );
     if( actual )
         *actual = result;
     return 0;

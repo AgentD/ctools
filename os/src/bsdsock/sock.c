@@ -87,13 +87,12 @@ SOCKET create_socket( int net, int transport )
     }
 
     fd = socket( family, type, proto );
-#ifdef MACHINE_OS_UNIX
-    if( fd >= 0 && fcntl( fd, F_SETFD, FD_CLOEXEC ) == -1 )
+
+    if( fd != INVALID_SOCKET && set_cloexec( fd ) == -1 )
     {
-        close( fd );
+        closesocket( fd );
         return INVALID_SOCKET;
     }
-#endif
     return fd;
 }
 

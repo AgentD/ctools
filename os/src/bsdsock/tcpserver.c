@@ -65,13 +65,12 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
     if( this->flags & TL_ENFORCE_V6_ONLY && !is_v6( peer ) )
         goto ignore;
 
-#ifdef MACHINE_OS_UNIX
-    if( fcntl( peer, F_SETFD, FD_CLOEXEC ) == -1 )
+    if( set_cloexec( peer ) == -1 )
     {
-        close( peer );
+        closesocket( peer );
         return NULL;
     }
-#endif
+
     client = sock_stream_create( peer, flags );
     if( !client )
         goto ignore;
