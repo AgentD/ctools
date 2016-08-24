@@ -18,13 +18,38 @@ static void tcp_destroy( tl_server* this )
     winsock_release( );
 }
 
-static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
+static int is_v6( SOCKET peer )
 {
     struct sockaddr_storage addr;
-    struct sockaddr_in6* v6;
-    tcp_server* this = (tcp_server*)super;
     socklen_t len = sizeof(addr);
-    int x, y, flags = TL_STREAM_TYPE_SOCK|TL_STREAM_TCP;
+    struct sockaddr_in6* v6;
+    int x, y;
+
+    if( getpeername( peer, (void*)&addr, &len ) != 0 )
+        return 0;
+    if( addr.ss_family != AF_INET6 )
+        return 0;
+
+    v6 = (struct sockaddr_in6*)&addr;
+
+    x = v6->sin6_addr.s6_addr[0] | v6->sin6_addr.s6_addr[1] |
+        v6->sin6_addr.s6_addr[2] | v6->sin6_addr.s6_addr[3] |
+        v6->sin6_addr.s6_addr[4] | v6->sin6_addr.s6_addr[5] |
+        v6->sin6_addr.s6_addr[6] | v6->sin6_addr.s6_addr[7] |
+        v6->sin6_addr.s6_addr[8] | v6->sin6_addr.s6_addr[9];
+
+    y = v6->sin6_addr.s6_addr[10] & v6->sin6_addr.s6_addr[11];
+
+    if( x==0 && y==0xFF )
+        return 0;
+
+    return 1;
+}
+
+static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
+{
+    int flags = TL_STREAM_TYPE_SOCK|TL_STREAM_TCP;
+    tcp_server* this = (tcp_server*)super;
     tl_iostream* client;
     SOCKET peer;
 
@@ -37,26 +62,9 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
     if( peer == INVALID_SOCKET )
         return NULL;
 
-    if( this->flags & TL_ENFORCE_V6_ONLY )
-    {
-        if( getpeername( peer, (void*)&addr, &len ) != 0 )
-            goto ignore;
-        if( addr.ss_family != AF_INET6 )
-            goto ignore;
+    if( this->flags & TL_ENFORCE_V6_ONLY && !is_v6( peer ) )
+        goto ignore;
 
-        v6 = (struct sockaddr_in6*)&addr;
-
-        x = v6->sin6_addr.s6_addr[0] | v6->sin6_addr.s6_addr[1] |
-            v6->sin6_addr.s6_addr[2] | v6->sin6_addr.s6_addr[3] |
-            v6->sin6_addr.s6_addr[4] | v6->sin6_addr.s6_addr[5] |
-            v6->sin6_addr.s6_addr[6] | v6->sin6_addr.s6_addr[7] |
-            v6->sin6_addr.s6_addr[8] | v6->sin6_addr.s6_addr[9];
-
-        y = v6->sin6_addr.s6_addr[10] & v6->sin6_addr.s6_addr[11];
-
-        if( x==0 && y==0xFF )
-            goto ignore;
-    }
 #ifdef MACHINE_OS_UNIX
     if( fcntl( peer, F_SETFD, FD_CLOEXEC ) == -1 )
     {

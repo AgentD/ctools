@@ -53,7 +53,6 @@ typedef struct
     tl_packetserver super;
     unsigned long timeout;
     SOCKET sockfd;
-    int flags;
 }
 tl_udp_packetserver;
 
