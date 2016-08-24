@@ -100,19 +100,16 @@ int wait_for_fd( SOCKET socket, unsigned long timeout, int write )
     struct timeval tv;
     fd_set fds;
 
-    if( timeout > 0 )
+    FD_ZERO( &fds );
+    FD_SET( socket, &fds );
+
+    tv.tv_sec = timeout / 1000L;
+    tv.tv_usec = (timeout - tv.tv_sec * 1000L) * 1000L;
+
+    if( select( socket+1, write ? 0 : &fds,
+                write ? &fds : 0, 0, timeout > 0 ? &tv : NULL ) <= 0 )
     {
-        FD_ZERO( &fds );
-        FD_SET( socket, &fds );
-
-        tv.tv_sec = timeout / 1000;
-        tv.tv_usec = (timeout - tv.tv_sec * 1000) * 1000;
-
-        if( select( socket+1, write ? 0 : &fds,
-                    write ? &fds : 0, 0, &tv ) <= 0 )
-        {
-            return 0;
-        }
+        return 0;
     }
 
     return 1;
