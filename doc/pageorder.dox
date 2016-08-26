@@ -12,4 +12,6 @@
 \page conc Concurrency
 \page interfaces Interfaces
 \page util Miscellaneous Utilities
+
+\example lookup.c
 */

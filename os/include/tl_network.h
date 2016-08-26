@@ -52,30 +52,18 @@
  *
  * \subsection names Name Resolution
  *
- * Checking if a host name can be resolved:
- * \code{.c}
- * if( tl_network_resolve_name( "www.example.com", TL_IPV4, NULL, 0 ) )
- *     puts( "Found an IPv4 address for this domain!" );
+ * The function \ref tl_network_resolve_name can be used to resolve host names
+ * or domain names to addresses using DNS, static configuration files or other
+ * means.
  *
- * if( tl_network_resolve_name( "www.example.com", TL_IPV6, NULL, 0 ) )
- *     puts( "Found an IPv6 address for this domain!" );
- * \endcode
+ * It can also be used to simply parse and convert a string representation
+ * of a numeric address.
  *
- * Resolving host names:
- * \code{.c}
- * tl_net_addr addr;
+ * The reverse process, resolving a numeric address into a hostname can be
+ * done through \ref tl_network_resolve_address.
  *
- * tl_network_resolve_name( "www.example.com", TL_ANY, &addr, 1 );
- * tl_network_resolve_name( "localhost", TL_ANY, &addr, 1 );
- * \endcode
- *
- * Converting an IP address string to an address structure:
- * \code{.c}
- * tl_net_addr addr;
- *
- * tl_network_resolve_name( "127.0.0.1", TL_ANY, &addr, 1 );
- * tl_network_resolve_name( "::1", TL_ANY, &addr, 1 );
- * \endcode
+ * An example can be found in \ref lookup.c for both forward name resolution
+ * and backward address to name resolution.
  *
  * \subsection netserver Network Server Objects
  *
