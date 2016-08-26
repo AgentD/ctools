@@ -9,12 +9,40 @@
 #include "../platform.h"
 #include "bsdsock.h"
 
+static int have_duplicate( const tl_net_addr* addr, size_t count,
+                           const tl_net_addr* find )
+{
+    size_t i;
+    int ret;
+
+    for( i=0; i<count; ++i )
+    {
+        if( addr[i].net != find->net )
+            continue;
+
+        if( find->net == TL_IPV4 && find->addr.ipv4 == addr[i].addr.ipv4 )
+            return 1;
+
+        if( find->net == TL_IPV6 )
+        {
+            ret = memcmp( find->addr.ipv6, addr[i].addr.ipv6,
+                          sizeof(find->addr.ipv6) );
+            if( ret == 0 )
+                return 1;
+        }
+    }
+
+    return 0;
+}
+
+
 int resolve_name( const char* hostname, int proto,
                   tl_net_addr* addr, size_t count )
 {
     struct addrinfo hints, *info, *p;
     struct in6_addr addr6;
     struct in_addr addr4;
+    tl_net_addr conv;
     size_t i = 0;
 
     proto =  (proto==TL_IPV6) ? AF_INET6 : 
@@ -37,27 +65,33 @@ int resolve_name( const char* hostname, int proto,
         if( proto!=AF_UNSPEC && p->ai_family!=proto )
             continue;
 
-        if( addr && i<count )
+        if( addr )
         {
+            if( i >= count )
+                break;
+
+            memset( &conv, 0, sizeof(conv) );
+
             if( p->ai_family==AF_INET6 )
             {
                 addr6 = ((struct sockaddr_in6*)p->ai_addr)->sin6_addr;
-                convert_ipv6( &addr6, addr );
+                convert_ipv6( &addr6, &conv );
             }
             else
             {
                 addr4 = ((struct sockaddr_in*)p->ai_addr)->sin_addr;
-                addr->addr.ipv4 = ntohl( addr4.s_addr );
+                conv.addr.ipv4 = ntohl( addr4.s_addr );
             }
 
-            addr->net = p->ai_family==AF_INET6 ? TL_IPV6 : TL_IPV4;
-            ++i;
-            ++addr;
+            conv.net = p->ai_family==AF_INET6 ? TL_IPV6 : TL_IPV4;
+
+            if( have_duplicate( addr, i, &conv ) )
+                continue;
+
+            addr[i] = conv;
         }
-        else if( !addr )
-        {
-            ++i;
-        }
+
+        ++i;
     }
 
     freeaddrinfo( info );
