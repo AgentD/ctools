@@ -43,6 +43,7 @@
  *
  * For more information, refere to the following functions:
  * \li \ref tl_network_resolve_name
+ * \li \ref tl_network_resolve_address
  * \li \ref tl_network_create_server
  * \li \ref tl_network_create_client
  * \li \ref tl_network_get_peer_address
@@ -339,6 +340,23 @@ extern "C" {
  */
 TLOSAPI int tl_network_resolve_name( const char* hostname, int proto,
                                      tl_net_addr* addr, size_t count );
+
+/**
+ * \brief Resolve an address to a host or DNS name
+ *
+ * \note This call is blocking and may (e.g. if talking to a slow DNS server)
+ *       block for multiple seconds before succeeding or giving up.
+ *
+ * \param addr The address to perform an inverse look up on
+ * \param out  A pointer to an \em uninitialized string to write the resulting
+ *             host name to.
+ *
+ * \return A positive value on success, zero if reverse lookup succeeded, but
+ *         there simply is no name stored for this address, or a negative
+ *         \ref TL_ERROR_CODE value on failure.
+ */
+TLOSAPI int tl_network_resolve_address( const tl_net_addr* addr,
+                                        tl_string* out );
 
 /**
  * \brief Create a server instance

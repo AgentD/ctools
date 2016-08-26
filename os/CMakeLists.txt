@@ -3,6 +3,7 @@ set( CTOOLS_BSDSOCK src/bsdsock/sock.c
                     src/bsdsock/addr_v6.c
                     src/bsdsock/tcpserver.c
                     src/bsdsock/resolve_name.c
+                    src/bsdsock/resolve_addr.c
                     src/bsdsock/udpserver.c )
 
 if( UNIX )
