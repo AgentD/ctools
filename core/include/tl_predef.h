@@ -130,7 +130,11 @@ typedef enum
     /** \brief An object cannot be accessed because it does not exist */
     TL_ERR_NOT_EXIST = -8,
 
-    /** \brief It was tried to execute a directory operation on a file */
+    /**
+     * \brief The requested operation can only be executed on directories,
+     *        or a path was specified with one of the components not being
+     *        a directory.
+     */
     TL_ERR_NOT_DIR = -9,
 
     /** \brief A directory could not be deleted because it was empty */
@@ -166,6 +170,12 @@ typedef enum
 
     /** \brief Network address type is not supported */
     TL_ERR_NET_ADDR = -18,
+
+    /**
+     * \brief Attempted to perform a file operation on something
+     *        other than a file
+     */
+    TL_ERR_NOT_FILE = -19,
 
     /** \brief A function was called with an invalid argument */
     TL_ERR_ARG = -100
