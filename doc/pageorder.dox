@@ -14,4 +14,5 @@
 \page util Miscellaneous Utilities
 
 \example lookup.c
+\example dirlist.c
 */

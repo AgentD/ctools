@@ -46,41 +46,12 @@
  *
  * \subsection dirlist Listing directory contents
  *
- * Loading the contents of a directory into an array could be done as follows
- * \code
- * tl_iterator* it;
- * tl_array array;
+ * The function \ref tl_dir_scan can be used to load a directory listing into
+ * a tl_array of tl_string instances.
  *
- * tl_array_init( &array, sizeof(tl_string), tl_string_get_allocator( ) );
+ * An iterator interface also exists in the form of \ref tl_dir_iterate.
  *
- * tl_dir_scan( "C:\\Windows", &array );
- *
- * tl_array_sort( &array, (tl_compare)tl_string_compare );
- *
- * it = tl_array_first( &array );
- *
- * while( it->has_data( it ) )
- * {
- *     puts( tl_string_cstr( it->get_value( it ) ) );
- *     it->next( it );
- * }
- *
- * it->destroy( it );
- * tl_array_cleanup( &array );
- * \endcode
- *
- * Simply iterating over the contents of a directory can be done this way
- * \code
- * tl_iterator* it = tl_dir_iterate( "/dev" );
- *
- * while( it->has_data( it ) )
- * {
- *     puts( tl_string_cstr( it->get_value( it ) ) );
- *     it->next( it );
- * }
- *
- * it->destroy( it );
- * \endcode
+ * The file \ref dirlist.c contains a simple example for both methods.
  */
 
 
