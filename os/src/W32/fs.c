@@ -26,17 +26,22 @@ int tl_fs_get_wd( tl_string* path )
 {
     DWORD length;
     WCHAR* wpath;
+    int ret;
 
     assert( path );
 
     length = GetCurrentDirectoryW( 0, NULL );
 
     if( !(wpath = malloc( length*2 )) )
-        return 0;
+        return TL_ERR_ALLOC;
 
     if( !GetCurrentDirectoryW( length, wpath ) )
+    {
+        ret = errno_to_fs( GetLastError( ) );
         goto fail;
+    }
 
+    ret = TL_ERR_ALLOC;
     if( !tl_string_init( path ) )
         goto fail;
 
@@ -48,12 +53,12 @@ int tl_fs_get_wd( tl_string* path )
     {
         goto failstr;
     }
-    return 1;
+    return 0;
 failstr:
     tl_string_cleanup( path );
 fail:
     free( wpath );
-    return 0;
+    return ret;
 }
 
 int tl_fs_get_user_dir( tl_string* path )
@@ -61,23 +66,32 @@ int tl_fs_get_user_dir( tl_string* path )
     HANDLE token = NULL;
     WCHAR* wpath = NULL;
     DWORD size = 0;
+    int ret;
 
     assert( path );
 
     if( !OpenProcessToken( GetCurrentProcess(), TOKEN_QUERY, &token ) )
-        return 0;
+        return errno_to_fs( GetLastError( ) );
 
     if( GetUserProfileDirectoryW( token, NULL, &size ) )
+    {
+        ret = errno_to_fs( GetLastError( ) );
         goto fail;
+    }
 
+    ret = TL_ERR_ALLOC;
     if( !(wpath = malloc( size*2 )) )
         goto fail;
 
     if( !GetUserProfileDirectoryW( token, wpath, &size ) )
+    {
+        ret = errno_to_fs( GetLastError( ) );
         goto fail;
+    }
 
     CloseHandle( token );
 
+    ret = TL_ERR_ALLOC;
     if( !tl_string_init( path ) )
         goto fail;
 
@@ -89,49 +103,59 @@ int tl_fs_get_user_dir( tl_string* path )
     {
         goto failstr;
     }
-    return 1;
+    return 0;
 failstr:
     tl_string_cleanup( path );
 fail:
     CloseHandle( token );
     free( wpath );
-    return 0;
+    return ret;
 }
 
 int tl_fs_exists( const char* path )
 {
     WCHAR* wpath;
-    int status;
+    int ret;
 
     assert( path );
 
-    if( get_absolute_path( &wpath, path ) != 0 )
-        return 0;
+    ret = get_absolute_path( &wpath, path );
+    if( ret != 0 )
+        goto out;
 
-    status = GetFileAttributesW( wpath ) != INVALID_FILE_ATTRIBUTES;
-
+    /*
+        FIXME: could be an error. Which one of the GetLastError codes tells
+               us that the terget doesn't exist? ERROR_FILE_NOT_FOUND?
+               ERROR_PATH_NOT_FOUND?
+     */
+    if( GetFileAttributesW( wpath ) == INVALID_FILE_ATTRIBUTES )
+        ret = 1;
+out:
     free( wpath );
-    return status;
+    return ret;
 }
 
 int tl_fs_is_directory( const char* path )
 {
     WCHAR* wpath;
     DWORD attr;
-    int status;
+    int ret;
 
     assert( path );
 
-    if( get_absolute_path( &wpath, path ) != 0 )
-        return 0;
+    ret = get_absolute_path( &wpath, path );
+    if( ret != 0 )
+        return ret;
 
     attr = GetFileAttributesW( wpath );
 
-    status = (attr!=INVALID_FILE_ATTRIBUTES) &&
-             (attr & FILE_ATTRIBUTE_DIRECTORY);
+    if( attr == INVALID_FILE_ATTRIBUTES )
+        ret = errno_to_fs(GetLastError());
+    else
+        ret = (attr & FILE_ATTRIBUTE_DIRECTORY) ? 0 : 1;
 
     free( wpath );
-    return status;
+    return ret;
 }
 
 int tl_fs_is_symlink( const char* path )
@@ -140,31 +164,43 @@ int tl_fs_is_symlink( const char* path )
     WCHAR* wpath;
     HANDLE hnd;
     DWORD attr;
+    int ret;
 
     assert( path );
 
-    if( get_absolute_path( &wpath, path ) != 0 )
-        return 0;
+    ret = get_absolute_path( &wpath, path );
+    if( ret != 0 )
+        return ret;
 
     attr = GetFileAttributesW( wpath );
 
     if( attr == INVALID_FILE_ATTRIBUTES )
+    {
+        ret = errno_to_fs(GetLastError());
         goto out;
+    }
 
     if( (attr & FILE_ATTRIBUTE_REPARSE_POINT)==0 )
+    {
+        ret = 1;
         goto out;
+    }
 
     hnd = FindFirstFileW( wpath, &entw );
 
     if( hnd == INVALID_HANDLE_VALUE )
+    {
+        ret = errno_to_fs(GetLastError());
         goto out;
+    }
 
     FindClose( hnd );
-    free( wpath );
-    return (entw.dwReserved0 == 0xA000000C);    /* IO_REPARSE_TAG_SYMLINK */
+
+    /* IO_REPARSE_TAG_SYMLINK */
+    ret = (entw.dwReserved0 == 0xA000000C) ? 0 : 1;
 out:
     free( wpath );
-    return 0;
+    return ret;
 }
 
 int tl_fs_cwd( const char* path )
@@ -229,59 +265,64 @@ int tl_fs_delete( const char* path )
 
     attr = GetFileAttributesW( wpath );
 
-    if( attr == INVALID_FILE_ATTRIBUTES )
-        goto out;
-
-    if( attr & FILE_ATTRIBUTE_DIRECTORY )
+    if( attr != INVALID_FILE_ATTRIBUTES )
     {
-        if( RemoveDirectoryW( wpath ) )
+        if( attr & FILE_ATTRIBUTE_DIRECTORY )
+        {
+            if( RemoveDirectoryW( wpath ) )
+                goto out;
+        }
+        else if( DeleteFileW( wpath ) )
+        {
             goto out;
+        }
     }
-    else if( DeleteFileW( wpath ) )
-    {
-        goto out;
-    }
-
     status = errno_to_fs( GetLastError( ) );
 out:
     free( wpath );
     return status;
 }
 
-tl_u64 tl_fs_get_file_size( const char* path )
+int tl_fs_get_file_size( const char* path, tl_u64* size )
 {
     WIN32_FIND_DATAW entw;
-    tl_u64 size = 0;
     WCHAR* wpath;
     HANDLE hnd;
     DWORD attr;
+    int ret;
 
-    assert( path );
+    assert( path && size );
+    *size = 0;
 
     /* check if path actually names an existing file */
-    if( get_absolute_path( &wpath, path ) != 0 )
-        return 0;
+    ret = get_absolute_path( &wpath, path );
+    if( ret != 0 )
+        return ret;
 
     attr = GetFileAttributesW( wpath );
 
     if( attr == INVALID_FILE_ATTRIBUTES )
-        goto out;
+        goto out_err;
 
+    ret = TL_ERR_NOT_FILE;
     if( attr & FILE_ATTRIBUTE_DIRECTORY )
         goto out;
 
     /* get extended information */
     hnd = FindFirstFileW( wpath, &entw );
-
     if( hnd == INVALID_HANDLE_VALUE )
-        goto out;
+        goto out_err;
 
     FindClose( hnd );
 
-    size = (tl_u64)entw.nFileSizeHigh * ((tl_u64)MAXDWORD+1) +
-           (tl_u64)entw.nFileSizeLow;
+    ret = 0;
+    *size = (tl_u64)entw.nFileSizeHigh * ((tl_u64)MAXDWORD+1) +
+            (tl_u64)entw.nFileSizeLow;
 out:
     free( wpath );
-    return size;
+    return ret;
+out_err:
+    ret = errno_to_fs( GetLastError( ) );
+    goto out;
 }
 

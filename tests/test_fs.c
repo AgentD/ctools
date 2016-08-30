@@ -14,6 +14,7 @@ int main( void )
     tl_iterator* dir;
     tl_array strlist;
     tl_string str;
+    tl_u64 size;
     size_t i;
     FILE* f;
 
@@ -50,38 +51,40 @@ int main( void )
     dir->destroy( dir );
 
     /* test filesystem functions */
-    if( tl_fs_exists( "FOO" )           ) return EXIT_FAILURE;
-    if( tl_fs_is_directory( "FOO" )     ) return EXIT_FAILURE;
-    if( tl_fs_mkdir( "FOO" )!=0         ) return EXIT_FAILURE;
-    if( !tl_fs_exists( "FOO" )          ) return EXIT_FAILURE;
-    if( !tl_fs_is_directory( "FOO" )    ) return EXIT_FAILURE;
-    if( tl_fs_exists( "FOO/bar" )       ) return EXIT_FAILURE;
-    if( tl_fs_is_directory( "FOO/bar" ) ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO" )==0           ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO" )==0     ) return EXIT_FAILURE;
+    if( tl_fs_mkdir( "FOO" )!=0            ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO" )!=0           ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO" )!=0     ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO/bar" )==0       ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO/bar" )==0 ) return EXIT_FAILURE;
 
-    if( tl_fs_cwd( "FOO" )!=0           ) return EXIT_FAILURE;
-    if( tl_fs_exists( "FOO" )           ) return EXIT_FAILURE;
-    if( tl_fs_is_directory( "FOO" )     ) return EXIT_FAILURE;
-    if( tl_fs_get_file_size( "bar" )!=0 ) return EXIT_FAILURE;
+    if( tl_fs_cwd( "FOO" )!=0                  ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO" )==0               ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO" )==0         ) return EXIT_FAILURE;
+    if( tl_fs_get_file_size( "bar", &size )==0 ) return EXIT_FAILURE;
     f = fopen( "bar", "wb" );
-    if( tl_fs_get_file_size( "bar" )!=0 ) return EXIT_FAILURE;
+    if( tl_fs_get_file_size( "bar", &size )!=0 ) return EXIT_FAILURE;
+    if( size != 0                              ) return EXIT_FAILURE;
     fwrite( "Hello World", 1, 11, f );
     fclose( f );
-    if( tl_fs_get_file_size("bar")!=11  ) return EXIT_FAILURE;
-    if( tl_fs_cwd( ".." )!=0            ) return EXIT_FAILURE;
-    if( !tl_fs_exists( "FOO" )          ) return EXIT_FAILURE;
-    if( !tl_fs_is_directory( "FOO" )    ) return EXIT_FAILURE;
-    if( !tl_fs_exists( "FOO/bar" )      ) return EXIT_FAILURE;
-    if( tl_fs_is_directory( "FOO/bar" ) ) return EXIT_FAILURE;
+    if( tl_fs_get_file_size( "bar", &size )!=0 ) return EXIT_FAILURE;
+    if( size != 11                             ) return EXIT_FAILURE;
+    if( tl_fs_cwd( ".." )!=0                   ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO" )!=0               ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO" )!=0         ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO/bar" )!=0           ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO/bar" )==0     ) return EXIT_FAILURE;
 
     if( tl_fs_delete( "FOO" )!=TL_ERR_NOT_EMPTY )
         return EXIT_FAILURE;
 
-    if( tl_fs_delete( "FOO/bar" )!=0    ) return EXIT_FAILURE;
-    if( tl_fs_exists( "FOO/bar" )       ) return EXIT_FAILURE;
-    if( tl_fs_is_directory( "FOO/bar" ) ) return EXIT_FAILURE;
-    if( tl_fs_delete( "FOO" )!=0        ) return EXIT_FAILURE;
-    if( tl_fs_exists( "FOO" )           ) return EXIT_FAILURE;
-    if( tl_fs_is_directory( "FOO" )     ) return EXIT_FAILURE;
+    if( tl_fs_delete( "FOO/bar" )!=0       ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO/bar" )==0       ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO/bar" )==0 ) return EXIT_FAILURE;
+    if( tl_fs_delete( "FOO" )!=0           ) return EXIT_FAILURE;
+    if( tl_fs_exists( "FOO" )==0           ) return EXIT_FAILURE;
+    if( tl_fs_is_directory( "FOO" )==0     ) return EXIT_FAILURE;
 
 #if 0
 int tl_fs_is_symlink( const char* path );

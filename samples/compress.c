@@ -180,7 +180,11 @@ int main( int argc, char** argv )
     }
 
     /* map input file into memory */
-    size = tl_fs_get_file_size( in );
+    if( tl_fs_get_file_size( in, &size ) != 0 )
+    {
+        fprintf( stderr, "Cannot get size of %s\n", in );
+        goto outfiles;
+    }
 
     map = tl_file_map( infile, 0, size, TL_MAP_READ );
 

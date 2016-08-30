@@ -68,6 +68,8 @@ extern "C" {
  *
  * Usually just a single character (e.g. forward slash, backward slash).
  *
+ * \note This function returns a pointer to a static string and never fails.
+ *
  * \return A null terminated ASCII string containing the directory seperator
  */
 TLOSAPI const char* tl_fs_get_dir_sep( void );
@@ -77,7 +79,8 @@ TLOSAPI const char* tl_fs_get_dir_sep( void );
  *
  * \param path The path to check
  *
- * \return Non-zero if the path exists
+ * \return Zero if the the path exists, a positive value if not, or a
+ *         negative \ref TL_ERROR_CODE value if an error occoured.
  */
 TLOSAPI int tl_fs_exists( const char* path );
 
@@ -86,7 +89,9 @@ TLOSAPI int tl_fs_exists( const char* path );
  *
  * \param path The path to check
  *
- * \return Non-zero if the path exists and is a directory, zero otherwise
+ * \return Zero if the path exists and is a directory, a positive value if it
+ *         exists, but isn't a directory, or a negative \ref TL_ERROR_CODE
+ *         value if an error occoured.
  */
 TLOSAPI int tl_fs_is_directory( const char* path );
 
@@ -95,7 +100,9 @@ TLOSAPI int tl_fs_is_directory( const char* path );
  *
  * \param path The path to check
  *
- * \return Non-zero if the path exists and is a symbolic link, zero otherwise
+ * \return Zero if the path exists and is a symbolic link, a positive value
+ *         if the path exists but isn't symlink, or a negative
+ *         \ref TL_ERROR_CODE value if an error occoured.
  */
 TLOSAPI int tl_fs_is_symlink( const char* path );
 
@@ -104,14 +111,14 @@ TLOSAPI int tl_fs_is_symlink( const char* path );
  *
  * \param path The path to create
  *
- * \note If the given directory already exists, this function reports success
+ * \note If the path already exists and is a directory,
+ *       this function reports success.
  *
- * \return Zero on success, TL_ERR_ACCESS if the calling process does not have
- *         the neccessarry permissions, TL_ERR_EXISTS if the path already
- *         exists and is not a directory, TL_ERR_NO_SPACE if there is not
- *         enough space on the target file system, TL_ERR_NOT_EXIST if a part
- *         of the path does not exist, TL_ERR_NOT_DIR if an element of the
- *         path is not a directory
+ * \return Zero on success, or a negative \ref TL_ERROR_CODE value if an error
+ *         occoured. \ref TL_ERR_EXISTS is reported if the path already
+ *         exists, but isn't a directory. \ref TL_ERR_NOT_EXIST is reported
+ *         if a part of the path does not exist, \ref TL_ERR_NOT_DIR if an
+ *         element of the path is not a directory.
  */
 TLOSAPI int tl_fs_mkdir( const char* path );
 
@@ -120,10 +127,7 @@ TLOSAPI int tl_fs_mkdir( const char* path );
  *
  * \param path The path to set as the new working directory
  *
- * \return Zero on success, TL_ERR_ACCESS if the calling process does not have
- *         the neccessarry permissions, TL_ERR_NOT_EXIST if a part of the path
- *         does not exist, TL_ERR_NOT_DIR if an element of the path is not a
- *         directory
+ * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
 TLOSAPI int tl_fs_cwd( const char* path );
 
@@ -132,7 +136,7 @@ TLOSAPI int tl_fs_cwd( const char* path );
  *
  * \param path A pointer to an uninitialized string
  *
- * \return Non-zero on success, zero on failure
+ * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
 TLOSAPI int tl_fs_get_wd( tl_string* path );
 
@@ -148,7 +152,8 @@ TLOSAPI int tl_fs_get_wd( tl_string* path );
  *
  * \param path A pointer to an uninitialized string
  *
- * \return Non-zero on success, zero on failure
+ * \return Zero on success, a positive value if the user doesn't have a home
+ *         directory, a negative \ref TL_ERROR_CODE value on failure.
  */
 TLOSAPI int tl_fs_get_user_dir( tl_string* path );
 
@@ -159,10 +164,13 @@ TLOSAPI int tl_fs_get_user_dir( tl_string* path );
  * the link is deleted, not the file pointed to. If the path points to a
  * directory, the directory is deleted only if empty.
  *
+ * \note An attempt at deleting a path that does not exist
+ *       is reported as an error.
+ *
  * \param path A path to a file, directory or symlink to delete
  *
- * \return Zero on success, TL_ERR_ACCESS if the calling process does not have
- *         the propper permissions, TL_ERR_NOT_EMPTY if trying to delete a non
+ * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure.
+ *         \ref TL_ERR_NOT_EMPTY is reported when trying to delete a non
  *         empty directory.
  */
 TLOSAPI int tl_fs_delete( const char* path );
@@ -171,10 +179,13 @@ TLOSAPI int tl_fs_delete( const char* path );
  * \brief Determine the size of a file in bytes
  *
  * \param path A path to a file
+ * \param size A pointer to a tl_u64 to write the file size to
  *
- * \return The size of the file in bytes
+ * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure.
+ *         \ref TL_ERR_NOT_FILE is reported if the path points to something
+ *         other than a regular file.
  */
-TLOSAPI tl_u64 tl_fs_get_file_size( const char* path );
+TLOSAPI int tl_fs_get_file_size( const char* path, tl_u64* size );
 
 #ifdef __cplusplus
 }
