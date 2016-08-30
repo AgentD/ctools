@@ -117,7 +117,6 @@ fail:
 
 int tl_fs_get_user_dir( tl_string* path )
 {
-    char buffer[ 256 ];
     struct passwd* pw;
     char* dir;
 
@@ -134,20 +133,6 @@ int tl_fs_get_user_dir( tl_string* path )
     dir = getenv("HOME");
     if( dir && tl_fs_is_directory( dir ) )
         goto done;
-
-    /* try to construct typicall names */
-    if( pw )
-    {
-        dir = buffer;
-
-        sprintf( buffer, "/home/%s/", pw->pw_name );
-        if( tl_fs_is_directory( dir ) )
-            goto done;
-
-        sprintf( buffer, "/usr/%s/", pw->pw_name );
-        if( tl_fs_is_directory( dir ) )
-            goto done;
-    }
 
     return 0;
 done:
