@@ -34,7 +34,7 @@ int tl_fs_is_symlink( const char* path )
 {
     struct stat sb;
     assert( path );
-    return stat( path, &sb )==0 && S_ISLNK(sb.st_mode);
+    return lstat( path, &sb )==0 && S_ISLNK(sb.st_mode);
 }
 
 int tl_fs_mkdir( const char* path )
