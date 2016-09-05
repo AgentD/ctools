@@ -42,13 +42,13 @@ static int run_test( tl_net_addr* peer, tl_net_addr* accept )
     if( !(server = tl_network_create_server( accept, 10, 0 )) )
         return 0;
 
-    if( !(a = tl_network_create_client( peer, 0 )) )
+    if( !(a = tl_network_create_client( peer, NULL, 0 )) )
         return 0;
 
     if( !(a_down = server->wait_for_client( server, 1000 )) )
         return 0;
 
-    if( !(b = tl_network_create_client( peer, 0 )) )
+    if( !(b = tl_network_create_client( peer, NULL, 0 )) )
         return 0;
 
     if( !(b_down = server->wait_for_client( server, 1000 )) )

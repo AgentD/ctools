@@ -9,7 +9,9 @@
 #include "../platform.h"
 #include "bsdsock.h"
 
-tl_iostream* tl_network_create_client( const tl_net_addr* peer, int flags )
+tl_iostream* tl_network_create_client( const tl_net_addr* peer,
+                                       const tl_net_addr* local,
+                                       int flags )
 {
     struct sockaddr_storage addrbuffer;
     tl_iostream* stream;
@@ -21,14 +23,23 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer, int flags )
     if( !winsock_acquire( ) )
         return NULL;
 
-    if( !encode_sockaddr( peer, &addrbuffer, &size ) )
-        goto fail_release;
-
     sockfd = create_socket( peer->net, peer->transport );
     if( sockfd == INVALID_SOCKET )
         goto fail_release;
 
     if( !set_socket_flags( sockfd, peer->net, &flags ) )
+        goto fail;
+
+    if( local )
+    {
+        if( !encode_sockaddr( local, &addrbuffer, &size ) )
+            goto fail;
+
+        if( bind( sockfd, (void*)&addrbuffer, size ) == SOCKET_ERROR )
+            goto fail;
+    }
+
+    if( !encode_sockaddr( peer, &addrbuffer, &size ) )
         goto fail;
 
     if( connect( sockfd, (void*)&addrbuffer, size ) == SOCKET_ERROR )

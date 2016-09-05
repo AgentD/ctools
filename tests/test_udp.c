@@ -33,7 +33,7 @@ int main( void )
     addr.transport = TL_UDP;
     addr.port = 15000;
 
-    str = tl_network_create_client( &addr, 0 );
+    str = tl_network_create_client( &addr, NULL, 0 );
     if( !str )
         return EXIT_FAILURE;
 

@@ -364,11 +364,13 @@ TLOSAPI tl_server* tl_network_create_server( const tl_net_addr* addr,
  * \brief Create a connection to a server
  *
  * \param peer The address of the peer to connect to
+ * \param local If not NULL, a local address to bind before connecting
  * \param flags A combination of \ref TL_NETWORK_FLAGS fields
  *
  * \return A pointer to a tl_iostream instance or NULL on failure
  */
 TLOSAPI tl_iostream* tl_network_create_client( const tl_net_addr* peer,
+                                               const tl_net_addr* local,
                                                int flags );
 
 /**
