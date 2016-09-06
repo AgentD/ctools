@@ -304,7 +304,7 @@ TLOSAPI int tl_iostream_printf( tl_iostream* stream,
  * \param actual If not NULL, returns the number of bytes actually copied
  * \param flags  A combination of \ref TL_SPLICE_FLAG flags
  *
- * \return Zeron on success, a negative value (\ref TL_ERROR_CODE) on failure
+ * \return Zero on success, a negative value (\ref TL_ERROR_CODE) on failure
  */
 TLOSAPI int tl_iostream_splice( tl_iostream* out, tl_iostream* in,
                                 size_t count, size_t* actual, int flags );

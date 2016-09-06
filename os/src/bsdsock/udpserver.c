@@ -1,4 +1,4 @@
-/* packetserver.c -- This file is part of ctools
+/* udpserver.c -- This file is part of ctools
  *
  * Copyright (C) 2015 - David Oberhollenzer
  *
