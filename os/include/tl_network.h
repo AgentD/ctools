@@ -419,14 +419,22 @@ TLOSAPI int tl_network_get_local_address( tl_iostream* stream,
  * The tl_packetserver implementation sends and recevies packets through the
  * given port number to/from any remote port number.
  *
- * \param addr    Specifies the local address to bind to, on
- *                what port to listen and what protocols to use.
+ * This function has two optional arguments, local and remote address. At
+ * least one has to be set. If local is set and remote is NULL, the server
+ * is bound to the specified address but accepts traffic from anywhere. If
+ * remote is set and local is NULL, the server can only send traffic to a
+ * specific remote address and only receive traffic from there. The local
+ * address and port number are chosen by the OS.
+ *
+ * \param local If not NULL, the local address to bind to.
+ * \param remote If not NULL, the remote address to send packets to.
  * \param flags A combination of \ref TL_NETWORK_FLAGS fields
  *
  * \return A pointer to a server interface on success, NULL on failure
  */
 TLOSAPI tl_packetserver*
-tl_network_create_packet_server( const tl_net_addr* addr, int flags );
+tl_network_create_packet_server( const tl_net_addr* local,
+                                 const tl_net_addr* remote, int flags );
 
 /**
  * \brief Convert a network address type to a different address type

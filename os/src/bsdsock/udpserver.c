@@ -66,17 +66,23 @@ static int udp_send( tl_packetserver* super, const void* buffer,
 {
     tl_udp_packetserver* this = (tl_udp_packetserver*)super;
     struct sockaddr_storage addrbuf;
-    socklen_t addrsize;
+    socklen_t addrsize = 0;
+    void* aptr = NULL;
     ssize_t result;
     int intr_count;
 
-    assert( this && address );
+    assert( this );
 
     if( actual )
         *actual = 0;
 
-    if( !encode_sockaddr( address, &addrbuf, &addrsize ) )
-        return TL_ERR_NET_ADDR;
+    if( address )
+    {
+        if( !encode_sockaddr( address, &addrbuf, &addrsize ) )
+            return TL_ERR_NET_ADDR;
+
+        aptr = (void*)&addrbuf;
+    }
 
     if( !wait_for_fd( this->sockfd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;
@@ -84,7 +90,7 @@ static int udp_send( tl_packetserver* super, const void* buffer,
     for( intr_count = 0; intr_count < 3; ++intr_count )
     {
         result = sendto( this->sockfd, buffer, size, MSG_NOSIGNAL,
-                         (void*)&addrbuf, addrsize );
+                         aptr, addrsize );
         if( result >= 0 || !is_intr( ) )
             break;
     }
@@ -110,9 +116,7 @@ static int is_v6( const tl_net_addr* addr )
 static int udp_send_v6( tl_packetserver* super, const void* buffer,
                         const void* address, size_t size, size_t* actual )
 {
-    assert( address );
-
-    if( !is_v6( address ) )
+    if( address && !is_v6( address ) )
     {
         if( actual )
             *actual = 0;
@@ -158,6 +162,7 @@ static void udp_destroy( tl_packetserver* super )
 /****************************************************************************/
 
 tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
+                                                  const tl_net_addr* remote,
                                                   int flags )
 {
     struct sockaddr_storage addrbuffer;
@@ -165,13 +170,16 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     tl_packetserver* super;
     socklen_t size;
 
-    assert( addr );
+    assert( addr || remote );
 
     /* sanity check */
-    if( addr->transport!=TL_UDP )
+    if( addr && remote && (addr->net != remote->net) )
         return NULL;
 
-    if( !encode_sockaddr( addr, &addrbuffer, &size ) )
+    if( addr && addr->transport!=TL_UDP )
+        return NULL;
+
+    if( remote && remote->transport!=TL_UDP )
         return NULL;
 
     if( !winsock_acquire( ) )
@@ -182,7 +190,7 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     super = (tl_packetserver*)this;
 
     if( !this )
-        return NULL;
+        goto fail_release;
 
     /* create socket */
     this->sockfd = create_socket( addr->net, addr->transport );
@@ -192,8 +200,25 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( !set_socket_flags( this->sockfd, addr->net, &flags ) )
         goto failclose;
 
-    if( bind( this->sockfd, (void*)&addrbuffer, size ) < 0 )
-        goto failclose;
+    /* bind */
+    if( addr )
+    {
+        if( !encode_sockaddr( addr, &addrbuffer, &size ) )
+            goto failclose;
+
+        if( bind( this->sockfd, (void*)&addrbuffer, size )==SOCKET_ERROR )
+            goto failclose;
+    }
+
+    /* connect */
+    if( remote )
+    {
+        if( !encode_sockaddr( remote, &addrbuffer, &size ) )
+            goto failclose;
+
+        if( connect( this->sockfd, (void*)&addrbuffer, size )==SOCKET_ERROR )
+            goto failclose;
+    }
 
     /* initialization */
     this->timeout = 0;
@@ -214,6 +239,7 @@ failclose:
     closesocket( this->sockfd );
 fail:
     free( this );
+fail_release:
     winsock_release( );
     return NULL;
 }

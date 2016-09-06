@@ -21,13 +21,13 @@ int main( void )
     addr.transport = TL_UDP;
     addr.port = 15000;
 
-    pserver1 = tl_network_create_packet_server( &addr, TL_ALLOW_BROADCAST );
+    pserver1 = tl_network_create_packet_server(&addr,NULL,TL_ALLOW_BROADCAST);
     if( !pserver1 )
         return EXIT_FAILURE;
 
     addr.port = 16000;
 
-    pserver2 = tl_network_create_packet_server( &addr, 0 );
+    pserver2 = tl_network_create_packet_server( &addr, NULL, 0 );
     if( !pserver2 )
         return EXIT_FAILURE;
 
