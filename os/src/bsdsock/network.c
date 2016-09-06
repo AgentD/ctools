@@ -13,9 +13,7 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer,
                                        const tl_net_addr* local,
                                        int flags )
 {
-    struct sockaddr_storage addrbuffer;
     tl_iostream* stream;
-    socklen_t size;
     SOCKET sockfd;
 
     assert( peer );
@@ -30,19 +28,10 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer,
     if( !set_socket_flags( sockfd, peer->net, &flags ) )
         goto fail;
 
-    if( local )
-    {
-        if( !encode_sockaddr( local, &addrbuffer, &size ) )
-            goto fail;
-
-        if( bind( sockfd, (void*)&addrbuffer, size ) == SOCKET_ERROR )
-            goto fail;
-    }
-
-    if( !encode_sockaddr( peer, &addrbuffer, &size ) )
+    if( local && !bind_socket( sockfd, local ) )
         goto fail;
 
-    if( connect( sockfd, (void*)&addrbuffer, size ) == SOCKET_ERROR )
+    if( !connect_socket( sockfd, peer ) )
         goto fail;
 
     flags = TL_STREAM_TYPE_SOCK;

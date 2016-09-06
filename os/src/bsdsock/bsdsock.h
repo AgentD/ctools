@@ -126,6 +126,10 @@ int decode_sockaddr_in( const struct sockaddr_storage* addr, socklen_t len,
  */
 SOCKET create_socket( int net, int transport );
 
+int bind_socket( SOCKET s, const tl_net_addr* addr );
+
+int connect_socket( SOCKET s, const tl_net_addr* addr );
+
 /** \brief Perform actual name resolution */
 int resolve_name( const char* hostname, int proto,
                   tl_net_addr* addr, size_t count );

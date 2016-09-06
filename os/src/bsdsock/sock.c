@@ -96,3 +96,31 @@ SOCKET create_socket( int net, int transport )
     return fd;
 }
 
+int bind_socket( SOCKET s, const tl_net_addr* addr )
+{
+    struct sockaddr_storage addrbuffer;
+    socklen_t size;
+
+    if( !encode_sockaddr( addr, &addrbuffer, &size ) )
+        return 0;
+
+    if( bind( s, (void*)&addrbuffer, size ) == SOCKET_ERROR )
+        return 0;
+
+    return 1;
+}
+
+int connect_socket( SOCKET s, const tl_net_addr* addr )
+{
+    struct sockaddr_storage addrbuffer;
+    socklen_t size;
+
+    if( !encode_sockaddr( addr, &addrbuffer, &size ) )
+        return 0;
+
+    if( connect( s, (void*)&addrbuffer, size ) == SOCKET_ERROR )
+        return 0;
+
+    return 1;
+}
+

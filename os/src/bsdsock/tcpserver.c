@@ -84,16 +84,11 @@ static tl_server* tcp_server_create( const tl_net_addr* addr,
                                      unsigned int backlog,
                                      int flags )
 {
-    struct sockaddr_storage addrbuffer;
     tcp_server* this;
     tl_server* super;
-    socklen_t size;
     SOCKET sockfd;
 
     if( !winsock_acquire( ) )
-        return NULL;
-
-    if( !encode_sockaddr( addr, &addrbuffer, &size ) )
         return NULL;
 
     sockfd = create_socket( addr->net, addr->transport );
@@ -103,7 +98,7 @@ static tl_server* tcp_server_create( const tl_net_addr* addr,
     if( !set_socket_flags( sockfd, addr->net, &flags ) )
         goto failclose;
 
-    if( bind( sockfd, (void*)&addrbuffer, size ) < 0 )
+    if( !bind_socket( sockfd, addr ) )
         goto failclose;
 
     if( listen( sockfd, backlog ) == SOCKET_ERROR )

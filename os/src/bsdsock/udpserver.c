@@ -165,10 +165,8 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
                                                   const tl_net_addr* remote,
                                                   int flags )
 {
-    struct sockaddr_storage addrbuffer;
     tl_udp_packetserver* this;
     tl_packetserver* super;
-    socklen_t size;
 
     assert( addr || remote );
 
@@ -200,25 +198,11 @@ tl_packetserver* tl_network_create_packet_server( const tl_net_addr* addr,
     if( !set_socket_flags( this->sockfd, addr->net, &flags ) )
         goto failclose;
 
-    /* bind */
-    if( addr )
-    {
-        if( !encode_sockaddr( addr, &addrbuffer, &size ) )
-            goto failclose;
+    if( addr && !bind_socket( this->sockfd, addr ) )
+        goto failclose;
 
-        if( bind( this->sockfd, (void*)&addrbuffer, size )==SOCKET_ERROR )
-            goto failclose;
-    }
-
-    /* connect */
-    if( remote )
-    {
-        if( !encode_sockaddr( remote, &addrbuffer, &size ) )
-            goto failclose;
-
-        if( connect( this->sockfd, (void*)&addrbuffer, size )==SOCKET_ERROR )
-            goto failclose;
-    }
+    if( remote && !connect_socket( this->sockfd, remote ) )
+        goto failclose;
 
     /* initialization */
     this->timeout = 0;
