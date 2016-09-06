@@ -80,13 +80,17 @@ ignore:
     return NULL;
 }
 
-static tl_server* tcp_server_create( const tl_net_addr* addr,
-                                     unsigned int backlog,
-                                     int flags )
+tl_server* tl_network_create_server( const tl_net_addr* addr,
+                                     unsigned int backlog, int flags )
 {
     tcp_server* this;
     tl_server* super;
     SOCKET sockfd;
+
+    assert( addr );
+
+    if( addr->transport != TL_TCP )
+        return NULL;
 
     if( !winsock_acquire( ) )
         return NULL;
@@ -118,19 +122,6 @@ failclose:
     closesocket( sockfd );
 fail:
     winsock_release( );
-    return NULL;
-}
-
-/****************************************************************************/
-
-tl_server* tl_network_create_server( const tl_net_addr* addr,
-                                     unsigned int backlog, int flags )
-{
-    assert( addr );
-
-    if( addr->transport == TL_TCP )
-        return tcp_server_create( addr, backlog, flags );
-
     return NULL;
 }
 
