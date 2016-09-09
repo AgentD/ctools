@@ -12,6 +12,9 @@
 
 
 #define IS_SURROGATE( x ) (((x) >= 0xD800) && ((x) <= 0xDFFF))
+#define UNICODE_MAX 0x0010FFFF
+#define BOM 0xFEFF
+#define BOM2 0xFFFE
 
 
 
@@ -118,7 +121,10 @@ unsigned int tl_utf8_encode( char* utf8, unsigned int cp )
 
     assert( utf8 );
 
-    if( cp>0x10FFFF )
+    if( IS_SURROGATE(cp) || cp > UNICODE_MAX )
+        return 0;
+
+    if( cp==BOM || cp==BOM2 || cp==0xFFFF )
         return 0;
 
     if( cp < 0x80 )

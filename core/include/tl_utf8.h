@@ -103,13 +103,13 @@ TLAPI unsigned int tl_utf8_decode(const char* utf8, unsigned int* bytecount);
 /**
  * \brief Get the UTF-8 encoding of a unicode code point
  *
- * \note This function runs in constant time
+ * \note If the given code point is not a valid unicode code point, the
+ *       function returns 0 (i.e. nothing written to the output buffer).
  *
- * \param utf8 A buffer that can hold AT LEST four bytes
+ * \param utf8 A buffer that can hold AT LEAST four bytes
  * \param cp   The code point to encode
  *
- * \return The number of bytes required, not including a possible
- *         null-terminator
+ * \return The number of bytes used.
  */
 TLAPI unsigned int tl_utf8_encode( char* utf8, unsigned int cp );
 

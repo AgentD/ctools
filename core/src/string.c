@@ -10,13 +10,6 @@
 
 #include <ctype.h>
 
-
-#define IS_SURROGATE( x ) (((x) >= 0xD800) && ((x) <= 0xDFFF))
-#define UNICODE_MAX 0x0010FFFF
-#define BOM 0xFEFF
-#define BOM2 0xFFFE
-
-
 int tl_string_init( tl_string* this )
 {
     unsigned char null = 0;
@@ -140,11 +133,7 @@ int tl_string_append_code_point( tl_string* this, unsigned int cp )
 
     assert( this );
 
-    if( IS_SURROGATE(cp)||cp>UNICODE_MAX||cp==BOM||cp==BOM2||cp==0xFFFF )
-        return 0;
-
     count = tl_utf8_encode( (char*)val, cp );
-
     if( !count )
         return 0;
 
