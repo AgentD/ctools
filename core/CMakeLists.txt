@@ -71,15 +71,15 @@ set( STRING_SRC src/string.c
                 src/string/tokenize.c
                 src/string/allocator.c )
 
-set( UNICODE_SRC src/unicode/isspace.c )
+set( UNICODE_SRC src/unicode/isspace.c
+                 src/unicode/utf16.c
+                 src/unicode/utf8.c )
 
 add_library( tlcore ${TYPE} src/array.c
                             src/list.c
                             src/list_node.c
                             src/rbtree.c
                             src/hashmap.c
-                            src/utf8.c
-                            src/utf16.c
                             src/allocator.c
                             src/blob.c
                             src/compress.c
