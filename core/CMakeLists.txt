@@ -70,6 +70,8 @@ set( STRING_SRC src/string.c
                 src/string/tokenize.c
                 src/string/allocator.c )
 
+set( UNICODE_SRC src/unicode/isspace.c )
+
 add_library( tlcore ${TYPE} src/array.c
                             src/list.c
                             src/list_node.c
@@ -82,6 +84,7 @@ add_library( tlcore ${TYPE} src/array.c
                             src/compress.c
                             src/uncompress.c
                             src/opt.c
+                            ${UNICODE_SRC}
                             ${STRING_SRC}
                             ${SEARCH_SRC}
                             ${SORT_SRC}
@@ -119,6 +122,7 @@ install( FILES include/tl_allocator.h
                include/tl_utf8.h
                include/tl_compress.h
                include/tl_convert.h
+               include/tl_unicode.h
          DESTINATION include )
 
 install( TARGETS tlcore LIBRARY DESTINATION lib
