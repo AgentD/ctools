@@ -63,6 +63,7 @@ set( ITER_SRC src/iterator/array.c
               src/iterator/hashmap.c )
 
 set( STRING_SRC src/string.c
+                src/string/trim.c
                 src/string/append_utf8.c
                 src/string/append_utf16.c
                 src/string/append_latin1.c
