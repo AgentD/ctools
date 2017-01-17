@@ -22,18 +22,6 @@ static void remove_option( int* argc, char** argv, int idx, int count )
     *argc -= count;
 }
 
-static int escape_string( char* str )
-{
-    if( str[0]=='\\' && (str[1]=='-' || str[1]=='+') )
-        goto escape;
-    if( str[0]=='\\' && str[1]=='\\' && (str[2]=='-' || str[2]=='+') )
-        goto escape;
-    return 0;
-escape:
-    memmove( str, str+1, strlen(str) );
-    return 1;
-}
-
 static int find_string( tl_option* options, size_t num_options,
                         const char* arg, int type, size_t* idx )
 {
@@ -110,7 +98,7 @@ int tl_process_args( tl_option* options, size_t num_options,
 
     while( i < (*argc) )
     {
-        if( escape_string(argv[i]) || (argv[i][0]!='-' && argv[i][0]!='+') )
+        if( argv[i][0]!='-' && argv[i][0]!='+' )
             goto skip;
 
         if( !strcmp( argv[i], "--" ) )
@@ -135,7 +123,6 @@ int tl_process_args( tl_option* options, size_t num_options,
             {
                 if( i==(*argc - 1) || argv[i+1][0]=='-' || argv[i+1][0]=='+' )
                     goto missingarg;
-                escape_string( argv[i+1] );
                 options[j].handle_option( options+j, argv[i+1] );
                 goto removetwo;
             }
@@ -176,7 +163,6 @@ int tl_process_args( tl_option* options, size_t num_options,
             {
                 if( i==(*argc - 1) || argv[i+1][0]=='-' || argv[i+1][0]=='+' )
                     goto missingarg;
-                escape_string( argv[i+1] );
                 options[j].handle_option( options+j, argv[i+1] );
                 goto removetwo;
             }
