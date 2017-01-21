@@ -6,7 +6,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 #define TL_OS_EXPORT
-#include "tl_iostream.h"
+#include "tl_splice.h"
 #include "platform.h"
 
 static int splice_copy( tl_iostream* out, tl_iostream* in,

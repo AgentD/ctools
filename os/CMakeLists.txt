@@ -69,6 +69,7 @@ install( FILES include/tl_dir.h
                include/tl_threadpool.h
                include/tl_unix.h
                include/tl_file.h
+               include/tl_splice.h
          DESTINATION include )
 
 install( TARGETS tlos LIBRARY DESTINATION lib
