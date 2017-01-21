@@ -198,6 +198,7 @@ typedef struct tl_allocator tl_allocator;
 typedef struct tl_iterator tl_iterator;
 typedef struct tl_blob tl_blob;
 typedef struct tl_iostream tl_iostream;
+typedef struct tl_file tl_file;
 typedef struct tl_server tl_server;
 typedef struct tl_net_addr tl_net_addr;
 typedef struct tl_process tl_process;
@@ -208,6 +209,7 @@ typedef struct tl_rwlock tl_rwlock;
 typedef struct tl_monitor tl_monitor;
 typedef struct tl_thread tl_thread;
 typedef struct tl_threadpool tl_threadpool;
+typedef struct tl_file_mapping tl_file_mapping;
 
 
 

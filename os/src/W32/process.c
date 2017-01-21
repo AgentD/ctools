@@ -135,14 +135,13 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
     if( flags & (TL_PIPE_STDOUT|TL_PIPE_STDIN) )
     {
         this->iostream = fstream_create( outpipe[0], inpipe[1],
-                                         TL_STREAM_TYPE_PIPE, 0 );
+                                         TL_STREAM_TYPE_PIPE );
         if( !this->iostream )
             goto procfail;
     }
     if( flags & TL_PIPE_STDERR )
     {
-        this->errstream = fstream_create(errpipe[0],NULL,
-                                         TL_STREAM_TYPE_PIPE, 0);
+        this->errstream = fstream_create(errpipe[0],NULL, TL_STREAM_TYPE_PIPE);
         if( !this->errstream )
             goto procfail;
     }

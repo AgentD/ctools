@@ -37,7 +37,8 @@ int __tl_os_splice( tl_iostream* out, tl_iostream* in,
         return TL_ERR_TIMEOUT;
 
     /* splice */
-    if( ((fd_stream*)out)->flags & STREAM_APPEND )
+    if( out->type == TL_STREAM_TYPE_FILE &&
+        (((file_stream*)out)->flags & TL_APPEND) )
     {
         old = lseek( outfd, 0, SEEK_END );
         if( old == (off_t)-1 )
@@ -49,8 +50,11 @@ int __tl_os_splice( tl_iostream* out, tl_iostream* in,
     else if( in->type == TL_STREAM_TYPE_FILE )
         res = sendfile( outfd, infd, NULL, count );
 
-    if( ((fd_stream*)out)->flags & STREAM_APPEND )
+    if( out->type == TL_STREAM_TYPE_FILE &&
+        (((file_stream*)out)->flags & TL_APPEND) )
+    {
         lseek( outfd, old, SEEK_SET );
+    }
 
     /* let the fallback implementation retry and figure that out */
     if( res <= 0 )
@@ -78,6 +82,11 @@ void tl_unix_iostream_fd( tl_iostream* str, int* fds )
     {
     case TL_STREAM_TYPE_PIPE:
     case TL_STREAM_TYPE_FILE:
+        fds[0] = (((file_stream*)str)->flags & TL_READ) ?
+                 ((file_stream*)str)->fd : -1;
+        fds[1] = (((file_stream*)str)->flags & TL_WRITE) ?
+        	 ((file_stream*)str)->fd : -1;
+        break;
     case TL_STREAM_TYPE_SOCK:
         fds[0] = ((fd_stream*)str)->readfd;
         fds[1] = ((fd_stream*)str)->writefd;

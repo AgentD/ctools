@@ -24,31 +24,14 @@ static void fstream_destroy( tl_iostream* super )
 static int fstream_set_timeout( tl_iostream* super, unsigned int timeout )
 {
     fstream* this = (fstream*)super;
-    COMMTIMEOUTS ct;
 
     assert( this );
 
-    if( timeout )
-    {
-        ct.ReadIntervalTimeout         = timeout;
-        ct.ReadTotalTimeoutMultiplier  = 0;
-        ct.ReadTotalTimeoutConstant    = timeout;
-        ct.WriteTotalTimeoutMultiplier = 0;
-        ct.WriteTotalTimeoutConstant   = timeout;
-    }
-    else
-    {
-        ct.ReadIntervalTimeout         = MAXDWORD;
-        ct.ReadTotalTimeoutMultiplier  = MAXDWORD;
-        ct.ReadTotalTimeoutConstant    = MAXDWORD;
-        ct.WriteTotalTimeoutMultiplier = MAXDWORD;
-        ct.WriteTotalTimeoutConstant   = MAXDWORD;
-    }
-
     if( this->rhnd )
-        SetCommTimeouts( this->rhnd, &ct );
-    if( this->whnd )
-        SetCommTimeouts( this->whnd, &ct );
+        set_handle_timeout(this->rhnd, timeout);
+
+    if( this->whnd && this->whnd != this->rhnd )
+        set_handle_timeout(this->whnd, timeout);
 
     return 0;
 }
@@ -57,7 +40,6 @@ static int fstream_write( tl_iostream* super, const void* buffer,
                           size_t size, size_t* actual )
 {
     fstream* this = (fstream*)super;
-    tl_s64 pos = 0;
     DWORD result;
 
     if( actual )
@@ -68,18 +50,8 @@ static int fstream_write( tl_iostream* super, const void* buffer,
     if( !this->whnd )
         return TL_ERR_NOT_SUPPORTED;
 
-    if( this->flags & STREAM_APPEND )
-    {
-        pos = w32_lseek( this->whnd, 0, FILE_END );
-        if( pos < 0 )
-            return TL_ERR_INTERNAL;
-    }
-
     if( !WriteFile( this->whnd, buffer, size, &result, NULL ) )
         return errno_to_fs( GetLastError( ) );
-
-    if( this->flags & STREAM_APPEND )
-        w32_lseek( this->whnd, pos, FILE_BEGIN );
 
     if( actual )
         *actual = result;
@@ -107,13 +79,7 @@ static int fstream_read( tl_iostream* super, void* buffer, size_t size,
     if( actual )
         *actual = result;
 
-    if( !result )
-    {
-        if( super->type == TL_STREAM_TYPE_FILE )
-            return TL_EOF;
-        return TL_ERR_CLOSED;
-    }
-    return 0;
+    return result ? 0 : TL_ERR_CLOSED;
 }
 
 /****************************************************************************/
@@ -127,7 +93,6 @@ fstream tl_stdio =
         fstream_write,
         fstream_read
     },
-    0,
     NULL,
     NULL
 };
@@ -141,15 +106,13 @@ fstream tl_stderr =
         fstream_write,
         fstream_read
     },
-    0,
     NULL,
     NULL
 };
 
 /****************************************************************************/
 
-tl_iostream* fstream_create( HANDLE readhnd, HANDLE writehnd,
-                             int type, int flags )
+tl_iostream* fstream_create( HANDLE readhnd, HANDLE writehnd, int type )
 {
     fstream* this = calloc( 1, sizeof(fstream) );
     tl_iostream* super = (tl_iostream*)this;
@@ -158,7 +121,6 @@ tl_iostream* fstream_create( HANDLE readhnd, HANDLE writehnd,
     {
         this->rhnd         = readhnd;
         this->whnd         = writehnd;
-        this->flags        = flags;
         super->type        = type;
         super->read        = fstream_read;
         super->write       = fstream_write;

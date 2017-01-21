@@ -52,6 +52,7 @@
 
 
 #include "tl_predef.h"
+#include "tl_iostream.h"
 
 
 
@@ -109,6 +110,87 @@ TL_MAP_FLAGS;
  *
  * \brief An I/O stream implementation for file I/O
  */
+struct tl_file
+{
+    tl_iostream super;
+
+    /**
+     * \brief Reposition the read/write pointer within a file
+     *
+     * \param file     A pointer to a file object
+     * \param position The new, absolute position to set
+     *
+     * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
+     */
+    int (*seek)(tl_file* file, tl_u64 position);
+
+    /**
+     * \brief Get the current position the read/write pointer within a file
+     *
+     * \param file     A pointer to a file object
+     * \param position Returns the absolute position within the file
+     *
+     * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
+     */
+    int (*tell)(tl_file* file, tl_u64* position);
+
+    /**
+     * \brief Map a part of a file into memory
+     *
+     * Mapping a file may not be possible for all file types or fail for
+     * some combinations of flags. For instance, combining \ref TL_MAP_WRITE
+     * and \ref TL_MAP_EXECUTE is not be allowed on some systems for
+     * security reasons (e.g. OpenBSD).
+     *
+     * \see tl_file_map_flush
+     * \see tl_file_unmap
+     *
+     * \param file   A pointer to a file object
+     * \param offset A byte offset into a file
+     * \param count  The number of bytes to map starting at the offset
+     * \param flags  A combination of \ref TL_MAP_FLAGS
+     *
+     * \return A pointer to a blob object encapsulating the mapped memory
+     */
+    const tl_file_mapping* (*map)(tl_file* file, tl_u64 offset,
+                                  size_t count, int flags);
+};
+
+/**
+ * \struct tl_file_mapping
+ *
+ * \extends tl_blob
+ *
+ * \brief A blob that contains a range of a file mapped into memory
+ */
+struct tl_file_mapping
+{
+    tl_blob super;
+
+    /**
+     * \brief Unmap a mapped file range and destroy the mapping object
+     *
+     * \note This function cleans up and frees the blob object
+     *
+     * \param map A pointer to the blob object encapsulating the mapped memory
+     */
+    void (*destroy)(const tl_file_mapping* map);
+
+    /**
+     * \brief Flush a range of a memory mapped file back to disk
+     *
+     * \note This function may block until the mapped range has been written
+     *
+     * This function writes part of a memory mapped file back to the disk and
+     * invalidates the mapped ranges of other processes so they can work with
+     * updated values.
+     *
+     * \param blob   The tl_file_mapping object
+     * \param offset A byte offset into mapped region
+     * \param range  The number of bytes to flush
+     */
+    void (*flush)(const tl_file_mapping* blob, size_t offset, size_t range);
+};
 
 
 #ifdef __cplusplus
@@ -121,87 +203,12 @@ extern "C" {
  * \memberof tl_file
  *
  * \param path  An UTF-8 encoded path of the file
- * \param file  Returns a pointer to a tl_iostream that wrapps the file
+ * \param file  Returns a pointer to a tl_file that wrapps the file
  * \param flags A combination of \ref TL_OPEN_FLAGS
  *
  * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
-TLOSAPI int tl_file_open( const char* path, tl_iostream** file, int flags );
-
-/**
- * \brief Reposition the read/write pointer within a file
- *
- * \memberof tl_file
- *
- * \param file     A pointer to a file object
- * \param position The new, absolute position to set
- *
- * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
- */
-TLOSAPI int tl_file_seek( tl_iostream* file, tl_u64 position );
-
-/**
- * \brief Get the current position the read/write pointer within a file
- *
- * \memberof tl_file
- *
- * \param file     A pointer to a file object
- * \param position Returns the absolute position within the file
- *
- * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
- */
-TLOSAPI int tl_file_tell( tl_iostream* file, tl_u64* position );
-
-/**
- * \brief Map a part of a file into memory
- *
- * \memberof tl_file
- *
- * \note Some combinations of flags may not work on all operating systems.
- *       For instance, combining \ref TL_MAP_WRITE and \ref TL_MAP_EXECUTE is
- *       not be allowed on some systems for security reasons (e.g. OpenBSD).
- *
- * \see tl_file_map_flush
- * \see tl_file_unmap
- *
- * \param file   A pointer to a file object
- * \param offset A byte offset into a file
- * \param count  The number of bytes to map starting at the offset
- * \param flags  A combination of \ref TL_MAP_FLAGS
- *
- * \return A pointer to a blob object encapsulating the mapped memory
- */
-TLOSAPI const tl_blob* tl_file_map( tl_iostream* file, tl_u64 offset,
-                                    size_t count, int flags );
-
-/**
- * \brief Flush a range of a memory mapped file back to disk
- *
- * \memberof tl_file
- *
- * \note This function may block until the mapped range has been written
- *
- * This function writes part of a memory mapped file back to the disk and
- * invalidates the mapped ranges of other processes so they can work with
- * updated values.
- *
- * \param blob   The blobl returned from \ref tl_file_map
- * \param offset A byte offset into the blob
- * \param range  The number of files to write back to disk
- */
-TLOSAPI void tl_file_map_flush( const tl_blob* blob,
-                                size_t offset, size_t range );
-
-/**
- * \brief Unmap a mapped file range
- *
- * \memberof tl_file
- *
- * \note This function cleans up and frees the blob object
- *
- * \param map A pointer to the blob object encapsulating the mapped memory
- */
-TLOSAPI void tl_file_unmap( const tl_blob* map );
+TLOSAPI int tl_file_open( const char* path, tl_file** file, int flags );
 
 #ifdef __cplusplus
 }

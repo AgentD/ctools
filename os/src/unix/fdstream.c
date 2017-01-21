@@ -31,60 +31,54 @@ static int fd_stream_write( tl_iostream* super, const void* buffer,
                             size_t size, size_t* actual )
 {
     fd_stream* this = (fd_stream*)super;
-    ssize_t result, intr_count = 0;
-    off_t old = 0;
+    ssize_t result = 0, intr_count = 0;
+    int ret = 0;
 
     assert( this && buffer );
 
-    if( actual           ) *actual = 0;
-    if( this->writefd<0  ) return TL_ERR_NOT_SUPPORTED;
-    if( !size            ) return 0;
+    if( this->writefd < 0 )
+    	return TL_ERR_NOT_SUPPORTED;
+    if( !size )
+    	goto out;
 
 retry:
     if( !wait_for_fd( this->writefd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;
-
-    if( this->flags & STREAM_APPEND )
-    {
-        old = lseek( this->writefd, 0, SEEK_END );
-        if( old == (off_t)-1 )
-            return TL_ERR_INTERNAL;
-    }
 
     if( super->type == TL_STREAM_TYPE_SOCK )
         result = sendto( this->writefd, buffer, size, MSG_NOSIGNAL, NULL, 0 );
     else
         result = write( this->writefd, buffer, size );
 
-    if( result<0 && errno==EINTR && (intr_count++)<3 )
-        goto retry;
-
-    if( this->flags & STREAM_APPEND )
-        lseek( this->writefd, old, SEEK_SET );
-
     if( result<0 )
     {
-        if( errno==EBADF || errno==EINVAL || errno==EPIPE )
-            return TL_ERR_CLOSED;
-        return errno_to_fs( errno );
+        if( errno==EINTR && (intr_count++)<3 )
+            goto retry;
+        ret = errno_to_fs( errno );
     }
 
+out:
     if( actual )
         *actual = result;
-    return 0;
+    return ret;
 }
 
 static int fd_stream_read( tl_iostream* super, void* buffer,
                            size_t size, size_t* actual )
 {
     fd_stream* this = (fd_stream*)super;
-    ssize_t result, intr_count = 0;
+    ssize_t result = 0, intr_count = 0;
+    int ret = 0;
 
     assert( this && buffer );
 
-    if( actual           ) *actual = 0;
-    if( this->readfd<0   ) return TL_ERR_NOT_SUPPORTED;
-    if( !size            ) return 0;
+    if( this->readfd < 0 )
+    {
+        ret = TL_ERR_NOT_SUPPORTED;
+        goto out;
+    }
+    if( !size )
+        goto out;
 
 retry:
     if( !wait_for_fd( this->readfd, this->timeout, 0 ) )
@@ -98,19 +92,11 @@ retry:
     if( result<0 && errno==EINTR && (intr_count++)<3 )
         goto retry;
 
-    if( result==0 )
-    {
-        if( super->type == TL_STREAM_TYPE_FILE )
-            return TL_EOF;
-        return TL_ERR_CLOSED;
-    }
-
-    if( result < 0 )
-        return errno_to_fs( errno );
-
+    ret = result < 0 ? errno_to_fs(errno) : (result == 0 ? TL_ERR_CLOSED : 0);
+out:
     if( actual )
-        *actual = result;
-    return 0;
+        *actual = result > 0 ? result : 0;
+    return ret;
 }
 
 /****************************************************************************/

@@ -14,6 +14,7 @@
 #include "tl_thread.h"
 #include "tl_string.h"
 #include "tl_array.h"
+#include "tl_file.h"
 #include "tl_fs.h"
 
 #include "../platform.h"
@@ -42,14 +43,22 @@
 
 
 typedef struct fd_stream fd_stream;
+typedef struct file_stream file_stream;
 
 typedef enum
 {
     STREAM_UDP = 0x0001,
-    STREAM_TCP = 0x0002,
-    STREAM_APPEND = 0x0004
+    STREAM_TCP = 0x0002
 }
 STREAM_FLAGS;
+
+struct file_stream
+{
+    tl_file super;
+    unsigned int timeout;
+    int flags;
+    int fd;
+}; 
 
 struct fd_stream
 {

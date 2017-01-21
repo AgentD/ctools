@@ -121,7 +121,7 @@ int main( void )
 {
     unsigned char *ptr = image;
     unsigned int x, y;
-    tl_iostream* f;
+    tl_file* f;
     float r;
 
     for( y=0; y<600; ++y )
@@ -142,8 +142,8 @@ int main( void )
 
 
     tl_file_open( "test.png", &f, TL_WRITE|TL_CREATE|TL_OVERWRITE );
-    write_png_file( f, image, 800, 600, COLOR_RGB );
-    f->destroy( f );
+    write_png_file( (tl_iostream*)f, image, 800, 600, COLOR_RGB );
+    ((tl_iostream*)f)->destroy( (tl_iostream*)f );
     return 0;
 }
 

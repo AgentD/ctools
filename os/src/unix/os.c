@@ -15,6 +15,8 @@ int errno_to_fs( int code )
 {
     switch( code )
     {
+    case EPIPE:
+         return TL_ERR_CLOSED;
     case EPERM:
     case EACCES:
     case EROFS:

@@ -120,8 +120,8 @@ int main( int argc, char** argv )
 {
     size_t numoptions = sizeof(options)/sizeof(options[0]);
     int i, status = EXIT_FAILURE, ret;
-    tl_iostream *infile, *outfile;
-    const tl_blob* map;
+    const tl_file_mapping* map;
+    tl_file *infile, *outfile;
     char line[128];
     tl_blob dst;
     tl_u64 size;
@@ -186,7 +186,7 @@ int main( int argc, char** argv )
         goto outfiles;
     }
 
-    map = tl_file_map( infile, 0, size, TL_MAP_READ );
+    map = infile->map( infile, 0, size, TL_MAP_READ );
 
     if( !map )
     {
@@ -196,9 +196,9 @@ int main( int argc, char** argv )
 
     /* process input */
     if( compress == COMP )
-        ret = tl_compress_blob( &dst, map, algo, flags );
+        ret = tl_compress_blob( &dst, (const tl_blob*)map, algo, flags );
     else
-        ret = tl_uncompress_blob( &dst, map, algo );
+        ret = tl_uncompress_blob( &dst, (const tl_blob*)map, algo );
 
     switch( ret )
     {
@@ -216,7 +216,7 @@ int main( int argc, char** argv )
     }
 
     /* write out result */
-    if( tl_iostream_write_blob( outfile, &dst, NULL ) != 0 )
+    if( tl_iostream_write_blob( (tl_iostream*)outfile, &dst, NULL ) != 0 )
     {
         fprintf( stderr, "write: %s\n", out );
         goto outblob;
@@ -225,9 +225,9 @@ int main( int argc, char** argv )
     /* cleanup */
     status = EXIT_SUCCESS;
 outblob:  tl_blob_cleanup( &dst );
-outbuf:   tl_file_unmap( map );
-outfiles: outfile->destroy( outfile );
-outinf:   infile->destroy( infile );
+outbuf:   map->destroy(map);
+outfiles: ((tl_iostream*)outfile)->destroy( (tl_iostream*)outfile );
+outinf:   ((tl_iostream*)infile)->destroy( (tl_iostream*)infile );
     return status;
 }
 
