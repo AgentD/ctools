@@ -152,7 +152,7 @@ int main( int argc, char** argv )
         return EXIT_FAILURE;
     }
 
-    if( tl_fs_exists( out ) )
+    if( tl_fs_exists( out ) == 0 )
     {
         printf( "WARNING: Output file '%s' exists, overwrite [y|N]? ", out );
         fgets( line, sizeof(line), stdin );
