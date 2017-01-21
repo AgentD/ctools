@@ -223,8 +223,8 @@ static TL_INLINE int tl_iostream_write_string( tl_iostream* stream,
  *
  * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
-TLOSAPI int tl_iostream_read_blob( tl_iostream* stream, tl_blob* blob,
-                                   size_t maximum );
+TLAPI int tl_iostream_read_blob( tl_iostream* stream, tl_blob* blob,
+                                 size_t maximum );
 
 /**
  * \brief Read characters from a stream until a new line symbol is encountered
@@ -251,8 +251,8 @@ TLOSAPI int tl_iostream_read_blob( tl_iostream* stream, tl_blob* blob,
  *
  * \return Zero on success, a negative value (\ref TL_ERROR_CODE) on failure
  */
-TLOSAPI int tl_iostream_read_line( tl_iostream* stream, tl_string* line,
-                                   int flags );
+TLAPI int tl_iostream_read_line( tl_iostream* stream, tl_string* line,
+                                 int flags );
 
 /**
  * \brief Write formated data to a tl_iostream
@@ -262,8 +262,8 @@ TLOSAPI int tl_iostream_read_line( tl_iostream* stream, tl_string* line,
  *
  * \return Zero on success, a negative value (\ref TL_ERROR_CODE) on failure
  */
-TLOSAPI int tl_iostream_printf( tl_iostream* stream,
-                                const char* format, ... ) TL_FORMATSTR;
+TLAPI int tl_iostream_printf( tl_iostream* stream,
+                              const char* format, ... ) TL_FORMATSTR;
 
 #ifdef __cplusplus
 }

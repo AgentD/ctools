@@ -75,6 +75,10 @@ set( UNICODE_SRC src/unicode/isspace.c
                  src/unicode/utf16.c
                  src/unicode/utf8.c )
 
+set( IOSTREAM_SRC src/iostream/printf.c
+                  src/iostream/read_blob.c
+                  src/iostream/read_line.c )
+
 add_library( tlcore ${TYPE} src/array.c
                             src/list.c
                             src/list_node.c
@@ -85,6 +89,7 @@ add_library( tlcore ${TYPE} src/array.c
                             src/compress.c
                             src/uncompress.c
                             src/opt.c
+                            ${IOSTREAM_SRC}
                             ${UNICODE_SRC}
                             ${STRING_SRC}
                             ${SEARCH_SRC}
@@ -124,6 +129,7 @@ install( FILES include/tl_allocator.h
                include/tl_compress.h
                include/tl_convert.h
                include/tl_unicode.h
+               include/tl_iostream.h
          DESTINATION include )
 
 install( TARGETS tlcore LIBRARY DESTINATION lib

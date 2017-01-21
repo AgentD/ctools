@@ -41,9 +41,6 @@ elseif( WIN32 )
 endif( )
 
 add_library( tlos ${TYPE} src/network.c
-                          src/printf.c
-                          src/read_blob.c
-                          src/read_line.c
                           src/splice.c
                           ${CTOOLS_SYSDEP} )
 
@@ -60,7 +57,6 @@ endif( )
 
 install( FILES include/tl_dir.h
                include/tl_fs.h
-               include/tl_iostream.h
                include/tl_network.h
                include/tl_packetserver.h
                include/tl_process.h

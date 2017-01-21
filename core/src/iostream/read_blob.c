@@ -5,7 +5,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  */
-#define TL_OS_EXPORT
+#define TL_EXPORT
 #include "tl_iostream.h"
 
 int tl_iostream_read_blob( tl_iostream* this, tl_blob* blob,
