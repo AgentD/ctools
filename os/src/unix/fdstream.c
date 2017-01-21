@@ -44,14 +44,14 @@ retry:
     if( !wait_for_fd( this->writefd, this->timeout, 1 ) )
         return TL_ERR_TIMEOUT;
 
-    if( super->flags & TL_STREAM_APPEND )
+    if( this->flags & STREAM_APPEND )
     {
         old = lseek( this->writefd, 0, SEEK_END );
         if( old == (off_t)-1 )
             return TL_ERR_INTERNAL;
     }
 
-    if( (super->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
+    if( super->type == TL_STREAM_TYPE_SOCK )
         result = sendto( this->writefd, buffer, size, MSG_NOSIGNAL, NULL, 0 );
     else
         result = write( this->writefd, buffer, size );
@@ -59,7 +59,7 @@ retry:
     if( result<0 && errno==EINTR && (intr_count++)<3 )
         goto retry;
 
-    if( super->flags & TL_STREAM_APPEND )
+    if( this->flags & STREAM_APPEND )
         lseek( this->writefd, old, SEEK_SET );
 
     if( result<0 )
@@ -90,7 +90,7 @@ retry:
     if( !wait_for_fd( this->readfd, this->timeout, 0 ) )
         return TL_ERR_TIMEOUT;
 
-    if( (super->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
+    if( super->type == TL_STREAM_TYPE_SOCK )
         result = recvfrom(this->readfd, buffer,size,MSG_NOSIGNAL,NULL,NULL);
     else
         result = read( this->readfd, buffer, size );
@@ -100,7 +100,7 @@ retry:
 
     if( result==0 )
     {
-        if( (super->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_FILE )
+        if( super->type == TL_STREAM_TYPE_FILE )
             return TL_EOF;
         return TL_ERR_CLOSED;
     }
@@ -124,6 +124,7 @@ fd_stream tl_stdio =
         fd_stream_write,
         fd_stream_read
     },
+    0,
     STDIN_FILENO,
     STDOUT_FILENO,
     0
@@ -138,6 +139,7 @@ fd_stream tl_stderr =
         fd_stream_write,
         fd_stream_read
     },
+    0,
     -1,
     STDERR_FILENO,
     0
@@ -145,7 +147,7 @@ fd_stream tl_stderr =
 
 /****************************************************************************/
 
-tl_iostream* fdstream_create( int readfd, int writefd, int flags )
+tl_iostream* fdstream_create( int readfd, int writefd, int type, int flags )
 {
     fd_stream* this = calloc( 1, sizeof(fd_stream) );
     tl_iostream* super = (tl_iostream*)this;
@@ -155,7 +157,8 @@ tl_iostream* fdstream_create( int readfd, int writefd, int flags )
 
     this->readfd       = readfd;
     this->writefd      = writefd;
-    super->flags       = flags;
+    this->flags        = flags;
+    super->type        = type;
     super->destroy     = fd_stream_destroy;
     super->set_timeout = fd_stream_set_timeout;
     super->write       = fd_stream_write;

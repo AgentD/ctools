@@ -68,7 +68,7 @@ static int fstream_write( tl_iostream* super, const void* buffer,
     if( !this->whnd )
         return TL_ERR_NOT_SUPPORTED;
 
-    if( super->flags & TL_STREAM_APPEND )
+    if( this->flags & STREAM_APPEND )
     {
         pos = w32_lseek( this->whnd, 0, FILE_END );
         if( pos < 0 )
@@ -78,7 +78,7 @@ static int fstream_write( tl_iostream* super, const void* buffer,
     if( !WriteFile( this->whnd, buffer, size, &result, NULL ) )
         return errno_to_fs( GetLastError( ) );
 
-    if( super->flags & TL_STREAM_APPEND )
+    if( this->flags & STREAM_APPEND )
         w32_lseek( this->whnd, pos, FILE_BEGIN );
 
     if( actual )
@@ -109,7 +109,7 @@ static int fstream_read( tl_iostream* super, void* buffer, size_t size,
 
     if( !result )
     {
-        if( (super->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_FILE )
+        if( super->type == TL_STREAM_TYPE_FILE )
             return TL_EOF;
         return TL_ERR_CLOSED;
     }
@@ -127,6 +127,7 @@ fstream tl_stdio =
         fstream_write,
         fstream_read
     },
+    0,
     NULL,
     NULL
 };
@@ -140,13 +141,15 @@ fstream tl_stderr =
         fstream_write,
         fstream_read
     },
+    0,
     NULL,
     NULL
 };
 
 /****************************************************************************/
 
-tl_iostream* fstream_create( HANDLE readhnd, HANDLE writehnd, int flags )
+tl_iostream* fstream_create( HANDLE readhnd, HANDLE writehnd,
+                             int type, int flags )
 {
     fstream* this = calloc( 1, sizeof(fstream) );
     tl_iostream* super = (tl_iostream*)this;
@@ -155,7 +158,8 @@ tl_iostream* fstream_create( HANDLE readhnd, HANDLE writehnd, int flags )
     {
         this->rhnd         = readhnd;
         this->whnd         = writehnd;
-        super->flags       = flags;
+        this->flags        = flags;
+        super->type        = type;
         super->read        = fstream_read;
         super->write       = fstream_write;
         super->destroy     = fstream_destroy;

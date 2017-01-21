@@ -23,8 +23,8 @@ tl_mmap_blob;
 int tl_file_open( const char* path, tl_iostream** file, int flags )
 {
     DWORD share = FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE;
-    int ret = 0, strflags = TL_STREAM_TYPE_FILE;
     DWORD access = 0, disp = OPEN_EXISTING;
+    int ret = 0, strflags = 0;
     WCHAR* wpath;
     HANDLE fhnd;
 
@@ -52,7 +52,7 @@ int tl_file_open( const char* path, tl_iostream** file, int flags )
         disp = OPEN_ALWAYS;
 
     if( flags & TL_APPEND )
-        strflags |= TL_STREAM_APPEND;
+        strflags |= STREAM_APPEND;
 
     /* open file */
     ret = get_absolute_path( &wpath, path );
@@ -71,6 +71,7 @@ int tl_file_open( const char* path, tl_iostream** file, int flags )
     /* create stream */
     *file = fstream_create( flags & TL_READ  ? fhnd : NULL,
                             flags & TL_WRITE ? fhnd : NULL,
+                            TL_STREAM_TYPE_FILE,
                             strflags );
 
     if( !(*file) )
@@ -87,7 +88,7 @@ int tl_file_seek( tl_iostream* super, tl_u64 position )
 
     assert( this );
 
-    if( (super->flags & TL_STREAM_TYPE_MASK) != TL_STREAM_TYPE_FILE )
+    if( super->type != TL_STREAM_TYPE_FILE )
         return TL_ERR_NOT_SUPPORTED;
 
     fhnd = this->rhnd;
@@ -107,7 +108,7 @@ int tl_file_tell( tl_iostream* super, tl_u64* position )
 
     assert( this );
 
-    if( (super->flags & TL_STREAM_TYPE_MASK) != TL_STREAM_TYPE_FILE )
+    if( super->type != TL_STREAM_TYPE_FILE )
         return TL_ERR_NOT_SUPPORTED;
 
     fhnd = this->rhnd;
@@ -137,7 +138,7 @@ const tl_blob* tl_file_map( tl_iostream* super, tl_u64 offset,
         return NULL;
     if( !(flags & (TL_MAP_READ|TL_MAP_WRITE|TL_MAP_EXECUTE)) )
         return NULL;
-    if( (super->flags & TL_STREAM_TYPE_MASK) != TL_STREAM_TYPE_FILE )
+    if( super->type != TL_STREAM_TYPE_FILE )
         return NULL;
 
     fhnd = this->rhnd;

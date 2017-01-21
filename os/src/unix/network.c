@@ -53,9 +53,9 @@ int tl_network_get_peer_address( tl_iostream* stream, tl_net_addr* addr )
 
     assert( stream && addr );
 
-    if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
+    if( stream->type == TL_STREAM_TYPE_SOCK )
     {
-        addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
+        addr->transport = (fd->flags & STREAM_UDP) ? TL_UDP : TL_TCP;
 
         if( getpeername( fd->writefd, (void*)&buffer, &len )==0 )
             return decode_sockaddr_in( &buffer, len, addr );
@@ -72,9 +72,9 @@ int tl_network_get_local_address( tl_iostream* stream, tl_net_addr* addr )
 
     assert( stream && addr );
 
-    if( (stream->flags & TL_STREAM_TYPE_MASK) == TL_STREAM_TYPE_SOCK )
+    if( stream->type == TL_STREAM_TYPE_SOCK )
     {
-        addr->transport = (stream->flags & TL_STREAM_UDP) ? TL_UDP : TL_TCP;
+        addr->transport = (fd->flags & STREAM_UDP) ? TL_UDP : TL_TCP;
 
         if( getsockname( fd->writefd, (void*)&buffer, &len )==0 )
             return decode_sockaddr_in( &buffer, len, addr );

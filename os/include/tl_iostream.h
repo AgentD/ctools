@@ -66,24 +66,20 @@
 
 
 /**
- * \enum TL_STREAM_FLAG
+ * \enum TL_STREAM_TYPE
  *
- * \brief Encapsulates the underlying type of a stream and various flags
+ * \brief Encapsulates the underlying type of a stream
  */
 typedef enum
 {
-    /**< \brief A mask to flag out the stream type */
-    TL_STREAM_TYPE_MASK = 0x00FF,
-
     TL_STREAM_TYPE_PIPE = 0x0000,   /**< \brief The stream is a pipe */
     TL_STREAM_TYPE_FILE = 0x0001,   /**< \brief The stream is a file */
     TL_STREAM_TYPE_SOCK = 0x0002,   /**< \brief The stream is a socket */
 
-    TL_STREAM_UDP = 0x0100,         /**< \brief Set for UDP sockets */
-    TL_STREAM_TCP = 0x0200,         /**< \brief Set for TCP sockets */
-    TL_STREAM_APPEND = 0x0400       /**< \brief File opened in append mode */
+    /** \brief Base ID for user defined streams */
+    TL_STREAM_USER = 0x8000
 }
-TL_STREAM_FLAG;
+TL_STREAM_TYPE;
 
 /**
  * \enum TL_READ_LINE_FLAG
@@ -135,8 +131,8 @@ TL_SPLICE_FLAG;
  */
 struct tl_iostream
 {
-    /** \brief A combination of \ref TL_STREAM_FLAG flags */
-    int flags;
+    /** \brief A combination \ref TL_STREAM_TYPE identifier */
+    int type;
 
     /**
      * \brief Make sure all pending writes are performed and destroy a stream

@@ -14,7 +14,7 @@
 
 int tl_file_open( const char* path, tl_iostream** file, int flags )
 {
-    int fd, readfd, writefd, of = O_CLOEXEC, sf = TL_STREAM_TYPE_FILE;
+    int fd, readfd, writefd, of = O_CLOEXEC, sf = 0;
 
     assert( path && file );
 
@@ -34,7 +34,7 @@ int tl_file_open( const char* path, tl_iostream** file, int flags )
     else                                  of |= O_RDONLY;
 
     if( flags & TL_APPEND )
-        sf |= TL_STREAM_APPEND;
+        sf |= STREAM_APPEND;
 
     /* XXX: path string encoding? */
     fd = open( path, of, 0644 );
@@ -44,7 +44,7 @@ int tl_file_open( const char* path, tl_iostream** file, int flags )
     readfd = flags & TL_READ ? fd : -1;
     writefd = flags & TL_WRITE ? fd : -1;
 
-    *file = fdstream_create( readfd, writefd, sf );
+    *file = fdstream_create( readfd, writefd, TL_STREAM_TYPE_FILE, sf );
     if( !(*file) )
     {
         close( fd );
@@ -61,7 +61,7 @@ int tl_file_seek( tl_iostream* super, tl_u64 position )
 
     assert( this );
 
-    if( (super->flags & TL_STREAM_TYPE_MASK) != TL_STREAM_TYPE_FILE )
+    if( super->type != TL_STREAM_TYPE_FILE )
         return TL_ERR_NOT_SUPPORTED;
 
     fd = this->readfd;
@@ -81,7 +81,7 @@ int tl_file_tell( tl_iostream* super, tl_u64* position )
 
     assert( this && position );
 
-    if( (super->flags & TL_STREAM_TYPE_MASK) != TL_STREAM_TYPE_FILE )
+    if( super->type != TL_STREAM_TYPE_FILE )
         return TL_ERR_NOT_SUPPORTED;
 
     fd = this->readfd;
@@ -109,7 +109,7 @@ const tl_blob* tl_file_map( tl_iostream* super, tl_u64 offset,
         return NULL;
     if( !(flags & (TL_MAP_READ|TL_MAP_WRITE|TL_MAP_EXECUTE)) )
         return NULL;
-    if( this && ((super->flags & TL_STREAM_TYPE_MASK)!=TL_STREAM_TYPE_FILE) )
+    if( this && (super->type != TL_STREAM_TYPE_FILE) )
         return NULL;
 
     if( flags & TL_MAP_READ    ) prot |= PROT_READ;

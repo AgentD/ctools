@@ -43,9 +43,18 @@
 
 typedef struct fd_stream fd_stream;
 
+typedef enum
+{
+    STREAM_UDP = 0x0001,
+    STREAM_TCP = 0x0002,
+    STREAM_APPEND = 0x0004
+}
+STREAM_FLAGS;
+
 struct fd_stream
 {
     tl_iostream super;
+    int flags;
     int readfd;
     int writefd;
     unsigned int timeout;
@@ -57,7 +66,9 @@ struct tl_monitor
     pthread_cond_t cond;
 };
 
-#define sock_stream_create( fd, flags ) fdstream_create(fd,fd,flags)
+#define sock_stream_create(fd, proto) \
+	fdstream_create(fd,fd,TL_STREAM_TYPE_SOCK, \
+			(proto)==TL_UDP ? STREAM_UDP : STREAM_TCP)
 
 extern fd_stream tl_stdio;
 extern fd_stream tl_stderr;
@@ -84,9 +95,11 @@ int wait_for_fd( int fd, unsigned long timeoutms, int writeable );
  *
  * \param readpipe  A file descriptor to read from
  * \param writepipe A file descriptor to write to
- * \param flags     Flags to set for the underlying tl_iostream structure
+ * \param type      Stream type to set for the tl_iostream
+ * \param flags     Flags to set for the fd_stream structure
  */
-tl_iostream* fdstream_create( int readpipe, int writepipe, int flags );
+tl_iostream* fdstream_create( int readpipe, int writepipe,
+                              int type, int flags );
 
 /** \brief Initialize a monitor object */
 int tl_monitor_init( tl_monitor* monitor );

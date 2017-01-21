@@ -72,7 +72,7 @@ static int sockstream_read_raw( tl_iostream* super, void* buffer,
 
 /****************************************************************************/
 
-tl_iostream* sock_stream_create( SOCKET sockfd, int flags )
+tl_iostream* sock_stream_create( SOCKET sockfd, int proto )
 {
     sockstream* this = calloc( 1, sizeof(sockstream) );
     tl_iostream* super = (tl_iostream*)this;
@@ -81,7 +81,8 @@ tl_iostream* sock_stream_create( SOCKET sockfd, int flags )
         return NULL;
 
     this->socket       = sockfd;
-    super->flags       = flags;
+    this->proto        = proto;
+    super->type        = TL_STREAM_TYPE_SOCK;
     super->destroy     = sockstream_destroy;
     super->set_timeout = sockstream_set_timeout;
     super->write       = sockstream_write_raw;

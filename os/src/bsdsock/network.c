@@ -34,10 +34,7 @@ tl_iostream* tl_network_create_client( const tl_net_addr* peer,
     if( !connect_socket( sockfd, peer ) )
         goto fail;
 
-    flags = TL_STREAM_TYPE_SOCK;
-    flags |= (peer->transport==TL_UDP ? TL_STREAM_UDP : TL_STREAM_TCP);
-
-    if( !(stream = sock_stream_create( sockfd, flags )) )
+    if( !(stream = sock_stream_create( sockfd, peer->transport )) )
         goto fail;
 
     return stream;

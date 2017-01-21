@@ -48,7 +48,6 @@ static int is_v6( SOCKET peer )
 
 static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
 {
-    int flags = TL_STREAM_TYPE_SOCK|TL_STREAM_TCP;
     tcp_server* this = (tcp_server*)super;
     tl_iostream* client;
     SOCKET peer;
@@ -71,7 +70,7 @@ static tl_iostream* tcp_wait_for_client( tl_server* super, int timeout )
         return NULL;
     }
 
-    client = sock_stream_create( peer, flags );
+    client = sock_stream_create( peer, TL_TCP );
     if( !client )
         goto ignore;
     return client;

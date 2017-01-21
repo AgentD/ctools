@@ -29,6 +29,12 @@
 typedef struct fstream fstream;
 typedef struct sockstream sockstream;
 
+typedef enum
+{
+    STREAM_APPEND = 0x0001
+}
+STREAM_FLAGS;
+
 struct tl_monitor
 {
     CRITICAL_SECTION mutex;
@@ -41,6 +47,7 @@ struct tl_monitor
 struct fstream
 {
     tl_iostream super;
+    int flags;
     HANDLE rhnd;
     HANDLE whnd;
 };
@@ -48,6 +55,7 @@ struct fstream
 struct sockstream
 {
     tl_iostream super;
+    int proto;
     DWORD timeout;
     SOCKET socket;
 };
@@ -84,7 +92,7 @@ int winsock_acquire( void );
 void winsock_release( void );
 
 /** \brief Create a stream operating on a winsock socket */
-tl_iostream* sock_stream_create( SOCKET sockfd, int flags );
+tl_iostream* sock_stream_create( SOCKET sockfd, int proto );
 
 int wait_for_fd( SOCKET socket, unsigned long timeout, int write );
 
@@ -97,7 +105,8 @@ int tl_monitor_init( tl_monitor* monitor );
 void tl_monitor_cleanup( tl_monitor* monitor );
 
 /** \brief Create a stream object that uses pipe or file HANDLE objects */
-tl_iostream* fstream_create( HANDLE readhnd, HANDLE writehnd, int flags );
+tl_iostream* fstream_create( HANDLE readhnd, HANDLE writehnd,
+                             int type, int flags );
 
 /** \brief Set flags on socket */
 int set_socket_flags( SOCKET fd, int netlayer, int* flags );

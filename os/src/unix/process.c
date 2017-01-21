@@ -59,14 +59,15 @@ tl_process* tl_process_create( const char* filename, const char* const* argv,
     if( flags & (TL_PIPE_STDIN|TL_PIPE_STDOUT) )
     {
         this->iopipe = fdstream_create( outpipe[0], inpipe[1],
-                                        TL_STREAM_TYPE_PIPE );
+                                        TL_STREAM_TYPE_PIPE, 0 );
         if( !this->iopipe )
             goto fail;
     }
 
     if( (flags & TL_PIPE_STDERR) && !(flags & TL_STDERR_TO_STDOUT) )
     {
-        this->errpipe = fdstream_create(errpipe[0], -1, TL_STREAM_TYPE_PIPE);
+        this->errpipe = fdstream_create(errpipe[0], -1,
+                                        TL_STREAM_TYPE_PIPE, 0);
         if( !this->errpipe )
             goto fail;
     }
