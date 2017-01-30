@@ -9,7 +9,8 @@ set( CTOOLS_BSDSOCK src/bsdsock/sock.c
 if( UNIX )
   set( CTOOLS_SYSDEP src/unix/os.c
                      src/unix/fs.c
-                     src/unix/dir.c
+                     src/unix/dir_it.c
+                     src/unix/dir_scan.c
                      src/unix/network.c
                      src/unix/process.c
                      src/unix/thread.c
@@ -24,7 +25,8 @@ if( UNIX )
 elseif( WIN32 )
   set( CTOOLS_SYSDEP src/W32/os.c
                      src/W32/fs.c
-                     src/W32/dir.c
+                     src/W32/dir_it.c
+                     src/W32/dir_scan.c
                      src/W32/network.c
                      src/W32/process.c
                      src/W32/thread.c

@@ -1,4 +1,4 @@
-/* dir.c -- This file is part of ctools
+/* dir_it.c -- This file is part of ctools
  *
  * Copyright (C) 2015 - David Oberhollenzer
  *
@@ -7,9 +7,7 @@
  */
 #define TL_OS_EXPORT
 #include "tl_iterator.h"
-#include "tl_array.h"
 #include "tl_dir.h"
-#include "tl_fs.h"
 #include "os.h"
 
 #include <dirent.h>
@@ -82,32 +80,6 @@ static void dir_iterator_remove( tl_iterator* this )
     (void)this;
 }
 
-/****************************************************************************/
-
-int tl_dir_scan( const char* path, tl_array* list )
-{
-    struct dirent* ent;
-    tl_string str;
-    DIR* dir;
-
-    assert( list && path );
-
-    if( !(dir = opendir( path )) )
-        return errno_to_fs( errno );
-
-    while( (ent=readdir( dir )) )
-    {
-        if( strcmp( ent->d_name, "." )!=0 && strcmp( ent->d_name, ".." )!=0 )
-        {
-            tl_string_init_local( &str, ent->d_name );
-            tl_array_append( list, &str );
-        }
-    }
-
-    closedir( dir );
-    return 0;
-}
-
 tl_iterator* tl_dir_iterate( const char* path )
 {
     dir_iterator* it;
@@ -133,4 +105,3 @@ tl_iterator* tl_dir_iterate( const char* path )
     it->super.remove    = dir_iterator_remove;
     return (tl_iterator*)it;
 }
-
