@@ -111,7 +111,7 @@ void file_destroy( tl_iostream* super )
 {
     file_stream* this = (file_stream*)super;
 
-    assert(this != NULL && buffer != NULL);
+    assert(this != NULL);
     assert(super->type == TL_STREAM_TYPE_FILE);
 
     close(this->fd);
@@ -122,7 +122,7 @@ int file_set_timeout( tl_iostream* super, unsigned int timeout )
 {
     file_stream* this = (file_stream*)super;
 
-    assert(this != NULL && buffer != NULL);
+    assert(this != NULL);
     assert(super->type == TL_STREAM_TYPE_FILE);
 
     this->timeout = timeout;
