@@ -176,8 +176,8 @@ static int file_tell(tl_file* file, tl_u64* position)
     return 0;
 }
 
-const tl_file_mapping* file_map(tl_file* file, tl_u64 offset,
-                                size_t count, int flags)
+static const tl_file_mapping* file_map(tl_file* file, tl_u64 offset,
+                                       size_t count, int flags)
 {
     filestream* this = (filestream*)file;
     DWORD prot = 0, viewprot = 0;

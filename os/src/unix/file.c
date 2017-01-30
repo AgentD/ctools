@@ -107,7 +107,7 @@ static const tl_file_mapping* file_map( tl_file* super, tl_u64 offset,
     return map;
 }
 
-void file_destroy( tl_iostream* super )
+static void file_destroy( tl_iostream* super )
 {
     file_stream* this = (file_stream*)super;
 
@@ -118,7 +118,7 @@ void file_destroy( tl_iostream* super )
     free(this);
 }
 
-int file_set_timeout( tl_iostream* super, unsigned int timeout )
+static int file_set_timeout( tl_iostream* super, unsigned int timeout )
 {
     file_stream* this = (file_stream*)super;
 
@@ -129,8 +129,8 @@ int file_set_timeout( tl_iostream* super, unsigned int timeout )
     return 0;
 }
 
-int file_write( tl_iostream* super, const void* buffer,
-                size_t size, size_t* actual )
+static int file_write( tl_iostream* super, const void* buffer,
+                       size_t size, size_t* actual )
 {
     file_stream* this = (file_stream*)super;
     ssize_t result = 0, intr_count = 0;
@@ -178,8 +178,8 @@ out:
     return ret;
 }
 
-int file_read( tl_iostream* super, void* buffer, size_t size,
-               size_t* actual )
+static int file_read( tl_iostream* super, void* buffer, size_t size,
+                      size_t* actual )
 {
     file_stream* this = (file_stream*)super;
     ssize_t result = 0, intr_count = 0;
