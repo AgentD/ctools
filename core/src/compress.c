@@ -12,19 +12,20 @@
 #include <stdlib.h>
 
 
-int tl_compress( tl_blob* dst, const void* src, size_t size,
-                 int algo, int flags )
+tl_compressor* tl_create_compressor(int algo, int flags)
 {
     switch( algo )
     {
 #ifdef TL_HAVE_DEFLATE
     case TL_DEFLATE:
-        return tl_deflate( dst, src, size, flags );
+        return tl_deflate(flags);
+    case TL_INFLATE:
+        return tl_inflate(flags);
 #endif
     default:
         break;
     }
 
-    return TL_ERR_NOT_SUPPORTED;
+    return NULL;
 }
 

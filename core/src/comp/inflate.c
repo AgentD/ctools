@@ -7,77 +7,106 @@
  */
 #define TL_EXPORT
 #include "tl_compress.h"
+#include "compressor.h"
 
 #include <string.h>
 #include <stdlib.h>
 
 #include <zlib.h>
 
-int tl_inflate( tl_blob* dst, const void* data, size_t size )
+typedef struct
 {
-    char out[1024];
+    base_compressor super;
     z_stream strm;
-    tl_array temp;
-    void* fit;
-    int ret;
+}
+tl_inflate_compressor;
 
-    assert( dst );
 
-    if( !data || !size )
-    {
-        memset( dst, 0, sizeof(*dst) );
-        return 0;
-    }
+static void inflate_destroy( tl_iostream* stream )
+{
+    tl_inflate_compressor* this = (tl_inflate_compressor*)stream;
 
-    memset( &strm, 0, sizeof(strm) );
+    assert(this != NULL);
+    assert(stream->type == TL_STREAM_TYPE_COMPRESSOR);
 
-    if( inflateInit( &strm ) != Z_OK )
-        return TL_ERR_INTERNAL;
+    inflateEnd(&this->strm);
+    free(((base_compressor*)this)->buffer);
+    free(this);
+}
 
-    tl_array_init( &temp, 1, NULL );
+static int inflate_read( tl_iostream* stream, void* buffer,
+                         size_t size, size_t* actual )
+{
+    tl_inflate_compressor* this = (tl_inflate_compressor*)stream;
+    base_compressor* super = (base_compressor*)stream;
+    int ret = 0, have, total = 0;
 
-    strm.next_in = (void*)data;
-    strm.avail_in = size;
+    assert(this != NULL && buffer != NULL);
+    assert(stream->type == TL_STREAM_TYPE_COMPRESSOR);
+
+    if( !super->used )
+        size = 0;
+
+    if( !size )
+        goto out;
+
+    this->strm.next_in = super->buffer;
+    this->strm.avail_in = super->used;
 
     do
     {
-        strm.next_out = (void*)out;
-        strm.avail_out = sizeof(out);
+        this->strm.next_out = buffer;
+        this->strm.avail_out = size;
 
-        ret = inflate( &strm, Z_NO_FLUSH );
-
-        if( ret != Z_OK && ret != Z_STREAM_END )
+        switch( inflate(&this->strm, Z_NO_FLUSH) )
         {
+        case Z_STREAM_END:
+            ret = TL_EOF;
+            break;
+        case Z_OK:
+            ret = 0;
+            break;
+        default:
             ret = TL_ERR_INTERNAL;
-            goto fail;
+            goto out_remove;
         }
 
-        ret = tl_array_append_array( &temp, out,
-                                     sizeof(out) - strm.avail_out );
+        have = size - this->strm.avail_out;
 
-        if( !ret )
-        {
-            ret = TL_ERR_ALLOC;
-            goto fail;
-        }
+        buffer = (unsigned char*)buffer + have;
+        size -= have;
+        total += have;
     }
-    while( strm.avail_out == 0 );
+    while( size && this->strm.avail_out == 0 );
 
-    inflateEnd( &strm );
-
-    dst->data = temp.data;
-    dst->size = temp.used;
-
-    if( temp.used < temp.reserved )
-    {
-        fit = realloc( dst->data, dst->size );
-        if( fit )
-            dst->data = fit;
-    }
-    return 0;
-fail:
-    tl_array_cleanup( &temp );
-    inflateEnd( &strm );
+out_remove:
+    base_compressor_remove( super, super->used - this->strm.avail_in );
+out:
+    if( actual )
+        *actual = total;
     return ret;
 }
 
+tl_compressor* tl_inflate(int flags)
+{
+    tl_inflate_compressor* this;
+
+    if( flags & (~TL_COMPRESS_ALL_FLAGS) )
+        return NULL;
+
+    this = calloc(1, sizeof(*this));
+    if( !this )
+        return NULL;
+
+    base_compressor_init((base_compressor*)this);
+
+    if( inflateInit( &(this->strm) ) != Z_OK )
+    {
+        free(this);
+        return NULL;
+    }
+
+    ((tl_iostream*)this)->destroy = inflate_destroy;
+    ((tl_iostream*)this)->read = inflate_read;
+    return (tl_compressor*)this;
+}

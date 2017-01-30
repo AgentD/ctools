@@ -87,8 +87,9 @@ add_library( tlcore ${TYPE} src/array.c
                             src/allocator.c
                             src/blob.c
                             src/compress.c
-                            src/uncompress.c
+                            src/comp_blob.c
                             src/opt.c
+                            src/comp/compressor.c
                             ${IOSTREAM_SRC}
                             ${UNICODE_SRC}
                             ${STRING_SRC}

@@ -4,6 +4,7 @@
  */
 #include "tl_compress.h"
 #include "tl_iostream.h"
+#include "tl_splice.h"
 #include "tl_file.h"
 #include "tl_opt.h"
 #include "tl_fs.h"
@@ -22,22 +23,24 @@ static int algo = TL_DEFLATE;
 static unsigned long flags = TL_COMPRESS_FAST;
 static const char* in = NULL;
 static const char* out = NULL;
-static int compress = COMP;
 
 
 static void opt_algo_callback( tl_option* opt, const char* value )
 {
+    (void)opt;
     if( !strcmp( value, "deflate" ) )
     {
         algo = TL_DEFLATE;
+    }
+    else if( !strcmp( value, "inflate" ) )
+    {
+        algo = TL_INFLATE;
     }
     else
     {
         fprintf( stderr, "Unknown compression algorithm '%s'\n", value );
         exit( EXIT_FAILURE );
     }
-
-    compress = opt->value;
 }
 
 static void set_in_file( tl_option* opt, const char* value )
@@ -73,7 +76,7 @@ static int opt_error_handler( tl_option* opt, const char* option, int issue )
 
 static void usage( void )
 {
-    puts( "usage: compress [ -fg ] [-c|--compress|-d|--uncompress <algo>]\n"
+    puts( "usage: compress [ -fg ] [-a|--algorithm <algo>]\n"
           "                --in <file> --out <file> ...\n\n"
 
           "Compress or uncompress a file. If no options other than intput\n"
@@ -85,27 +88,23 @@ static void usage( void )
           "    Prefere compression speed over file size.\n"
           "  -g, --good\n"
           "    Prefere small file size over compression speed.\n"
-          "  -c, --compress <algo>\n"
+          "  -a, --algorithm <algo>\n"
           "    Specifies that the input file should be compressed with a\n"
           "    specific compression algorithm." );
-    puts( "  -d, --uncompress <algo>\n"
-          "    Specifies that the input file is compressed with the given\n"
-          "    compression algorithm and should be uncompressed.\n"
-          "  --in <file>\n"
+    puts( "  --in <file>\n"
           "    Specifies the input file to process.\n"
           "  --out <file>\n"
           "    Specifies the output file to generate.\n" );
 
-    puts( "The following compression algorithms are supported:\n"
-          "  \"deflate\" (default)\n" );
+    puts( "The following algorithms are supported:\n"
+          "  \"deflate\" (default)\n"
+          "  \"inflate\"\n" );
 }
 
 static tl_option options[] =
 {
-    { TL_SHORT_OPTION, "c",          COMP,   NULL, opt_algo_callback },
-    { TL_LONG_OPTION,  "compress",   COMP,   NULL, opt_algo_callback },
-    { TL_SHORT_OPTION, "d",          UNCOMP, NULL, opt_algo_callback },
-    { TL_LONG_OPTION,  "uncompress", UNCOMP, NULL, opt_algo_callback },
+    { TL_SHORT_OPTION, "a",          0,      NULL, opt_algo_callback },
+    { TL_LONG_OPTION,  "algorithm",  0,      NULL, opt_algo_callback },
     { TL_LONG_OPTION,  "in",         0,      NULL, set_in_file       },
     { TL_LONG_OPTION,  "out",        0,      NULL, set_out_file      },
 
@@ -119,12 +118,10 @@ static tl_option options[] =
 int main( int argc, char** argv )
 {
     size_t numoptions = sizeof(options)/sizeof(options[0]);
-    int i, status = EXIT_FAILURE, ret;
-    const tl_file_mapping* map;
     tl_file *infile, *outfile;
+    tl_compressor *comp;
     char line[128];
-    tl_blob dst;
-    tl_u64 size;
+    int i, ret;
 
     /* process command line */
     for( i=1; i<argc; ++i )
@@ -176,58 +173,63 @@ int main( int argc, char** argv )
     if( tl_file_open( out, &outfile, TL_WRITE|TL_CREATE|TL_OVERWRITE ) != 0 )
     {
         fprintf( stderr, "error opening %s\n", out );
-        goto outinf;
+        goto out;
     }
 
-    /* map input file into memory */
-    if( tl_fs_get_file_size( in, &size ) != 0 )
+    /* compress */
+    comp = tl_create_compressor( algo, flags );
+
+    if( !comp )
     {
-        fprintf( stderr, "Cannot get size of %s\n", in );
-        goto outfiles;
-    }
-
-    map = infile->map( infile, 0, size, TL_MAP_READ );
-
-    if( !map )
-    {
-        fprintf( stderr, "Error mapping %s\n", in );
-        goto outfiles;
-    }
-
-    /* process input */
-    if( compress == COMP )
-        ret = tl_compress_blob( &dst, (const tl_blob*)map, algo, flags );
-    else
-        ret = tl_uncompress_blob( &dst, (const tl_blob*)map, algo );
-
-    switch( ret )
-    {
-    case 0:
-        break;
-    case TL_ERR_NOT_SUPPORTED:
         fputs( "Compression algorithm unsupported\n", stderr );
-        goto outbuf;
-    case TL_ERR_ALLOC:
-        fputs( "Out of memory\n", stderr );
-        goto outbuf;
-    default:
-        fputs( "Unknown error\n", stderr );
-        goto outbuf;
+        goto out;
     }
 
-    /* write out result */
-    if( tl_iostream_write_blob( (tl_iostream*)outfile, &dst, NULL ) != 0 )
+    /* convert in loop */
+    while(infile != NULL || outfile != NULL)
     {
-        fprintf( stderr, "write: %s\n", out );
-        goto outblob;
+        if(infile)
+        {
+            ret = tl_iostream_splice( (tl_iostream*)comp, (tl_iostream*)infile,
+                                      4096, NULL, 0 );
+
+            if(ret == TL_EOF)
+            {
+                ((tl_iostream*)infile)->destroy( (tl_iostream*)infile );
+                infile = NULL;
+                comp->flush(comp, TL_COMPRESS_FLUSH_EOF);
+            }
+            else if(ret < 0)
+            {
+                fputs("Error reading from input", stderr);
+                goto out;
+            }
+        }
+
+        ret = tl_iostream_splice( (tl_iostream*)outfile, (tl_iostream*)comp,
+                                  4096, NULL, 0 );
+
+        if(ret == TL_EOF)
+        {
+            ((tl_iostream*)outfile)->destroy( (tl_iostream*)outfile );
+            outfile = NULL;
+        }
+        else if(ret < 0)
+        {
+            fputs("Error writing to output", stderr);
+            goto out;
+        }
     }
 
     /* cleanup */
-    status = EXIT_SUCCESS;
-outblob:  tl_blob_cleanup( &dst );
-outbuf:   map->destroy(map);
-outfiles: ((tl_iostream*)outfile)->destroy( (tl_iostream*)outfile );
-outinf:   ((tl_iostream*)infile)->destroy( (tl_iostream*)infile );
-    return status;
+    ((tl_iostream*)comp)->destroy( (tl_iostream*)comp );
+
+out:
+    if(outfile)
+        ((tl_iostream*)outfile)->destroy( (tl_iostream*)outfile );
+    if(infile)
+        ((tl_iostream*)infile)->destroy( (tl_iostream*)infile );
+
+    return outfile==NULL && infile==NULL ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

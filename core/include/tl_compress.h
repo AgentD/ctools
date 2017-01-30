@@ -33,33 +33,28 @@
 /**
  * \page comp Compression Algorithms
  *
- * Two simple functions are provided for compressing or uncompressing chunks
- * of data:
- * \li \ref tl_compress
- * \li \ref tl_uncompress
+ * Data compression (and uncompression) is implemented through a
+ * \ref tl_compressor, a special variant of a \ref tl_iostream that
+ * compresses or uncompresses data written to it and returns the
+ * result when reading from it.
  *
- * Those functions can be configured to use various different data compression
- * algorithms. See \ref TL_COMPRESSION for a list of supported algortihms and
- * \ref TL_COMPRESS_FLAGS for possible flags that can be used to tweek data
- * compression.
- *
- * Alternatively, the functions implementing the algorithms can be called
- * directly:
+ * Compressor implementations can be created through the
+ * \ref tl_create_compressor, using an algorithm identifier
+ * (see \ref TL_COMPRESSION), or directly through one of the
+ * following functions:
  * \li \ref tl_deflate
  * \li \ref tl_inflate
  *
- * A few wrapper functions are provided for compressing and uncompressing
- * tl_blob or tl_string objects:
+ * A number of convenience functions are proveded for compressing or
+ * uncompressing chunks of data:
+ * \li \ref tl_compress
  * \li \ref tl_compress_blob
- * \li \ref tl_uncompress_blob
- * \li \ref tl_compress_string
  */
 
 #include "tl_predef.h"
 #include "tl_string.h"
+#include "tl_iostream.h"
 #include "tl_blob.h"
-
-
 
 /**
  * \enum TL_COMPRESSION
@@ -71,18 +66,26 @@ typedef enum
     /**
      * \brief Deflate as implemented by zlib
      *
-     * For tl_compress, this means that data should be deflate compressed and
-     * exported as a raw zlib stream. For tl_uncompress, this means that the
-     * input data is a deflate compressed zlib stream.
+     * This means that data should be deflate compressed and
+     * exported as a raw zlib stream.
      */
-    TL_DEFLATE = 0x01
+    TL_DEFLATE = 0x01,
+
+    /**
+     * \brief Inflate decompression as implemented by zlib
+     *
+     * Data written to the compressor is expected to be a deflate compressed
+     * zlib packet stream. The decompressed result appears when reading from
+     * the compressor stream object.
+     */
+    TL_INFLATE = 0x02
 }
 TL_COMPRESSION;
 
 /**
  * \enum TL_COMPRESS_FLAGS
  *
- * \brief Possible flags for tweaking tl_compress
+ * \brief Possible flags for tweaking a compressor
  */
 typedef enum
 {
@@ -90,10 +93,63 @@ typedef enum
     TL_COMPRESS_FAST = 0x01,
 
     /** \brief Prefere small output, possibly sacrificing compression speed */
-    TL_COMPRESS_GOOD = 0x02
+    TL_COMPRESS_GOOD = 0x02,
+
+    /** \brief A combination of all valid flags */
+    TL_COMPRESS_ALL_FLAGS = 0x03
 }
 TL_COMPRESS_FLAGS;
 
+/**
+ * \enum TL_COMPRESS_FLUSH
+ *
+ * \brief Possible flags for the flush function on a \ref tl_compressor
+ */
+typedef enum
+{
+    /**
+     * \brief Terminate the compressed stream
+     *
+     * When this option is set, the implementation is forced to process all
+     * remaining input, terminate the generated stream format and clear all
+     * internal state. The read function will return \ref TL_EOF once the end
+     * last byte of the stream has been read.
+     */
+    TL_COMPRESS_FLUSH_EOF = 0x01
+}
+TL_COMPRESS_FLUSH;
+
+
+/**
+ * \struct tl_compressor
+ *
+ * \extends tl_iostream
+ *
+ * \brief A tl_iostream that compresses or uncompresses data written to
+ *        it and returns the result when reading from the stream.
+ *
+ * Depending on the implementation, some amount of input data is needed before
+ * a compressed or uncompressed output block can be generated, so when writing
+ * to the compressor and then reading from it in a loop, there might be a
+ * delay until output data appears.
+ */
+struct tl_compressor
+{
+    tl_iostream super;
+
+    /**
+     * \brief Force the remaining input to be completely processed
+     *
+     * If the flag \ref TL_COMPRESS_FLUSH_EOF is set, the compressed stream
+     * is terminated, i.e. a termination mark is generated and the internal
+     * state of the compressor is reset. Compressing further data will start
+     * a new compression stream.
+     *
+     * \param comp A pointer to the compressor object
+     * \param flags A combination of \ref TL_COMPRESS_FLUSH flags
+     */
+    int(*flush)(tl_compressor *comp, int flags);
+};
 
 
 #ifdef __cplusplus
@@ -101,147 +157,87 @@ extern "C" {
 #endif
 
 /**
- * \brief Compress a chunk of data
+ * \brief Create a compressor stream
  *
- * This function is a convinience wrapper for the various built in
- * compression routines like \ref tl_deflate. It calls an actual
- * compression routine based on an algorithm ID.
+ * This function creates a \ref tl_compressor implementation for a specified
+ * compression algorithm. It is a convenience wrapper that decodes a
+ * \ref TL_COMPRESSION id and calls a coresponding function like
+ * \ref tl_deflate.
  *
  * In custom builds, some algorithms may not be compiled in. This function
- * has a compile time check and returns \ref TL_ERR_NOT_SUPPORTED if an
- * algorithm is specified that has not been compiled in.
+ * has a compile time check and returns NULL if an algorithm is specified
+ * that has not been compiled in.
  *
- * \param dst   A pointer to an \b uninitialized blob object to write
- *              the compressed output to.
- * \param src   A pointer to a block of data to compress
- * \param size  The number of bytes in the input block to compress
  * \param algo  What compression algorithm to use (see \ref TL_COMPRESSION)
  * \param flags Flags that can be used to tweek the compression algorithm
  *              (see \ref TL_COMPRESS_FLAGS)
  *
- * \return Zero on success, a negative value on failure
- *         (see \ref TL_ERROR_CODE). TL_ERR_NOT_SUPPORTED if the algorithm
- *         is unknown.
+ * \return A pointer to a \ref tl_compressor on success, NULL on failure.
  */
-TLAPI int tl_compress( tl_blob* dst, const void* src, size_t size,
-                       int algo, int flags );
+TLAPI tl_compressor* tl_create_compressor(int algo, int flags);
 
 /**
- * \brief Uncompress a chunk of data
- *
- * This function is a convinience wrapper for the various built in
- * uncompression routines like \ref tl_inflate. It calls an actual
- * uncompression routine based on an algorithm ID.
- *
- * In custom builds, some algorithms may not be compiled in. This function
- * has a compile time check and returns \ref TL_ERR_NOT_SUPPORTED if an
- * algorithm is specified that has not been compiled in.
- *
- * \param dst   A pointer to an \b uninitialized blob object to write
- *              the uncompressed output to.
- * \param src   A pointer to a block of compressed data
- * \param size  The number of bytes to read from the input block
- * \param algo  What compression algorithm to use (see \ref TL_COMPRESSION)
- *
- * \return Zero on success, a negative value on failure
- *         (see \ref TL_ERROR_CODE). TL_ERR_NOT_SUPPORTED if the algorithm
- *         is unknown.
- */
-TLAPI int tl_uncompress( tl_blob* dst, const void* src,
-                         size_t size, int algo );
-
-/**
- * \brief Deflate compress a chunk of data
+ * \brief Create a compressor for zlib deflate compression
  *
  * \note In some custom builds of the library, this function may not
  *       be compiled in. Only use this function if you are absolutely sure
- *       you must use deflate. Otherwise, use \ref tl_compress.
+ *       you must use deflate. Otherwise, use \ref tl_create_compressor.
  *
- * \param dst   A pointer to an \b uninitialized blob object to write
- *              the compressed output to.
- * \param src   A pointer to a block of data to compress
- * \param size  The number of bytes in the input block to compress
- * \param flags Flags that can be used to tweek the compression algorithm
+ * \param flags Flags that can be used to tweak the compression algorithm
  *              (see \ref TL_COMPRESS_FLAGS)
  *
- * \return Zero on success, a negative value on failure
- *         (see \ref TL_ERROR_CODE).
+ * \return A pointer to a tl_compressor, NULL if out of memory.
  */
-TLAPI int tl_deflate(tl_blob* dst, const void* data, size_t size, int flags);
+TLAPI tl_compressor* tl_deflate(int flags);
 
 /**
- * \brief Uncompress a deflate compressed chunk of data
+ * \brief Create a compressor that uncompress a deflate compressed stream
  *
  * \note In some custom builds of the library, this function may not
  *       be compiled in. Only use this function if you are absolutely sure
- *       you must use inflate. Otherwise, use \ref tl_uncompress.
+ *       you must use inflate. Otherwise, use \ref tl_create_compressor.
  *
- * \param dst  A pointer to an \b uninitialized blob object to write
- *             the uncompressed output to.
- * \param src  A pointer to a block of compressed data
- * \param size The number of bytes to read from the input block
+ * \param flags A combination of \ref TL_COMPRESS_FLAGS flags
  *
- * \return Zero on success, a negative value on failure
- *         (see \ref TL_ERROR_CODE).
+ * \return A pointer to a tl_compressor, NULL if out of memory.
  */
-TLAPI int tl_inflate( tl_blob* dst, const void* data, size_t size );
+TLAPI tl_compressor* tl_inflate(int flags);
 
 /**
- * \brief A wrapper for tl_compress that uses a tl_blob object as input
+ * \brief A convenience function for compressing a blob of data
+ *
+ * This function internally calls \ref tl_create_compressor to instantiate a
+ * compressor stream, feeds an input blob of data through it and collects the
+ * resulting data in a \ref tl_blob.
  *
  * \param dst   A pointer to an \b uninitialized blob object to write to
- * \param src   A pointer to a tl_blob objec to compress
+ * \param src   A pointer to a \ref tl_blob object to processes
  * \param algo  What compression algorithm to use (see \ref TL_COMPRESSION)
- * \param flags Flags to tweek the compression (see \ref TL_COMPRESS_FLAGS)
+ * \param flags Flags to tweak the compression (see \ref TL_COMPRESS_FLAGS)
  *
  * \return Zero on success, a negative value on failure
  *         (see \ref TL_ERROR_CODE). TL_ERR_NOT_SUPPORTED if the algorithm
  *         is unknown.
  */
-static TL_INLINE int tl_compress_blob( tl_blob* dst, const tl_blob* src,
-                                       int algo, int flags )
-{
-    return tl_compress( dst, src->data, src->size, algo, flags );
-}
+TLAPI int tl_compress_blob( tl_blob* dst, const tl_blob* src,
+                            int algo, int flags );
 
 /**
- * \brief A wrapper for tl_uncompress that uses a tl_blob object as input
+ * \copydoc tl_compress_blob
  *
  * \param dst   A pointer to an \b uninitialized blob object to write to
- * \param src   A pointer to a tl_blob object containing the compressed data
+ * \param src   A pointer to a chunk of memory to processes
+ * \param size  The number of bytes to process
  * \param algo  What compression algorithm to use (see \ref TL_COMPRESSION)
- *
- * \return Zero on success, a negative value on failure
- *         (see \ref TL_ERROR_CODE). TL_ERR_NOT_SUPPORTED if the algorithm
- *         is unknown.
- *
- * \param src A pointer to a tl_blob object to uncompress
+ * \param flags Flags to tweak the compression (see \ref TL_COMPRESS_FLAGS)
  */
-static TL_INLINE int tl_uncompress_blob( tl_blob* dst, const tl_blob* src,
-                                         int algo )
+static TL_INLINE int tl_compress( tl_blob* dst, const void* src,
+                                  size_t size, int algo, int flags )
 {
-    return tl_uncompress( dst, src->data, src->size, algo );
-}
-
-/**
- * \brief A wrapper for tl_compress that uses a tl_string object as input
- *
- * \note The null-terminator of the string is ignored and will be missing
- *       if the compressed data is uncompressed as-is.
- *
- * \param dst   A pointer to an \b uninitialized tl_blob object to write to
- * \param str   A pointer to a tl_string object to compress
- * \param algo  The compression algorithm to use (see \ref TL_COMPRESSION)
- * \param flags Flags to tweek the compression (see \ref TL_COMPRESS_FLAGS)
- *
- * \return Zero on success, a negative value on failure
- *         (see \ref TL_ERROR_CODE). TL_ERR_NOT_SUPPORTED if the algorithm
- *         is unknown.
- */
-static TL_INLINE int tl_compress_string( tl_blob* dst, const tl_string* str,
-                                         int algo, int flags )
-{
-    return tl_compress(dst, str->data.data, str->data.used - 1, algo, flags);
+    tl_blob srcblob;
+    srcblob.data = (void*)src;
+    srcblob.size = size;
+    return tl_compress_blob( dst, &srcblob, algo, flags );
 }
 
 #ifdef __cplusplus
