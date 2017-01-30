@@ -13,31 +13,43 @@ static int splice_copy( tl_iostream* out, tl_iostream* in,
                         size_t count, size_t* actual )
 {
     size_t indiff, outdiff, outcount = 0;
+    int res_r = 0, res_w = 0, res = 0;
     char buffer[ 1024 ];
-    int res = 0;
 
     while( count )
     {
         indiff = count > sizeof(buffer) ? sizeof(buffer) : count;
-        res = in->read( in, buffer, indiff, &indiff );
+        res_r = in->read( in, buffer, indiff, &indiff );
 
-        if( res!=0 )
+        if( (res_r==0 && !indiff) || (res_r!=0 && res_r!=TL_EOF) )
+        {
+            res = res_r;
             break;
+        }
 
         while( indiff )
         {
-            res = out->write( out, buffer, indiff, &outdiff );
+            res_w = out->write( out, buffer, indiff, &outdiff );
 
-            if( res!=0 )
+            if( res_w!=0 )
+            {
+                res = res_w;
                 goto out;
+            }
 
             indiff -= outdiff;
             count -= outdiff;
             outcount += outdiff;
         }
+
+        if( res_r==TL_EOF )
+        {
+            res = res_r;
+            break;
+        }
     }
 out:
-    if( *actual )
+    if( actual )
         *actual = outcount;
 
     return res;
