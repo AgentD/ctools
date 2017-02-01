@@ -271,6 +271,382 @@ TLAPI void tl_blob_remove( tl_blob* blob, size_t offset, size_t length );
  */
 TLAPI void tl_blob_truncate( tl_blob* blob, size_t offset );
 
+/**
+ * \brief Get a byte at a specific offset in a blob
+ *
+ * \memberof tl_blob
+ *
+ * This function does bounds checking and fails if the offset is outside the
+ * memory block managed by the blob object.
+ *
+ * \param blob   A pointer to a blob objet
+ * \param offset An byte offset into the blob
+ *
+ * \return The value stored at the specified offset or -1 if the offset is out
+ *         of bounds.
+ */
+static TL_INLINE int tl_blob_peek( tl_blob* blob, size_t offset )
+{
+    assert( blob != NULL );
+    return (offset < blob->size) ? ((unsigned char*)blob->data)[offset] : -1;
+}
+
+/**
+ * \brief Read a little endian 16 bit word from a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob A pointer to a blob object
+ * \param offset A byte offset into a blob
+ * \param value Returns the value in host byte order
+ *
+ * \return Zero on success, -1 if out of bounds
+ */
+static TL_INLINE int tl_blob_peek_le16( tl_blob* blob, size_t offset,
+                                        tl_u16* value )
+{
+    unsigned char *ptr;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 1) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    *value = (ptr[1] << 8) | ptr[0];
+    return 0;
+}
+
+/**
+ * \brief Read a big endian 16 bit word from a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob A pointer to a blob object
+ * \param offset A byte offset into a blob
+ * \param value Returns the value in host byte order
+ *
+ * \return Zero on success, -1 if out of bounds
+ */
+static TL_INLINE int tl_blob_peek_be16( tl_blob* blob, size_t offset,
+                                        tl_u16* value )
+{
+    unsigned char *ptr;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 1) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    *value = (ptr[0] << 8) | ptr[1];
+    return 0;
+}
+
+/**
+ * \brief Read a little endian 32 bit word from a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob A pointer to a blob object
+ * \param offset A byte offset into a blob
+ * \param value Returns the value in host byte order
+ *
+ * \return Zero on success, -1 if out of bounds
+ */
+static TL_INLINE int tl_blob_peek_le32( tl_blob* blob, size_t offset,
+                                        tl_u32* value )
+{
+    unsigned char *ptr;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 3) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    *value = (ptr[3] << 24) | (ptr[2] << 16) | (ptr[1] << 8) | ptr[0];
+    return 0;
+}
+
+/**
+ * \brief Read a big endian 32 bit word from a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob A pointer to a blob object
+ * \param offset A byte offset into a blob
+ * \param value Returns the value in host byte order
+ *
+ * \return Zero on success, -1 if out of bounds
+ */
+static TL_INLINE int tl_blob_peek_be32( tl_blob* blob, size_t offset,
+                                        tl_u32* value )
+{
+    unsigned char *ptr;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 3) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    *value = (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
+    return 0;
+}
+
+/**
+ * \brief Read a little endian 64 bit word from a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob A pointer to a blob object
+ * \param offset A byte offset into a blob
+ * \param value Returns the value in host byte order
+ *
+ * \return Zero on success, -1 if out of bounds
+ */
+static TL_INLINE int tl_blob_peek_le64( tl_blob* blob, size_t offset,
+                                        tl_u64* value )
+{
+    unsigned char *ptr;
+    tl_u64 hi, lo;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 7) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    lo = (ptr[3] << 24) | (ptr[2] << 16) | (ptr[1] << 8) | ptr[0];
+    hi = (ptr[4] << 24) | (ptr[5] << 16) | (ptr[6] << 8) | ptr[7];
+
+    *value = (hi << 32) | lo;
+    return 0;
+}
+
+/**
+ * \brief Read a big endian 64 bit word from a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob A pointer to a blob object
+ * \param offset A byte offset into a blob
+ * \param value Returns the value in host byte order
+ *
+ * \return Zero on success, -1 if out of bounds
+ */
+static TL_INLINE int tl_blob_peek_be64( tl_blob* blob, size_t offset,
+                                        tl_u64* value )
+{
+    unsigned char *ptr;
+    tl_u64 hi, lo;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 7) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    lo = (ptr[4] << 24) | (ptr[5] << 16) | (ptr[6] << 8) | ptr[7];
+    hi = (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
+
+    *value = (hi << 32) | lo;
+    return 0;
+}
+
+/**
+ * \brief Set a byte at a specific offset in a blob
+ *
+ * \memberof tl_blob
+ *
+ * This function does bounds checking and fails if the offset is outside the
+ * memory block managed by the blob object.
+ *
+ * \param blob   A pointer to a blob objet
+ * \param offset An byte offset into the blob
+ * \param value  The value to write at that offset
+ *
+ * \return Zero on success, -1 if the offset is out of bounds.
+ */
+static TL_INLINE int tl_blob_poke( tl_blob* blob, size_t offset,
+                                   unsigned char value )
+{
+    assert( blob != NULL );
+    if( offset < blob->size )
+    {
+        ((unsigned char*)blob->data)[offset] = value;
+        return 0;
+    }
+    return -1;
+}
+
+/**
+ * \brief Write a little endian 16 bit word into a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob   A pointer to a blob objet
+ * \param offset An byte offset into the blob
+ * \param value  The value to convert to little endian and write to the blob
+ *
+ * \return Zero on success, -1 if the offset is out of bounds.
+ */
+static TL_INLINE int tl_blob_poke_le16( tl_blob* blob, size_t offset,
+                                        tl_u16 value )
+{
+    unsigned char *ptr;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 1) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    ptr[0] = value & 0xFF;
+    ptr[1] = (value >> 8) & 0xFF;
+    return 0;
+}
+
+/**
+ * \brief Write a big endian 16 bit word into a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob   A pointer to a blob objet
+ * \param offset An byte offset into the blob
+ * \param value  The value to convert to little endian and write to the blob
+ *
+ * \return Zero on success, -1 if the offset is out of bounds.
+ */
+static TL_INLINE int tl_blob_poke_be16( tl_blob* blob, size_t offset,
+                                        tl_u16 value )
+{
+    unsigned char *ptr;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 1) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    ptr[0] = (value >> 8) & 0xFF;
+    ptr[1] = value & 0xFF;
+    return 0;
+}
+
+/**
+ * \brief Write a little endian 32 bit word into a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob   A pointer to a blob objet
+ * \param offset An byte offset into the blob
+ * \param value  The value to convert to little endian and write to the blob
+ *
+ * \return Zero on success, -1 if the offset is out of bounds.
+ */
+static TL_INLINE int tl_blob_poke_le32( tl_blob* blob, size_t offset,
+                                        tl_u32 value )
+{
+    unsigned char *ptr;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 3) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    ptr[0] = value & 0xFF;
+    ptr[1] = (value >> 8) & 0xFF;
+    ptr[2] = (value >> 16) & 0xFF;
+    ptr[3] = (value >> 24) & 0xFF;
+    return 0;
+}
+
+/**
+ * \brief Write a big endian 32 bit word into a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob   A pointer to a blob objet
+ * \param offset An byte offset into the blob
+ * \param value  The value to convert to little endian and write to the blob
+ *
+ * \return Zero on success, -1 if the offset is out of bounds.
+ */
+static TL_INLINE int tl_blob_poke_be32( tl_blob* blob, size_t offset,
+                                        tl_u32 value )
+{
+    unsigned char *ptr;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 3) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    ptr[0] = (value >> 24) & 0xFF;
+    ptr[1] = (value >> 16) & 0xFF;
+    ptr[2] = (value >> 8) & 0xFF;
+    ptr[3] = value & 0xFF;
+    return 0;
+}
+
+/**
+ * \brief Write a little endian 64 bit word into a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob   A pointer to a blob objet
+ * \param offset An byte offset into the blob
+ * \param value  The value to convert to little endian and write to the blob
+ *
+ * \return Zero on success, -1 if the offset is out of bounds.
+ */
+static TL_INLINE int tl_blob_poke_le64( tl_blob* blob, size_t offset,
+                                        tl_u64 value )
+{
+    unsigned char *ptr;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 7) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    ptr[0] = value & 0xFF;
+    ptr[1] = (value >> 8) & 0xFF;
+    ptr[2] = (value >> 16) & 0xFF;
+    ptr[3] = (value >> 24) & 0xFF;
+    ptr[4] = (value >> 32) & 0xFF;
+    ptr[5] = (value >> 40) & 0xFF;
+    ptr[6] = (value >> 48) & 0xFF;
+    ptr[7] = (value >> 56) & 0xFF;
+    return 0;
+}
+
+/**
+ * \brief Write a big endian 64 bit word into a blob
+ *
+ * \memberof tl_blob
+ *
+ * \param blob   A pointer to a blob objet
+ * \param offset An byte offset into the blob
+ * \param value  The value to convert to little endian and write to the blob
+ *
+ * \return Zero on success, -1 if the offset is out of bounds.
+ */
+static TL_INLINE int tl_blob_poke_be64( tl_blob* blob, size_t offset,
+                                        tl_u64 value )
+{
+    unsigned char *ptr;
+
+    assert( blob != NULL && value != NULL );
+    if( offset >= blob->size || (offset + 7) >= blob->size )
+        return -1;
+
+    ptr = ((unsigned char*)blob->data) + offset;
+    ptr[0] = (value >> 56) & 0xFF;
+    ptr[1] = (value >> 48) & 0xFF;
+    ptr[2] = (value >> 40) & 0xFF;
+    ptr[3] = (value >> 32) & 0xFF;
+    ptr[4] = (value >> 24) & 0xFF;
+    ptr[5] = (value >> 16) & 0xFF;
+    ptr[6] = (value >> 8) & 0xFF;
+    ptr[7] = value & 0xFF;
+    return 0;
+}
+
 #ifdef __cplusplus
 }
 #endif
