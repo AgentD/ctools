@@ -491,7 +491,7 @@ static TL_INLINE int tl_blob_poke_le16( tl_blob* blob, size_t offset,
 {
     unsigned char *ptr;
 
-    assert( blob != NULL && value != NULL );
+    assert( blob != NULL );
     if( offset >= blob->size || (offset + 1) >= blob->size )
         return -1;
 
@@ -517,7 +517,7 @@ static TL_INLINE int tl_blob_poke_be16( tl_blob* blob, size_t offset,
 {
     unsigned char *ptr;
 
-    assert( blob != NULL && value != NULL );
+    assert( blob != NULL );
     if( offset >= blob->size || (offset + 1) >= blob->size )
         return -1;
 
@@ -543,7 +543,7 @@ static TL_INLINE int tl_blob_poke_le32( tl_blob* blob, size_t offset,
 {
     unsigned char *ptr;
 
-    assert( blob != NULL && value != NULL );
+    assert( blob != NULL );
     if( offset >= blob->size || (offset + 3) >= blob->size )
         return -1;
 
@@ -571,7 +571,7 @@ static TL_INLINE int tl_blob_poke_be32( tl_blob* blob, size_t offset,
 {
     unsigned char *ptr;
 
-    assert( blob != NULL && value != NULL );
+    assert( blob != NULL );
     if( offset >= blob->size || (offset + 3) >= blob->size )
         return -1;
 
@@ -599,7 +599,7 @@ static TL_INLINE int tl_blob_poke_le64( tl_blob* blob, size_t offset,
 {
     unsigned char *ptr;
 
-    assert( blob != NULL && value != NULL );
+    assert( blob != NULL );
     if( offset >= blob->size || (offset + 7) >= blob->size )
         return -1;
 
@@ -631,7 +631,7 @@ static TL_INLINE int tl_blob_poke_be64( tl_blob* blob, size_t offset,
 {
     unsigned char *ptr;
 
-    assert( blob != NULL && value != NULL );
+    assert( blob != NULL );
     if( offset >= blob->size || (offset + 7) >= blob->size )
         return -1;
 
