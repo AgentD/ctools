@@ -14,6 +14,7 @@
 
       Short paths (max 256 characters excluding drive prefix and \0):
         Absolute path in specific drive: <letter>:\ <path>
+        Relative path in specific drive: <letter>: <path>
         Absolute path in current drive: \ <path>
         Absolute path on network share: \\<server>\<share>\ <path>
 
@@ -22,17 +23,22 @@
         Network share: \\?\UNC\<server>\<share>\ <path>
 
       Device namespace:
-        Direct access to a device: \\.\ <device>
+        Unix-like device to file mapping: \\.\ <device>
 
     Other NT namespaces exist but need a \\?\ prefix to access, so we don't
     need to worry about them. We don't care about anything that already
     starts with \\?\.
 
-    Other abominations of paths exist (e.g. C:foo\bar.txt, which according
-    to MSDN is relative to the current working directory, but on an other
-    drive?!?) but are treated as invalid.
+    Also, paths prefixed with \\?\ bypass the parser and cannot be relative.
 
-    Paths prefixed with \\?\ bypass the parser and cannot be relative.
+    Relative paths with a drive prefix refere to the working directory on that
+    drive. Historically, MS-DOS didn't have directories and allowed path names
+    like "A:foo.TXT", "B:bar.TXT". When directories were added later, the
+    semantics of that was changed to refere to the working directory on
+    another drive. To clarify, you now had _multiple_ current directories,
+    one per drive. The concept was kinda-sorta phased out later, i.e. some
+    API functions don't support it, some do. To avoid a lot of trouble and
+    brain damage, these paths are treated as invalid.
  */
 
 
