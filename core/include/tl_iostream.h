@@ -178,6 +178,52 @@ extern "C" {
 #endif
 
 /**
+ * \brief A simple wrapper for calling read on a \ref tl_iostream
+ *        implementation to avoid excessive down casting.
+ *
+ * \memberof tl_iostream
+ */
+static TL_INLINE int tl_iostream_read(void *stream, void *buffer,
+                                      size_t size, size_t *actual)
+{
+    return ((tl_iostream *)stream)->read(stream, buffer, size, actual);
+}
+
+/**
+ * \brief A simple wrapper for calling write on a \ref tl_iostream
+ *        implementation to avoid excessive down casting.
+ *
+ * \memberof tl_iostream
+ */
+static TL_INLINE int tl_iostream_write(void *stream, void *buffer,
+                                       size_t size, size_t *actual)
+{
+    return ((tl_iostream *)stream)->write(stream, buffer, size, actual);
+}
+
+/**
+ * \brief A simple wrapper for calling set_timeout on a \ref tl_iostream
+ *        implementation to avoid excessive down casting.
+ *
+ * \memberof tl_iostream
+ */
+static TL_INLINE int tl_iostream_set_timeout(void* io, unsigned int timeout)
+{
+    return ((tl_iostream *)io)->set_timeout(io, timeout);
+}
+
+/**
+ * \brief A simple wrapper for calling destroy on a \ref tl_iostream
+ *        implementation to avoid excessive down casting.
+ *
+ * \memberof tl_iostream
+ */
+static TL_INLINE void tl_iostream_destroy(void* io)
+{
+    ((tl_iostream *)io)->destroy(io);
+}
+
+/**
  * \brief Write a blob to a stream
  *
  * \memberof tl_iostream
