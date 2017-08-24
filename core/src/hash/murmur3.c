@@ -58,9 +58,9 @@ tl_u32 tl_hash_murmur3_32( const void* data, size_t len, tl_u32 seed )
 
     switch( len & 3 )
     {
-    case 3: k1 ^= tail[2] << 16;
-    case 2: k1 ^= tail[1] << 8;
-    case 1: k1 ^= tail[0];
+    case 3: k1 ^= tail[2] << 16; /* fall-through */
+    case 2: k1 ^= tail[1] << 8;  /* fall-through */
+    case 1: k1 ^= tail[0];       /* fall-through */
         k1 *= MM3_C1;
         k1 = (k1 << MM3_R1) | (k1 >> (32 - MM3_R1));
         k1 *= MM3_C2;
