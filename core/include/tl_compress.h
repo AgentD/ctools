@@ -112,7 +112,7 @@ typedef enum
      *
      * When this option is set, the implementation is forced to process all
      * remaining input, terminate the generated stream format and clear all
-     * internal state. The read function will return \ref TL_EOF once the end
+     * internal state. The read function will return \ref TL_EOF once the
      * last byte of the stream has been read.
      */
     TL_COMPRESS_FLUSH_EOF = 0x01
@@ -223,7 +223,7 @@ TLAPI int tl_compress_blob( tl_blob* dst, const tl_blob* src,
                             int algo, int flags );
 
 /**
- * \copydoc tl_compress_blob
+ * \copydoc tl_compress
  *
  * \param dst   A pointer to an \b uninitialized blob object to write to
  * \param src   A pointer to a chunk of memory to processes
