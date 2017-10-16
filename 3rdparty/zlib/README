@@ -1,6 +1,6 @@
 ZLIB DATA COMPRESSION LIBRARY
 
-zlib 1.2.8 is a general purpose data compression library.  All the code is
+zlib 1.2.11 is a general purpose data compression library.  All the code is
 thread safe.  The data format used by the zlib library is described by RFCs
 (Request for Comments) 1950 to 1952 in the files
 http://tools.ietf.org/html/rfc1950 (zlib format), rfc1951 (deflate format) and
@@ -31,7 +31,7 @@ Mark Nelson <markn@ieee.org> wrote an article about zlib for the Jan.  1997
 issue of Dr.  Dobb's Journal; a copy of the article is available at
 http://marknelson.us/1997/01/01/zlib-engine/ .
 
-The changes made in version 1.2.8 are documented in the file ChangeLog.
+The changes made in version 1.2.11 are documented in the file ChangeLog.
 
 Unsupported third party contributions are provided in directory contrib/ .
 
@@ -84,7 +84,7 @@ Acknowledgments:
 
 Copyright notice:
 
- (C) 1995-2013 Jean-loup Gailly and Mark Adler
+ (C) 1995-2017 Jean-loup Gailly and Mark Adler
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -125,8 +125,8 @@ Changes made for inclusion in the ctools collection:
   targets that don't have zlib or another deflate implementation natively.
 
   The original package that the source code in this directory is based on
-  is the zlib-1.2.8 source tar ball obtained from http://zlib.net/ on
-  April 1, 2016.
+  is the zlib-1.2.11 source tar ball obtained from http://zlib.net/ on
+  October 16, 2017.
 
   An attempt has been made at removing the entire build system, samples,
   tests, documentation, 3rd party contributions, gzip support and various
@@ -134,13 +134,13 @@ Changes made for inclusion in the ctools collection:
 
   The following sub-directories were removed with all there contents:
     amiga/
-    as400/
     contrib/
     doc/
     examples/
     msdos/
     nintendods/
     old/
+    os400/
     qnx/
     test/
     watcom/
@@ -150,6 +150,7 @@ Changes made for inclusion in the ctools collection:
     gzread.c
     gzclose.c
     gzwrite.c
+    gzguts.h
     gzlib.c
     crc32.c
     crc32.h
@@ -166,6 +167,7 @@ Changes made for inclusion in the ctools collection:
   The following additional files were removed in their entirety:
     ChangeLog
     CMakeLists.txt
+    configure
     FAQ
     INDEX
     Makefile
@@ -177,6 +179,8 @@ Changes made for inclusion in the ctools collection:
     zlib.3
     zlib.3.pdf
     zlib.map
+    zlib.pc.cmakein
+    zlib.pc.in
     zlib2ansi
 
   The following additional files were modified:
