@@ -161,7 +161,7 @@ Changes made for inclusion in the ctools collection:
   The following source files were modified (modifications marked with a
   comment in the source):
     zutil.c
-
+    inflate.c
 
   The following additional files were removed in their entirety:
     ChangeLog

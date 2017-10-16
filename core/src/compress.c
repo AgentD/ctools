@@ -13,6 +13,8 @@
 
 tl_compressor *tl_create_compressor(int algo, int flags)
 {
+	(void)flags;
+
 	switch (algo) {
 #ifdef TL_HAVE_DEFLATE
 	case TL_DEFLATE:
