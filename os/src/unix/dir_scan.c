@@ -12,26 +12,25 @@
 
 #include <dirent.h>
 
-int tl_dir_scan( const char* path, tl_array* list )
+int tl_dir_scan(const char *path, tl_array *list)
 {
-    struct dirent* ent;
-    tl_string str;
-    DIR* dir;
+	struct dirent *ent;
+	tl_string str;
+	DIR *dir;
 
-    assert( list && path );
+	assert(list && path);
 
-    if( !(dir = opendir( path )) )
-        return errno_to_fs( errno );
+	if (!(dir = opendir(path)))
+		return errno_to_fs(errno);
 
-    while( (ent=readdir( dir )) )
-    {
-        if( strcmp( ent->d_name, "." )!=0 && strcmp( ent->d_name, ".." )!=0 )
-        {
-            tl_string_init_local( &str, ent->d_name );
-            tl_array_append( list, &str );
-        }
-    }
+	while ((ent = readdir(dir))) {
+		if (strcmp(ent->d_name, ".") != 0
+		    && strcmp(ent->d_name, "..") != 0) {
+			tl_string_init_local(&str, ent->d_name);
+			tl_array_append(list, &str);
+		}
+	}
 
-    closedir( dir );
-    return 0;
+	closedir(dir);
+	return 0;
 }

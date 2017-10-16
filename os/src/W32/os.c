@@ -10,193 +10,183 @@
 #include "tl_network.h"
 
 #ifdef _MSC_VER
-    #include <intrin.h>
+#include <intrin.h>
 
-    #pragma intrinsic (_InterlockedIncrement)
-    #pragma intrinsic (_InterlockedDecrement)
+#pragma intrinsic (_InterlockedIncrement)
+#pragma intrinsic (_InterlockedDecrement)
 
-    static volatile LONG refcount = 0;
+static volatile LONG refcount = 0;
 #else
-    static volatile int refcount = 0;
+static volatile int refcount = 0;
 #endif
 
-int errno_to_fs( int code )
+int errno_to_fs(int code)
 {
-    switch( code )
-    {
-    case ERROR_FILE_NOT_FOUND:
-    case ERROR_PATH_NOT_FOUND:
-    case ERROR_DIRECTORY:
-        return TL_ERR_NOT_EXIST;
+	switch (code) {
+	case ERROR_FILE_NOT_FOUND:
+	case ERROR_PATH_NOT_FOUND:
+	case ERROR_DIRECTORY:
+		return TL_ERR_NOT_EXIST;
 
-    case ERROR_INVALID_ACCESS:
-        return TL_ERR_ACCESS;
+	case ERROR_INVALID_ACCESS:
+		return TL_ERR_ACCESS;
 
-    case ERROR_FILE_EXISTS:
-    case ERROR_ALREADY_EXISTS:
-        return TL_ERR_EXISTS;
+	case ERROR_FILE_EXISTS:
+	case ERROR_ALREADY_EXISTS:
+		return TL_ERR_EXISTS;
 
+	case ERROR_DISK_FULL:
+		return TL_ERR_NO_SPACE;
 
-    case ERROR_DISK_FULL:
-        return TL_ERR_NO_SPACE;
+	case ERROR_DIR_NOT_EMPTY:
+		return TL_ERR_NOT_EMPTY;
 
-    case ERROR_DIR_NOT_EMPTY:
-        return TL_ERR_NOT_EMPTY;
+	case ERROR_BROKEN_PIPE:
+		return TL_ERR_CLOSED;
+	case ERROR_HANDLE_EOF:
+		return TL_EOF;
 
-    case ERROR_BROKEN_PIPE:
-        return TL_ERR_CLOSED;
-    case ERROR_HANDLE_EOF:
-        return TL_EOF;
+		/*return TL_ERR_NOT_DIR; */
+	}
 
-        /*return TL_ERR_NOT_DIR;*/
-    }
-
-    return code==0 ? 0 : TL_ERR_INTERNAL;
+	return code == 0 ? 0 : TL_ERR_INTERNAL;
 }
 
-WCHAR* utf8_to_utf16( const char* utf8 )
+WCHAR *utf8_to_utf16(const char *utf8)
 {
-    unsigned int length = MultiByteToWideChar(CP_UTF8,0,utf8,-1,NULL,0);
-    WCHAR* out = malloc( sizeof(WCHAR)*(length+1) );
+	size_t length = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);
+	WCHAR *out = malloc(sizeof(WCHAR) * (length + 1));
 
-    if( out )
-    {
-        MultiByteToWideChar( CP_UTF8, 0, utf8, -1, out, length );
-        out[length] = '\0';
-    }
-    return out;
+	if (out) {
+		MultiByteToWideChar(CP_UTF8, 0, utf8, -1, out, length);
+		out[length] = '\0';
+	}
+	return out;
 }
 
-int winsock_acquire( void )
+int winsock_acquire(void)
 {
-    WORD version = MAKEWORD(2, 2);
-    WSADATA data;
+	WORD version = MAKEWORD(2, 2);
+	WSADATA data;
 
 #ifdef _MSC_VER
-    if( _InterlockedIncrement( &refcount )>1 )
-        return 1;
+	if (_InterlockedIncrement(&refcount) > 1)
+		return 1;
 #else
-    if( __sync_fetch_and_add( &refcount, 1 )>0 )
-        return 1;
+	if (__sync_fetch_and_add(&refcount, 1) > 0)
+		return 1;
 #endif
 
-    return WSAStartup( version, &data )==0;
+	return WSAStartup(version, &data) == 0;
 }
 
-void winsock_release( void )
+void winsock_release(void)
 {
 #ifdef _MSC_VER
-    if( _InterlockedDecrement( &refcount ) == 0 )
+	if (_InterlockedDecrement(&refcount) == 0) {
 #else
-    if( __sync_fetch_and_sub( &refcount, 1 )==1 )
+	if (__sync_fetch_and_sub(&refcount, 1) == 1) {
 #endif
-    {
-        WSACleanup( );
-    }
+		WSACleanup();
+	}
 }
 
-int wait_for_fd( SOCKET socket, unsigned long timeout, int write )
+int wait_for_fd(SOCKET socket, unsigned long timeout, int write)
 {
-    struct timeval tv;
-    fd_set fds;
+	struct timeval tv;
+	fd_set fds;
 
-    FD_ZERO( &fds );
-    FD_SET( socket, &fds );
+	FD_ZERO(&fds);
+	FD_SET(socket, &fds);
 
-    tv.tv_sec = timeout / 1000L;
-    tv.tv_usec = (timeout - tv.tv_sec * 1000L) * 1000L;
+	tv.tv_sec = timeout / 1000L;
+	tv.tv_usec = (timeout - tv.tv_sec * 1000L) * 1000L;
 
-    if( select( socket+1, write ? 0 : &fds,
-                write ? &fds : 0, 0, timeout > 0 ? &tv : NULL ) <= 0 )
-    {
-        return 0;
-    }
+	if (select(socket + 1, write ? 0 : &fds,
+		   write ? &fds : 0, 0, timeout > 0 ? &tv : NULL) <= 0) {
+		return 0;
+	}
 
-    return 1;
+	return 1;
 }
 
-int WSAHandleFuckup( void )
+int WSAHandleFuckup(void)
 {
-    int status = WSAGetLastError( );
+	int status = WSAGetLastError();
 
-    switch( status )
-    {
-    case WSAENOPROTOOPT:
-    case WSAEINVAL:
-        return TL_ERR_NOT_SUPPORTED;
-    case WSAETIMEDOUT:
-    case WSAEWOULDBLOCK:
-        return TL_ERR_TIMEOUT;
-    case WSAEHOSTDOWN:
-    case WSAEHOSTUNREACH:
-        return TL_ERR_HOST_UNREACH;
-    case WSAECONNRESET:
-        return TL_ERR_NET_RESET;
-    case WSAENETUNREACH:
-        return TL_ERR_NET_UNREACH;
-    case WSAENETDOWN:
-        return TL_ERR_NET_DOWN;
-    case WSAEAFNOSUPPORT:
-        return TL_ERR_NET_ADDR;
-    case WSAEMSGSIZE:
-        return TL_ERR_TOO_LARGE;
-    case WSAEACCES:
-        return TL_ERR_ACCESS;
-    case WSAECONNABORTED:
-    case WSAESHUTDOWN:
-    case WSAENOTSOCK:
-    case WSAENOTCONN:
-    case WSAENETRESET:
-        return TL_ERR_CLOSED;
-    }
-    return TL_ERR_INTERNAL;
+	switch (status) {
+	case WSAENOPROTOOPT:
+	case WSAEINVAL:
+		return TL_ERR_NOT_SUPPORTED;
+	case WSAETIMEDOUT:
+	case WSAEWOULDBLOCK:
+		return TL_ERR_TIMEOUT;
+	case WSAEHOSTDOWN:
+	case WSAEHOSTUNREACH:
+		return TL_ERR_HOST_UNREACH;
+	case WSAECONNRESET:
+		return TL_ERR_NET_RESET;
+	case WSAENETUNREACH:
+		return TL_ERR_NET_UNREACH;
+	case WSAENETDOWN:
+		return TL_ERR_NET_DOWN;
+	case WSAEAFNOSUPPORT:
+		return TL_ERR_NET_ADDR;
+	case WSAEMSGSIZE:
+		return TL_ERR_TOO_LARGE;
+	case WSAEACCES:
+		return TL_ERR_ACCESS;
+	case WSAECONNABORTED:
+	case WSAESHUTDOWN:
+	case WSAENOTSOCK:
+	case WSAENOTCONN:
+	case WSAENETRESET:
+		return TL_ERR_CLOSED;
+	}
+	return TL_ERR_INTERNAL;
 }
 
-int set_socket_flags( SOCKET fd, int netlayer, int* flags )
+int set_socket_flags(SOCKET fd, int netlayer, int *flags)
 {
-    BOOL bval = TRUE;
+	BOOL bval = TRUE;
 
-    if( (*flags) & (~TL_ALL_NETWORK_FLAGS) )   /* unknown flags */
-        return 0;
+	if ((*flags) & (~TL_ALL_NETWORK_FLAGS))	/* unknown flags */
+		return 0;
 
-    setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, (char*)&bval, sizeof(bval) );
+	setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&bval, sizeof(bval));
 
-    if( ((*flags) & TL_ALLOW_BROADCAST) && (netlayer == TL_IPV4) )
-    {
-        bval = TRUE;
-        if( setsockopt(fd,SOL_SOCKET,SO_BROADCAST,(void*)&bval,sizeof(bval)) )
-            return 0;
-    }
+	if (((*flags) & TL_ALLOW_BROADCAST) && (netlayer == TL_IPV4)) {
+		bval = TRUE;
+		if (setsockopt
+		    (fd, SOL_SOCKET, SO_BROADCAST, (void *)&bval, sizeof(bval)))
+			return 0;
+	}
 
-    if( ((*flags) & TL_DONT_FRAGMENT) && (netlayer == TL_IPV4) )
-    {
-        DWORD opt = 1;
-        setsockopt( fd, IPPROTO_IP, IP_DONTFRAGMENT,
-                    (void*)&opt, sizeof(DWORD) );
-    }
-    return 1;
+	if (((*flags) & TL_DONT_FRAGMENT) && (netlayer == TL_IPV4)) {
+		DWORD opt = 1;
+		setsockopt(fd, IPPROTO_IP, IP_DONTFRAGMENT,
+			   (void *)&opt, sizeof(DWORD));
+	}
+	return 1;
 }
 
 void set_handle_timeout(HANDLE hnd, unsigned int timeout)
 {
-    COMMTIMEOUTS ct;
+	COMMTIMEOUTS ct;
 
-    if( timeout )
-    {
-        ct.ReadIntervalTimeout         = timeout;
-        ct.ReadTotalTimeoutMultiplier  = 0;
-        ct.ReadTotalTimeoutConstant    = timeout;
-        ct.WriteTotalTimeoutMultiplier = 0;
-        ct.WriteTotalTimeoutConstant   = timeout;
-    }
-    else
-    {
-        ct.ReadIntervalTimeout         = MAXDWORD;
-        ct.ReadTotalTimeoutMultiplier  = MAXDWORD;
-        ct.ReadTotalTimeoutConstant    = MAXDWORD;
-        ct.WriteTotalTimeoutMultiplier = MAXDWORD;
-        ct.WriteTotalTimeoutConstant   = MAXDWORD;
-    }
+	if (timeout) {
+		ct.ReadIntervalTimeout = timeout;
+		ct.ReadTotalTimeoutMultiplier = 0;
+		ct.ReadTotalTimeoutConstant = timeout;
+		ct.WriteTotalTimeoutMultiplier = 0;
+		ct.WriteTotalTimeoutConstant = timeout;
+	} else {
+		ct.ReadIntervalTimeout = MAXDWORD;
+		ct.ReadTotalTimeoutMultiplier = MAXDWORD;
+		ct.ReadTotalTimeoutConstant = MAXDWORD;
+		ct.WriteTotalTimeoutMultiplier = MAXDWORD;
+		ct.WriteTotalTimeoutConstant = MAXDWORD;
+	}
 
-    SetCommTimeouts( hnd, &ct );
+	SetCommTimeouts(hnd, &ct);
 }

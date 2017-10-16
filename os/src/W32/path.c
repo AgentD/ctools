@@ -8,7 +8,6 @@
 #define TL_OS_EXPORT
 #include "os.h"
 
-
 /*
     A brief overview of the WinDOS path syntax fuckup:
 
@@ -41,200 +40,196 @@
     brain damage, these paths are treated as invalid.
  */
 
-
-
-static void canonicalize( WCHAR* path )
+static void canonicalize(WCHAR *path)
 {
-    WCHAR *out, *in, *ptr;
+	WCHAR *out, *in, *ptr;
 
-    /* remove sequences of slashes */
-    out = in = path;
+	/* remove sequences of slashes */
+	out = in = path;
 
-    while( *in )
-    {
-        if( in[0]=='\\' && in[1]=='\\' )
-            ++in;
-        else
-            *(out++) = *(in++);
-    }
+	while (*in) {
+		if (in[0] == '\\' && in[1] == '\\') {
+			++in;
+		} else {
+			*(out++) = *(in++);
+		}
+	}
 
-    *out = '\0';
+	*out = '\0';
 
-    /* remove leading & trailing slashes */
-    out = in = path;
+	/* remove leading & trailing slashes */
+	out = in = path;
 
-    if( *in=='\\' )
-        ++in;
+	if (*in == '\\')
+		++in;
 
-    while( *in && !(in[0]=='\\' && !in[1]) )
-        *(out++) = *(in++);
+	while (*in && !(in[0] == '\\' && !in[1]))
+		*(out++) = *(in++);
 
-    *out = '\0';
+	*out = '\0';
 
-    /* remove references to current directory */
-    out = in = path;
+	/* remove references to current directory */
+	out = in = path;
 
-    while( *in )
-    {
-        if( in[0]=='.' && in[1]=='\\' ) { in += 2;     continue; }
-        if( in[0]=='.' && !in[1]      ) break;
+	while (*in) {
+		if (in[0] == '.' && in[1] == '\\') {
+			in += 2;
+			continue;
+		}
+		if (in[0] == '.' && !in[1])
+			break;
 
-        while( *in && *in != '\\' )
-            *(out++) = *(in++);
-        if( *in == '\\' )
-            *(out++) = *(in++);
-    }
+		while (*in && *in != '\\')
+			*(out++) = *(in++);
+		if (*in == '\\')
+			*(out++) = *(in++);
+	}
 
-    *out = '\0';
+	*out = '\0';
 
-    /* remove references to previous directory */
-    out = in = path;
+	/* remove references to previous directory */
+	out = in = path;
 
-    while( *in )
-    {
-        if( in[0]=='.' && in[1]=='.' && (in[2]=='\\' || !in[2]) )
-        {
-            if( out==path )
-                goto copy;
-            for( ptr=out-2; ptr>path && *ptr!='\\'; --ptr ) { }
-            if( *ptr=='\\' )
-                ++ptr;
-            if( ptr[0]=='.' && ptr[1]=='.' && ptr[2]=='\\' )
-                goto copy;
+	while (*in) {
+		if (in[0] == '.' && in[1] == '.' && (in[2] == '\\' || !in[2])) {
+			if (out == path)
+				goto copy;
+			for (ptr = out - 2; ptr > path && *ptr != '\\'; --ptr)
+				;
 
-            out = ptr;
-            in += in[2] ? 3 : 2;
-            continue;
-        }
+			if (*ptr == '\\')
+				++ptr;
+			if (ptr[0] == '.' && ptr[1] == '.' && ptr[2] == '\\')
+				goto copy;
 
-    copy:
-        while( *in && *in != '\\' )
-            *(out++) = *(in++);
-        if( *in == '\\' )
-            *(out++) = *(in++);
-    }
+			out = ptr;
+			in += in[2] ? 3 : 2;
+			continue;
+		}
 
-    *out = '\0';
+copy:
+		while (*in && *in != '\\')
+			*(out++) = *(in++);
+		if (*in == '\\')
+			*(out++) = *(in++);
+	}
+
+	*out = '\0';
 }
 
-static WCHAR* get_path_start( WCHAR* path )
+static WCHAR *get_path_start(WCHAR *path)
 {
-    WCHAR *ptr = NULL;
+	WCHAR *ptr = NULL;
 
-    if( path[0]=='\\' && path[1]=='\\' )
-    {
-        ptr = path + 2;                         /* hostname */
-        if( !(*ptr) || *ptr == '\\' )
-            return NULL;
-        while( *ptr && *ptr != '\\' )
-            ++ptr;
+	if (path[0] == '\\' && path[1] == '\\') {
+		ptr = path + 2;	/* hostname */
+		if (!(*ptr) || *ptr == '\\')
+			return NULL;
+		while (*ptr && *ptr != '\\')
+			++ptr;
 
-        if( !(*ptr) )                           /* share */
-            return NULL;
-        ++ptr;
-        if( !(*ptr) || *ptr == '\\' )
-            return NULL;
-        while( *ptr && *ptr != '\\' )
-            ++ptr;
+		if (!(*ptr))	/* share */
+			return NULL;
+		++ptr;
+		if (!(*ptr) || *ptr == '\\')
+			return NULL;
+		while (*ptr && *ptr != '\\')
+			++ptr;
 
-        return *ptr ? ptr : (ptr + 1);          /* path */
-    }
+		return *ptr ? ptr : (ptr + 1);	/* path */
+	}
 
-    if( isalpha(path[0]) && path[1]==':' )
-        return (path[2] == '\\') ? (path + 3) : NULL;
+	if (isalpha(path[0]) && path[1] == ':')
+		return (path[2] == '\\') ? (path + 3) : NULL;
 
-    return (path[0] == '\\') ? (path + 1) : path;
+	return (path[0] == '\\') ? (path + 1) : path;
 }
 
-int get_absolute_path( WCHAR** out, const char* path )
+int get_absolute_path(WCHAR **out, const char *path)
 {
-    WCHAR *wpath, *temp, *ptr;
-    size_t length, clen;
+	WCHAR *wpath, *temp, *ptr;
+	size_t length, clen;
 
-    /* convert UTF-8 path to UTF-16 */
-    length = MultiByteToWideChar( CP_UTF8, 0, path, -1, NULL, 0 ) + 4;
-    wpath = malloc( sizeof(WCHAR)*(length + 1) );
+	/* convert UTF-8 path to UTF-16 */
+	length = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0) + 4;
+	wpath = malloc(sizeof(WCHAR) * (length + 1));
 
-    if( !wpath )
-        return TL_ERR_ALLOC;
+	if (!wpath)
+		return TL_ERR_ALLOC;
 
-    MultiByteToWideChar( CP_UTF8, 0, path, -1, wpath, length );
-    wpath[length] = '\0';
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, length);
+	wpath[length] = '\0';
 
-    /* convert to DOS path separators */
-    for( ptr=wpath; *ptr; ++ptr )
-    {
-        if( *ptr == '/' )
-            *ptr = '\\';
-    }
+	/* convert to DOS path separators */
+	for (ptr = wpath; *ptr; ++ptr) {
+		if (*ptr == '/')
+			*ptr = '\\';
+	}
 
-    /* absolute paths & namespaces we don't care about */
-    if( wpath[0]=='\\' && wpath[1]=='\\' &&
-        (wpath[2]=='?' || wpath[2]=='.') && wpath[3]=='\\' )
-    {
-        goto done;
-    }
+	/* absolute paths & namespaces we don't care about */
+	if (wpath[0] == '\\' && wpath[1] == '\\' &&
+	    (wpath[2] == '?' || wpath[2] == '.') && wpath[3] == '\\') {
+		goto done;
+	}
 
-    /* make relative path absolute */
-    ptr = get_path_start( wpath );
-    if( !ptr )
-        goto fail;
+	/* make relative path absolute */
+	ptr = get_path_start(wpath);
+	if (!ptr)
+		goto fail;
 
-    if( ptr == wpath )
-    {
-        clen = GetCurrentDirectoryW( 0, NULL );
-        temp = malloc( sizeof(WCHAR)*(length + clen + 2) );
-        if( !temp )
-        {
-            free(wpath);
-            return TL_ERR_ALLOC;
-        }
+	if (ptr == wpath) {
+		clen = GetCurrentDirectoryW(0, NULL);
+		temp = malloc(sizeof(WCHAR) * (length + clen + 2));
+		if (!temp) {
+			free(wpath);
+			return TL_ERR_ALLOC;
+		}
 
-        if( !GetCurrentDirectoryW( clen, temp ) )
-            goto fail;
-        temp[clen] = '\0';
+		if (!GetCurrentDirectoryW(clen, temp))
+			goto fail;
+		temp[clen] = '\0';
 
-        ptr = get_path_start( temp );
-        if( !ptr )
-            goto fail_temp;
+		ptr = get_path_start(temp);
+		if (!ptr)
+			goto fail_temp;
 
-        canonicalize( ptr );
-        for( ptr=temp; *ptr; ++ptr ) { }
+		canonicalize(ptr);
+		for (ptr = temp; *ptr; ++ptr) {
+		}
 
-        *(ptr++) = '\\';
-        memcpy( ptr, wpath, sizeof(WCHAR)*(length + 1) );
-        free( wpath );
-        wpath = temp;
-    }
+		*(ptr++) = '\\';
+		memcpy(ptr, wpath, sizeof(WCHAR) * (length + 1));
+		free(wpath);
+		wpath = temp;
+	}
 
-    /* canonicalize absolute path */
-    ptr = get_path_start( wpath );
-    if( !ptr )
-        goto fail;
+	/* canonicalize absolute path */
+	ptr = get_path_start(wpath);
+	if (!ptr)
+		goto fail;
 
-    canonicalize( ptr );
+	canonicalize(ptr);
 
-    if( ptr[0]=='.' && ptr[1]=='.' && (ptr[2]=='\\' || !ptr[2]) )
-        *ptr = '\0';
+	if (ptr[0] == '.' && ptr[1] == '.' && (ptr[2] == '\\' || !ptr[2]))
+		*ptr = '\0';
 
-    /* prefix over long paths */
-    for( length=0; wpath[length]; ++length ) { }
+	/* prefix over long paths */
+	for (length = 0; wpath[length]; ++length) {
+	}
 
-    if( length > 256 )
-    {
-        memmove( wpath + 4, wpath, sizeof(WCHAR)*(length + 1) );
-        wpath[0] = '\\';
-        wpath[1] = '\\';
-        wpath[2] = '?';
-        wpath[3] = '\\';
-    }
+	if (length > 256) {
+		memmove(wpath + 4, wpath, sizeof(WCHAR) * (length + 1));
+		wpath[0] = '\\';
+		wpath[1] = '\\';
+		wpath[2] = '?';
+		wpath[3] = '\\';
+	}
 done:
-    *out = wpath;
-    return 0;
+	*out = wpath;
+	return 0;
 fail_temp:
-    free(temp);
+	free(temp);
 fail:
-    free(wpath);
-    return TL_ERR_ARG;
+	free(wpath);
+	return TL_ERR_ARG;
 }
-

@@ -9,54 +9,50 @@
 #include "tl_thread.h"
 #include "os.h"
 
-
-tl_mutex* tl_mutex_create( int recursive )
+tl_mutex *tl_mutex_create(int recursive)
 {
-    CRITICAL_SECTION* this = calloc( 1, sizeof(CRITICAL_SECTION) );
-    (void)recursive;
+	CRITICAL_SECTION *this = calloc(1, sizeof(*this));
+	(void)recursive;
 
-    assert( this );
-    InitializeCriticalSection( this );
-    return (tl_mutex*)this;
+	assert(this);
+	InitializeCriticalSection(this);
+	return (tl_mutex *)this;
 }
 
-int tl_mutex_lock( tl_mutex* this, unsigned long timeout )
+int tl_mutex_lock(tl_mutex *this, unsigned long timeout)
 {
-    unsigned long dt;
+	unsigned long dt;
 
-    assert( this );
+	assert(this);
 
-    if( timeout>0 )
-    {
-    retry:
-        if( TryEnterCriticalSection( (CRITICAL_SECTION*)this ) )
-            return 1;
+	if (timeout > 0) {
+retry:
+		if (TryEnterCriticalSection((CRITICAL_SECTION *)this))
+			return 1;
 
-        if( timeout )
-        {
-            dt = timeout < 10 ? timeout : 10;
-            Sleep( dt );
-            timeout -= dt;
-            goto retry;
-        }
+		if (timeout) {
+			dt = timeout < 10 ? timeout : 10;
+			Sleep(dt);
+			timeout -= dt;
+			goto retry;
+		}
 
-        return 0;
-    }
+		return 0;
+	}
 
-    EnterCriticalSection( (CRITICAL_SECTION*)this );
-    return 1;
+	EnterCriticalSection((CRITICAL_SECTION *)this);
+	return 1;
 }
 
-void tl_mutex_unlock( tl_mutex* this )
+void tl_mutex_unlock(tl_mutex *this)
 {
-    assert( this );
-    LeaveCriticalSection( (CRITICAL_SECTION*)this );
+	assert(this);
+	LeaveCriticalSection((CRITICAL_SECTION *)this);
 }
 
-void tl_mutex_destroy( tl_mutex* this )
+void tl_mutex_destroy(tl_mutex *this)
 {
-    assert( this );
-    DeleteCriticalSection( (CRITICAL_SECTION*)this );
-    free( this );
+	assert(this);
+	DeleteCriticalSection((CRITICAL_SECTION *)this);
+	free(this);
 }
-

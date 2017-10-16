@@ -9,320 +9,301 @@
 #include "tl_fs.h"
 #include "os.h"
 
-
 /**
  * XXX: GetUserProfileDirectoryW is only available on NT 4.0 and later,
  *      so WinDOS 95/98/ME need a work around
  */
 #include <userenv.h>
 
-
-const char* tl_fs_get_dir_sep( void )
+const char *tl_fs_get_dir_sep(void)
 {
-    return "\\";
+	return "\\";
 }
 
-int tl_fs_get_wd( tl_string* path )
+int tl_fs_get_wd(tl_string *path)
 {
-    DWORD length;
-    WCHAR* wpath;
-    int ret;
+	DWORD length;
+	WCHAR *wpath;
+	int ret;
 
-    assert( path );
+	assert(path);
 
-    length = GetCurrentDirectoryW( 0, NULL );
+	length = GetCurrentDirectoryW(0, NULL);
 
-    if( !(wpath = malloc( length*2 )) )
-        return TL_ERR_ALLOC;
+	if (!(wpath = malloc(length * 2)))
+		return TL_ERR_ALLOC;
 
-    if( !GetCurrentDirectoryW( length, wpath ) )
-    {
-        ret = errno_to_fs( GetLastError( ) );
-        goto fail;
-    }
+	if (!GetCurrentDirectoryW(length, wpath)) {
+		ret = errno_to_fs(GetLastError());
+		goto fail;
+	}
 
-    ret = TL_ERR_ALLOC;
-    if( !tl_string_init( path ) )
-        goto fail;
+	ret = TL_ERR_ALLOC;
+	if (!tl_string_init(path))
+		goto fail;
 
-    if( !tl_string_append_utf16( path, wpath ) )
-        goto failstr;
+	if (!tl_string_append_utf16(path, wpath))
+		goto failstr;
 
-    if( tl_string_last( path )!='\\' &&
-        !tl_string_append_code_point( path, '\\' ) )
-    {
-        goto failstr;
-    }
-    return 0;
+	if (tl_string_last(path) != '\\' &&
+	    !tl_string_append_code_point(path, '\\')) {
+		goto failstr;
+	}
+	return 0;
 failstr:
-    tl_string_cleanup( path );
+	tl_string_cleanup(path);
 fail:
-    free( wpath );
-    return ret;
+	free(wpath);
+	return ret;
 }
 
-int tl_fs_get_user_dir( tl_string* path )
+int tl_fs_get_user_dir(tl_string *path)
 {
-    HANDLE token = NULL;
-    WCHAR* wpath = NULL;
-    DWORD size = 0;
-    int ret;
+	HANDLE token = NULL;
+	WCHAR *wpath = NULL;
+	DWORD size = 0;
+	int ret;
 
-    assert( path );
+	assert(path);
 
-    if( !OpenProcessToken( GetCurrentProcess(), TOKEN_QUERY, &token ) )
-        return errno_to_fs( GetLastError( ) );
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token))
+		return errno_to_fs(GetLastError());
 
-    if( GetUserProfileDirectoryW( token, NULL, &size ) )
-    {
-        ret = errno_to_fs( GetLastError( ) );
-        goto fail;
-    }
+	if (GetUserProfileDirectoryW(token, NULL, &size)) {
+		ret = errno_to_fs(GetLastError());
+		goto fail;
+	}
 
-    ret = TL_ERR_ALLOC;
-    if( !(wpath = malloc( size*2 )) )
-        goto fail;
+	ret = TL_ERR_ALLOC;
+	if (!(wpath = malloc(size * 2)))
+		goto fail;
 
-    if( !GetUserProfileDirectoryW( token, wpath, &size ) )
-    {
-        ret = errno_to_fs( GetLastError( ) );
-        goto fail;
-    }
+	if (!GetUserProfileDirectoryW(token, wpath, &size)) {
+		ret = errno_to_fs(GetLastError());
+		goto fail;
+	}
 
-    CloseHandle( token );
+	CloseHandle(token);
 
-    ret = TL_ERR_ALLOC;
-    if( !tl_string_init( path ) )
-        goto fail;
+	ret = TL_ERR_ALLOC;
+	if (!tl_string_init(path))
+		goto fail;
 
-    if( !tl_string_append_utf16( path, wpath ) )
-        goto failstr;
+	if (!tl_string_append_utf16(path, wpath))
+		goto failstr;
 
-    if( tl_string_last( path )!='\\' &&
-        !tl_string_append_code_point( path, '\\' ) )
-    {
-        goto failstr;
-    }
-    return 0;
+	if (tl_string_last(path) != '\\' &&
+	    !tl_string_append_code_point(path, '\\')) {
+		goto failstr;
+	}
+	return 0;
 failstr:
-    tl_string_cleanup( path );
+	tl_string_cleanup(path);
 fail:
-    CloseHandle( token );
-    free( wpath );
-    return ret;
+	CloseHandle(token);
+	free(wpath);
+	return ret;
 }
 
-int tl_fs_exists( const char* path )
+int tl_fs_exists(const char *path)
 {
-    WCHAR* wpath;
-    int ret;
+	WCHAR *wpath;
+	int ret;
 
-    assert( path );
+	assert(path);
 
-    ret = get_absolute_path( &wpath, path );
-    if( ret != 0 )
-        goto out;
+	ret = get_absolute_path(&wpath, path);
+	if (ret != 0)
+		goto out;
 
-    /*
-        FIXME: could be an error. Which one of the GetLastError codes tells
-               us that the terget doesn't exist? ERROR_FILE_NOT_FOUND?
-               ERROR_PATH_NOT_FOUND?
-     */
-    if( GetFileAttributesW( wpath ) == INVALID_FILE_ATTRIBUTES )
-        ret = 1;
+	/*
+	FIXME: could be an error. Which one of the GetLastError codes tells
+	us that the target doesn't exist? ERROR_FILE_NOT_FOUND?
+	ERROR_PATH_NOT_FOUND?
+	 */
+	if (GetFileAttributesW(wpath) == INVALID_FILE_ATTRIBUTES)
+		ret = 1;
 out:
-    free( wpath );
-    return ret;
+	free(wpath);
+	return ret;
 }
 
-int tl_fs_is_directory( const char* path )
+int tl_fs_is_directory(const char *path)
 {
-    WCHAR* wpath;
-    DWORD attr;
-    int ret;
+	WCHAR *wpath;
+	DWORD attr;
+	int ret;
 
-    assert( path );
+	assert(path);
 
-    ret = get_absolute_path( &wpath, path );
-    if( ret != 0 )
-        return ret;
+	ret = get_absolute_path(&wpath, path);
+	if (ret != 0)
+		return ret;
 
-    attr = GetFileAttributesW( wpath );
+	attr = GetFileAttributesW(wpath);
 
-    if( attr == INVALID_FILE_ATTRIBUTES )
-        ret = errno_to_fs(GetLastError());
-    else
-        ret = (attr & FILE_ATTRIBUTE_DIRECTORY) ? 0 : 1;
+	if (attr == INVALID_FILE_ATTRIBUTES) {
+		ret = errno_to_fs(GetLastError());
+	} else {
+		ret = (attr & FILE_ATTRIBUTE_DIRECTORY) ? 0 : 1;
+	}
 
-    free( wpath );
-    return ret;
+	free(wpath);
+	return ret;
 }
 
-int tl_fs_is_symlink( const char* path )
+int tl_fs_is_symlink(const char *path)
 {
-    WIN32_FIND_DATAW entw;
-    WCHAR* wpath;
-    HANDLE hnd;
-    DWORD attr;
-    int ret;
+	WIN32_FIND_DATAW entw;
+	WCHAR *wpath;
+	HANDLE hnd;
+	DWORD attr;
+	int ret;
 
-    assert( path );
+	assert(path);
 
-    ret = get_absolute_path( &wpath, path );
-    if( ret != 0 )
-        return ret;
+	ret = get_absolute_path(&wpath, path);
+	if (ret != 0)
+		return ret;
 
-    attr = GetFileAttributesW( wpath );
+	attr = GetFileAttributesW(wpath);
 
-    if( attr == INVALID_FILE_ATTRIBUTES )
-    {
-        ret = errno_to_fs(GetLastError());
-        goto out;
-    }
+	if (attr == INVALID_FILE_ATTRIBUTES) {
+		ret = errno_to_fs(GetLastError());
+		goto out;
+	}
 
-    if( (attr & FILE_ATTRIBUTE_REPARSE_POINT)==0 )
-    {
-        ret = 1;
-        goto out;
-    }
+	if ((attr & FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
+		ret = 1;
+		goto out;
+	}
 
-    hnd = FindFirstFileW( wpath, &entw );
+	hnd = FindFirstFileW(wpath, &entw);
 
-    if( hnd == INVALID_HANDLE_VALUE )
-    {
-        ret = errno_to_fs(GetLastError());
-        goto out;
-    }
+	if (hnd == INVALID_HANDLE_VALUE) {
+		ret = errno_to_fs(GetLastError());
+		goto out;
+	}
 
-    FindClose( hnd );
+	FindClose(hnd);
 
-    /* IO_REPARSE_TAG_SYMLINK */
-    ret = (entw.dwReserved0 == 0xA000000C) ? 0 : 1;
+	/* IO_REPARSE_TAG_SYMLINK */
+	ret = (entw.dwReserved0 == 0xA000000C) ? 0 : 1;
 out:
-    free( wpath );
-    return ret;
+	free(wpath);
+	return ret;
 }
 
-int tl_fs_cwd( const char* path )
+int tl_fs_cwd(const char *path)
 {
-    WCHAR* wpath;
-    int status;
+	WCHAR *wpath;
+	int status;
 
-    assert( path );
+	assert(path);
 
-    status = get_absolute_path( &wpath, path );
-    if( status != 0 )
-        return status;
+	status = get_absolute_path(&wpath, path);
+	if (status != 0)
+		return status;
 
-    status = SetCurrentDirectoryW( wpath ) ? 0 : errno_to_fs(GetLastError());
+	status = SetCurrentDirectoryW(wpath) ? 0 : errno_to_fs(GetLastError());
 
-    free( wpath );
-    return status;
+	free(wpath);
+	return status;
 }
 
-int tl_fs_mkdir( const char* path )
+int tl_fs_mkdir(const char *path)
 {
-    WCHAR* wpath;
-    DWORD attr;
-    int status;
+	WCHAR *wpath;
+	DWORD attr;
+	int status;
 
-    assert( path );
+	assert(path);
 
-    status = get_absolute_path( &wpath, path );
-    if( status != 0 )
-        return status;
+	status = get_absolute_path(&wpath, path);
+	if (status != 0)
+		return status;
 
-    attr = GetFileAttributesW( wpath );
+	attr = GetFileAttributesW(wpath);
 
-    if( attr!=INVALID_FILE_ATTRIBUTES )
-    {
-        status = (attr & FILE_ATTRIBUTE_DIRECTORY) ? 0 : TL_ERR_EXISTS;
-    }
-    else if( CreateDirectoryW( wpath, NULL ) )
-    {
-        status = 0;
-    }
-    else
-    {
-        status = errno_to_fs( GetLastError( ) );
-    }
+	if (attr != INVALID_FILE_ATTRIBUTES) {
+		status = (attr & FILE_ATTRIBUTE_DIRECTORY) ? 0 : TL_ERR_EXISTS;
+	} else if (CreateDirectoryW(wpath, NULL)) {
+		status = 0;
+	} else {
+		status = errno_to_fs(GetLastError());
+	}
 
-    free( wpath );
-    return status;
+	free(wpath);
+	return status;
 }
 
-int tl_fs_delete( const char* path )
+int tl_fs_delete(const char *path)
 {
-    int status = 0;
-    WCHAR* wpath;
-    DWORD attr;
+	int status = 0;
+	WCHAR *wpath;
+	DWORD attr;
 
-    assert( path );
+	assert(path);
 
-    status = get_absolute_path( &wpath, path );
-    if( status != 0 )
-        return status;
+	status = get_absolute_path(&wpath, path);
+	if (status != 0)
+		return status;
 
-    attr = GetFileAttributesW( wpath );
+	attr = GetFileAttributesW(wpath);
 
-    if( attr != INVALID_FILE_ATTRIBUTES )
-    {
-        if( attr & FILE_ATTRIBUTE_DIRECTORY )
-        {
-            if( RemoveDirectoryW( wpath ) )
-                goto out;
-        }
-        else if( DeleteFileW( wpath ) )
-        {
-            goto out;
-        }
-    }
-    status = errno_to_fs( GetLastError( ) );
+	if (attr != INVALID_FILE_ATTRIBUTES) {
+		if (attr & FILE_ATTRIBUTE_DIRECTORY) {
+			if (RemoveDirectoryW(wpath))
+				goto out;
+		} else if (DeleteFileW(wpath)) {
+			goto out;
+		}
+	}
+	status = errno_to_fs(GetLastError());
 out:
-    free( wpath );
-    return status;
+	free(wpath);
+	return status;
 }
 
-int tl_fs_get_file_size( const char* path, tl_u64* size )
+int tl_fs_get_file_size(const char *path, tl_u64 *size)
 {
-    WIN32_FIND_DATAW entw;
-    WCHAR* wpath;
-    HANDLE hnd;
-    DWORD attr;
-    int ret;
+	WIN32_FIND_DATAW entw;
+	WCHAR *wpath;
+	HANDLE hnd;
+	DWORD attr;
+	int ret;
 
-    assert( path && size );
-    *size = 0;
+	assert(path && size);
+	*size = 0;
 
-    /* check if path actually names an existing file */
-    ret = get_absolute_path( &wpath, path );
-    if( ret != 0 )
-        return ret;
+	/* check if path actually names an existing file */
+	ret = get_absolute_path(&wpath, path);
+	if (ret != 0)
+		return ret;
 
-    attr = GetFileAttributesW( wpath );
+	attr = GetFileAttributesW(wpath);
 
-    if( attr == INVALID_FILE_ATTRIBUTES )
-        goto out_err;
+	if (attr == INVALID_FILE_ATTRIBUTES)
+		goto out_err;
 
-    ret = TL_ERR_NOT_FILE;
-    if( attr & FILE_ATTRIBUTE_DIRECTORY )
-        goto out;
+	ret = TL_ERR_NOT_FILE;
+	if (attr & FILE_ATTRIBUTE_DIRECTORY)
+		goto out;
 
-    /* get extended information */
-    hnd = FindFirstFileW( wpath, &entw );
-    if( hnd == INVALID_HANDLE_VALUE )
-        goto out_err;
+	/* get extended information */
+	hnd = FindFirstFileW(wpath, &entw);
+	if (hnd == INVALID_HANDLE_VALUE)
+		goto out_err;
 
-    FindClose( hnd );
+	FindClose(hnd);
 
-    ret = 0;
-    *size = (tl_u64)entw.nFileSizeHigh * ((tl_u64)MAXDWORD+1) +
-            (tl_u64)entw.nFileSizeLow;
+	ret = 0;
+	*size = (tl_u64) entw.nFileSizeHigh * ((tl_u64) MAXDWORD + 1) +
+		(tl_u64) entw.nFileSizeLow;
 out:
-    free( wpath );
-    return ret;
+	free(wpath);
+	return ret;
 out_err:
-    ret = errno_to_fs( GetLastError( ) );
-    goto out;
+	ret = errno_to_fs(GetLastError());
+	goto out;
 }
-

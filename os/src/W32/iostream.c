@@ -9,10 +9,12 @@
 #include "tl_iostream.h"
 #include "os.h"
 
-int __tl_os_splice( tl_iostream* out, tl_iostream* in,
-                    size_t count, size_t* actual )
+int __tl_os_splice(tl_iostream *out, tl_iostream *in,
+		   size_t count, size_t *actual)
 {
-    (void)out; (void)in; (void)count; (void)actual;
-    return TL_ERR_NOT_SUPPORTED;
+	(void)out;
+	(void)in;
+	(void)count;
+	(void)actual;
+	return TL_ERR_NOT_SUPPORTED;
 }
-

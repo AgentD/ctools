@@ -9,39 +9,37 @@
 #include "../platform.h"
 #include "bsdsock.h"
 
-tl_iostream* tl_network_create_client( const tl_net_addr* peer,
-                                       const tl_net_addr* local,
-                                       int flags )
+tl_iostream *tl_network_create_client(const tl_net_addr *peer,
+				      const tl_net_addr *local, int flags)
 {
-    tl_iostream* stream;
-    SOCKET sockfd;
+	tl_iostream *stream;
+	SOCKET sockfd;
 
-    assert( peer );
+	assert(peer);
 
-    if( !winsock_acquire( ) )
-        return NULL;
+	if (!winsock_acquire())
+		return NULL;
 
-    sockfd = create_socket( peer->net, peer->transport );
-    if( sockfd == INVALID_SOCKET )
-        goto fail_release;
+	sockfd = create_socket(peer->net, peer->transport);
+	if (sockfd == INVALID_SOCKET)
+		goto fail_release;
 
-    if( !set_socket_flags( sockfd, peer->net, &flags ) )
-        goto fail;
+	if (!set_socket_flags(sockfd, peer->net, &flags))
+		goto fail;
 
-    if( local && !bind_socket( sockfd, local ) )
-        goto fail;
+	if (local && !bind_socket(sockfd, local))
+		goto fail;
 
-    if( !connect_socket( sockfd, peer ) )
-        goto fail;
+	if (!connect_socket(sockfd, peer))
+		goto fail;
 
-    if( !(stream = sock_stream_create( sockfd, peer->transport )) )
-        goto fail;
+	if (!(stream = sock_stream_create(sockfd, peer->transport)))
+		goto fail;
 
-    return stream;
+	return stream;
 fail:
-    closesocket( sockfd );
+	closesocket(sockfd);
 fail_release:
-    winsock_release( );
-    return NULL;
+	winsock_release();
+	return NULL;
 }
-

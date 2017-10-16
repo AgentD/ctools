@@ -9,66 +9,63 @@
 #include "tl_thread.h"
 #include "os.h"
 
-
-tl_rwlock* tl_rwlock_create( void )
+tl_rwlock *tl_rwlock_create(void)
 {
-    pthread_rwlock_t* this = calloc( 1, sizeof(pthread_rwlock_t) );
+	pthread_rwlock_t *this = calloc(1, sizeof(*this));
 
-    if( this && pthread_rwlock_init( this, NULL )!=0 )
-    {
-        free( this );
-        this = NULL;
-    }
+	if (this && pthread_rwlock_init(this, NULL) != 0) {
+		free(this);
+		this = NULL;
+	}
 
-    return (tl_rwlock*)this;
+	return (tl_rwlock *)this;
 }
 
-int tl_rwlock_lock_read( tl_rwlock* this, unsigned long timeout )
+int tl_rwlock_lock_read(tl_rwlock *this, unsigned long timeout)
 {
-    struct timespec ts;
+	struct timespec ts;
 
-    assert( this );
+	assert(this);
 
-    if( timeout>0 )
-    {
-        timeout_to_abs( timeout, &ts );
-        return pthread_rwlock_timedrdlock( (pthread_rwlock_t*)this, &ts )==0;
-    }
+	if (timeout > 0) {
+		timeout_to_abs(timeout, &ts);
+		return pthread_rwlock_timedrdlock((pthread_rwlock_t *)this,
+						  &ts) == 0;
+	}
 
-    return pthread_rwlock_rdlock( (pthread_rwlock_t*)this )==0;
+	return pthread_rwlock_rdlock((pthread_rwlock_t *)this) == 0;
 }
 
-int tl_rwlock_lock_write( tl_rwlock* this, unsigned long timeout )
+int tl_rwlock_lock_write(tl_rwlock *this, unsigned long timeout)
 {
-    struct timespec ts;
+	struct timespec ts;
 
-    assert( this );
+	assert(this);
 
-    if( timeout>0 )
-    {
-        timeout_to_abs( timeout, &ts );
-        return pthread_rwlock_timedwrlock( (pthread_rwlock_t*)this, &ts )==0;
-    }
+	if (timeout > 0) {
+		timeout_to_abs(timeout, &ts);
+		return pthread_rwlock_timedwrlock((pthread_rwlock_t *) this,
+						  &ts) == 0;
+	}
 
-    return pthread_rwlock_wrlock( (pthread_rwlock_t*)this )==0;
+	return pthread_rwlock_wrlock((pthread_rwlock_t *)this) == 0;
 }
 
-void tl_rwlock_unlock_read( tl_rwlock* this )
+void tl_rwlock_unlock_read(tl_rwlock *this)
 {
-    assert( this );
-    pthread_rwlock_unlock( (pthread_rwlock_t*)this );
+	assert(this);
+	pthread_rwlock_unlock((pthread_rwlock_t *)this);
 }
 
-void tl_rwlock_unlock_write( tl_rwlock* this )
+void tl_rwlock_unlock_write(tl_rwlock *this)
 {
-    assert( this );
-    pthread_rwlock_unlock( (pthread_rwlock_t*)this );
+	assert(this);
+	pthread_rwlock_unlock((pthread_rwlock_t *)this);
 }
 
-void tl_rwlock_destroy( tl_rwlock* this )
+void tl_rwlock_destroy(tl_rwlock *this)
 {
-    assert( this );
-    pthread_rwlock_destroy( (pthread_rwlock_t*)this );
-    free( this );
+	assert(this);
+	pthread_rwlock_destroy((pthread_rwlock_t *)this);
+	free(this);
 }
-

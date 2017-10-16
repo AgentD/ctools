@@ -12,96 +12,89 @@
 
 #include <dirent.h>
 
+typedef struct {
+	tl_iterator super;	/* inherits iterator interface */
+	tl_string current;	/* current directory name */
+	struct dirent *ent;	/* current directory entry */
+	DIR *dir;		/* pointer to directory */
+} dir_iterator;
 
-
-typedef struct
-{
-    tl_iterator super;      /* inherits iterator interface */
-    tl_string current;      /* current directory name */
-    struct dirent* ent;     /* current directory entry */
-    DIR* dir;               /* pointer to directory */
-}
-dir_iterator;
-
-
-
-static void find_next( dir_iterator* this )
+static void find_next(dir_iterator *this)
 {
 retry:
-    this->ent = readdir( this->dir );
+	this->ent = readdir(this->dir);
 
-    if( !this->ent )
-        return;
-    if( !strcmp( this->ent->d_name, "." ) )
-        goto retry;
-    if( !strcmp( this->ent->d_name, ".." ) )
-        goto retry;
+	if (!this->ent)
+		return;
+	if (!strcmp(this->ent->d_name, "."))
+		goto retry;
+	if (!strcmp(this->ent->d_name, ".."))
+		goto retry;
 
-    tl_string_init_local( &this->current, this->ent->d_name );
+	tl_string_init_local(&this->current, this->ent->d_name);
 }
 
-static void dir_iterator_destroy( tl_iterator* super )
+static void dir_iterator_destroy(tl_iterator *super)
 {
-    dir_iterator* this = (dir_iterator*)super;
+	dir_iterator *this = (dir_iterator *)super;
 
-    closedir( this->dir );
-    free( this );
+	closedir(this->dir);
+	free(this);
 }
 
-static void dir_iterator_reset( tl_iterator* super )
+static void dir_iterator_reset(tl_iterator *super)
 {
-    dir_iterator* this = (dir_iterator*)super;
-    rewinddir( this->dir );
-    find_next( this );
+	dir_iterator *this = (dir_iterator *)super;
+	rewinddir(this->dir);
+	find_next(this);
 }
 
-static int dir_iterator_has_data( tl_iterator* this )
+static int dir_iterator_has_data(tl_iterator *this)
 {
-    return (((dir_iterator*)this)->ent != NULL);
+	return (((dir_iterator *)this)->ent != NULL);
 }
 
-static void dir_iterator_next( tl_iterator* super )
+static void dir_iterator_next(tl_iterator *super)
 {
-    dir_iterator* this = (dir_iterator*)super;
+	dir_iterator *this = (dir_iterator *)super;
 
-    if( this->ent )
-        find_next( this );
+	if (this->ent)
+		find_next(this);
 }
 
-static void* dir_iterator_get_value( tl_iterator* super )
+static void *dir_iterator_get_value(tl_iterator *super)
 {
-    dir_iterator* this = (dir_iterator*)super;
+	dir_iterator *this = (dir_iterator *)super;
 
-    return this->ent ? &this->current : NULL;
+	return this->ent ? &this->current : NULL;
 }
 
-static void dir_iterator_remove( tl_iterator* this )
+static void dir_iterator_remove(tl_iterator *this)
 {
-    (void)this;
+	(void)this;
 }
 
-tl_iterator* tl_dir_iterate( const char* path )
+tl_iterator *tl_dir_iterate(const char *path)
 {
-    dir_iterator* it;
-    DIR* dir;
+	dir_iterator *it;
+	DIR *dir;
 
-    if( !(dir = opendir( path )) )
-        return NULL;
+	if (!(dir = opendir(path)))
+		return NULL;
 
-    if( !(it = calloc(1, sizeof(*it))) )
-    {
-        closedir( dir );
-        return NULL;
-    }
+	if (!(it = calloc(1, sizeof(*it)))) {
+		closedir(dir);
+		return NULL;
+	}
 
-    it->dir = dir;
-    find_next( it );
+	it->dir = dir;
+	find_next(it);
 
-    it->super.destroy   = dir_iterator_destroy;
-    it->super.reset     = dir_iterator_reset;
-    it->super.has_data  = dir_iterator_has_data;
-    it->super.next      = dir_iterator_next;
-    it->super.get_value = dir_iterator_get_value;
-    it->super.remove    = dir_iterator_remove;
-    return (tl_iterator*)it;
+	it->super.destroy = dir_iterator_destroy;
+	it->super.reset = dir_iterator_reset;
+	it->super.has_data = dir_iterator_has_data;
+	it->super.next = dir_iterator_next;
+	it->super.get_value = dir_iterator_get_value;
+	it->super.remove = dir_iterator_remove;
+	return (tl_iterator *)it;
 }
