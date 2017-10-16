@@ -8,18 +8,16 @@
 #define TL_EXPORT
 #include "tl_iostream.h"
 
-int tl_iostream_read_blob( tl_iostream* this, tl_blob* blob,
-                           size_t maximum )
+int tl_iostream_read_blob(tl_iostream *this, tl_blob *blob, size_t maximum)
 {
-    int status;
+	int status;
 
-    assert( this && blob );
+	assert(this && blob);
 
-    if( !tl_blob_init( blob, maximum, NULL ) )
-        return TL_ERR_ALLOC;
+	if (!tl_blob_init(blob, maximum, NULL))
+		return TL_ERR_ALLOC;
 
-    status = this->read( this, blob->data, maximum, &blob->size );
-    tl_blob_truncate( blob, blob->size );
-    return status;
+	status = this->read(this, blob->data, maximum, &blob->size);
+	tl_blob_truncate(blob, blob->size);
+	return status;
 }
-

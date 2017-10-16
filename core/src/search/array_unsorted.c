@@ -8,20 +8,18 @@
 #define TL_EXPORT
 #include "tl_array.h"
 
-void* tl_array_search_unsorted( const tl_array* this, tl_compare cmp,
-                                const void* key )
+void *tl_array_search_unsorted(const tl_array *this, tl_compare cmp,
+				const void *key)
 {
-    char* ptr;
-    size_t i;
+	size_t i = 0;
+	char *ptr;
 
-    assert( this && cmp && key );
+	assert(this && cmp && key);
 
-    for( ptr=this->data, i=0; i<this->used; ++i, ptr+=this->unitsize )
-    {
-        if( cmp( ptr, key )==0 )
-            return ptr;
-    }
+	for (ptr = this->data; i < this->used; ++i, ptr += this->unitsize) {
+		if (cmp(ptr, key) == 0)
+			return ptr;
+	}
 
-    return NULL;
+	return NULL;
 }
-

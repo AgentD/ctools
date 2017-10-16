@@ -10,18 +10,16 @@
 
 #include "tl_compress.h"
 
-typedef struct
-{
-    tl_compressor super;
-    unsigned char* buffer;
-    size_t total;
-    size_t used;
-}
-base_compressor;
+typedef struct {
+	tl_compressor super;
+	unsigned char *buffer;
+	size_t total;
+	size_t used;
+} base_compressor;
 
-void base_compressor_init(base_compressor* cmp);
+void base_compressor_init(base_compressor *cmp);
 
-void base_compressor_remove(base_compressor* cmp, size_t count);
+void base_compressor_remove(base_compressor *cmp, size_t count);
 
 #endif /* COMPRESSOR_H */
 

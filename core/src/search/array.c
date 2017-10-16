@@ -8,34 +8,33 @@
 #define TL_EXPORT
 #include "tl_array.h"
 
-void* tl_array_search( const tl_array* this, tl_compare cmp, const void* key )
+void *tl_array_search(const tl_array *this, tl_compare cmp, const void *key)
 {
-    size_t i, l, u;
-    char* ptr;
-    int cv;
+	size_t i, l, u;
+	char *ptr;
+	int cv;
 
-    assert( this && cmp && key );
+	assert(this && cmp && key);
 
-    if( !this->used )
-        return NULL;
+	if (!this->used)
+		return NULL;
 
-    l = 0;
-    u = this->used;
+	l = 0;
+	u = this->used;
 
-    while( l < u )
-    {
-        i = (l + u) >> 1;
-        ptr = (char*)this->data + i*this->unitsize;
-        cv = cmp( key, ptr );
+	while (l < u) {
+		i = (l + u) >> 1;
+		ptr = (char *)this->data + i * this->unitsize;
+		cv = cmp(key, ptr);
 
-        if( cv<0 )
-            u = i;
-        else if( cv>0 )
-            l = i + 1;
-        else
-            return ptr;
-    }
+		if (cv < 0) {
+			u = i;
+		} else if (cv > 0) {
+			l = i + 1;
+		} else {
+			return ptr;
+		}
+	}
 
-    return NULL;
+	return NULL;
 }
-

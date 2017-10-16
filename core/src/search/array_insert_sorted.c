@@ -9,37 +9,29 @@
 #include "tl_array.h"
 #include "tl_allocator.h"
 
-int tl_array_insert_sorted( tl_array* this, tl_compare cmp,
-                            const void* element )
+int tl_array_insert_sorted(tl_array *this, tl_compare cmp, const void *element)
 {
-    size_t i = 0;
-    char* ptr;
+	size_t i = 0;
+	char *ptr;
 
-    assert( this && cmp && element );
+	assert(this && cmp && element);
 
-    /* for each element */
-    for( ptr=this->data, i=0; i<this->used; ++i, ptr+=this->unitsize )
-    {
-        /* if we found the first element that is larger */
-        if( cmp( ptr, element )>0 )
-        {
-            /* allocate space for one more element */
-            if( !tl_array_resize( this, this->used+1, 0 ) )
-                return 0;
+	for (ptr = this->data; i < this->used; ++i, ptr += this->unitsize) {
+		if (cmp(ptr, element) <= 0)
+			continue;
 
-            /* move rest of the array ahead */
-            ptr = (char*)this->data + i*this->unitsize;
+		if (!tl_array_resize(this, this->used + 1, 0))
+			return 0;
 
-            memmove( ptr + this->unitsize, ptr,
-                     (this->used-1-i) * this->unitsize );
+		ptr = (char *)this->data + i * this->unitsize;
 
-            /* insert and return success */
-            tl_allocator_copy( this->alloc, ptr, element, this->unitsize, 1 );
-            return 1;
-        }
-    }
+		memmove(ptr + this->unitsize, ptr,
+			(this->used - 1 - i) * this->unitsize);
 
-    /* no element found that is smaller? */
-    return tl_array_append( this, element );
+		tl_allocator_copy(this->alloc, ptr, element,
+				  this->unitsize, 1);
+		return 1;
+	}
+
+	return tl_array_append(this, element);
 }
-

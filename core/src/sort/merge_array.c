@@ -9,14 +9,13 @@
 #include "tl_array.h"
 #include "tl_sort.h"
 
-void tl_array_stable_sort( tl_array* this, tl_compare cmp )
+void tl_array_stable_sort(tl_array *this, tl_compare cmp)
 {
-    assert( this && cmp );
+	assert(this && cmp);
 
-    if( !this->data || !this->used )
-        return;
-    if( tl_mergesort( this->data, this->used, this->unitsize, cmp ) )
-        return;
-    tl_mergesort_inplace( this->data, this->used, this->unitsize, cmp );
+	if (!this->data || !this->used)
+		return;
+	if (tl_mergesort(this->data, this->used, this->unitsize, cmp))
+		return;
+	tl_mergesort_inplace(this->data, this->used, this->unitsize, cmp);
 }
-
