@@ -38,6 +38,10 @@ if( HAVE_DEFLATE )
                 src/comp/inflate.c )
 endif( )
 
+set( COMP_SRC ${COMP_SRC}
+              src/comp/base64_enc.c
+              src/comp/base64_dec.c )
+
 set( SEARCH_SRC src/search/array.c
                 src/search/array_insert_sorted.c
                 src/search/array_unsorted.c
@@ -54,9 +58,6 @@ set( SORT_SRC src/sort/heap.c
               src/sort/merge_list.c
               src/sort/merge_array.c
               src/sort/quick.c )
-
-set( CONV_SRC src/conv/base64_dec.c
-              src/conv/base64_enc.c )
 
 set( ITER_SRC src/iterator/array.c
               src/iterator/list.c
@@ -96,7 +97,6 @@ add_library( tlcore ${TYPE} src/array.c
                             ${SEARCH_SRC}
                             ${SORT_SRC}
                             ${HASH_SRC}
-                            ${CONV_SRC}
                             ${COMP_SRC}
                             ${ITER_SRC}
                             ${ZLIB_SRCS} )
@@ -128,7 +128,6 @@ install( FILES include/tl_allocator.h
                include/tl_utf16.h
                include/tl_utf8.h
                include/tl_compress.h
-               include/tl_convert.h
                include/tl_unicode.h
                include/tl_iostream.h
          DESTINATION include )

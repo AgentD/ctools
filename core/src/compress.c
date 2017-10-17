@@ -22,6 +22,10 @@ tl_compressor *tl_create_compressor(int algo, int flags)
 	case TL_INFLATE:
 		return tl_inflate(flags);
 #endif
+	case TL_BASE64_ENCODE:
+		return tl_base64_encode(flags);
+	case TL_BASE64_DECODE:
+		return tl_base64_decode(flags);
 	default:
 		break;
 	}

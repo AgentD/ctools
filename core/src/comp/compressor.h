@@ -21,5 +21,8 @@ void base_compressor_init(base_compressor *cmp);
 
 void base_compressor_remove(base_compressor *cmp, size_t count);
 
+int base_compressor_write(tl_iostream *stream, const void *buffer,
+			  size_t size, size_t *actual);
+
 #endif /* COMPRESSOR_H */
 

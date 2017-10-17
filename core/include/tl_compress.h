@@ -78,7 +78,19 @@ typedef enum
      * zlib packet stream. The decompressed result appears when reading from
      * the compressor stream object.
      */
-    TL_INFLATE = 0x02
+    TL_INFLATE = 0x02,
+
+    /** \brief Binary to base64 encoding */
+    TL_BASE64_ENCODE = 0x03,
+
+    /**
+     * \brief Base64 to binary decoding
+     *
+     * By default, ASCII white space characters are ignored. If
+     * the \ref TL_BASE64_IGNORE_GARBAGE flag is used, all other
+     * unknown characters are also ignored.
+     */
+    TL_BASE64_DECODE = 0x04
 }
 TL_COMPRESSION;
 
@@ -119,6 +131,21 @@ typedef enum
 }
 TL_COMPRESS_FLUSH;
 
+/**
+ * \enum TL_BASE64_FLAGS
+ *
+ * \brief Miscellaneous flags for \ref tl_base64_encode and
+ *        \ref tl_base64_decode
+ */
+typedef enum
+{
+    /** \brief If set, ignore invalid characters when decoding base 64 */
+    TL_BASE64_IGNORE_GARBAGE = 0x01,
+
+    /** \brief If set, use URL & file name safe characters (see RFC 4648) */
+    TL_BASE64_URL_SAFE = 0x02
+}
+TL_BASE64_FLAGS;
 
 /**
  * \struct tl_compressor
@@ -202,6 +229,24 @@ TLAPI tl_compressor* tl_deflate(int flags);
  * \return A pointer to a tl_compressor, NULL if out of memory.
  */
 TLAPI tl_compressor* tl_inflate(int flags);
+
+/**
+ * \brief Create a compressor implementation that performs Base64 encoding
+ *
+ * \param flags A set of \ref TL_BASE64_FLAGS
+ *
+ * \return Non-zero on success, zero on failure
+ */
+TLAPI tl_compressor* tl_base64_encode(int flags);
+
+/**
+ * \brief Create a compressor implementation that performs Base64 decoding
+ *
+ * \param flags A set of \ref TL_BASE64_FLAGS
+ *
+ * \return Non-zero on success, zero on failure
+ */
+TLAPI tl_compressor* tl_base64_decode(int flags);
 
 /**
  * \brief A convenience function for compressing a blob of data
