@@ -25,6 +25,26 @@ static int dummy_set_timeout(tl_iostream *stream, unsigned int timeout)
 	return TL_ERR_NOT_SUPPORTED;
 }
 
+static int base_compressor_read(tl_iostream *stream, void *buffer,
+				size_t size, size_t *actual)
+{
+	base_compressor *this = (base_compressor *)stream;
+
+	assert(this != NULL && buffer != NULL);
+	assert(stream->type == TL_STREAM_TYPE_COMPRESSOR);
+
+	if (actual)
+		*actual = 0;
+
+	if (this->eof)
+		return TL_EOF;
+
+	if (!size)
+		return 0;
+
+	return this->read(this, buffer, size, actual);
+}
+
 int base_compressor_write(tl_iostream *stream, const void *buffer,
 			  size_t size, size_t *actual)
 {
@@ -60,6 +80,7 @@ void base_compressor_init(base_compressor *cmp)
 {
 	((tl_compressor *)cmp)->flush = dummy_flush;
 	((tl_iostream *)cmp)->set_timeout = dummy_set_timeout;
+	((tl_iostream *)cmp)->read = base_compressor_read;
 	((tl_iostream *)cmp)->write = base_compressor_write;
 	((tl_iostream *)cmp)->type = TL_STREAM_TYPE_COMPRESSOR;
 }

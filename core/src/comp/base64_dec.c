@@ -16,7 +16,6 @@
 typedef struct {
 	base_compressor super;
 	const char *charset;
-	unsigned int eof : 1;
 	unsigned int ignore : 1;	/* ignore unknown characters */
 } tl_base64_decoder;
 
@@ -41,24 +40,14 @@ static void base64_destroy(tl_iostream *stream)
 	free(this);
 }
 
-static int base64_read(tl_iostream *stream, void *buffer,
+static int base64_read(base_compressor *this, void *buffer,
 		       size_t size, size_t *actual)
 {
-	tl_base64_decoder *this = (tl_base64_decoder *)stream;
-	base_compressor *super = (base_compressor *)stream;
 	int ret = 0, total = 0, have, a, b, c, d;
 	const unsigned char *ptr;
 
-	assert(this != NULL && buffer != NULL);
-	assert(stream->type == TL_STREAM_TYPE_COMPRESSOR);
-
-	if (this->eof) {
-		ret = TL_EOF;
-		goto out;
-	}
-
-	have = super->used;
-	ptr = super->buffer;
+	have = this->used;
+	ptr = this->buffer;
 
 	while (have >= 4 && size >= 3) {
 		a = *(ptr++);
@@ -94,8 +83,8 @@ static int base64_read(tl_iostream *stream, void *buffer,
 		size -= 3;
 	}
 
-	base_compressor_remove(super, super->used - have);
-out:
+	base_compressor_remove(this, this->used - have);
+
 	if (actual)
 		*actual = total;
 
@@ -163,7 +152,7 @@ tl_compressor *tl_base64_decode(int flags)
 		this->ignore = 1;
 
 	((tl_iostream *)this)->destroy = base64_destroy;
-	((tl_iostream *)this)->read = base64_read;
 	((tl_iostream *)this)->write = base64_write;
+	((base_compressor *)this)->read = base64_read;
 	return (tl_compressor *)this;
 }

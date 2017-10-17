@@ -10,11 +10,15 @@
 
 #include "tl_compress.h"
 
-typedef struct {
+typedef struct base_compressor {
 	tl_compressor super;
 	unsigned char *buffer;
 	size_t total;
 	size_t used;
+	unsigned int eof : 1;
+
+	int (*read)(struct base_compressor *cmp, void *buffer,
+		    size_t size, size_t *actual);
 } base_compressor;
 
 void base_compressor_init(base_compressor *cmp);

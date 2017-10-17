@@ -47,21 +47,11 @@ static void deflate_destroy(tl_iostream *stream)
 	free(this);
 }
 
-static int deflate_read(tl_iostream *stream, void *buffer,
+static int deflate_read(base_compressor *super, void *buffer,
 			size_t size, size_t *actual)
 {
-	tl_deflate_compressor *this = (tl_deflate_compressor *)stream;
-	base_compressor *super = (base_compressor *)stream;
+	tl_deflate_compressor *this = (tl_deflate_compressor *)super;
 	int ret = 0, have, total = 0;
-
-	assert(this != NULL && buffer != NULL);
-	assert(stream->type == TL_STREAM_TYPE_COMPRESSOR);
-
-	if (!super->used && this->flush_mode == Z_NO_FLUSH)
-		size = 0;
-
-	if (!size)
-		goto out;
 
 	this->strm.next_in = (void *)super->buffer;
 	this->strm.avail_in = super->used;
@@ -73,6 +63,7 @@ static int deflate_read(tl_iostream *stream, void *buffer,
 		switch (deflate(&this->strm, this->flush_mode)) {
 		case Z_STREAM_END:
 			ret = TL_EOF;
+			super->eof = 1;
 			break;
 		case Z_OK:
 			ret = 0;
@@ -91,7 +82,7 @@ static int deflate_read(tl_iostream *stream, void *buffer,
 
 out_remove:
 	base_compressor_remove(super, super->used - this->strm.avail_in);
-out:
+
 	if (actual)
 		*actual = total;
 
@@ -124,8 +115,8 @@ tl_compressor *tl_deflate(int flags)
 	}
 
 	((tl_iostream *)this)->destroy = deflate_destroy;
-	((tl_iostream *)this)->read = deflate_read;
 	((tl_compressor *)this)->flush = deflate_flush;
+	((base_compressor *)this)->read = deflate_read;
 	this->flush_mode = Z_NO_FLUSH;
 	return (tl_compressor *)this;
 }
