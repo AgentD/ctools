@@ -50,6 +50,10 @@ static int inflate_read(base_compressor *super, void *buffer,
 			ret = TL_EOF;
 			super->eof = 1;
 			break;
+		case Z_BUF_ERROR:
+			ret = 0;
+			total += (size - this->strm.avail_out);
+			goto out_remove;
 		case Z_OK:
 			ret = 0;
 			break;
