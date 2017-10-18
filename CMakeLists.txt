@@ -63,32 +63,12 @@ if( MSVC )
 endif( )
 
 #----------------------------------------------------------------------
-# OS detection
-#----------------------------------------------------------------------
-if( WIN32 )
-  add_definitions( -DMACHINE_OS_WINDOWS )
-
-  if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    message( STATUS "Compiling for 64 bit Windows" )
-  else( )
-    message( STATUS "Compiling for 32 bit Windows" )
-  endif( )
-elseif( APPLE )
-  message( ERROR "Mac OS X is not supported yet!" )
-elseif( UNIX )
-  add_definitions( -D_GNU_SOURCE )
-  add_definitions( -DMACHINE_OS_UNIX )
-  message( STATUS "Compiling for a generic UNIX like operating system" )
-else( )
-  message( ERROR "Unknown, possibly unsupported operating system!" )
-endif( )
-
-#----------------------------------------------------------------------
 # Configure targets
 #----------------------------------------------------------------------
 if( UNIX )
   find_package( Threads )
 
+  add_definitions( -D_GNU_SOURCE )
   add_definitions( -D_POSIX_SOURCE=1 )
   add_definitions( -D_POSIX_C_SOURCE=200112L )
 

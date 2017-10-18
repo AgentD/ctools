@@ -8,9 +8,9 @@
 #ifndef TL_INTERNAL_PLATFORM_H
 #define TL_INTERNAL_PLATFORM_H
 
-#if defined(MACHINE_OS_WINDOWS)
+#if defined(_WIN32)
 	#include "W32/os.h"
-#elif defined(MACHINE_OS_UNIX)
+#else
 	#include "unix/os.h"
 #endif
 

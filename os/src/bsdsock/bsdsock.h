@@ -8,7 +8,7 @@
 #ifndef BSD_SOCK_H
 #define BSD_SOCK_H
 
-#ifdef MACHINE_OS_WINDOWS
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winsock2.h>

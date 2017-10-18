@@ -26,7 +26,7 @@ int tl_network_resolve_address(const tl_net_addr *addr, tl_string *out)
 		return TL_ERR_NET_ADDR;
 
 	slen = NI_MAXHOST;
-#ifndef MACHINE_OS_WINDOWS
+#ifndef _WIN32
 	for (ret = EAI_OVERFLOW; ret == EAI_OVERFLOW; slen *= 2)
 #endif
 	{
@@ -43,7 +43,7 @@ int tl_network_resolve_address(const tl_net_addr *addr, tl_string *out)
 	switch (ret) {
 	case 0:
 		break;
-#ifndef MACHINE_OS_WINDOWS
+#ifndef _WIN32
 	case EAI_SYSTEM:
 		ret = errno_to_fs(errno);
 		goto out_free;

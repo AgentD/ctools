@@ -9,7 +9,7 @@
 #include "../platform.h"
 #include "bsdsock.h"
 
-#if defined(MACHINE_OS_WINDOWS) && !defined(s6_addr)
+#if defined(_WIN32) && !defined(s6_addr)
 #define s6_addr u.Byte
 #endif
 
