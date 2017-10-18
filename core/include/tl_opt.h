@@ -30,8 +30,6 @@
 #ifndef TOOL_OPT_H
 #define TOOL_OPT_H
 
-
-
 /**
  * \page util Miscellaneous Utilities
  *
@@ -86,104 +84,99 @@
  * \endcode
  */
 
-
-
 #include "tl_predef.h"
-
-
 
 /**
  * \enum TL_OPTION_TYPE
  *
  * \brief Identifies the type of a command line option
  */
-typedef enum
-{
-    /**
-     * \brief A single character flag
-     *
-     * Single character flags are preceeded by a single dash. Multiple single
-     * character flags can be grouped together to a giberisch phrase preceeded
-     * by a single dash.
-     *
-     * Example:
-     * \code
-     * -A -b -C -AbC
-     * \endcode
-     */
-    TL_SHORT_FLAG = 1,
+typedef enum {
+	/**
+	 * \brief A single character flag
+	 *
+	 * Single character flags are preceeded by a single dash. Multiple
+	 * single character flags can be grouped together to a giberisch
+	 * phrase preceeded by a single dash.
+	 *
+	 * Example:
+	 * \code
+	 * -A -b -C -AbC
+	 * \endcode
+	 */
+	TL_SHORT_FLAG = 1,
 
-    /**
-     * \brief A long flag
-     *
-     * A long flag is a word preceeded by two dash characters. Long flags
-     * cannot be grouped.
-     *
-     * Example:
-     * \code
-     * --foo --bar --baz
-     * \endcode
-     */
-    TL_LONG_FLAG = 2,
+	/**
+	 * \brief A long flag
+	 *
+	 * A long flag is a word preceeded by two dash characters. Long flags
+	 * cannot be grouped.
+	 *
+	 * Example:
+	 * \code
+	 * --foo --bar --baz
+	 * \endcode
+	 */
+	TL_LONG_FLAG = 2,
 
-    /**
-     * \brief A short option
-     *
-     * A short option is a single character preceeded by a single dash. A
-     * short option is followed by a string argument.
-     *
-     * Example:
-     * \code
-     * -f someargument
-     * \endcode
-     */
-    TL_SHORT_OPTION = 3,
+	/**
+	 * \brief A short option
+	 *
+	 * A short option is a single character preceeded by a single dash. A
+	 * short option is followed by a string argument.
+	 *
+	 * Example:
+	 * \code
+	 * -f someargument
+	 * \endcode
+	 */
+	TL_SHORT_OPTION = 3,
 
-    /**
-     * \brief A long option option
-     *
-     * A long option is a word, preceeded by a two dash characters. A long
-     * option has either an equals sign directly appended to it with an
-     * argument immediately afterwards, or it is followed by an argument.
-     *
-     * Example:
-     * \code
-     * --foo=someargument --bar argument
-     * \endcode
-     */
-    TL_LONG_OPTION = 4,
+	/**
+	 * \brief A long option option
+	 *
+	 * A long option is a word, preceeded by a two dash characters. A long
+	 * option has either an equals sign directly appended to it with an
+	 * argument immediately afterwards, or it is followed by an argument.
+	 *
+	 * Example:
+	 * \code
+	 * --foo=someargument --bar argument
+	 * \endcode
+	 */
+	TL_LONG_OPTION = 4,
 
-    /**
-     * \brief A short toggle switch
-     *
-     * A short toggle switch is a single character that when preceeded by a
-     * plus character, switches a flag on and when preceeded by a minus
-     * character, switches a flag off. Multiple short toggle switches can be
-     * grouped together.
-     *
-     * Example:
-     * \code
-     * -a -b +c +d
-     * -ab +cd
-     * \endcode
-     */
-    TL_SHORT_TOGGLE = 5,
+	/**
+	 * \brief A short toggle switch
+	 *
+	 * A short toggle switch is a single character that when preceeded by
+	 * a plus character, switches a flag on and when preceeded by a minus
+	 * character, switches a flag off. Multiple short toggle switches can
+	 * be grouped together.
+	 *
+	 * Example:
+	 * \code
+	 * -a -b +c +d
+	 * -ab +cd
+	 * \endcode
+	 */
+	TL_SHORT_TOGGLE = 5,
 
-    /**
-     * \brief A long toggle switch
-     *
-     * A long toggle switch is a word that when preceeded by a plus character,
-     * switches a flag on and when preceeded by a minus character, switches a
-     * flag off. Long toggle switches can not be grouped together.
-     *
-     * Example:
-     * \code
-     * -foo +bar
-     * \endcode
-     */
-    TL_LONG_TOGGLE = 6
-}
-TL_OPTION_TYPE;
+	/**
+	 * \brief A long toggle switch
+	 *
+	 * A long toggle switch is a word that when preceeded by a plus
+	 * character, switches a flag on and when preceeded by a minus
+	 * character, switches a flag off. Long toggle switches can not be
+	 * grouped together.
+	 *
+	 * Example:
+	 * \code
+	 * -foo +bar
+	 * \endcode
+	 */
+	TL_LONG_TOGGLE = 6
+} TL_OPTION_TYPE;
 
 /**
  * \enum TL_OPTION_ACTION
@@ -191,18 +184,16 @@ TL_OPTION_TYPE;
  * \brief Returned by tl_option_error_handler to indicate how to process
  *        an option.
  */
-typedef enum
-{
-    /** \brief Ignore the option altogether */
-    TL_OPT_IGNORE = 1,
+typedef enum {
+	/** \brief Ignore the option altogether */
+	TL_OPT_IGNORE = 1,
 
-    /** \brief Ignore the option and remove it from the argument vector */
-    TL_OPT_REMOVE = 2,
+	/** \brief Ignore the option and remove it from the argument vector */
+	TL_OPT_REMOVE = 2,
 
-    /** \brief Abort processing and report failure */
-    TL_OPT_FAIL = 3
-}
-TL_OPTION_ACTION;
+	/** \brief Abort processing and report failure */
+	TL_OPT_FAIL = 3
+} TL_OPTION_ACTION;
 
 /**
  * \enum TL_OPTION_ISSUE
@@ -210,15 +201,13 @@ TL_OPTION_ACTION;
  * \brief Passed to tl_option_error_handler to indiciate what kind of problem
  *        occoured
  */
-typedef enum
-{
-    /** \brief A given option is unknown */
-    TL_OPT_UNKNOWN = 1,
+typedef enum {
+	/** \brief A given option is unknown */
+	TL_OPT_UNKNOWN = 1,
 
-    /**  \brief An option requires an argument but the argument is missing */
-    TL_OPT_MISSING_ARGUMENT = 2
-}
-TL_OPTION_ISSUE;
+	/**  \brief An option requires an argument but it is missing */
+	TL_OPT_MISSING_ARGUMENT = 2
+} TL_OPTION_ISSUE;
 
 /**
  * \brief A callback used by tl_process_args for handling erroneous options
@@ -232,40 +221,39 @@ TL_OPTION_ISSUE;
  *
  * \return A \ref TL_OPTION_ACTION value indicating what to do
  */
-typedef int(* tl_option_error_handler )( tl_option* opt, const char* option,
-                                         int issue );
+typedef int(*tl_option_error_handler)(tl_option *opt, const char *option,
+					int issue);
 
 /**
  * \struct tl_option
  *
  * \brief Describes a command line option
  */
-struct tl_option
-{
-    int type;       /**< \brief A \ref TL_OPTION_TYPE identifier */
+struct tl_option {
+	int type;       /**< \brief A \ref TL_OPTION_TYPE identifier */
 
-    /**
-     * \brief Entire word used for long options,
-     *        first character used for short options
-     */
-    const char* opt;
+	/**
+	 * \brief Entire word used for long options,
+	 *        first character used for short options
+	 */
+	const char *opt;
 
-    /** \brief For flags and toggle switches, the flag value to set */
-    unsigned long value;
+	/** \brief For flags and toggle switches, the flag value to set */
+	unsigned long value;
 
-    /** \brief For flags and toggle switches, a pointer to the flag field */
-    unsigned long* field;
+	/**
+	 * \brief For flags and toggle switches, a pointer to the flag field
+	 */
+	unsigned long *field;
 
-    /**
-     * \brief For options, a function to handle the argument
-     *
-     * \param opt   A pointer to the option that was found
-     * \param value The string value that was set
-     */
-    void(* handle_option )( tl_option* opt, const char* value );
+	/**
+	 * \brief For options, a function to handle the argument
+	 *
+	 * \param opt   A pointer to the option that was found
+	 * \param value The string value that was set
+	 */
+	void (*handle_option)(tl_option *opt, const char *value);
 };
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -316,9 +304,9 @@ extern "C" {
  *
  * \return Non-zero on success, zero on failure
  */
-TLAPI int tl_process_args( tl_option* options, size_t num_options,
-                           int* argc, char** argv,
-                           tl_option_error_handler handler );
+TLAPI int tl_process_args(tl_option *options, size_t num_options,
+			  int *argc, char **argv,
+			  tl_option_error_handler handler);
 
 #ifdef __cplusplus
 }

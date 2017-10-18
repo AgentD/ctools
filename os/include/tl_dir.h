@@ -54,11 +54,7 @@
  * The file \ref dirlist.c contains a simple example for both methods.
  */
 
-
-
 #include "tl_predef.h"
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,7 +74,7 @@ extern "C" {
  *         the neccessarry permissions, TL_ERR_NOT_EXIST if the path does not
  *         exist, TL_ERR_NOT_DIR if the path points to a file
  */
-TLOSAPI int tl_dir_scan( const char* path, tl_array* list );
+TLOSAPI int tl_dir_scan(const char *path, tl_array *list);
 
 /**
  * \brief Iterate over the contents of a directory
@@ -90,7 +86,7 @@ TLOSAPI int tl_dir_scan( const char* path, tl_array* list );
  *
  * \return A pointer to an iterator object on success, NULL on failure
  */
-TLOSAPI tl_iterator* tl_dir_iterate( const char* path );
+TLOSAPI tl_iterator *tl_dir_iterate(const char *path);
 
 #ifdef __cplusplus
 }

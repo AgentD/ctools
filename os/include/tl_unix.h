@@ -30,9 +30,7 @@
 #ifndef TL_UNIX_H
 #define TL_UNIX_H
 
-
 #include "tl_predef.h"
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,7 +43,7 @@ extern "C" {
  * tl_network_create_packet_server, this function returns the
  * underlying socket file descriptor.
  */
-TLOSAPI int tl_unix_packetserver_fd( tl_packetserver* srv );
+TLOSAPI int tl_unix_packetserver_fd(tl_packetserver *srv);
 
 /**
  * \brief Get the file descriptor of a tl_iostream
@@ -62,7 +60,7 @@ TLOSAPI int tl_unix_packetserver_fd( tl_packetserver* srv );
  *
  * \return Returns the number of file descriptors written to fds
  */
-TLOSAPI void tl_unix_iostream_fd( tl_iostream* str, int* fds );
+TLOSAPI void tl_unix_iostream_fd(tl_iostream *str, int *fds);
 
 /**
  * \brief Get the file descriptor of a tl_server
@@ -71,7 +69,7 @@ TLOSAPI void tl_unix_iostream_fd( tl_iostream* str, int* fds );
  * tl_network_create_server, this function returns the
  * underlying socket file descriptor.
  */
-TLOSAPI int tl_unix_server_fd( tl_server* srv );
+TLOSAPI int tl_unix_server_fd(tl_server *srv);
 
 #ifdef __cplusplus
 }

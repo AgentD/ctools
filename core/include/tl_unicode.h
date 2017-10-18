@@ -49,15 +49,13 @@
  *
  * \brief Simple classification of Unicode characters
  */
-typedef enum
-{
-    /** \brief Character is a whitespace character */
-    TL_SPACE = 0x01,
+typedef enum {
+	/** \brief Character is a whitespace character */
+	TL_SPACE = 0x01,
 
-    /** \brief Whitespace character is a non-breaking space */
-    TL_NB_SPACE = 0x02
-}
-TL_CHAR_TYPE;
+	/** \brief Whitespace character is a non-breaking space */
+	TL_NB_SPACE = 0x02
+} TL_CHAR_TYPE;
 
 #ifdef __cplusplus
 extern "C" {

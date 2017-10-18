@@ -83,11 +83,7 @@
  * The tl_list container internally implements a list based merge sort.
  */
 
-
-
 #include "tl_predef.h"
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -110,8 +106,8 @@ extern "C" {
  * \param size     The size of a single element
  * \param cmp      A function used for comparing two elements
  */
-TLAPI void tl_insertionsort( void* data, size_t elements, size_t size,
-                             tl_compare cmp );
+TLAPI void tl_insertionsort(void *data, size_t elements, size_t size,
+			    tl_compare cmp);
 
 /**
  * \brief Sort an array of elements using the quicksort algorithm
@@ -135,8 +131,8 @@ TLAPI void tl_insertionsort( void* data, size_t elements, size_t size,
  * \param size     The size of a single element
  * \param cmp      A function used for comparing two elements
  */
-TLAPI void tl_quicksort( void* data, size_t elements, size_t size,
-                         tl_compare cmp );
+TLAPI void tl_quicksort(void *data, size_t elements, size_t size,
+			tl_compare cmp);
 
 /**
  * \brief Sort an array of elements using the heapsort algorithm
@@ -157,8 +153,8 @@ TLAPI void tl_quicksort( void* data, size_t elements, size_t size,
  * \param size     The size of a single element
  * \param cmp      A function used for comparing two elements
  */
-TLAPI void tl_heapsort( void* data, size_t elements, size_t size,
-                        tl_compare cmp );
+TLAPI void tl_heapsort(void *data, size_t elements, size_t size,
+			tl_compare cmp);
 
 /**
  * \brief Sort an array of elements using the merge sort algorithm
@@ -178,8 +174,8 @@ TLAPI void tl_heapsort( void* data, size_t elements, size_t size,
  *
  * \return Non-zero on success, zero if there is not enough memory
  */
-TLAPI int tl_mergesort( void* data, size_t elements, size_t size,
-                        tl_compare cmp );
+TLAPI int tl_mergesort(void *data, size_t elements, size_t size,
+			tl_compare cmp);
 
 /**
  * \brief Sort an array of elements using an in-place merge sort
@@ -195,8 +191,8 @@ TLAPI int tl_mergesort( void* data, size_t elements, size_t size,
  * \param size     The size of a single element
  * \param cmp      A function used for comparing two elements
  */
-TLAPI void tl_mergesort_inplace( void* data, size_t elements,
-                                 size_t size, tl_compare cmp );
+TLAPI void tl_mergesort_inplace(void *data, size_t elements,
+				size_t size, tl_compare cmp);
 
 /**
  * \brief Sort a linked list using merge sort
@@ -215,8 +211,8 @@ TLAPI void tl_mergesort_inplace( void* data, size_t elements,
  *
  * \return A pointer to the new head of the list
  */
-TLAPI tl_list_node* tl_mergesort_list( tl_list_node* list, size_t elements,
-                                       tl_compare cmp );
+TLAPI tl_list_node *tl_mergesort_list(tl_list_node *list, size_t elements,
+					tl_compare cmp);
 
 #ifdef __cplusplus
 }

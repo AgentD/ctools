@@ -59,13 +59,9 @@
  * \li Appending or prepending is done in constant time
  */
 
-
-
 #include "tl_predef.h"
 
 #include <string.h>
-
-
 
 /**
  * \struct tl_list_node
@@ -74,13 +70,12 @@
  *
  * \see tl_list
  */
-struct tl_list_node
-{
-    /** \brief A pointer to the preceeding list node */
-    tl_list_node* next;
+struct tl_list_node {
+	/** \brief A pointer to the preceeding list node */
+	tl_list_node *next;
 
-    /** \brief A pointer to the following list node */
-    tl_list_node* prev;
+	/** \brief A pointer to the following list node */
+	tl_list_node *prev;
 };
 
 /**
@@ -94,25 +89,22 @@ struct tl_list_node
  * element access time at the beginning or end of the list and constant
  * insertion and removal at the beginning or end of the list.
  */
-struct tl_list
-{
-    /** \brief A pointer to the head (i.e. first) node in the list */
-    tl_list_node* first;
+struct tl_list {
+	/** \brief A pointer to the head (i.e. first) node in the list */
+	tl_list_node *first;
 
-    /** \brief A pointer to the tail (i.e. last) node in the list */
-    tl_list_node* last;
+	/** \brief A pointer to the tail (i.e. last) node in the list */
+	tl_list_node *last;
 
-    /** \brief The number of elements currently in the list */
-    size_t size;
+	/** \brief The number of elements currently in the list */
+	size_t size;
 
-    /** \brief The size of a single element */
-    size_t unitsize;
+	/** \brief The size of a single element */
+	size_t unitsize;
 
-    /** \brief Pointer to an allocator or NULL if not used */
-    tl_allocator* alloc;
+	/** \brief Pointer to an allocator or NULL if not used */
+	tl_allocator *alloc;
 };
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -131,8 +123,7 @@ extern "C" {
  * \return On success, a pointer to a list node that has to be freed using
  *         free( ). NULL on failure
  */
-TLAPI tl_list_node* tl_list_node_create( const tl_list* list,
-                                         const void* data );
+TLAPI tl_list_node *tl_list_node_create(const tl_list *list, const void *data);
 
 /**
  * \brief Destroy a list node and free its content using the list allocator
@@ -142,7 +133,7 @@ TLAPI tl_list_node* tl_list_node_create( const tl_list* list,
  * \param node A pointer to a node assumed to no longer be in the list
  * \param list A pointer to the list that originally contained the node
  */
-TLAPI void tl_list_node_destroy( tl_list_node* node, tl_list* list );
+TLAPI void tl_list_node_destroy(tl_list_node *node, tl_list *list);
 
 /**
  * \brief Get a pointer to the data field of a linked list node
@@ -153,7 +144,7 @@ TLAPI void tl_list_node_destroy( tl_list_node* node, tl_list* list );
  *
  * \return A pointer to the data field
  */
-TLAPI void* tl_list_node_get_data( const tl_list_node* node );
+TLAPI void *tl_list_node_get_data(const tl_list_node *node);
 
 /**
  * \brief Initialize a previously uninitialized list
@@ -164,14 +155,14 @@ TLAPI void* tl_list_node_get_data( const tl_list_node* node );
  * \param elementsize The size of an individual element
  * \param alloc       Pointer to an allocator or NULL if not used
  */
-static TL_INLINE void tl_list_init( tl_list* list, size_t elementsize,
-                                    tl_allocator* alloc )
+static TL_INLINE void tl_list_init(tl_list *list, size_t elementsize,
+				   tl_allocator *alloc)
 {
-    assert( list );
+	assert(list);
 
-    memset( list, 0, sizeof(*list) );
-    list->unitsize = elementsize;
-    list->alloc    = alloc;
+	memset(list, 0, sizeof(*list));
+	list->unitsize = elementsize;
+	list->alloc = alloc;
 }
 
 /**
@@ -187,7 +178,7 @@ static TL_INLINE void tl_list_init( tl_list* list, size_t elementsize,
  * \return A pointer to the node on success, NULL if index out of bounds or
  *         the list pointer is NULL
  */
-TLAPI tl_list_node* tl_list_node_from_index(const tl_list* list, size_t idx);
+TLAPI tl_list_node *tl_list_node_from_index(const tl_list *list, size_t idx);
 
 /**
  * \brief Generate a list of elements from an array
@@ -202,7 +193,7 @@ TLAPI tl_list_node* tl_list_node_from_index(const tl_list* list, size_t idx);
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-TLAPI int tl_list_from_array( tl_list* list, const void* data, size_t count );
+TLAPI int tl_list_from_array(tl_list *list, const void *data, size_t count);
 
 /**
  * \brief Copy the contents of a list to an array of elements
@@ -215,7 +206,7 @@ TLAPI int tl_list_from_array( tl_list* list, const void* data, size_t count );
  * \param data A pointer to an array of elements, large enough to hold at
  *             least as many elements as the list contains.
  */
-TLAPI void tl_list_to_array( const tl_list* list, void* data );
+TLAPI void tl_list_to_array(const tl_list *list, void *data);
 
 /**
  * \brief Create a copy of a sub range of a list
@@ -231,8 +222,8 @@ TLAPI void tl_list_to_array( const tl_list* list, void* data );
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-TLAPI int tl_list_copy_range( tl_list* dst, const tl_list* src,
-                              size_t start, size_t count );
+TLAPI int tl_list_copy_range(tl_list *dst, const tl_list *src,
+			     size_t start, size_t count);
 
 /**
  * \brief Create a copy of a list
@@ -246,10 +237,10 @@ TLAPI int tl_list_copy_range( tl_list* dst, const tl_list* src,
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-static TL_INLINE int tl_list_copy( tl_list* dst, const tl_list* src )
+static TL_INLINE int tl_list_copy(tl_list *dst, const tl_list *src)
 {
-    assert( dst && src );
-    return tl_list_copy_range( dst, src, 0, src->size );
+	assert(dst && src);
+	return tl_list_copy_range(dst, src, 0, src->size);
 }
 
 /**
@@ -270,7 +261,7 @@ static TL_INLINE int tl_list_copy( tl_list* dst, const tl_list* src )
  * \return Non-zero on success, zero on failure (one of the list pointers is
  *         NULL, index is out of bounds, element sizes don't match, etc...)
  */
-TLAPI int tl_list_join( tl_list* list, tl_list* other, size_t idx );
+TLAPI int tl_list_join(tl_list *list, tl_list *other, size_t idx);
 
 /**
  * \brief Reverse the order of elements in a list
@@ -281,7 +272,7 @@ TLAPI int tl_list_join( tl_list* list, tl_list* other, size_t idx );
  *
  * \param list A pointer to a list
  */
-TLAPI void tl_list_reverse( tl_list* list );
+TLAPI void tl_list_reverse(tl_list *list);
 
 /**
  * \brief Concatenate two lists, copying the elements of the second to the
@@ -296,7 +287,7 @@ TLAPI void tl_list_reverse( tl_list* list );
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-TLAPI int tl_list_concat( tl_list* dst, const tl_list* src );
+TLAPI int tl_list_concat(tl_list *dst, const tl_list *src);
 
 /**
  * \brief Remove elements from a list
@@ -309,7 +300,7 @@ TLAPI int tl_list_concat( tl_list* dst, const tl_list* src );
  * \param idx   The index of the first element to remove
  * \param count The number of elements to remove
  */
-TLAPI void tl_list_remove( tl_list* list, size_t idx, size_t count );
+TLAPI void tl_list_remove(tl_list *list, size_t idx, size_t count);
 
 /**
  * \brief Check if a list is empty
@@ -322,10 +313,10 @@ TLAPI void tl_list_remove( tl_list* list, size_t idx, size_t count );
  *
  * \return Non-zero if the list is empty, zero if not.
  */
-static TL_INLINE int tl_list_is_empty( const tl_list* list )
+static TL_INLINE int tl_list_is_empty(const tl_list *list)
 {
-    assert( list );
-    return (list->size==0);
+	assert(list);
+	return list->size == 0;
 }
 
 /**
@@ -340,9 +331,9 @@ static TL_INLINE int tl_list_is_empty( const tl_list* list )
  *
  * \return A pointer to the data, or NULL if index out of bounds
  */
-static TL_INLINE void* tl_list_at( const tl_list* list, size_t idx )
+static TL_INLINE void* tl_list_at(const tl_list *list, size_t idx)
 {
-    return tl_list_node_get_data( tl_list_node_from_index( list, idx ) );
+	return tl_list_node_get_data(tl_list_node_from_index(list, idx));
 }
 
 /**
@@ -359,7 +350,7 @@ static TL_INLINE void* tl_list_at( const tl_list* list, size_t idx )
  * \return Non-zero on success, zero on failure (index out of bounds, invalid
  *         pointers, etc...)
  */
-TLAPI int tl_list_set( tl_list* list, size_t idx, const void* element );
+TLAPI int tl_list_set(tl_list *list, size_t idx, const void *element);
 
 /**
  * \brief Add a new element to the end of a list
@@ -374,7 +365,7 @@ TLAPI int tl_list_set( tl_list* list, size_t idx, const void* element );
  * \return Non-zero on success, zero on failure (out of memory, invalid
  *         arguments)
  */
-TLAPI int tl_list_append( tl_list* list, const void* element );
+TLAPI int tl_list_append(tl_list *list, const void *element);
 
 /**
  * \brief Add a new element to the beginning of list
@@ -389,7 +380,7 @@ TLAPI int tl_list_append( tl_list* list, const void* element );
  * \return Non-zero on success, zero on failure (out of memory, invalid
  *         arguments)
  */
-TLAPI int tl_list_prepend( tl_list* list, const void* element );
+TLAPI int tl_list_prepend(tl_list *list, const void *element);
 
 /**
  * \brief Insert a range of elements to a list
@@ -406,8 +397,8 @@ TLAPI int tl_list_prepend( tl_list* list, const void* element );
  * \return Non-zero on success, zero on failure (out of memory, index out of
  *         bounds, invalid pointers, etc...)
  */
-TLAPI int tl_list_insert( tl_list* list, size_t idx,
-                          const void* elements, size_t count );
+TLAPI int tl_list_insert(tl_list *list, size_t idx,
+			 const void *elements, size_t count);
 
 /**
  * \brief Insert an element into a sorted list at the right position
@@ -422,8 +413,8 @@ TLAPI int tl_list_insert( tl_list* list, size_t idx,
  *
  * \return Non-zero on success, zero on failure (out of memory)
  */
-TLAPI int tl_list_insert_sorted( tl_list* list, tl_compare cmp,
-                                 const void* element );
+TLAPI int tl_list_insert_sorted(tl_list *list, tl_compare cmp,
+				const void *element);
 
 /**
  * \brief Remove the first element of a list
@@ -434,7 +425,7 @@ TLAPI int tl_list_insert_sorted( tl_list* list, tl_compare cmp,
  *
  * \param list A pointer to a list
  */
-TLAPI void tl_list_remove_first( tl_list* list );
+TLAPI void tl_list_remove_first(tl_list *list);
 
 /**
  * \brief Remove the last element of a list
@@ -445,7 +436,7 @@ TLAPI void tl_list_remove_first( tl_list* list );
  *
  * \param list A pointer to a list
  */
-TLAPI void tl_list_remove_last( tl_list* list );
+TLAPI void tl_list_remove_last(tl_list *list);
 
 /**
  * \brief Remove all elements of a list
@@ -456,7 +447,7 @@ TLAPI void tl_list_remove_last( tl_list* list );
  *
  * \param list A pointer to a list
  */
-TLAPI void tl_list_clear( tl_list* list );
+TLAPI void tl_list_clear(tl_list *list);
 
 /**
  * \brief Free the memory used by a list and reset it
@@ -467,9 +458,9 @@ TLAPI void tl_list_clear( tl_list* list );
  *
  * \param list A pointer to a list
  */
-static TL_INLINE void tl_list_cleanup( tl_list* list )
+static TL_INLINE void tl_list_cleanup(tl_list *list)
 {
-    tl_list_clear( list );
+	tl_list_clear(list);
 }
 
 /**
@@ -486,7 +477,7 @@ static TL_INLINE void tl_list_cleanup( tl_list* list )
  * \param list A pointer to a list
  * \param cmp  A function used to compare two elements, determining the order
  */
-TLAPI void tl_list_sort( tl_list* list, tl_compare cmp );
+TLAPI void tl_list_sort(tl_list *list, tl_compare cmp);
 
 /**
  * \def tl_list_stable_sort
@@ -495,9 +486,9 @@ TLAPI void tl_list_sort( tl_list* list, tl_compare cmp );
  *
  * \copydoc tl_list_sort
  */
-static TL_INLINE void tl_list_stable_sort( tl_list* list, tl_compare cmp )
+static TL_INLINE void tl_list_stable_sort(tl_list *list, tl_compare cmp)
 {
-    tl_list_sort( list, cmp );
+	tl_list_sort(list, cmp);
 }
 
 /**
@@ -513,8 +504,8 @@ static TL_INLINE void tl_list_stable_sort( tl_list* list, tl_compare cmp )
  *
  * \return A pointer to a node containing the key, or NULL if not found
  */
-TLAPI tl_list_node* tl_list_search( const tl_list* list, tl_compare cmp,
-                                    const void* key );
+TLAPI tl_list_node *tl_list_search(const tl_list *list, tl_compare cmp,
+				   const void *key);
 
 /**
  * \brief tl_list_search_unsorted
@@ -523,11 +514,11 @@ TLAPI tl_list_node* tl_list_search( const tl_list* list, tl_compare cmp,
  *
  * \copydoc tl_list_search
  */
-static TL_INLINE tl_list_node* tl_list_search_unsorted( const tl_list* list,
-                                                        tl_compare cmp,
-                                                        const void* key )
+static TL_INLINE tl_list_node *tl_list_search_unsorted(const tl_list *list,
+						       tl_compare cmp,
+						       const void *key)
 {
-    return tl_list_search( list, cmp, key );
+	return tl_list_search(list, cmp, key);
 }
 
 /**
@@ -543,7 +534,7 @@ static TL_INLINE tl_list_node* tl_list_search_unsorted( const tl_list* list,
  *
  * \return A pointer to the original first node, NULL on failure
  */
-TLAPI tl_list_node* tl_list_drop_first( tl_list* list );
+TLAPI tl_list_node *tl_list_drop_first(tl_list *list);
 
 /**
  * \brief Remove and return the last node of a list but do not delete it
@@ -558,7 +549,7 @@ TLAPI tl_list_node* tl_list_drop_first( tl_list* list );
  *
  * \return A pointer to the original last node, NULL on failure
  */
-TLAPI tl_list_node* tl_list_drop_last( tl_list* list );
+TLAPI tl_list_node *tl_list_drop_last(tl_list *list);
 
 /**
  * \brief Get an iterator to the first element
@@ -572,7 +563,7 @@ TLAPI tl_list_node* tl_list_drop_last( tl_list* list );
  *
  * \return A pointer to an iterator or NULL on failure
  */
-TLAPI tl_iterator* tl_list_first( tl_list* list );
+TLAPI tl_iterator *tl_list_first(tl_list *list);
 
 /**
  * \brief Get an iterator to the last element that moves backwards throug
@@ -587,7 +578,7 @@ TLAPI tl_iterator* tl_list_first( tl_list* list );
  *
  * \return A pointer to an iterator or NULL on failure
  */
-TLAPI tl_iterator* tl_list_last( tl_list* list );
+TLAPI tl_iterator *tl_list_last(tl_list *list);
 
 /**
  * \brief Get the number of elements currently in a list
@@ -598,10 +589,10 @@ TLAPI tl_iterator* tl_list_last( tl_list* list );
  *
  * \return The number of elements currently in the list
  */
-static TL_INLINE size_t tl_list_get_size( const tl_list* list )
+static TL_INLINE size_t tl_list_get_size(const tl_list *list)
 {
-    assert( list );
-    return list->size;
+	assert(list);
+	return list->size;
 }
 
 /**
@@ -613,10 +604,10 @@ static TL_INLINE size_t tl_list_get_size( const tl_list* list )
  *
  * \return A pointer to the first element or NULL if empty
  */
-static TL_INLINE void* tl_list_get_first( tl_list* list )
+static TL_INLINE void *tl_list_get_first(tl_list *list)
 {
-    assert( list );
-    return tl_list_node_get_data( list->first );
+	assert(list);
+	return tl_list_node_get_data(list->first);
 }
 
 /**
@@ -628,10 +619,10 @@ static TL_INLINE void* tl_list_get_first( tl_list* list )
  *
  * \return A pointer to the last element or NULL if empty
  */
-static TL_INLINE void* tl_list_get_last( tl_list* list )
+static TL_INLINE void *tl_list_get_last(tl_list *list)
 {
-    assert( list );
-    return tl_list_node_get_data( list->last );
+	assert(list);
+	return tl_list_node_get_data(list->last);
 }
 
 #ifdef __cplusplus

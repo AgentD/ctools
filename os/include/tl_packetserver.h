@@ -49,11 +49,7 @@
  * code using it to handle packets and addresses propperly.
  */
 
-
-
 #include "tl_predef.h"
-
-
 
 /**
  * \interface tl_packetserver
@@ -63,58 +59,56 @@
  *
  * \see \ref packetserver
  */
-struct tl_packetserver
-{
-    /**
-     * \brief Set a maximum timeout before giving up receiving or transmitting
-     *
-     * \param server  A pointer to a server object
-     * \param timeout The maximum number of milliseconds to keep waiting. Zero
-     *                for infinite.
-     */
-    void(* set_timeout )( tl_packetserver* server, unsigned int timeout );
+struct tl_packetserver {
+	/**
+	 * \brief Set a maximum timeout before giving up receiving
+	 *        or transmitting
+	 *
+	 * \param server  A pointer to a server object
+	 * \param timeout The maximum number of milliseconds to keep waiting.
+	 *                Zero for infinite.
+	 */
+	void (*set_timeout)(tl_packetserver *server, unsigned int timeout);
 
-    /**
-     * \brief Receive a packet
-     *
-     * \param server  A pointer to the server object
-     * \param buffer  A pointer to the buffer to write data to
-     * \param address A pointer to an implementation specific structure to
-     *                write the sender address to. E.g. for a network server,
-     *                this is a pointer to a \ref tl_net_addr
-     * \param size    The size of the buffer, i.e. maximum bytes to receive
-     * \param actual  Returns the number of bytes actually received
-     *
-     * \return Zero on success, a TL_ERROR_CODE value if an error occoured.
-     */
-    int (* receive )( tl_packetserver* server, void* buffer, void* address,
-                      size_t size, size_t* actual );
+	/**
+	 * \brief Receive a packet
+	 *
+	 * \param server  A pointer to the server object
+	 * \param buffer  A pointer to the buffer to write data to
+	 * \param address A pointer to an implementation specific structure to
+	 *                write the sender address to. E.g. for a network
+	 *                server, this is a pointer to a \ref tl_net_addr
+	 * \param size    The size of the buffer, i.e. maximum bytes to receive
+	 * \param actual  Returns the number of bytes actually received
+	 *
+	 * \return Zero on success, a TL_ERROR_CODE value if an error occoured.
+	 */
+	int (*receive)(tl_packetserver *server, void *buffer, void *address,
+			size_t size, size_t *actual);
 
-    /**
-     * \brief Send a packet
-     *
-     * \param server  A pointer to the server object
-     * \param buffer  A pointer to the data to send
-     * \param address A pointer to an implementation specific structure
-     *                holding the destination address. E.g. for a network
-     *                server, this is a pointer to a \ref tl_net_addr
-     * \param size    The number of bytes to send
-     * \param actual  Returns the number of bytes actually sent
-     *
-     * \return Zero on success, a TL_ERROR_CODE value if an error occoured.
-     */
-    int (* send )( tl_packetserver* server, const void* buffer,
-                   const void* address, size_t size, size_t* actual );
+	/**
+	 * \brief Send a packet
+	 *
+	 * \param server  A pointer to the server object
+	 * \param buffer  A pointer to the data to send
+	 * \param address A pointer to an implementation specific structure
+	 *                holding the destination address. E.g. for a network
+	 *                server, this is a pointer to a \ref tl_net_addr
+	 * \param size    The number of bytes to send
+	 * \param actual  Returns the number of bytes actually sent
+	 *
+	 * \return Zero on success, a TL_ERROR_CODE value if an error occoured.
+	 */
+	int (*send)(tl_packetserver *server, const void *buffer,
+		    const void *address, size_t size, size_t *actual);
 
-    /**
-     * \brief Destroy a tl_packetserver object and release all its memory
-     *
-     * \param server A pointer to the server object
-     */
-    void (* destroy )( tl_packetserver* server );
+	/**
+	 * \brief Destroy a tl_packetserver object and release all its memory
+	 *
+	 * \param server A pointer to the server object
+	 */
+	void (*destroy)(tl_packetserver *server);
 };
-
-
 
 #endif /* TL_PACKETSERVER_H */
 

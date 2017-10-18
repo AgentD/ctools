@@ -31,8 +31,6 @@
 #ifndef TOOLS_THREADPOOL_H
 #define TOOLS_THREADPOOL_H
 
-
-
 /**
  * \page conc Concurrency
  *
@@ -50,12 +48,8 @@
  * For a function reference, see \ref tl_threadpool.
  */
 
-
-
 #include "tl_predef.h"
 #include "tl_thread.h"
-
-
 
 /**
  * \struct tl_threadpool
@@ -64,8 +58,6 @@
  *
  * For a detailed description, see \ref tpool
  */
-
-
 
 /**
  * \brief Function pointer type used by tl_threadpool
@@ -77,9 +69,7 @@
  *
  * \param data A pointer to the data element to process
  */
-typedef void(* tl_threadpool_worker_cb )( void* data );
-
-
+typedef void (*tl_threadpool_worker_cb)(void *data);
 
 #ifdef __cplusplus
 extern "C" {
@@ -107,11 +97,11 @@ extern "C" {
  *
  * \return A pointer to a thread pool object on success, NULL on failure
  */
-TLOSAPI tl_threadpool* tl_threadpool_create( unsigned int num_workers,
-                                             tl_threadpool_worker_cb init,
-                                             void* initarg,
-                                             tl_threadpool_worker_cb cleanup,
-                                             void* cleanuparg );
+TLOSAPI tl_threadpool *tl_threadpool_create(unsigned int num_workers,
+					    tl_threadpool_worker_cb init,
+					    void *initarg,
+					    tl_threadpool_worker_cb cleanup,
+					    void *cleanuparg);
 
 /**
  * \brief Destroy a thread pool and free its resources
@@ -127,7 +117,7 @@ TLOSAPI tl_threadpool* tl_threadpool_create( unsigned int num_workers,
  *
  * \param pool A pointer to a thread pool object
  */
-TLOSAPI void tl_threadpool_destroy( tl_threadpool* pool );
+TLOSAPI void tl_threadpool_destroy(tl_threadpool *pool);
 
 /**
  * \brief Add a task to a thread pool
@@ -147,10 +137,10 @@ TLOSAPI void tl_threadpool_destroy( tl_threadpool* pool );
  * \param alloc    If the task object should be copied and requires a deep
  *                 copying mechanisms, a pointer to an allocator to use
  */
-TLOSAPI int tl_threadpool_add_task( tl_threadpool* pool,
-                                    tl_threadpool_worker_cb function,
-                                    void* data, size_t tasksize,
-                                    tl_allocator* alloc );
+TLOSAPI int tl_threadpool_add_task(tl_threadpool *pool,
+				   tl_threadpool_worker_cb function,
+				   void *data, size_t tasksize,
+				   tl_allocator *alloc);
 
 /**
  * \brief Get statistics from a thread pool
@@ -165,8 +155,8 @@ TLOSAPI int tl_threadpool_add_task( tl_threadpool* pool,
  * \param done  If not NULL, returns the number of tasks processed since
  *              tl_threadpool_create
  */
-TLOSAPI void tl_threadpool_stats( tl_threadpool* pool,
-                                  size_t* total, size_t* done );
+TLOSAPI void tl_threadpool_stats(tl_threadpool *pool,
+				 size_t *total, size_t *done);
 
 /**
  * \brief Wait for the task queue to go empty
@@ -186,7 +176,7 @@ TLOSAPI void tl_threadpool_stats( tl_threadpool* pool,
  *
  * \return Non-zero on success, zero if a timeout occoured
  */
-TLOSAPI int tl_threadpool_wait( tl_threadpool* pool, unsigned long timeout );
+TLOSAPI int tl_threadpool_wait(tl_threadpool *pool, unsigned long timeout);
 
 #ifdef __cplusplus
 }

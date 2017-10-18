@@ -60,8 +60,6 @@
  * \li Random insertion or deletion is done in linear time
  */
 
-
-
 #include "tl_predef.h"
 
 #include "tl_sort.h"
@@ -69,8 +67,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-
-
 
 /**
  * \struct tl_array
@@ -84,39 +80,32 @@
  * The dynamic array offers constant element access by index, constant
  * amortized insertion and removal (linear worst case).
  */
-struct tl_array
-{
-    /** \brief Number of elements available */
-    size_t reserved;
+struct tl_array {
+	/** \brief Number of elements available */
+	size_t reserved;
 
-    /** \brief Number of elements used */
-    size_t used;
+	/** \brief Number of elements used */
+	size_t used;
 
-    /** \brief Size of an individual element in bytes */
-    size_t unitsize;
+	/** \brief Size of an individual element in bytes */
+	size_t unitsize;
 
-    /** \brief The block of data managed by the array */
-    void* data;
+	/** \brief The block of data managed by the array */
+	void *data;
 
-    /** \brief Pointer to an allocator or NULL if not used */
-    tl_allocator* alloc;
+	/** \brief Pointer to an allocator or NULL if not used */
+	tl_allocator *alloc;
 };
-
-
 
 /**
  * \enum TL_ARRAY_FLAGS
  *
  * \brief Miscellaneous flags for tl_array operations
  */
-typedef enum
-{
-    /** \brief Tell \ref tl_array_resize to initialize new elements */
-    TL_ARRAY_INIT = 0x01
-}
-TL_ARRAY_FLAGS;
-
-
+typedef enum {
+	/** \brief Tell \ref tl_array_resize to initialize new elements */
+	TL_ARRAY_INIT = 0x01
+} TL_ARRAY_FLAGS;
 
 #ifdef __cplusplus
 extern "C" {
@@ -131,14 +120,14 @@ extern "C" {
  * \param elementsize The size of a single element
  * \param alloc       A pointer to an allocator or NULL if not used
  */
-static TL_INLINE void tl_array_init( tl_array* vec, size_t elementsize,
-                                     tl_allocator* alloc )
+static TL_INLINE void tl_array_init(tl_array *vec, size_t elementsize,
+				    tl_allocator *alloc)
 {
-    assert( vec );
+	assert(vec);
 
-    memset( vec, 0, sizeof(*vec) );
-    vec->unitsize = elementsize;
-    vec->alloc    = alloc;
+	memset(vec, 0, sizeof(*vec));
+	vec->unitsize = elementsize;
+	vec->alloc = alloc;
 }
 
 /**
@@ -148,11 +137,11 @@ static TL_INLINE void tl_array_init( tl_array* vec, size_t elementsize,
  *
  * \param vec A pointer to a dynamic array
  */
-static TL_INLINE void tl_array_cleanup( tl_array* vec )
+static TL_INLINE void tl_array_cleanup(tl_array *vec)
 {
-    assert( vec );
-    tl_allocator_cleanup( vec->alloc, vec->data, vec->unitsize, vec->used );
-    free( vec->data );
+	assert(vec);
+	tl_allocator_cleanup(vec->alloc, vec->data, vec->unitsize, vec->used);
+	free(vec->data);
 }
 
 /**
@@ -169,7 +158,7 @@ static TL_INLINE void tl_array_cleanup( tl_array* vec )
  * \return Non-zero on success, zero on failure (out of memory or
  *         invalid arguments)
  */
-TLAPI int tl_array_from_array(tl_array* vec, const void* data, size_t count);
+TLAPI int tl_array_from_array(tl_array *vec, const void *data, size_t count);
 
 /**
  * \brief Copy the contents of an array to an array
@@ -182,11 +171,11 @@ TLAPI int tl_array_from_array(tl_array* vec, const void* data, size_t count);
  * \param data A pointer to an array, large enough to hold at
  *             least as many elements as the array contains.
  */
-static TL_INLINE void tl_array_to_array( const tl_array* vec, void* data )
+static TL_INLINE void tl_array_to_array(const tl_array *vec, void *data)
 {
-    assert( vec && data );
-    tl_allocator_copy( vec->alloc, data, vec->data,
-                       vec->unitsize, vec->used );
+	assert(vec && data);
+	tl_allocator_copy(vec->alloc, data, vec->data,
+			  vec->unitsize, vec->used);
 }
 
 /**
@@ -204,8 +193,8 @@ static TL_INLINE void tl_array_to_array( const tl_array* vec, void* data )
  * \return Non-zero on success, zero on failure (out of memory or index out
  *         of bounds)
  */
-TLAPI int tl_array_copy_range( tl_array* dst, const tl_array* src,
-                               size_t start, size_t count );
+TLAPI int tl_array_copy_range(tl_array *dst, const tl_array *src,
+			      size_t start, size_t count);
 
 /**
  * \brief Copy the data of a source array to a destination array
@@ -219,10 +208,10 @@ TLAPI int tl_array_copy_range( tl_array* dst, const tl_array* src,
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-static TL_INLINE int tl_array_copy( tl_array* dst, const tl_array* src )
+static TL_INLINE int tl_array_copy(tl_array *dst, const tl_array *src)
 {
-    assert( dst && src && dst->unitsize==src->unitsize );
-    return tl_array_copy_range( dst, src, 0, src->used );
+	assert(dst && src && dst->unitsize == src->unitsize);
+	return tl_array_copy_range(dst, src, 0, src->used);
 }
 
 /**
@@ -237,7 +226,7 @@ static TL_INLINE int tl_array_copy( tl_array* dst, const tl_array* src )
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-TLAPI int tl_array_concat( tl_array* dst, const tl_array* src );
+TLAPI int tl_array_concat(tl_array *dst, const tl_array *src);
 
 /**
  * \brief Make sure the size of an array matches a given size
@@ -257,7 +246,7 @@ TLAPI int tl_array_concat( tl_array* dst, const tl_array* src );
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-TLAPI int tl_array_resize( tl_array* vec, size_t size, int flags );
+TLAPI int tl_array_resize(tl_array *vec, size_t size, int flags);
 
 /**
  * \brief Make sure an array has at least a certain capacity
@@ -275,7 +264,7 @@ TLAPI int tl_array_resize( tl_array* vec, size_t size, int flags );
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-TLAPI int tl_array_reserve( tl_array* vec, size_t size );
+TLAPI int tl_array_reserve(tl_array *vec, size_t size);
 
 /**
  * \brief Remove elements from an array
@@ -288,7 +277,7 @@ TLAPI int tl_array_reserve( tl_array* vec, size_t size );
  * \param idx   The index of the first element to remove
  * \param count The number of elements to remove
  */
-TLAPI void tl_array_remove( tl_array* vec, size_t idx, size_t count );
+TLAPI void tl_array_remove(tl_array *vec, size_t idx, size_t count);
 
 /**
  * \brief Check if an array is empty
@@ -301,10 +290,10 @@ TLAPI void tl_array_remove( tl_array* vec, size_t idx, size_t count );
  *
  * \return Zero if the array contains elements, zero if it is empty
  */
-static TL_INLINE int tl_array_is_empty( const tl_array* vec )
+static TL_INLINE int tl_array_is_empty(const tl_array *vec)
 {
-    assert( vec );
-    return vec->used==0;
+	assert(vec);
+	return vec->used == 0;
 }
 
 /**
@@ -319,12 +308,12 @@ static TL_INLINE int tl_array_is_empty( const tl_array* vec )
  *
  * \return A pointer to an element, or NULL if index out of bounds
  */
-static TL_INLINE void* tl_array_at( const tl_array* vec, size_t idx )
+static TL_INLINE void *tl_array_at(const tl_array *vec, size_t idx)
 {
-    assert( vec );
+	assert(vec);
 
-    return idx < vec->used ?
-           ((unsigned char*)vec->data + idx * vec->unitsize) : NULL;
+	return idx < vec->used ?
+		((unsigned char *)vec->data + idx * vec->unitsize) : NULL;
 }
 
 /**
@@ -341,7 +330,7 @@ static TL_INLINE void* tl_array_at( const tl_array* vec, size_t idx )
  * \return Non-zero on success, zero on failure (out memory or index out
  *         of bounds)
  */
-TLAPI int tl_array_set( tl_array* vec, size_t idx, const void* element );
+TLAPI int tl_array_set(tl_array *vec, size_t idx, const void *element);
 
 /**
  * \brief Append an element to an array
@@ -355,7 +344,7 @@ TLAPI int tl_array_set( tl_array* vec, size_t idx, const void* element );
  *
  * \return Non-zero on success, zero on failure (read: out memory)
  */
-TLAPI int tl_array_append( tl_array* vec, const void* element );
+TLAPI int tl_array_append(tl_array *vec, const void *element);
 
 /**
  * \brief Insert an element at the beginning of an array
@@ -369,7 +358,7 @@ TLAPI int tl_array_append( tl_array* vec, const void* element );
  *
  * \return Non-zero on success, zero on failure (read: out memory)
  */
-TLAPI int tl_array_prepend( tl_array* vec, const void* element );
+TLAPI int tl_array_prepend(tl_array *vec, const void *element);
 
 /**
  * \brief Insert elements into an array
@@ -386,8 +375,8 @@ TLAPI int tl_array_prepend( tl_array* vec, const void* element );
  * \return Non-zero on success, zero on failure (out memory or index
  *         out of bounds)
  */
-TLAPI int tl_array_insert( tl_array* vec, size_t idx,
-                           const void* element, size_t count );
+TLAPI int tl_array_insert(tl_array *vec, size_t idx,
+			  const void *element, size_t count);
 
 /**
  * \brief Append an array of elements to an array
@@ -403,8 +392,7 @@ TLAPI int tl_array_insert( tl_array* vec, size_t idx,
  * \return Non-zero on succes, zero if out of memory or either of the input
  *         pointers was NULL
  */
-TLAPI int tl_array_append_array( tl_array* vec, const void* data,
-                                 size_t count );
+TLAPI int tl_array_append_array(tl_array *vec, const void *data, size_t count);
 
 /**
  * \brief Insert an element into a sorted array at the right position
@@ -419,8 +407,8 @@ TLAPI int tl_array_append_array( tl_array* vec, const void* data,
  *
  * \return Non-zero on success, zero on failure (out of memory)
  */
-TLAPI int tl_array_insert_sorted( tl_array* vec, tl_compare cmp,
-                                  const void* element );
+TLAPI int tl_array_insert_sorted(tl_array *vec, tl_compare cmp,
+				 const void *element);
 
 /**
  * \brief Remove the first element of an array
@@ -431,7 +419,7 @@ TLAPI int tl_array_insert_sorted( tl_array* vec, tl_compare cmp,
  *
  * \param vec A pointer to an array
  */
-TLAPI void tl_array_remove_first( tl_array* vec );
+TLAPI void tl_array_remove_first(tl_array *vec);
 
 /**
  * \brief Remove the last element of a array
@@ -442,12 +430,12 @@ TLAPI void tl_array_remove_first( tl_array* vec );
  *
  * \param vec A pointer to an array
  */
-static TL_INLINE void tl_array_remove_last( tl_array* vec )
+static TL_INLINE void tl_array_remove_last(tl_array *vec)
 {
-    assert( vec );
+	assert(vec);
 
-    if( vec->used )
-        tl_array_resize( vec, vec->used - 1, 0 );
+	if (vec->used)
+		tl_array_resize(vec, vec->used - 1, 0);
 }
 
 /**
@@ -459,12 +447,12 @@ static TL_INLINE void tl_array_remove_last( tl_array* vec )
  *
  * \param vec A pointer to an array
  */
-static TL_INLINE void tl_array_clear( tl_array* vec )
+static TL_INLINE void tl_array_clear(tl_array *vec)
 {
-    assert( vec );
+	assert(vec);
 
-    tl_allocator_cleanup( vec->alloc, vec->data, vec->unitsize, vec->used );
-    vec->used = 0;
+	tl_allocator_cleanup(vec->alloc, vec->data, vec->unitsize, vec->used);
+	vec->used = 0;
 }
 
 /**
@@ -480,12 +468,12 @@ static TL_INLINE void tl_array_clear( tl_array* vec )
  * \param arr A pointer to an array
  * \param cmp A function used to compare two elements, determining the order
  */
-static TL_INLINE void tl_array_sort( tl_array* arr, tl_compare cmp )
+static TL_INLINE void tl_array_sort(tl_array *arr, tl_compare cmp)
 {
-    assert( arr && cmp );
+	assert(arr && cmp);
 
-    if( arr->data && arr->used )
-        tl_heapsort( arr->data, arr->used, arr->unitsize, cmp );
+	if (arr->data && arr->used)
+		tl_heapsort(arr->data, arr->used, arr->unitsize, cmp);
 }
 
 /**
@@ -502,7 +490,7 @@ static TL_INLINE void tl_array_sort( tl_array* arr, tl_compare cmp )
  * \param arr A pointer to an array
  * \param cmp A function used to compare two elements, determining the order
  */
-TLAPI void tl_array_stable_sort( tl_array* arr, tl_compare cmp );
+TLAPI void tl_array_stable_sort(tl_array *arr, tl_compare cmp);
 
 /**
  * \brief Search an element in a sorted array
@@ -518,8 +506,8 @@ TLAPI void tl_array_stable_sort( tl_array* arr, tl_compare cmp );
  *
  * \return A pointer to the element if found, NULL otherwise
  */
-TLAPI void* tl_array_search( const tl_array* arr, tl_compare cmp,
-                             const void* key );
+TLAPI void *tl_array_search(const tl_array *arr, tl_compare cmp,
+			    const void *key);
 
 /**
  * \brief Search an element in an unsorted array
@@ -534,8 +522,8 @@ TLAPI void* tl_array_search( const tl_array* arr, tl_compare cmp,
  *
  * \return A pointer to the element if found, NULL otherwise
  */
-TLAPI void* tl_array_search_unsorted( const tl_array* arr, tl_compare cmp,
-                                      const void* key );
+TLAPI void *tl_array_search_unsorted(const tl_array *arr, tl_compare cmp,
+				     const void *key);
 
 /**
  * \brief Shrink the reserved elements to one half if an array is
@@ -547,7 +535,7 @@ TLAPI void* tl_array_search_unsorted( const tl_array* arr, tl_compare cmp,
  *
  * \param arr A pointer to a dynamic array
  */
-TLAPI void tl_array_try_shrink( tl_array* arr );
+TLAPI void tl_array_try_shrink(tl_array *arr);
 
 /**
  * \brief Get an iterator to the first element
@@ -561,7 +549,7 @@ TLAPI void tl_array_try_shrink( tl_array* arr );
  *
  * \return A pointer to an iterator or NULL on failure
  */
-TLAPI tl_iterator* tl_array_first( tl_array* arr );
+TLAPI tl_iterator *tl_array_first(tl_array *arr);
 
 /**
  * \brief Get an iterator to the last element that moves backwards throug
@@ -575,7 +563,7 @@ TLAPI tl_iterator* tl_array_first( tl_array* arr );
  *
  * \return A pointer to an iterator or NULL on failure
  */
-TLAPI tl_iterator* tl_array_last( tl_array* arr );
+TLAPI tl_iterator *tl_array_last(tl_array *arr);
 
 /**
  * \brief Get the number of elements currently in a dynamic array
@@ -586,10 +574,10 @@ TLAPI tl_iterator* tl_array_last( tl_array* arr );
  *
  * \return The number of elements in the array
  */
-static TL_INLINE size_t tl_array_get_size( const tl_array* arr )
+static TL_INLINE size_t tl_array_get_size(const tl_array *arr)
 {
-    assert( arr );
-    return arr->used;
+	assert(arr);
+	return arr->used;
 }
 
 /**
@@ -601,10 +589,10 @@ static TL_INLINE size_t tl_array_get_size( const tl_array* arr )
  *
  * \return A pointer to the first element or NULL if empty
  */
-static TL_INLINE void* tl_array_get_first( tl_array* arr )
+static TL_INLINE void *tl_array_get_first(tl_array *arr)
 {
-    assert( arr );
-    return arr->used ? arr->data : NULL;
+	assert(arr);
+	return arr->used ? arr->data : NULL;
 }
 
 /**
@@ -616,11 +604,11 @@ static TL_INLINE void* tl_array_get_first( tl_array* arr )
  *
  * \return A pointer to the last element or NULL if empty
  */
-static TL_INLINE void* tl_array_get_last( tl_array* arr )
+static TL_INLINE void *tl_array_get_last(tl_array *arr)
 {
-    assert( arr );
-    return arr->used ?
-           ((char*)arr->data + arr->unitsize*(arr->used-1)) : NULL;
+	assert(arr);
+	return arr->used ?
+		((char *)arr->data + arr->unitsize * (arr->used - 1)) : NULL;
 }
 
 #ifdef __cplusplus

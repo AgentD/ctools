@@ -30,8 +30,6 @@
 #ifndef TOOLS_THREAD_H
 #define TOOLS_THREAD_H
 
-
-
 /**
  * \page conc Concurrency
  *
@@ -78,11 +76,7 @@
  * \endcode
  */
 
-
-
 #include "tl_predef.h"
-
-
 
 /**
  * \struct tl_mutex
@@ -149,32 +143,29 @@
  * \return An arbitrary value that can be retrieved
  *         via tl_thread_get_return_value 
  */
-typedef void*(* tl_thread_function )( void* arg );
+typedef void *(*tl_thread_function)(void *arg);
 
 /**
  * \enum TL_THREAD_STATE
  *
  * \brief Encapsultes the state that a thread is in
  */
-typedef enum
-{
-    /** \brief The thread was created but is not running yet */
-    TL_PENDING = 0,
+typedef enum {
+	/** \brief The thread was created but is not running yet */
+	TL_PENDING = 0,
 
-    /**
-     * \brief The thread function is being executed
-     *
-     * This value only means that the thread exists and it is executing the
-     * thread function. The thread itself may or may not be scheduled to
-     * a processor.
-     */
-    TL_RUNNING = 1,
+	/**
+	 * \brief The thread function is being executed
+	 *
+	 * This value only means that the thread exists and it is executing
+	 * the thread function. The thread itself may or may not be scheduled
+	 * to a processor.
+	 */
+	TL_RUNNING = 1,
 
-    /** \brief The thread function returned and the thread terminated. */
-    TL_TERMINATED = 2
-}
-TL_THREAD_STATE;
-
+	/** \brief The thread function returned and the thread terminated. */
+	TL_TERMINATED = 2
+} TL_THREAD_STATE;
 
 #ifdef __cplusplus
 extern "C" {
@@ -187,7 +178,7 @@ extern "C" {
  *
  * \return A pointer to a monitor on success, NULL on failure
  */
-TLOSAPI tl_monitor* tl_monitor_create( void );
+TLOSAPI tl_monitor *tl_monitor_create(void);
 
 /**
  * \brief Lock a monitor object to gain exclusive access
@@ -199,7 +190,7 @@ TLOSAPI tl_monitor* tl_monitor_create( void );
  *
  * \return Non-zero on success, zero if a timeout occoured
  */
-TLOSAPI int tl_monitor_lock( tl_monitor* monitor, unsigned long timeout );
+TLOSAPI int tl_monitor_lock(tl_monitor *monitor, unsigned long timeout);
 
 /**
  * \brief Unlock a monitor object, dropping exclusive access
@@ -208,7 +199,7 @@ TLOSAPI int tl_monitor_lock( tl_monitor* monitor, unsigned long timeout );
  *
  * \param monitor A pointer to a monitor object
  */
-TLOSAPI void tl_monitor_unlock( tl_monitor* monitor );
+TLOSAPI void tl_monitor_unlock(tl_monitor *monitor);
 
 /**
  * \brief Wait for an other thread to send a notification
@@ -225,7 +216,7 @@ TLOSAPI void tl_monitor_unlock( tl_monitor* monitor );
  *
  * \return Non-zero if a notification was received, zero if a timeout occoured
  */
-TLOSAPI int tl_monitor_wait( tl_monitor* monitor, unsigned long timeout );
+TLOSAPI int tl_monitor_wait(tl_monitor *monitor, unsigned long timeout);
 
 /**
  * \brief Wake another thread waiting for a notification
@@ -238,7 +229,7 @@ TLOSAPI int tl_monitor_wait( tl_monitor* monitor, unsigned long timeout );
  *
  * \param monitor A pointer to a monitor object
  */
-TLOSAPI void tl_monitor_notify( tl_monitor* monitor );
+TLOSAPI void tl_monitor_notify(tl_monitor *monitor);
 
 /**
  * \brief Wake all threads waiting for a notification
@@ -253,7 +244,7 @@ TLOSAPI void tl_monitor_notify( tl_monitor* monitor );
  *
  * \param monitor A pointer to a monitor object
  */
-TLOSAPI void tl_monitor_notify_all( tl_monitor* monitor );
+TLOSAPI void tl_monitor_notify_all(tl_monitor *monitor);
 
 /**
  * \brief Destroy a monitor object
@@ -262,7 +253,7 @@ TLOSAPI void tl_monitor_notify_all( tl_monitor* monitor );
  *
  * \param monitor A pointer to a monitor object
  */
-TLOSAPI void tl_monitor_destroy( tl_monitor* monitor );
+TLOSAPI void tl_monitor_destroy(tl_monitor *monitor);
 
 
 /**
@@ -272,7 +263,7 @@ TLOSAPI void tl_monitor_destroy( tl_monitor* monitor );
  *
  * \return A pointer to a read-write lock on success, NULL on failure
  */
-TLOSAPI tl_rwlock* tl_rwlock_create( void );
+TLOSAPI tl_rwlock *tl_rwlock_create(void);
 
 /**
  * \brief Gain read access to a tl_rwlock
@@ -286,7 +277,7 @@ TLOSAPI tl_rwlock* tl_rwlock_create( void );
  * \return Non-zero on success, zero if a timeout occoured before gaining
  *         the lock
  */
-TLOSAPI int tl_rwlock_lock_read( tl_rwlock* lock, unsigned long timeout );
+TLOSAPI int tl_rwlock_lock_read(tl_rwlock *lock, unsigned long timeout);
 
 /**
  * \brief Gain write access to a tl_rwlock
@@ -300,7 +291,7 @@ TLOSAPI int tl_rwlock_lock_read( tl_rwlock* lock, unsigned long timeout );
  * \return Non-zero on success, zero if a timeout occoured before gaining
  *         the lock
  */
-TLOSAPI int tl_rwlock_lock_write( tl_rwlock* lock, unsigned long timeout );
+TLOSAPI int tl_rwlock_lock_write(tl_rwlock *lock, unsigned long timeout);
 
 /**
  * \brief Release the currently held read lock of a tl_rwlock
@@ -309,7 +300,7 @@ TLOSAPI int tl_rwlock_lock_write( tl_rwlock* lock, unsigned long timeout );
  *
  * \param lock A pointer to the lock object
  */
-TLOSAPI void tl_rwlock_unlock_read( tl_rwlock* lock );
+TLOSAPI void tl_rwlock_unlock_read(tl_rwlock *lock);
 
 /**
  * \brief Release the currently held write lock of a tl_rwlock
@@ -318,7 +309,7 @@ TLOSAPI void tl_rwlock_unlock_read( tl_rwlock* lock );
  *
  * \param lock A pointer to the lock object
  */
-TLOSAPI void tl_rwlock_unlock_write( tl_rwlock* lock );
+TLOSAPI void tl_rwlock_unlock_write(tl_rwlock *lock);
 
 /**
  * \brief Destroy a lock object
@@ -327,7 +318,7 @@ TLOSAPI void tl_rwlock_unlock_write( tl_rwlock* lock );
  *
  * \param lock A pointer to a lock object
  */
-TLOSAPI void tl_rwlock_destroy( tl_rwlock* lock );
+TLOSAPI void tl_rwlock_destroy(tl_rwlock *lock);
 
 
 
@@ -340,7 +331,7 @@ TLOSAPI void tl_rwlock_destroy( tl_rwlock* lock );
  *
  * \return A pointer to a mutex object on success, zero on failure
  */
-TLOSAPI tl_mutex* tl_mutex_create( int recursive );
+TLOSAPI tl_mutex *tl_mutex_create(int recursive);
 
 /**
  * \brief Gain exclusive access to a mutex
@@ -354,7 +345,7 @@ TLOSAPI tl_mutex* tl_mutex_create( int recursive );
  * \return Non-zero on success, zero if a timeout occoured before gaining
  *         the lock
  */
-TLOSAPI int tl_mutex_lock( tl_mutex* mutex, unsigned long timeout );
+TLOSAPI int tl_mutex_lock(tl_mutex *mutex, unsigned long timeout);
 
 /**
  * \brief Release a currently held lock
@@ -363,7 +354,7 @@ TLOSAPI int tl_mutex_lock( tl_mutex* mutex, unsigned long timeout );
  *
  * \param mutex A pointer to the mutex object
  */
-TLOSAPI void tl_mutex_unlock( tl_mutex* mutex );
+TLOSAPI void tl_mutex_unlock(tl_mutex *mutex);
 
 /**
  * \brief Destroy a mutex object
@@ -372,7 +363,7 @@ TLOSAPI void tl_mutex_unlock( tl_mutex* mutex );
  *
  * \param mutex A pointer to the mutex object
  */
-TLOSAPI void tl_mutex_destroy( tl_mutex* mutex );
+TLOSAPI void tl_mutex_destroy(tl_mutex *mutex);
 
 /**
  * \brief Create a thread
@@ -387,7 +378,7 @@ TLOSAPI void tl_mutex_destroy( tl_mutex* mutex );
  *
  * \return A pointer to a thread object on success, NULL on failure
  */
-TLOSAPI tl_thread* tl_thread_create( tl_thread_function function, void* arg );
+TLOSAPI tl_thread *tl_thread_create(tl_thread_function function, void *arg);
 
 /**
  * \brief Wait for a thread to terminate
@@ -400,7 +391,7 @@ TLOSAPI tl_thread* tl_thread_create( tl_thread_function function, void* arg );
  *
  * \return Non-zero on success, zero if a timeout occoured
  */
-TLOSAPI int tl_thread_join( tl_thread* thread, unsigned long timeout );
+TLOSAPI int tl_thread_join(tl_thread *thread, unsigned long timeout);
 
 /**
  * \brief Get the value returned from the thread functon
@@ -412,7 +403,7 @@ TLOSAPI int tl_thread_join( tl_thread* thread, unsigned long timeout );
  * \return The value returned by the thread function, NULL if the thread is
  *         still running.
  */
-TLOSAPI void* tl_thread_get_return_value( tl_thread* thread );
+TLOSAPI void* tl_thread_get_return_value(tl_thread *thread);
 
 /**
  * \brief Get the state that a thread is currently in
@@ -423,7 +414,7 @@ TLOSAPI void* tl_thread_get_return_value( tl_thread* thread );
  *
  * \return A \ref TL_THREAD_STATE object
  */
-TLOSAPI int tl_thread_get_state( tl_thread* thread );
+TLOSAPI int tl_thread_get_state(tl_thread *thread);
 
 /**
  * \brief Destroy a thread object and free all its resources
@@ -436,7 +427,7 @@ TLOSAPI int tl_thread_get_state( tl_thread* thread );
  *
  * \param thread A pointer ot a thread object
  */
-TLOSAPI void tl_thread_destroy( tl_thread* thread );
+TLOSAPI void tl_thread_destroy(tl_thread *thread);
 
 /**
  * \brief Return a unique ID of a specific thread, or the calling thread
@@ -452,7 +443,7 @@ TLOSAPI void tl_thread_destroy( tl_thread* thread );
  *
  * \return A unique thread ID
  */
-TLOSAPI int tl_thread_get_id( tl_thread* thread );
+TLOSAPI int tl_thread_get_id(tl_thread *thread);
 
 #ifdef __cplusplus
 }

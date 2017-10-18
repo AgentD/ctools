@@ -57,49 +57,39 @@
  * \li \ref tl_iostream_splice
  */
 
-
-
 #include "tl_predef.h"
 #include "tl_string.h"
 #include "tl_blob.h"
-
-
 
 /**
  * \enum TL_STREAM_TYPE
  *
  * \brief Encapsulates the underlying type of a stream
  */
-typedef enum
-{
-    TL_STREAM_TYPE_PIPE = 0x0000,   /**< \brief The stream is a pipe */
-    TL_STREAM_TYPE_FILE = 0x0001,   /**< \brief The stream is a file */
-    TL_STREAM_TYPE_SOCK = 0x0002,   /**< \brief The stream is a socket */
+typedef enum {
+	TL_STREAM_TYPE_PIPE = 0x0000,   /**< \brief The stream is a pipe */
+	TL_STREAM_TYPE_FILE = 0x0001,   /**< \brief The stream is a file */
+	TL_STREAM_TYPE_SOCK = 0x0002,   /**< \brief The stream is a socket */
 
-    /** \brief A \ref tl_compressor stream */
-    TL_STREAM_TYPE_COMPRESSOR = 0x0010,
+	/** \brief A \ref tl_compressor stream */
+	TL_STREAM_TYPE_COMPRESSOR = 0x0010,
 
-    /** \brief Base ID for user defined streams */
-    TL_STREAM_USER = 0x8000
-}
-TL_STREAM_TYPE;
+	/** \brief Base ID for user defined streams */
+	TL_STREAM_USER = 0x8000
+} TL_STREAM_TYPE;
 
 /**
  * \enum TL_READ_LINE_FLAG
  *
  * \brief Encapsulates flags for tl_iostream_read_line
  */
-typedef enum
-{
-    /** \brief Default: Assume the input data is Latin 1 (ISO 8859-1) */
-    TL_LINE_READ_LATIN1 = 0x00,
+typedef enum {
+	/** \brief Default: Assume the input data is Latin 1 (ISO 8859-1) */
+	TL_LINE_READ_LATIN1 = 0x00,
 
-    /** \brief Assume the input data is UTF-8 */
-    TL_LINE_READ_UTF8 = 0x01
-}
-TL_READ_LINE_FLAG;
-
-
+	/** \brief Assume the input data is UTF-8 */
+	TL_LINE_READ_UTF8 = 0x01
+} TL_READ_LINE_FLAG;
 
 /**
  * \interface tl_iostream
@@ -109,69 +99,71 @@ TL_READ_LINE_FLAG;
  *
  * \see \ref iostream
  */
-struct tl_iostream
-{
-    /** \brief A combination \ref TL_STREAM_TYPE identifier */
-    int type;
+struct tl_iostream {
+	/** \brief A combination \ref TL_STREAM_TYPE identifier */
+	int type;
 
-    /**
-     * \brief Make sure all pending writes are performed and destroy a stream
-     *
-     * Makes sure all data written to a stream is actually written and
-     * destroys the stream objects, thus shutting down connections in an
-     * orderly manner and freeing all memory used by the stream object.
-     *
-     * \param stream A pointer to a stream object
-     */
-    void (* destroy )( tl_iostream* stream );
+	/**
+	 * \brief Make sure all pending writes are performed and
+	 *        destroy a stream
+	 *
+	 * Makes sure all data written to a stream is actually written and
+	 * destroys the stream objects, thus shutting down connections in an
+	 * orderly manner and freeing all memory used by the stream object.
+	 *
+	 * \param stream A pointer to a stream object
+	 */
+	void (*destroy)(tl_iostream *stream);
 
-    /**
-     * \brief Set the timeout behaviour of the stream
-     *
-     * The initial, default timeout behaviour depends on the underlying
-     * implementation.
-     *
-     * \param stream  A pointer to the stream object
-     * \param timeout A timeout value in milli seconds, 0 for infinite
-     *
-     * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
-     */
-    int (* set_timeout )( tl_iostream* stream, unsigned int timeout );
+	/**
+	 * \brief Set the timeout behaviour of the stream
+	 *
+	 * The initial, default timeout behaviour depends on the underlying
+	 * implementation.
+	 *
+	 * \param stream  A pointer to the stream object
+	 * \param timeout A timeout value in milli seconds, 0 for infinite
+	 *
+	 * \return Zero on success, a negative \ref TL_ERROR_CODE value
+	 *         on failure
+	 */
+	int (*set_timeout)(tl_iostream *stream, unsigned int timeout);
 
-    /**
-     * \brief Write a raw block of data to a stream
-     *
-     * \param stream A pointer to the stream object
-     * \param buffer A pointer to the data block to write
-     * \param size   The number of bytes to send
-     * \param actual If not NULL, returns the number of bytes actually written
-     *
-     * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
-     */
-    int (* write )( tl_iostream* stream, const void* buffer,
-                    size_t size, size_t* actual );
+	/**
+	 * \brief Write a raw block of data to a stream
+	 *
+	 * \param stream A pointer to the stream object
+	 * \param buffer A pointer to the data block to write
+	 * \param size   The number of bytes to send
+	 * \param actual If not NULL, returns the number of bytes
+	 *               actually written
+	 *
+	 * \return Zero on success, a negative \ref TL_ERROR_CODE value
+	 *         on failure
+	 */
+	int (*write)(tl_iostream *stream, const void *buffer,
+		     size_t size, size_t *actual);
 
-    /**
-     * \brief Read a raw block of data from a stream
-     *
-     * Try to read up to the given number of bytes from the stream and may
-     * return less than the given number of bytes.
-     * The function may block if no data is available or a timeout occours.
-     * See also set_read_timeout on how to alter the timeout. The default
-     * timeout value depends on the underlying implementation.
-     *
-     * \param stream A pointer to the stream object
-     * \param buffer A buffer to write the received data to
-     * \param size   The size of the buffer
-     * \param actual If not NULL, returns the number of bytes actually read.
-     *
-     * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
-     */
-    int (* read )( tl_iostream* stream, void* buffer, size_t size,
-                   size_t* actual );
+	/**
+	 * \brief Read a raw block of data from a stream
+	 *
+	 * Try to read up to the given number of bytes from the stream and may
+	 * return less than the given number of bytes.
+	 * The function may block if no data is available or a timeout occours.
+	 * See also set_read_timeout on how to alter the timeout. The default
+	 * timeout value depends on the underlying implementation.
+	 *
+	 * \param stream A pointer to the stream object
+	 * \param buffer A buffer to write the received data to
+	 * \param size   The size of the buffer
+	 * \param actual If not NULL, returns the number of bytes
+	 *               actually read.
+	 *
+	 * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
+	 */
+	int (*read)(tl_iostream *stream, void *buffer, size_t size,
+		    size_t *actual);
 };
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -184,9 +176,9 @@ extern "C" {
  * \memberof tl_iostream
  */
 static TL_INLINE int tl_iostream_read(void *stream, void *buffer,
-                                      size_t size, size_t *actual)
+				      size_t size, size_t *actual)
 {
-    return ((tl_iostream *)stream)->read(stream, buffer, size, actual);
+	return ((tl_iostream *)stream)->read(stream, buffer, size, actual);
 }
 
 /**
@@ -196,9 +188,9 @@ static TL_INLINE int tl_iostream_read(void *stream, void *buffer,
  * \memberof tl_iostream
  */
 static TL_INLINE int tl_iostream_write(void *stream, void *buffer,
-                                       size_t size, size_t *actual)
+				       size_t size, size_t *actual)
 {
-    return ((tl_iostream *)stream)->write(stream, buffer, size, actual);
+	return ((tl_iostream *)stream)->write(stream, buffer, size, actual);
 }
 
 /**
@@ -207,9 +199,9 @@ static TL_INLINE int tl_iostream_write(void *stream, void *buffer,
  *
  * \memberof tl_iostream
  */
-static TL_INLINE int tl_iostream_set_timeout(void* io, unsigned int timeout)
+static TL_INLINE int tl_iostream_set_timeout(void *io, unsigned int timeout)
 {
-    return ((tl_iostream *)io)->set_timeout(io, timeout);
+	return ((tl_iostream *)io)->set_timeout(io, timeout);
 }
 
 /**
@@ -218,9 +210,9 @@ static TL_INLINE int tl_iostream_set_timeout(void* io, unsigned int timeout)
  *
  * \memberof tl_iostream
  */
-static TL_INLINE void tl_iostream_destroy(void* io)
+static TL_INLINE void tl_iostream_destroy(void *io)
 {
-    ((tl_iostream *)io)->destroy(io);
+	((tl_iostream *)io)->destroy(io);
 }
 
 /**
@@ -234,11 +226,11 @@ static TL_INLINE void tl_iostream_destroy(void* io)
  *
  * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
-static TL_INLINE int tl_iostream_write_blob( tl_iostream* stream,
-                                             const tl_blob* blob,
-                                             size_t* actual )
+static TL_INLINE int tl_iostream_write_blob(tl_iostream *stream,
+					    const tl_blob *blob,
+					    size_t *actual)
 {
-    return stream->write( stream, blob->data, blob->size, actual );
+	return stream->write(stream, blob->data, blob->size, actual);
 }
 
 /**
@@ -253,11 +245,12 @@ static TL_INLINE int tl_iostream_write_blob( tl_iostream* stream,
  *
  * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
-static TL_INLINE int tl_iostream_write_string( tl_iostream* stream,
-                                               const tl_string* str,
-                                               size_t* actual )
+static TL_INLINE int tl_iostream_write_string(tl_iostream *stream,
+					      const tl_string *str,
+					      size_t *actual)
 {
-    return stream->write( stream, str->data.data, str->data.used-1, actual );
+	return stream->write(stream, str->data.data,
+			     str->data.used - 1, actual);
 }
 
 /**
@@ -272,8 +265,8 @@ static TL_INLINE int tl_iostream_write_string( tl_iostream* stream,
  *
  * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
-TLAPI int tl_iostream_read_blob( tl_iostream* stream, tl_blob* blob,
-                                 size_t maximum );
+TLAPI int tl_iostream_read_blob(tl_iostream *stream, tl_blob *blob,
+				size_t maximum);
 
 /**
  * \brief Read characters from a stream until a new line symbol is encountered
@@ -300,8 +293,8 @@ TLAPI int tl_iostream_read_blob( tl_iostream* stream, tl_blob* blob,
  *
  * \return Zero on success, a negative value (\ref TL_ERROR_CODE) on failure
  */
-TLAPI int tl_iostream_read_line( tl_iostream* stream, tl_string* line,
-                                 int flags );
+TLAPI int tl_iostream_read_line(tl_iostream *stream, tl_string *line,
+				int flags);
 
 /**
  * \brief Write formated data to a tl_iostream
@@ -311,8 +304,8 @@ TLAPI int tl_iostream_read_line( tl_iostream* stream, tl_string* line,
  *
  * \return Zero on success, a negative value (\ref TL_ERROR_CODE) on failure
  */
-TLAPI int tl_iostream_printf( tl_iostream* stream,
-                              const char* format, ... ) TL_FORMATSTR;
+TLAPI int tl_iostream_printf(tl_iostream *stream,
+			     const char *format, ...) TL_FORMATSTR;
 
 #ifdef __cplusplus
 }

@@ -61,11 +61,7 @@
  * maps strings to objects.
  */
 
-
-
 #include "tl_predef.h"
-
-
 
 /**
  * \struct tl_hashmap_entry
@@ -74,10 +70,9 @@
  *
  * \see tl_hashmap
  */
-struct tl_hashmap_entry
-{
-    /** \brief Linked list pointer */
-    tl_hashmap_entry* next;
+struct tl_hashmap_entry {
+	/** \brief Linked list pointer */
+	tl_hashmap_entry *next;
 };
 
 /**
@@ -101,44 +96,41 @@ struct tl_hashmap_entry
  * be done fast, but comparing the actual key objects is expensive, to reduce
  * the number of key comparisons (For instance, if the key is a string).
  */
-struct tl_hashmap
-{
-    /**
-     * \brief An array of tl_hashmap_entry based objects
-     *
-     * This is an array of hash map entries. When accessing an object, the
-     * index into this array is computed from the hash of the object. If there
-     * are multiple objects with the same hash, the index holds the first
-     * element of a linked list of entries with the same hash.
-     */
-    char* bins;
+struct tl_hashmap {
+	/**
+	 * \brief An array of tl_hashmap_entry based objects
+	 *
+	 * This is an array of hash map entries. When accessing an object, the
+	 * index into this array is computed from the hash of the object. If
+	 * there are multiple objects with the same hash, the index holds the
+	 * first element of a linked list of entries with the same hash.
+	 */
+	char *bins;
 
-    /** \brief Holds one bit for each bin (0 for empty, 1 for used). */
-    int* bitmap;
+	/** \brief Holds one bit for each bin (0 for empty, 1 for used). */
+	int *bitmap;
 
-    /** \brief The size of a key object */
-    size_t keysize;
+	/** \brief The size of a key object */
+	size_t keysize;
 
-    /** \brief The size of a value object */
-    size_t objsize;
+	/** \brief The size of a value object */
+	size_t objsize;
 
-    /** \brief The number of hash map bins */
-    size_t bincount;
+	/** \brief The number of hash map bins */
+	size_t bincount;
 
-    /** \brief A function used to compute the hash value of a key object */
-    tl_hash hash;
+	/** \brief A function used to compute the hash value of a key object */
+	tl_hash hash;
 
-    /** \brief A function used to compare two key objects */
-    tl_compare compare;
+	/** \brief A function used to compare two key objects */
+	tl_compare compare;
 
-    /** \brief A pointer to an allocator for keys or NULL if not used */
-    tl_allocator* keyalloc;
+	/** \brief A pointer to an allocator for keys or NULL if not used */
+	tl_allocator *keyalloc;
 
-    /** \brief A pointer to an allocator for values or NULL if not used */
-    tl_allocator* objalloc;
+	/** \brief A pointer to an allocator for values or NULL if not used */
+	tl_allocator *objalloc;
 };
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -161,10 +153,10 @@ extern "C" {
  * \return Non-zero on success, zero if out of memory or one of the arguments
  *         is zero/NULL
  */
-TLAPI int tl_hashmap_init( tl_hashmap* map, size_t keysize, size_t objsize,
-                           size_t bincount, tl_hash keyhash,
-                           tl_compare keycompare, tl_allocator* keyalloc,
-                           tl_allocator* valalloc );
+TLAPI int tl_hashmap_init(tl_hashmap *map, size_t keysize, size_t objsize,
+			  size_t bincount, tl_hash keyhash,
+			  tl_compare keycompare, tl_allocator *keyalloc,
+			  tl_allocator *valalloc);
 
 /**
  * \brief Free all the memory used by a hash map
@@ -175,7 +167,7 @@ TLAPI int tl_hashmap_init( tl_hashmap* map, size_t keysize, size_t objsize,
  *
  * \param map A pointer to a hash map
  */
-TLAPI void tl_hashmap_cleanup( tl_hashmap* map );
+TLAPI void tl_hashmap_cleanup(tl_hashmap *map);
 
 /**
  * \brief Get a pointer to the key of a hash map entry
@@ -189,8 +181,8 @@ TLAPI void tl_hashmap_cleanup( tl_hashmap* map );
  *
  * \return A pointer to the key, or NULL if one of the pointers was NULL
  */
-TLAPI void* tl_hashmap_entry_get_key( const tl_hashmap* map,
-                                      const tl_hashmap_entry* entry );
+TLAPI void *tl_hashmap_entry_get_key(const tl_hashmap *map,
+				     const tl_hashmap_entry *entry);
 
 /**
  * \brief Get a pointer to the value of a hash map entry
@@ -204,8 +196,8 @@ TLAPI void* tl_hashmap_entry_get_key( const tl_hashmap* map,
  *
  * \return A pointer to the value, or NULL if one of the pointers was NULL
  */
-TLAPI void* tl_hashmap_entry_get_value( const tl_hashmap* map,
-                                        const tl_hashmap_entry* entry );
+TLAPI void *tl_hashmap_entry_get_value(const tl_hashmap *map,
+					const tl_hashmap_entry *entry);
 
 /**
  * \brief Get a pointer to a hash map bin head
@@ -220,8 +212,7 @@ TLAPI void* tl_hashmap_entry_get_value( const tl_hashmap* map,
  * \return A pointer to the bin (list head) on success, NULL on failure
  *         (i.e. 'map' is NULL, index is out of range or the bin is empty)
  */
-TLAPI tl_hashmap_entry* tl_hashmap_get_bin( const tl_hashmap* map,
-                                            size_t idx );
+TLAPI tl_hashmap_entry *tl_hashmap_get_bin(const tl_hashmap *map, size_t idx);
 
 /**
  * \brief Overwrite a hash map with a copy of another hash map
@@ -237,7 +228,7 @@ TLAPI tl_hashmap_entry* tl_hashmap_get_bin( const tl_hashmap* map,
  * \return Non-zero on success, zero if one of the pointers is NULL or out of
  *         memory
  */
-TLAPI int tl_hashmap_copy( tl_hashmap* dst, const tl_hashmap* src );
+TLAPI int tl_hashmap_copy(tl_hashmap *dst, const tl_hashmap *src);
 
 /**
  * \brief Discard all contents of a hash map
@@ -248,7 +239,7 @@ TLAPI int tl_hashmap_copy( tl_hashmap* dst, const tl_hashmap* src );
  *
  * \param map A pointer to a hashmap
  */
-TLAPI void tl_hashmap_clear( tl_hashmap* map );
+TLAPI void tl_hashmap_clear(tl_hashmap *map);
 
 /**
  * \brief Add an object to a hashmap
@@ -267,8 +258,8 @@ TLAPI void tl_hashmap_clear( tl_hashmap* map );
  * \return Non-zero on success, zero if out of memory, or one of the arguments
  *         is NULL.
  */
-TLAPI int tl_hashmap_insert( tl_hashmap* map, const void* key,
-                                              const void* object );
+TLAPI int tl_hashmap_insert(tl_hashmap *map, const void *key,
+			    const void *object);
 
 /**
  * \brief Overwrite the value of an existing entry in a hash map
@@ -286,8 +277,7 @@ TLAPI int tl_hashmap_insert( tl_hashmap* map, const void* key,
  * \return Non-zero on success, zero if one of the arguments is NULL or
  *         the entry could not be found.
  */
-TLAPI int tl_hashmap_set( tl_hashmap* map, const void* key,
-                                           const void* object );
+TLAPI int tl_hashmap_set(tl_hashmap *map, const void *key, const void *object);
 
 /**
  * \brief Get an object stored in a hashmap by its key
@@ -303,7 +293,7 @@ TLAPI int tl_hashmap_set( tl_hashmap* map, const void* key,
  *
  * \return A pointer to the object stored in the hashmap or NULL if not found
  */
-TLAPI void* tl_hashmap_at( const tl_hashmap* map, const void* key );
+TLAPI void *tl_hashmap_at(const tl_hashmap *map, const void *key);
 
 /**
  * \brief Remove an object stored in a hash map
@@ -321,7 +311,7 @@ TLAPI void* tl_hashmap_at( const tl_hashmap* map, const void* key );
  *
  * \return Non-zero if the object was found, zero if not.
  */
-TLAPI int tl_hashmap_remove( tl_hashmap* map, const void* key, void* object );
+TLAPI int tl_hashmap_remove(tl_hashmap *map, const void *key, void *object);
 
 /**
  * \brief Returns non-zero if a given hash map contains no entries
@@ -334,7 +324,7 @@ TLAPI int tl_hashmap_remove( tl_hashmap* map, const void* key, void* object );
  *
  * \return Non-zero if the map is empty, zero if not
  */
-TLAPI int tl_hashmap_is_empty( const tl_hashmap* map );
+TLAPI int tl_hashmap_is_empty(const tl_hashmap *map);
 
 /**
  * \brief Get an iterator that iterates over a hash map
@@ -345,7 +335,7 @@ TLAPI int tl_hashmap_is_empty( const tl_hashmap* map );
  *
  * \return A pointer to an iterator or NULL on failure
  */
-TLAPI tl_iterator* tl_hashmap_get_iterator( tl_hashmap* map );
+TLAPI tl_iterator *tl_hashmap_get_iterator(tl_hashmap *map);
 
 #ifdef __cplusplus
 }

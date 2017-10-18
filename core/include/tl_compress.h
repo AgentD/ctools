@@ -61,75 +61,73 @@
  *
  * \brief Enumerates data compression algorithms
  */
-typedef enum
-{
-    /**
-     * \brief Deflate as implemented by zlib
-     *
-     * This means that data should be deflate compressed and
-     * exported as a raw zlib stream.
-     */
-    TL_DEFLATE = 0x01,
+typedef enum {
+	/**
+	 * \brief Deflate as implemented by zlib
+	 *
+	 * This means that data should be deflate compressed and
+	 * exported as a raw zlib stream.
+	 */
+	TL_DEFLATE = 0x01,
 
-    /**
-     * \brief Inflate decompression as implemented by zlib
-     *
-     * Data written to the compressor is expected to be a deflate compressed
-     * zlib packet stream. The decompressed result appears when reading from
-     * the compressor stream object.
-     */
-    TL_INFLATE = 0x02,
+	/**
+	 * \brief Inflate decompression as implemented by zlib
+	 *
+	 * Data written to the compressor is expected to be a deflate
+	 * compressed zlib packet stream. The decompressed result appears
+	 * when reading from the compressor stream object.
+	 */
+	TL_INFLATE = 0x02,
 
-    /** \brief Binary to base64 encoding */
-    TL_BASE64_ENCODE = 0x03,
+	/** \brief Binary to base64 encoding */
+	TL_BASE64_ENCODE = 0x03,
 
-    /**
-     * \brief Base64 to binary decoding
-     *
-     * By default, ASCII white space characters are ignored. If
-     * the \ref TL_BASE64_IGNORE_GARBAGE flag is used, all other
-     * unknown characters are also ignored.
-     */
-    TL_BASE64_DECODE = 0x04
-}
-TL_COMPRESSION;
+	/**
+	 * \brief Base64 to binary decoding
+	 *
+	 * By default, ASCII white space characters are ignored. If
+	 * the \ref TL_BASE64_IGNORE_GARBAGE flag is used, all other
+	 * unknown characters are also ignored.
+	 */
+	TL_BASE64_DECODE = 0x04
+} TL_COMPRESSION;
 
 /**
  * \enum TL_COMPRESS_FLAGS
  *
  * \brief Possible flags for tweaking a compressor
  */
-typedef enum
-{
-    /** \brief Prefere compression speed, possibly sacrificing output size */
-    TL_COMPRESS_FAST = 0x01,
+typedef enum {
+	/**
+	 * \brief Prefere compression speed, possibly sacrificing output size
+	 */
+	TL_COMPRESS_FAST = 0x01,
 
-    /** \brief Prefere small output, possibly sacrificing compression speed */
-    TL_COMPRESS_GOOD = 0x02,
+	/**
+	 * \brief Prefere small output, possibly sacrificing compression speed
+	 */
+	TL_COMPRESS_GOOD = 0x02,
 
-    /** \brief A combination of all valid flags */
-    TL_COMPRESS_ALL_FLAGS = 0x03
-}
-TL_COMPRESS_FLAGS;
+	/** \brief A combination of all valid flags */
+	TL_COMPRESS_ALL_FLAGS = 0x03
+} TL_COMPRESS_FLAGS;
 
 /**
  * \enum TL_COMPRESS_FLUSH
  *
  * \brief Possible flags for the flush function on a \ref tl_compressor
  */
-typedef enum
-{
-    /**
-     * \brief Terminate the compressed stream
-     *
-     * When this option is set, the implementation is forced to process all
-     * remaining input, terminate the generated stream format and clear all
-     * internal state. The read function will return \ref TL_EOF once the
-     * last byte of the stream has been read.
-     */
-    TL_COMPRESS_FLUSH_EOF = 0x01
-}
-TL_COMPRESS_FLUSH;
+typedef enum {
+	/**
+	 * \brief Terminate the compressed stream
+	 *
+	 * When this option is set, the implementation is forced to process
+	 * all remaining input, terminate the generated stream format and
+	 * clear all internal state. The read function will return \ref TL_EOF
+	 * once the last byte of the stream has been read.
+	 */
+	TL_COMPRESS_FLUSH_EOF = 0x01
+} TL_COMPRESS_FLUSH;
 
 /**
  * \enum TL_BASE64_FLAGS
@@ -137,15 +135,13 @@ TL_COMPRESS_FLUSH;
  * \brief Miscellaneous flags for \ref tl_base64_encode and
  *        \ref tl_base64_decode
  */
-typedef enum
-{
-    /** \brief If set, ignore invalid characters when decoding base 64 */
-    TL_BASE64_IGNORE_GARBAGE = 0x01,
+typedef enum {
+	/** \brief If set, ignore invalid characters when decoding base 64 */
+	TL_BASE64_IGNORE_GARBAGE = 0x01,
 
-    /** \brief If set, use URL & file name safe characters (see RFC 4648) */
-    TL_BASE64_URL_SAFE = 0x02
-}
-TL_BASE64_FLAGS;
+	/** \brief If set, use URL & file name safe characters (RFC 4648) */
+	TL_BASE64_URL_SAFE = 0x02
+} TL_BASE64_FLAGS;
 
 /**
  * \struct tl_compressor
@@ -160,24 +156,22 @@ TL_BASE64_FLAGS;
  * to the compressor and then reading from it in a loop, there might be a
  * delay until output data appears.
  */
-struct tl_compressor
-{
-    tl_iostream super;
+struct tl_compressor {
+	tl_iostream super;
 
-    /**
-     * \brief Force the remaining input to be completely processed
-     *
-     * If the flag \ref TL_COMPRESS_FLUSH_EOF is set, the compressed stream
-     * is terminated, i.e. a termination mark is generated and the internal
-     * state of the compressor is reset. Compressing further data will start
-     * a new compression stream.
-     *
-     * \param comp A pointer to the compressor object
-     * \param flags A combination of \ref TL_COMPRESS_FLUSH flags
-     */
-    int(*flush)(tl_compressor *comp, int flags);
+	/**
+	 * \brief Force the remaining input to be completely processed
+	 *
+	 * If the flag \ref TL_COMPRESS_FLUSH_EOF is set, the compressed
+	 * stream is terminated, i.e. a termination mark is generated and
+	 * the internal state of the compressor is reset. Compressing
+	 * further data will start a new compression stream.
+	 *
+	 * \param comp A pointer to the compressor object
+	 * \param flags A combination of \ref TL_COMPRESS_FLUSH flags
+	 */
+	int(*flush)(tl_compressor *comp, int flags);
 };
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -201,7 +195,7 @@ extern "C" {
  *
  * \return A pointer to a \ref tl_compressor on success, NULL on failure.
  */
-TLAPI tl_compressor* tl_create_compressor(int algo, int flags);
+TLAPI tl_compressor *tl_create_compressor(int algo, int flags);
 
 /**
  * \brief Create a compressor for zlib deflate compression
@@ -215,7 +209,7 @@ TLAPI tl_compressor* tl_create_compressor(int algo, int flags);
  *
  * \return A pointer to a tl_compressor, NULL if out of memory.
  */
-TLAPI tl_compressor* tl_deflate(int flags);
+TLAPI tl_compressor *tl_deflate(int flags);
 
 /**
  * \brief Create a compressor that uncompress a deflate compressed stream
@@ -228,7 +222,7 @@ TLAPI tl_compressor* tl_deflate(int flags);
  *
  * \return A pointer to a tl_compressor, NULL if out of memory.
  */
-TLAPI tl_compressor* tl_inflate(int flags);
+TLAPI tl_compressor *tl_inflate(int flags);
 
 /**
  * \brief Create a compressor implementation that performs Base64 encoding
@@ -237,7 +231,7 @@ TLAPI tl_compressor* tl_inflate(int flags);
  *
  * \return Non-zero on success, zero on failure
  */
-TLAPI tl_compressor* tl_base64_encode(int flags);
+TLAPI tl_compressor *tl_base64_encode(int flags);
 
 /**
  * \brief Create a compressor implementation that performs Base64 decoding
@@ -246,7 +240,7 @@ TLAPI tl_compressor* tl_base64_encode(int flags);
  *
  * \return Non-zero on success, zero on failure
  */
-TLAPI tl_compressor* tl_base64_decode(int flags);
+TLAPI tl_compressor *tl_base64_decode(int flags);
 
 /**
  * \brief A convenience function for compressing a blob of data
@@ -264,8 +258,8 @@ TLAPI tl_compressor* tl_base64_decode(int flags);
  *         (see \ref TL_ERROR_CODE). TL_ERR_NOT_SUPPORTED if the algorithm
  *         is unknown.
  */
-TLAPI int tl_compress_blob( tl_blob* dst, const tl_blob* src,
-                            int algo, int flags );
+TLAPI int tl_compress_blob(tl_blob *dst, const tl_blob *src,
+			   int algo, int flags);
 
 /**
  * \copydoc tl_compress
@@ -276,13 +270,13 @@ TLAPI int tl_compress_blob( tl_blob* dst, const tl_blob* src,
  * \param algo  What compression algorithm to use (see \ref TL_COMPRESSION)
  * \param flags Flags to tweak the compression (see \ref TL_COMPRESS_FLAGS)
  */
-static TL_INLINE int tl_compress( tl_blob* dst, const void* src,
-                                  size_t size, int algo, int flags )
+static TL_INLINE int tl_compress(tl_blob *dst, const void *src,
+				 size_t size, int algo, int flags)
 {
-    tl_blob srcblob;
-    srcblob.data = (void*)src;
-    srcblob.size = size;
-    return tl_compress_blob( dst, &srcblob, algo, flags );
+	tl_blob srcblob;
+	srcblob.data = (void*)src;
+	srcblob.size = size;
+	return tl_compress_blob(dst, &srcblob, algo, flags);
 }
 
 #ifdef __cplusplus

@@ -41,8 +41,6 @@
  * data. Substings can be added in various encodings.
  */
 
-
-
 #include "tl_hash.h"
 #include "tl_utf8.h"
 #include "tl_utf16.h"
@@ -51,40 +49,36 @@
 
 #include <string.h>
 
-
-
 /**
  * \struct tl_string
  *
  * \brief A dynamically resizeable UTF-8 string
  */
-struct tl_string
-{
-    /** \brief Contains the data of a null-terimated UTF-8 string */
-    tl_array data;
+struct tl_string {
+	/** \brief Contains the data of a null-terimated UTF-8 string */
+	tl_array data;
 
-    /**
-     * \brief The number of characters stored in a string
-     *
-     * If the string contains multi byte sequences, this does not neccessarily
-     * have to match the number of elements in the underlying container.
-     */
-    size_t charcount;
+	/**
+	 * \brief The number of characters stored in a string
+	 *
+	 * If the string contains multi byte sequences, this does not
+	 * neccessarily have to match the number of elements in the
+	 * underlying container.
+	 */
+	size_t charcount;
 
-    /**
-     * \brief The array index where the first multi byte sequence is used
-     *
-     * If the string contains multi byte sequences, this points to the first
-     * one. Otherwise, it set to an out of bounds value.
-     *
-     * A mapping from character index to array index below this value can
-     * be done in constant time. Above this value, a linear search is
-     * required.
-     */
-    size_t mbseq;
+	/**
+	 * \brief The array index where the first multi byte sequence is used
+	 *
+	 * If the string contains multi byte sequences, this points to the
+	 * first one. Otherwise, it set to an out of bounds value.
+	 *
+	 * A mapping from character index to array index below this value can
+	 * be done in constant time. Above this value, a linear search is
+	 * required.
+	 */
+	size_t mbseq;
 };
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,7 +94,7 @@ extern "C" {
  * \return Non-zero on success, zero in the unlikely case that it is not
  *         possible to allocate space for the null-terminator
  */
-TLAPI int tl_string_init( tl_string* str );
+TLAPI int tl_string_init(tl_string *str);
 
 /**
  * \brief Initialize a string from an UTF-8 encoded C string
@@ -112,7 +106,7 @@ TLAPI int tl_string_init( tl_string* str );
  *
  * \return Non-zero on success, zero if out of memory
  */
-TLAPI int tl_string_init_cstr( tl_string* str, const char* data );
+TLAPI int tl_string_init_cstr(tl_string *str, const char *data);
 
 /**
  * \brief Initialize a local, read only string
@@ -130,7 +124,7 @@ TLAPI int tl_string_init_cstr( tl_string* str, const char* data );
  * \param str  A pointer to an unitialized string
  * \param data A C string to encapsulate
  */
-TLAPI void tl_string_init_local( tl_string* str, const char* data );
+TLAPI void tl_string_init_local(tl_string *str, const char *data);
 
 /**
  * \brief Uninitialize a string and free all its memory
@@ -139,10 +133,10 @@ TLAPI void tl_string_init_local( tl_string* str, const char* data );
  *
  * \param str A pointer to a string object
  */
-static TL_INLINE void tl_string_cleanup( tl_string* str )
+static TL_INLINE void tl_string_cleanup(tl_string *str)
 {
-    assert( str );
-    tl_array_cleanup( &(str->data) );
+	assert(str);
+	tl_array_cleanup(&str->data);
 }
 
 /**
@@ -157,7 +151,7 @@ static TL_INLINE void tl_string_cleanup( tl_string* str )
  *
  * \return Non-zero on success, zero on failure (read: out of memory)
  */
-TLAPI int tl_string_copy( tl_string* dst, const tl_string* src );
+TLAPI int tl_string_copy(tl_string *dst, const tl_string *src);
 
 /**
  * \brief Get the number of characters stored in a string object, counting
@@ -172,10 +166,10 @@ TLAPI int tl_string_copy( tl_string* dst, const tl_string* src );
  * \return The number of characters in the string object, excluding the
  *         null-terminator
  */
-static TL_INLINE size_t tl_string_characters( const tl_string* str )
+static TL_INLINE size_t tl_string_characters(const tl_string *str)
 {
-    assert( str );
-    return str->charcount;
+	assert(str);
+	return str->charcount;
 }
 
 /**
@@ -191,10 +185,10 @@ static TL_INLINE size_t tl_string_characters( const tl_string* str )
  * \return The number of code units in the string object, excluding the
  *         null-terminator
  */
-static TL_INLINE size_t tl_string_length( const tl_string* str )
+static TL_INLINE size_t tl_string_length(const tl_string *str)
 {
-    assert( str );
-    return (str->data.used - 1);
+	assert(str);
+	return str->data.used - 1;
 }
 
 /**
@@ -204,7 +198,7 @@ static TL_INLINE size_t tl_string_length( const tl_string* str )
  *
  * \param str A pointer to a string object
  */
-TLAPI void tl_string_clear( tl_string* str );
+TLAPI void tl_string_clear(tl_string *str);
 
 /**
  * \brief Returns non-zero if a string is empty
@@ -217,10 +211,10 @@ TLAPI void tl_string_clear( tl_string* str );
  *
  * \return Non-zero if a string is empty, zero if it is not
  */
-static TL_INLINE int tl_string_is_empty( const tl_string* str )
+static TL_INLINE int tl_string_is_empty(const tl_string *str)
 {
-    assert( str );
-    return (str->charcount==0);
+	assert(str);
+	return str->charcount == 0;
 }
 
 /**
@@ -237,7 +231,7 @@ static TL_INLINE int tl_string_is_empty( const tl_string* str )
  *
  * \return A unicode code point value
  */
-TLAPI unsigned int tl_string_at( const tl_string* str, size_t idx );
+TLAPI unsigned int tl_string_at(const tl_string *str, size_t idx);
 
 /**
  * \brief Get a null-terminated UTF-8 string from a string object
@@ -250,10 +244,10 @@ TLAPI unsigned int tl_string_at( const tl_string* str, size_t idx );
  *
  * \return A pointer to a null-terminated UTF-8 string
  */
-static TL_INLINE char* tl_string_cstr( tl_string* str )
+static TL_INLINE char *tl_string_cstr(tl_string *str)
 {
-    assert( str );
-    return str->data.data;
+	assert(str);
+	return str->data.data;
 }
 
 /**
@@ -269,7 +263,7 @@ static TL_INLINE char* tl_string_cstr( tl_string* str )
  *
  * \return Non-zero on success, zero if out of memory
  */
-TLAPI int tl_string_append_code_point( tl_string* str, unsigned int cp );
+TLAPI int tl_string_append_code_point(tl_string *str, unsigned int cp);
 
 /**
  * \brief Append a number of UTF-8 or ASCII characters to a string object
@@ -287,8 +281,8 @@ TLAPI int tl_string_append_code_point( tl_string* str, unsigned int cp );
  *
  * \return Non-zero on success, zero if out of memory
  */
-TLAPI int tl_string_append_utf8_count( tl_string* str, const char* utf8,
-                                       size_t count );
+TLAPI int tl_string_append_utf8_count(tl_string *str, const char *utf8,
+				      size_t count);
 
 /**
  * \brief Append a number of Latin-1 or ASCII characters to a string
@@ -306,8 +300,8 @@ TLAPI int tl_string_append_utf8_count( tl_string* str, const char* utf8,
  *
  * \return Non-zero on success, zero if out of memory
  */
-TLAPI int tl_string_append_latin1_count( tl_string* str, const char* latin1,
-                                         size_t count );
+TLAPI int tl_string_append_latin1_count(tl_string *str, const char *latin1,
+					size_t count);
 
 /**
  * \brief Append a number of UTF-16 characters to a string
@@ -324,8 +318,8 @@ TLAPI int tl_string_append_latin1_count( tl_string* str, const char* latin1,
  * \param count The number of words to read from the string (surrogate
  *              pairs count as two words)
  */
-TLAPI int tl_string_append_utf16_count( tl_string* str, const tl_u16* utf16,
-                                        size_t count );
+TLAPI int tl_string_append_utf16_count(tl_string *str, const tl_u16 *utf16,
+					size_t count);
 
 /**
  * \brief Append a null-terminated UTF-8 or ASCII string to a string object
@@ -340,10 +334,10 @@ TLAPI int tl_string_append_utf16_count( tl_string* str, const tl_u16* utf16,
  *
  * \return Non-zero on success, zero if out of memory
  */
-static TL_INLINE int tl_string_append_utf8( tl_string* str, const char* utf8 )
+static TL_INLINE int tl_string_append_utf8(tl_string *str, const char *utf8)
 {
-    assert( str && utf8 );
-    return tl_string_append_utf8_count( str, utf8, strlen( utf8 ) );
+	assert(str && utf8);
+	return tl_string_append_utf8_count(str, utf8, strlen(utf8));
 }
 
 /**
@@ -359,11 +353,11 @@ static TL_INLINE int tl_string_append_utf8( tl_string* str, const char* utf8 )
  *
  * \return Non-zero on success, zero if out of memory
  */
-static TL_INLINE int tl_string_append_latin1( tl_string* str,
-                                              const char* latin1 )
+static TL_INLINE int tl_string_append_latin1(tl_string *str,
+					     const char *latin1)
 {
-    assert( str && latin1 );
-    return tl_string_append_latin1_count( str, latin1, strlen( latin1 ) );
+	assert(str && latin1);
+	return tl_string_append_latin1_count(str, latin1, strlen(latin1));
 }
 
 /**
@@ -380,12 +374,12 @@ static TL_INLINE int tl_string_append_latin1( tl_string* str,
  *
  * \return Non-zero on success, zero if out of memory
  */
-static TL_INLINE int tl_string_append_utf16( tl_string* str,
-                                             const tl_u16* utf16 )
+static TL_INLINE int tl_string_append_utf16(tl_string *str,
+					    const tl_u16 *utf16)
 {
-    assert( str && utf16 );
-    return tl_string_append_utf16_count(str,utf16,
-                                        tl_utf16_strlen(utf16,~((size_t)0)));
+	assert(str && utf16);
+	return tl_string_append_utf16_count(str, utf16,
+					tl_utf16_strlen(utf16, ~((size_t)0)));
 }
 
 /**
@@ -401,11 +395,11 @@ static TL_INLINE int tl_string_append_utf16( tl_string* str,
  *
  * \return Non-zero on success, zero if out of memory
  */
-static TL_INLINE int tl_string_append(tl_string* str, const tl_string* other)
+static TL_INLINE int tl_string_append(tl_string *str, const tl_string *other)
 {
-    assert( str && other );
-    return tl_string_append_utf8_count(str, other->data.data,
-                                       other->data.used-1);
+	assert(str && other);
+	return tl_string_append_utf8_count(str, other->data.data,
+					   other->data.used - 1);
 }
 
 /**
@@ -428,8 +422,7 @@ static TL_INLINE int tl_string_append(tl_string* str, const tl_string* other)
  *
  * \return Non-zero on success, zero if out of memory
  */
-TLAPI int tl_string_append_uint( tl_string* str, unsigned long value,
-                                 int base );
+TLAPI int tl_string_append_uint(tl_string *str, unsigned long value, int base);
 
 /**
  * \brief Append a signed intger value to a string
@@ -452,7 +445,7 @@ TLAPI int tl_string_append_uint( tl_string* str, unsigned long value,
  *
  * \return Non-zero on success, zero if out of memory
  */
-TLAPI int tl_string_append_int( tl_string* str, long value, int base );
+TLAPI int tl_string_append_int(tl_string *str, long value, int base);
 
 /**
  * \brief Determine how much space is needed to convert a tl_string to UTF-16
@@ -468,10 +461,10 @@ TLAPI int tl_string_append_int( tl_string* str, long value, int base );
  *
  * \return The number of code units (16 bit words) required
  */
-static TL_INLINE size_t tl_string_utf16_len( const tl_string* str )
+static TL_INLINE size_t tl_string_utf16_len(const tl_string *str)
 {
-    assert( str );
-    return tl_utf16_estimate_utf8_length( str->data.data, str->charcount );
+	assert(str);
+	return tl_utf16_estimate_utf8_length(str->data.data, str->charcount);
 }
 
 /**
@@ -492,8 +485,8 @@ static TL_INLINE size_t tl_string_utf16_len( const tl_string* str )
  *
  * \return The number of code units written (exlcuding the null-terminator)
  */
-TLAPI size_t tl_string_to_utf16( const tl_string* str, tl_u16* buffer,
-                                 size_t size );
+TLAPI size_t tl_string_to_utf16(const tl_string *str, tl_u16 *buffer,
+				size_t size);
 
 /**
  * \brief Get the last character of a string
@@ -507,7 +500,7 @@ TLAPI size_t tl_string_to_utf16( const tl_string* str, tl_u16* buffer,
  * \return The unicode code point of the last character in the string, or 0 if
  *         the string is empty
  */
-TLAPI unsigned int tl_string_last( const tl_string* str );
+TLAPI unsigned int tl_string_last(const tl_string *str);
 
 /**
  * \brief Remove the last character of a string
@@ -519,7 +512,7 @@ TLAPI unsigned int tl_string_last( const tl_string* str );
  *
  * \param str A pointer to a string
  */
-TLAPI void tl_string_drop_last( tl_string* str );
+TLAPI void tl_string_drop_last(tl_string *str);
 
 /**
  * \brief Remove a range of characters from a string
@@ -530,7 +523,7 @@ TLAPI void tl_string_drop_last( tl_string* str );
  * \param offset A character offset into the string
  * \param count  The number of characters to remove from the string
  */
-TLAPI void tl_string_remove( tl_string* str, size_t offset, size_t count );
+TLAPI void tl_string_remove(tl_string *str, size_t offset, size_t count);
 
 /**
  * \brief Compare two strings
@@ -544,10 +537,10 @@ TLAPI void tl_string_remove( tl_string* str, size_t offset, size_t count );
  *         larger than the second, a negative value if the second is larger
  *         than the first and zero if they are equal.
  */
-static TL_INLINE int tl_string_compare(const tl_string* a, const tl_string* b)
+static TL_INLINE int tl_string_compare(const tl_string *a, const tl_string *b)
 {
-    assert( a && b );
-    return strcmp( a->data.data, b->data.data );
+	assert(a && b);
+	return strcmp(a->data.data, b->data.data);
 }
 
 /**
@@ -568,10 +561,10 @@ static TL_INLINE int tl_string_compare(const tl_string* a, const tl_string* b)
  *
  * \return A hash value value
  */
-static TL_INLINE unsigned long tl_string_hash( const tl_string* str )
+static TL_INLINE unsigned long tl_string_hash(const tl_string *str)
 {
-    assert( str );
-    return tl_hash_murmur3_32( str->data.data, str->data.used, 0xDEADBEEF );
+	assert(str);
+	return tl_hash_murmur3_32(str->data.data, str->data.used, 0xDEADBEEF);
 }
 
 /**
@@ -582,7 +575,7 @@ static TL_INLINE unsigned long tl_string_hash( const tl_string* str )
  *
  * \return A unique pointer to a global allocator implementation
  */
-TLAPI tl_allocator* tl_string_get_allocator( void );
+TLAPI tl_allocator *tl_string_get_allocator(void);
 
 /**
  * \brief Remove white space characters from the end of a string
@@ -594,7 +587,7 @@ TLAPI tl_allocator* tl_string_get_allocator( void );
  *
  * \param str A pointer to a string
  */
-TLAPI void tl_string_trim_end( tl_string* str );
+TLAPI void tl_string_trim_end(tl_string *str);
 
 /**
  * \brief Remove white space characters from the beginning of a string
@@ -606,7 +599,7 @@ TLAPI void tl_string_trim_end( tl_string* str );
  *
  * \param str A pointer to a string
  */
-TLAPI void tl_string_trim_begin( tl_string* str );
+TLAPI void tl_string_trim_begin(tl_string *str);
 
 /**
  * \brief Remove white space characters from both ends of a string
@@ -618,10 +611,10 @@ TLAPI void tl_string_trim_begin( tl_string* str );
  *
  * \param str A pointer to a string
  */
-static TL_INLINE void tl_string_trim( tl_string* str )
+static TL_INLINE void tl_string_trim(tl_string *str)
 {
-    tl_string_trim_begin( str );
-    tl_string_trim_end( str );
+	tl_string_trim_begin(str);
+	tl_string_trim_end(str);
 }
 
 /**
@@ -641,8 +634,7 @@ static TL_INLINE void tl_string_trim( tl_string* str )
  *
  * \return A pointer to a new iterator obect or NULL if out of memory
  */
-TLAPI tl_iterator* tl_string_tokenize( tl_string* str,
-                                       const char* seperators );
+TLAPI tl_iterator *tl_string_tokenize(tl_string *str, const char *seperators);
 
 #ifdef __cplusplus
 }

@@ -54,11 +54,7 @@
  * the number of bytes required to store a UTF-8 string in UTF-16 encoding.
  */
 
-
-
 #include "tl_predef.h"
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,7 +69,7 @@ extern "C" {
  *
  * \return The numer of characters (code points) in the string
  */
-TLAPI size_t tl_utf8_charcount( const char* utf8 );
+TLAPI size_t tl_utf8_charcount(const char *utf8);
 
 /**
  * \brief Count the number of bytes in an UTF-8 string
@@ -85,7 +81,7 @@ TLAPI size_t tl_utf8_charcount( const char* utf8 );
  *
  * \return The number of bytes read from the string
  */
-TLAPI size_t tl_utf8_strlen( const char* utf8, size_t chars );
+TLAPI size_t tl_utf8_strlen(const char *utf8, size_t chars);
 
 /**
  * \brief Decode an UTF-8 encoded unicode code point
@@ -98,7 +94,7 @@ TLAPI size_t tl_utf8_strlen( const char* utf8, size_t chars );
  *
  * \return The decoded unicode code point
  */
-TLAPI unsigned int tl_utf8_decode(const char* utf8, unsigned int* bytecount);
+TLAPI unsigned int tl_utf8_decode(const char *utf8, unsigned int *bytecount);
 
 /**
  * \brief Get the UTF-8 encoding of a unicode code point
@@ -111,7 +107,7 @@ TLAPI unsigned int tl_utf8_decode(const char* utf8, unsigned int* bytecount);
  *
  * \return The number of bytes used.
  */
-TLAPI unsigned int tl_utf8_encode( char* utf8, unsigned int cp );
+TLAPI unsigned int tl_utf8_encode(char *utf8, unsigned int cp);
 
 /**
  * \brief Estimate the number of bytes required to encode
@@ -125,8 +121,7 @@ TLAPI unsigned int tl_utf8_encode( char* utf8, unsigned int cp );
  * \return The number of bytes required, not including a possible
  *         null-terminator
  */
-TLAPI size_t tl_utf8_estimate_utf16_length( const tl_u16* utf16,
-                                            size_t count );
+TLAPI size_t tl_utf8_estimate_utf16_length(const tl_u16 *utf16, size_t count);
 
 /**
  * \brief Find an UTF-8 encoded character in a string
@@ -137,7 +132,7 @@ TLAPI size_t tl_utf8_estimate_utf16_length( const tl_u16* utf16,
  * \return On success, a pointer to the first occourance of the character in
  *         the haystack, NULL if not found
  */
-TLAPI char* tl_utf8_strchr( const char* haystack, const char* needle );
+TLAPI char *tl_utf8_strchr(const char *haystack, const char *needle);
 
 #ifdef __cplusplus
 }

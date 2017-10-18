@@ -38,151 +38,145 @@
  * library, containing a small collection of utilities for C programs.
  */
 
-
-
 #include <stddef.h>
 #include <assert.h>
 
 #ifdef _MSC_VER
-    typedef __int8 tl_s8;
-    typedef __int16 tl_s16;
-    typedef __int32 tl_s32;
-    typedef __int64 tl_s64;
+	typedef __int8 tl_s8;
+	typedef __int16 tl_s16;
+	typedef __int32 tl_s32;
+	typedef __int64 tl_s64;
 
-    typedef unsigned __int8 tl_u8;
-    typedef unsigned __int16 tl_u16;
-    typedef unsigned __int32 tl_u32;
-    typedef unsigned __int64 tl_u64;
+	typedef unsigned __int8 tl_u8;
+	typedef unsigned __int16 tl_u16;
+	typedef unsigned __int32 tl_u32;
+	typedef unsigned __int64 tl_u64;
 #else
-    #include <stdint.h>
+	#include <stdint.h>
 
-    typedef int8_t tl_s8;
-    typedef int16_t tl_s16;
-    typedef int32_t tl_s32;
-    typedef int64_t tl_s64;
+	typedef int8_t tl_s8;
+	typedef int16_t tl_s16;
+	typedef int32_t tl_s32;
+	typedef int64_t tl_s64;
 
-    typedef uint8_t tl_u8;
-    typedef uint16_t tl_u16;
-    typedef uint32_t tl_u32;
-    typedef uint64_t tl_u64;
+	typedef uint8_t tl_u8;
+	typedef uint16_t tl_u16;
+	typedef uint32_t tl_u32;
+	typedef uint64_t tl_u64;
 #endif
 
 #if defined(_WIN32) && defined(TL_SHARED)
-    #ifdef TL_EXPORT
-        #define TLAPI __declspec(dllexport)
-    #else
-        #define TLAPI __declspec(dllimport)
-    #endif
+	#ifdef TL_EXPORT
+		#define TLAPI __declspec(dllexport)
+	#else
+		#define TLAPI __declspec(dllimport)
+	#endif
 
-    #ifdef TL_OS_EXPORT
-        #define TLOSAPI __declspec(dllexport)
-    #else
-        #define TLOSAPI __declspec(dllimport)
-    #endif
+	#ifdef TL_OS_EXPORT
+		#define TLOSAPI __declspec(dllexport)
+	#else
+		#define TLOSAPI __declspec(dllimport)
+	#endif
 #endif
 
 #ifdef _MSC_VER
-    #define TL_INLINE __forceinline
-    #define TL_FORMATSTR
+	#define TL_INLINE __forceinline
+	#define TL_FORMATSTR
 #else
-    #define TL_INLINE __inline__ __attribute__((always_inline))
-    #define TL_FORMATSTR __attribute__ ((format (printf, 2, 3)))
+	#define TL_INLINE __inline__ __attribute__((always_inline))
+	#define TL_FORMATSTR __attribute__ ((format (printf, 2, 3)))
 #endif
 
 #ifndef TLAPI
-    #define TLAPI
+	#define TLAPI
 #endif
 
 #ifndef TLOSAPI
-    #define TLOSAPI
+	#define TLOSAPI
 #endif
-
-
 
 /**
  * \enum TL_ERROR_CODE
  *
  * \brief Potential error codes of system operations
  */
-typedef enum
-{
-    /** \brief The operation is not supported by the implementation */
-    TL_ERR_NOT_SUPPORTED = -1,
+typedef enum {
+	/** \brief The operation is not supported by the implementation */
+	TL_ERR_NOT_SUPPORTED = -1,
 
-    /** \brief An io_stream has already been closed by the other end */
-    TL_ERR_CLOSED = -2,
+	/** \brief An io_stream has already been closed by the other end */
+	TL_ERR_CLOSED = -2,
 
-    /** \brief The operation took to long to perform and was aborted */
-    TL_ERR_TIMEOUT = -3,
+	/** \brief The operation took to long to perform and was aborted */
+	TL_ERR_TIMEOUT = -3,
 
-    /** \brief An unexpected, system specific internal error occoured */
-    TL_ERR_INTERNAL = -4,
+	/** \brief An unexpected, system specific internal error occoured */
+	TL_ERR_INTERNAL = -4,
 
-    /** \brief The operation requires permissions the caller does not have */
-    TL_ERR_ACCESS = -5,
+	/**
+	 * \brief The operation requires permissions the caller does not have
+	 */
+	TL_ERR_ACCESS = -5,
 
-    /** \brief An object cannot be created because it already exists */
-    TL_ERR_EXISTS = -6,
+	/** \brief An object cannot be created because it already exists */
+	TL_ERR_EXISTS = -6,
 
-    /** \brief Not enough persistent memory to perform an operation */
-    TL_ERR_NO_SPACE = -7,
+	/** \brief Not enough persistent memory to perform an operation */
+	TL_ERR_NO_SPACE = -7,
 
-    /** \brief An object cannot be accessed because it does not exist */
-    TL_ERR_NOT_EXIST = -8,
+	/** \brief An object cannot be accessed because it does not exist */
+	TL_ERR_NOT_EXIST = -8,
 
-    /**
-     * \brief The requested operation can only be executed on directories,
-     *        or a path was specified with one of the components not being
-     *        a directory.
-     */
-    TL_ERR_NOT_DIR = -9,
+	/**
+	 * \brief The requested operation can only be executed on directories,
+	 *        or a path was specified with one of the components not being
+	 *        a directory.
+	 */
+	TL_ERR_NOT_DIR = -9,
 
-    /** \brief A directory could not be deleted because it was empty */
-    TL_ERR_NOT_EMPTY = -10,
+	/** \brief A directory could not be deleted because it was empty */
+	TL_ERR_NOT_EMPTY = -10,
 
-    /** \brief Out of memory */
-    TL_ERR_ALLOC = -11,
+	/** \brief Out of memory */
+	TL_ERR_ALLOC = -11,
 
-    /** \brief End of file has been reached */
-    TL_EOF = -12,
+	/** \brief End of file has been reached */
+	TL_EOF = -12,
 
-    /**
-     * \brief Too large for file system or packet payload
-     *
-     * When writing to a file, indicates that the desired file size is not
-     * supported by the underlying filesystem. When sending data over an I/O
-     * device, indicates that the supplied data block is too large to fit
-     * into a single packet.
-     */
-    TL_ERR_TOO_LARGE = -13,
+	/**
+	 * \brief Too large for file system or packet payload
+	 *
+	 * When writing to a file, indicates that the desired file size is not
+	 * supported by the underlying filesystem. When sending data over an
+	 * I/O device, indicates that the supplied data block is too large to
+	 * fit into a single packet.
+	 */
+	TL_ERR_TOO_LARGE = -13,
 
-    /** \brief Host is unreachable */
-    TL_ERR_HOST_UNREACH = -14,
+	/** \brief Host is unreachable */
+	TL_ERR_HOST_UNREACH = -14,
 
-    /** \brief Network is unreachable */
-    TL_ERR_NET_UNREACH = -15,
+	/** \brief Network is unreachable */
+	TL_ERR_NET_UNREACH = -15,
 
-    /** \brief Network is down */
-    TL_ERR_NET_DOWN = -16,
+	/** \brief Network is down */
+	TL_ERR_NET_DOWN = -16,
 
-    /** \brief Connection was reset (e.g. TCP reset flag) */
-    TL_ERR_NET_RESET = -17,
+	/** \brief Connection was reset (e.g. TCP reset flag) */
+	TL_ERR_NET_RESET = -17,
 
-    /** \brief Network address type is not supported */
-    TL_ERR_NET_ADDR = -18,
+	/** \brief Network address type is not supported */
+	TL_ERR_NET_ADDR = -18,
 
-    /**
-     * \brief Attempted to perform a file operation on something
-     *        other than a file
-     */
-    TL_ERR_NOT_FILE = -19,
+	/**
+	 * \brief Attempted to perform a file operation on something
+	 *        other than a file
+	 */
+	TL_ERR_NOT_FILE = -19,
 
-    /** \brief A function was called with an invalid argument */
-    TL_ERR_ARG = -100
-}
-TL_ERROR_CODE;
-
-
+	/** \brief A function was called with an invalid argument */
+	TL_ERR_ARG = -100
+} TL_ERROR_CODE;
 
 typedef struct tl_array tl_array;
 typedef struct tl_list_node tl_list_node;
@@ -212,8 +206,6 @@ typedef struct tl_threadpool tl_threadpool;
 typedef struct tl_file_mapping tl_file_mapping;
 typedef struct tl_compressor tl_compressor;
 
-
-
 /**
  * \brief A function used to compare two objects
  *
@@ -223,7 +215,7 @@ typedef struct tl_compressor tl_compressor;
  * \return >0 if a is greater than b, <0 if a is smaller than b, 0 if both
  *         are equal
  */
-typedef int(* tl_compare )( const void* a, const void* b );
+typedef int (*tl_compare)(const void *a, const void *b);
 
 /**
  * \brief A function used to compute the hash value of an object
@@ -235,9 +227,7 @@ typedef int(* tl_compare )( const void* a, const void* b );
  *
  * \return An integer value generated from the object
  */
-typedef unsigned long(* tl_hash )( const void* obj );
-
-
+typedef unsigned long (*tl_hash)(const void *obj);
 
 #endif /* TOOLS_PREDEF_H */
 

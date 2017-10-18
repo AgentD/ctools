@@ -60,11 +60,7 @@
  * the \ref tl_packetserver interface is used.
  */
 
-
-
 #include "tl_predef.h"
-
-
 
 /**
  * \interface tl_server
@@ -74,27 +70,24 @@
  *
  * \see \ref server
  */
-struct tl_server
-{
-    /**
-     * \brief Destroy a server object shutting down all connections and,
-     *        freeing all its resources
-     *
-     * \param server A pointer to the server object
-     */
-    void(* destroy )( tl_server* server );
+struct tl_server {
+	/**
+	 * \brief Destroy a server object shutting down all connections and,
+	 *        freeing all its resources
+	 *
+	 * \param server A pointer to the server object
+	 */
+	void (*destroy)(tl_server *server);
 
-    /**
-     * \brief Wait until a new client connects
-     *
-     * \param server  A pointer to a server object
-     * \param timeout A timeout in milliseconds, or zero (or a negative value)
-     *                for infinite timeout.
-     */
-    tl_iostream* (* wait_for_client )( tl_server* server, int timeout );
+	/**
+	 * \brief Wait until a new client connects
+	 *
+	 * \param server  A pointer to a server object
+	 * \param timeout A timeout in milliseconds, or zero (or a negative
+	 *                value) for infinite timeout.
+	 */
+	tl_iostream *(*wait_for_client)(tl_server *server, int timeout);
 };
-
-
 
 #endif /* TOOLS_SERVER_H */
 

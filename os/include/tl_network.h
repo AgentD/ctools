@@ -168,38 +168,32 @@
 
 #include "tl_predef.h"
 
-
-
 /**
  * \enum TL_NETWORK_PROTOCOL
  *
  * \brief Various constants for network protocols
  */
-typedef enum
-{
-    /**
-     * \brief Use any layer 3 protocol available
-     *
-     * Only valid for resolving addresses to indicate no preference over
-     * any network layer protocol.
-     */
-    TL_ANY  = 0,
-    TL_IPV4 = 1,    /**< \brief Use IPv4 */
-    TL_IPV6 = 2     /**< \brief Use IPv6 */
-}
-TL_NETWORK_PROTOCOL;
+typedef enum {
+	/**
+	 * \brief Use any layer 3 protocol available
+	 *
+	 * Only valid for resolving addresses to indicate no preference over
+	 * any network layer protocol.
+	 */
+	TL_ANY  = 0,
+	TL_IPV4 = 1,	/**< \brief Use IPv4 */
+	TL_IPV6 = 2	/**< \brief Use IPv6 */
+} TL_NETWORK_PROTOCOL;
 
 /**
  * \enum TL_TRANSPORT_PROTOCOL
  *
  * \brief Various constants for transport protocols
  */
-typedef enum
-{
-    TL_TCP = 1,     /**< \brief Use TCP */
-    TL_UDP = 2      /**< \brief Use UDP */
-}
-TL_TRANSPORT_PROTOCOL;
+typedef enum {
+	TL_TCP = 1,	/**< \brief Use TCP */
+	TL_UDP = 2	/**< \brief Use UDP */
+} TL_TRANSPORT_PROTOCOL;
 
 /**
  * \enum TL_SPECIAL_ADDRESS
@@ -208,98 +202,89 @@ TL_TRANSPORT_PROTOCOL;
  *
  * \see tl_network_get_special_address
  */
-typedef enum
-{
-    /**
-     * \brief Address that sends to the local host only
-     *
-     * Can be used with tl_network_create_server to bind to the loop back
-     * device, or with tl_network_create_client to connect to the local
-     * machine via the loopback device.
-     */
-    TL_LOOPBACK = 0,
+typedef enum {
+	/**
+	 * \brief Address that sends to the local host only
+	 *
+	 * Can be used with tl_network_create_server to bind to the loop back
+	 * device, or with tl_network_create_client to connect to the local
+	 * machine via the loopback device.
+	 */
+	TL_LOOPBACK = 0,
 
-    /**
-     * \brief Generic broad cast address that sends at least to all devices
-     *        on the same link
-     *
-     * Typically used with tl_packetserver on a not connection oriented
-     * protocol (e.g. UDP) to send broadcast packets.
-     *
-     * For protocols like IPv4 \ref tl_network_get_special_address returns a
-     * generic global broad cast address. Since IPv4 routers \a typically
-     * don't forward global broad cast packets, sending packets there results
-     * \a usually in sending to all machines on the same link (i.e. layer 2
-     * broadcast).
-     *
-     * For protocols like IPv6 that don't have generic broadcasts, things are
-     * a little more involved and \ref tl_network_get_special_address can't
-     * return a sensible, generic answer.
-     */
-    TL_BROADCAST = 1,
+	/**
+	 * \brief Generic broad cast address that sends at least to all
+	 *        devices on the same link
+	 *
+	 * Typically used with tl_packetserver on a not connection oriented
+	 * protocol (e.g. UDP) to send broadcast packets.
+	 *
+	 * For protocols like IPv4 \ref tl_network_get_special_address
+	 * returns a generic global broad cast address. Since IPv4 routers
+	 * \a typically don't forward global broad cast packets, sending
+	 * packets there results \a usually in sending to all machines on the
+	 * same link (i.e. layer 2 broadcast).
+	 *
+	 * For protocols like IPv6 that don't have generic broadcasts, things
+	 * are a little more involved and \ref tl_network_get_special_address
+	 * can't return a sensible, generic answer.
+	 */
+	TL_BROADCAST = 1,
 
-    /**
-     * \brief Used to accept connections from all interfaces
-     *
-     * Typically used with tl_network_create_server to not bind to any
-     * particular interface and accept connections from everywhere.
-     */
-    TL_ALL = 2
-}
-TL_SPECIAL_ADDRESS;
+	/**
+	 * \brief Used to accept connections from all interfaces
+	 *
+	 * Typically used with tl_network_create_server to not bind to any
+	 * particular interface and accept connections from everywhere.
+	 */
+	TL_ALL = 2
+} TL_SPECIAL_ADDRESS;
 
 /** \brief Flags for network servers and connections */
-typedef enum
-{
-    /** \brief If set, allow sending broadcast packets */
-    TL_ALLOW_BROADCAST = 0x01,
+typedef enum {
+	/** \brief If set, allow sending broadcast packets */
+	TL_ALLOW_BROADCAST = 0x01,
 
-    /**
-     * \brief If set, IPv4 packets have the don't fragment bit set
-     *
-     * The underlying implementation may not support this directly
-     * (e.g. Mac OS X) or might do path MTU discovery (e.g. Linux).
-     *
-     * Failure to set this flag is not treated as an error. Even if the OS
-     * sets it and does path MTU discovery, naughty network hops in between
-     * might fragment packets any way (hopefully rare).
-     */
-    TL_DONT_FRAGMENT = 0x02,
+	/**
+	 * \brief If set, IPv4 packets have the don't fragment bit set
+	 *
+	 * The underlying implementation may not support this directly
+	 * (e.g. Mac OS X) or might do path MTU discovery (e.g. Linux).
+	 *
+	 * Failure to set this flag is not treated as an error. Even if the OS
+	 * sets it and does path MTU discovery, naughty network hops in
+	 * between might fragment packets any way (hopefully rare).
+	 */
+	TL_DONT_FRAGMENT = 0x02,
 
-    /** \brief Enum value with all possible/allowed flags set */
-    TL_ALL_NETWORK_FLAGS = 0x03
-}
-TL_NETWORK_FLAGS;
-
+	/** \brief Enum value with all possible/allowed flags set */
+	TL_ALL_NETWORK_FLAGS = 0x03
+} TL_NETWORK_FLAGS;
 
 /**
  * \struct tl_net_addr
  *
  * \brief Encapsulates OSI layer 3 and 4 addresses
  */
-struct tl_net_addr
-{
-    int net;        /**< \brief \ref TL_NETWORK_PROTOCOL identifier */
-    int transport;  /**< \brief \ref TL_TRANSPORT_PROTOCOL identifier */
+struct tl_net_addr {
+	int net;	/**< \brief \ref TL_NETWORK_PROTOCOL identifier */
+	int transport;	/**< \brief \ref TL_TRANSPORT_PROTOCOL identifier */
 
-    tl_u16 port;    /**< \brief Port number (layer 4 address) */
+	tl_u16 port;	/**< \brief Port number (layer 4 address) */
 
-    /** \brief Layer 3 address */
-    union
-    {
-        /** \brief IPv4 address in the systems native byte order */
-        tl_u32 ipv4;
+	/** \brief Layer 3 address */
+	union {
+		/** \brief IPv4 address in the systems native byte order */
+		tl_u32 ipv4;
 
-        /**
-         * \brief IPv6 address in the systems native byte order, least
-         *        significant to most significant (i.e. from right to left)
-         */
-        tl_u16 ipv6[8];
-    }
-    addr;
+		/**
+		 * \brief IPv6 address in the systems native byte order, least
+		 *        significant to most significant (i.e. from right
+		 *        to left)
+		 */
+		tl_u16 ipv6[8];
+	} addr;
 };
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -326,8 +311,8 @@ extern "C" {
  *
  * \return On success, the number of addresses found, zero on failure
  */
-TLOSAPI int tl_network_resolve_name( const char* hostname, int proto,
-                                     tl_net_addr* addr, size_t count );
+TLOSAPI int tl_network_resolve_name(const char *hostname, int proto,
+				    tl_net_addr *addr, size_t count);
 
 /**
  * \brief Resolve an address to a host or DNS name
@@ -343,8 +328,8 @@ TLOSAPI int tl_network_resolve_name( const char* hostname, int proto,
  *         there simply is no name stored for this address, or a negative
  *         \ref TL_ERROR_CODE value on failure.
  */
-TLOSAPI int tl_network_resolve_address( const tl_net_addr* addr,
-                                        tl_string* out );
+TLOSAPI int tl_network_resolve_address(const tl_net_addr *addr,
+					tl_string *out);
 
 /**
  * \brief Create a server instance
@@ -356,9 +341,8 @@ TLOSAPI int tl_network_resolve_address( const tl_net_addr* addr,
  *
  * \return A pointer to a new server instance or NULL on failure
  */
-TLOSAPI tl_server* tl_network_create_server( const tl_net_addr* addr,
-                                             unsigned int backlog,
-                                             int flags );
+TLOSAPI tl_server *tl_network_create_server(const tl_net_addr *addr,
+					    unsigned int backlog, int flags);
 
 /**
  * \brief Create a connection to a server
@@ -369,9 +353,9 @@ TLOSAPI tl_server* tl_network_create_server( const tl_net_addr* addr,
  *
  * \return A pointer to a tl_iostream instance or NULL on failure
  */
-TLOSAPI tl_iostream* tl_network_create_client( const tl_net_addr* peer,
-                                               const tl_net_addr* local,
-                                               int flags );
+TLOSAPI tl_iostream *tl_network_create_client(const tl_net_addr *peer,
+					      const tl_net_addr *local,
+					      int flags);
 
 /**
  * \brief Get a special network address
@@ -386,8 +370,8 @@ TLOSAPI tl_iostream* tl_network_create_client( const tl_net_addr* peer,
  * \return Non-zero on success, zero on failure (unsuported protocol, or the
  *         protocol doesn't support the special address type)
  */
-TLOSAPI int tl_network_get_special_address( tl_net_addr* addr, int type,
-                                            int net );
+TLOSAPI int tl_network_get_special_address(tl_net_addr *addr, int type,
+					   int net);
 
 /**
  * \brief Get the address of a peer from an end-to-end network stream
@@ -398,8 +382,8 @@ TLOSAPI int tl_network_get_special_address( tl_net_addr* addr, int type,
  *
  * \return Non-zero on success, zero on failure
  */
-TLOSAPI int tl_network_get_peer_address( tl_iostream* stream,
-                                         tl_net_addr* addr );
+TLOSAPI int tl_network_get_peer_address(tl_iostream *stream,
+					tl_net_addr *addr);
 
 /**
  * \brief Get our own address in an end-to-end network stream
@@ -410,8 +394,8 @@ TLOSAPI int tl_network_get_peer_address( tl_iostream* stream,
  *
  * \return Non-zero on success, zero on failure
  */
-TLOSAPI int tl_network_get_local_address( tl_iostream* stream,
-                                          tl_net_addr* addr );
+TLOSAPI int tl_network_get_local_address(tl_iostream *stream,
+					 tl_net_addr *addr);
 
 /**
  * \brief Create a low-level state-less, packet based server implementation
@@ -432,9 +416,9 @@ TLOSAPI int tl_network_get_local_address( tl_iostream* stream,
  *
  * \return A pointer to a server interface on success, NULL on failure
  */
-TLOSAPI tl_packetserver*
-tl_network_create_packet_server( const tl_net_addr* local,
-                                 const tl_net_addr* remote, int flags );
+TLOSAPI tl_packetserver
+*tl_network_create_packet_server(const tl_net_addr *local,
+				 const tl_net_addr *remote, int flags);
 
 /**
  * \brief Convert a network address type to a different address type
@@ -452,8 +436,8 @@ tl_network_create_packet_server( const tl_net_addr* local,
  *
  * \return Non-zero on success, zero if the conversion is not possible
  */
-TLOSAPI int tl_net_addr_convert( tl_net_addr* dst, const tl_net_addr* src,
-                                 int target );
+TLOSAPI int tl_net_addr_convert(tl_net_addr *dst, const tl_net_addr *src,
+				int target);
 
 /**
  * \brief Compare two network addresses for equality
@@ -470,7 +454,7 @@ TLOSAPI int tl_net_addr_convert( tl_net_addr* dst, const tl_net_addr* src,
  *
  * \return Non-zero if the addresses are equal, zero if not
  */
-TLOSAPI int tl_net_addr_equal( const tl_net_addr* a, const tl_net_addr* b );
+TLOSAPI int tl_net_addr_equal(const tl_net_addr *a, const tl_net_addr *b);
 
 #ifdef __cplusplus
 }

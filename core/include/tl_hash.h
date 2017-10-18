@@ -48,11 +48,7 @@
  *     check sum
  */
 
-
-
 #include "tl_predef.h"
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,7 +78,7 @@ extern "C" {
  *
  * \return The calculated hash value
  */
-TLAPI tl_u32 tl_hash_murmur3_32( const void* data, size_t len, tl_u32 seed );
+TLAPI tl_u32 tl_hash_murmur3_32(const void *data, size_t len, tl_u32 seed);
 
 /**
  * \brief Compute the CRC-32 sum of a block of data
@@ -100,7 +96,7 @@ TLAPI tl_u32 tl_hash_murmur3_32( const void* data, size_t len, tl_u32 seed );
  *
  * \return The calculated check sum
  */
-TLAPI tl_u32 tl_hash_crc32( tl_u32 crc, const void* data, size_t len );
+TLAPI tl_u32 tl_hash_crc32(tl_u32 crc, const void *data, size_t len);
 
 #ifdef __cplusplus
 }

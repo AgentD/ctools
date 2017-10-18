@@ -30,11 +30,7 @@
 #ifndef TOOLS_PROCESS_H
 #define TOOLS_PROCESS_H
 
-
-
 #include "tl_predef.h"
-
-
 
 /**
  * \page conc Concurrency
@@ -85,38 +81,34 @@
  *
  * \brief Flags that can be used by tl_process_create
  */
-typedef enum
-{
-    /**
-     * \brief If set, redirect the input stream to a tl_iostream
-     *
-     * If not set, the standard input stream is connected to the standard
-     * input stream of the parent process.
-     */
-    TL_PIPE_STDIN = 0x0001,
+typedef enum {
+	/**
+	 * \brief If set, redirect the input stream to a tl_iostream
+	 *
+	 * If not set, the standard input stream is connected to the standard
+	 * input stream of the parent process.
+	 */
+	TL_PIPE_STDIN = 0x0001,
 
-    /**
-     * \brief If set, redirect the output stream to a tl_iostream
-     *
-     * If not set, the standard output stream is connected to the standard
-     * output stream of the parent process.
-     */
-    TL_PIPE_STDOUT = 0x0002,
+	/**
+	 * \brief If set, redirect the output stream to a tl_iostream
+	 *
+	 * If not set, the standard output stream is connected to the standard
+	 * output stream of the parent process.
+	 */
+	TL_PIPE_STDOUT = 0x0002,
 
-    /**
-     * \brief If set, redirect the error stream to a tl_iostream
-     *
-     * If not set, the standard error stream is connected to the standard
-     * error stream of the parent process.
-     */
-    TL_PIPE_STDERR = 0x0004,
+	/**
+	 * \brief If set, redirect the error stream to a tl_iostream
+	 *
+	 * If not set, the standard error stream is connected to the standard
+	 * error stream of the parent process.
+	 */
+	TL_PIPE_STDERR = 0x0004,
 
-    /** \brief If set, redirect the error stream to the output stream */
-    TL_STDERR_TO_STDOUT = 0x0008
-}
-TL_PROCESS_FLAGS;
-
-
+	/** \brief If set, redirect the error stream to the output stream */
+	TL_STDERR_TO_STDOUT = 0x0008
+} TL_PROCESS_FLAGS;
 
 #ifdef __cplusplus
 extern "C" {
@@ -135,9 +127,9 @@ extern "C" {
  *                 child process inherits the environment of the parent.
  * \param flags    A combination of \ref TL_PROCESS_FLAGS
  */
-TLOSAPI tl_process* tl_process_create( const char* filename,
-                                       const char* const* argv,
-                                       const char* const* env, int flags );
+TLOSAPI tl_process *tl_process_create(const char *filename,
+					const char *const *argv,
+					const char *const *env, int flags);
 
 /**
  * \brief Kill a child process and free the memory used for managing it
@@ -146,7 +138,7 @@ TLOSAPI tl_process* tl_process_create( const char* filename,
  *
  * \param proc a pointer to a process object
  */
-TLOSAPI void tl_process_destroy( tl_process* proc );
+TLOSAPI void tl_process_destroy(tl_process *proc);
 
 /**
  * \brief Get the input and output stream of a process
@@ -169,7 +161,7 @@ TLOSAPI void tl_process_destroy( tl_process* proc );
  * \return A pointer to a stream encapsulating the STDOUT and STDIN streams of
  *         the child, or NULL if they are not redirected.
  */
-TLOSAPI tl_iostream* tl_process_get_stdio( tl_process* proc );
+TLOSAPI tl_iostream *tl_process_get_stdio(tl_process *proc);
 
 /**
  * \brief Get the error stream of a process
@@ -191,7 +183,7 @@ TLOSAPI tl_iostream* tl_process_get_stdio( tl_process* proc );
  * \return A pointer to a stream encapsulating the STDERR stream or NULL if
  *         it is not redirected
  */
-TLOSAPI tl_iostream* tl_process_get_stderr( tl_process* proc );
+TLOSAPI tl_iostream *tl_process_get_stderr(tl_process *proc);
 
 /**
  * \brief Immediately terminate a child process
@@ -203,7 +195,7 @@ TLOSAPI tl_iostream* tl_process_get_stderr( tl_process* proc );
  *
  * \param proc A pointer to a process object
  */
-TLOSAPI void tl_process_kill( tl_process* proc );
+TLOSAPI void tl_process_kill(tl_process *proc);
 
 /**
  * \brief Ask a child process to terminate
@@ -215,7 +207,7 @@ TLOSAPI void tl_process_kill( tl_process* proc );
  *
  * \param proc A pointer to a process object
  */
-TLOSAPI void tl_process_terminate( tl_process* proc );
+TLOSAPI void tl_process_terminate(tl_process *proc);
 
 /**
  * \brief Wait for a process to terminate and get its exit status
@@ -237,8 +229,8 @@ TLOSAPI void tl_process_terminate( tl_process* proc );
  *         occoured, TL_ERR_NOT_EXIST if the process does not exist and
  *         TL_ERR_INTERNAL if another kind of error occoured.
  */
-TLOSAPI int tl_process_wait( tl_process* proc, int* status,
-                             unsigned int timeout );
+TLOSAPI int tl_process_wait(tl_process *proc, int *status,
+			    unsigned int timeout);
 
 /**
  * \brief Make the calling thread block for a specified number of milliseconds
@@ -247,7 +239,7 @@ TLOSAPI int tl_process_wait( tl_process* proc, int* status,
  *
  * \param ms A number of milliseconds to wait
  */
-TLOSAPI void tl_sleep( unsigned long ms );
+TLOSAPI void tl_sleep(unsigned long ms);
 
 #ifdef __cplusplus
 }

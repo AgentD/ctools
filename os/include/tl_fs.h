@@ -53,11 +53,7 @@
  * \li \ref tl_fs_delete Delete a file or directory
  */
 
-
-
 #include "tl_predef.h"
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,7 +68,7 @@ extern "C" {
  *
  * \return A null terminated ASCII string containing the directory seperator
  */
-TLOSAPI const char* tl_fs_get_dir_sep( void );
+TLOSAPI const char *tl_fs_get_dir_sep(void);
 
 /**
  * \brief Determine whether a path actually exists
@@ -82,7 +78,7 @@ TLOSAPI const char* tl_fs_get_dir_sep( void );
  * \return Zero if the the path exists, a positive value if not, or a
  *         negative \ref TL_ERROR_CODE value if an error occoured.
  */
-TLOSAPI int tl_fs_exists( const char* path );
+TLOSAPI int tl_fs_exists(const char *path);
 
 /**
  * \brief Determine whether a path names a directory or a file
@@ -93,7 +89,7 @@ TLOSAPI int tl_fs_exists( const char* path );
  *         exists, but isn't a directory, or a negative \ref TL_ERROR_CODE
  *         value if an error occoured.
  */
-TLOSAPI int tl_fs_is_directory( const char* path );
+TLOSAPI int tl_fs_is_directory(const char *path);
 
 /**
  * \brief Determine whether a path names a symbolic link
@@ -104,7 +100,7 @@ TLOSAPI int tl_fs_is_directory( const char* path );
  *         if the path exists but isn't symlink, or a negative
  *         \ref TL_ERROR_CODE value if an error occoured.
  */
-TLOSAPI int tl_fs_is_symlink( const char* path );
+TLOSAPI int tl_fs_is_symlink(const char *path);
 
 /**
  * \brief Create a directory
@@ -120,7 +116,7 @@ TLOSAPI int tl_fs_is_symlink( const char* path );
  *         if a part of the path does not exist, \ref TL_ERR_NOT_DIR if an
  *         element of the path is not a directory.
  */
-TLOSAPI int tl_fs_mkdir( const char* path );
+TLOSAPI int tl_fs_mkdir(const char *path);
 
 /**
  * \brief Change the calling processes working directory
@@ -129,7 +125,7 @@ TLOSAPI int tl_fs_mkdir( const char* path );
  *
  * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
-TLOSAPI int tl_fs_cwd( const char* path );
+TLOSAPI int tl_fs_cwd(const char *path);
 
 /**
  * \brief Get the working directory of the calling process
@@ -138,7 +134,7 @@ TLOSAPI int tl_fs_cwd( const char* path );
  *
  * \return Zero on success, a negative \ref TL_ERROR_CODE value on failure
  */
-TLOSAPI int tl_fs_get_wd( tl_string* path );
+TLOSAPI int tl_fs_get_wd(tl_string *path);
 
 /**
  * \brief Get the user home directory
@@ -155,7 +151,7 @@ TLOSAPI int tl_fs_get_wd( tl_string* path );
  * \return Zero on success, a positive value if the user doesn't have a home
  *         directory, a negative \ref TL_ERROR_CODE value on failure.
  */
-TLOSAPI int tl_fs_get_user_dir( tl_string* path );
+TLOSAPI int tl_fs_get_user_dir(tl_string *path);
 
 /**
  * \brief Delete a file, directory or symlink
@@ -173,7 +169,7 @@ TLOSAPI int tl_fs_get_user_dir( tl_string* path );
  *         \ref TL_ERR_NOT_EMPTY is reported when trying to delete a non
  *         empty directory.
  */
-TLOSAPI int tl_fs_delete( const char* path );
+TLOSAPI int tl_fs_delete(const char *path);
 
 /**
  * \brief Determine the size of a file in bytes
@@ -185,7 +181,7 @@ TLOSAPI int tl_fs_delete( const char* path );
  *         \ref TL_ERR_NOT_FILE is reported if the path points to something
  *         other than a regular file.
  */
-TLOSAPI int tl_fs_get_file_size( const char* path, tl_u64* size );
+TLOSAPI int tl_fs_get_file_size(const char *path, tl_u64 *size);
 
 #ifdef __cplusplus
 }
