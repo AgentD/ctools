@@ -187,7 +187,7 @@ static TL_INLINE int tl_iostream_read(void *stream, void *buffer,
  *
  * \memberof tl_iostream
  */
-static TL_INLINE int tl_iostream_write(void *stream, void *buffer,
+static TL_INLINE int tl_iostream_write(void *stream, const void *buffer,
 				       size_t size, size_t *actual)
 {
 	return ((tl_iostream *)stream)->write(stream, buffer, size, actual);
