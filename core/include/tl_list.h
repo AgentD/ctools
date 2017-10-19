@@ -76,6 +76,9 @@ struct tl_list_node {
 
 	/** \brief A pointer to the following list node */
 	tl_list_node *prev;
+
+	/** \brief List node payload data */
+	tl_u8 data[1];
 };
 
 /**

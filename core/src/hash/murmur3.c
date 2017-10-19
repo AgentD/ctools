@@ -16,15 +16,6 @@
 #define MM3_M 5
 #define MM3_N 0xE6546B64
 
-#ifdef TL_ALLIGN_MEMORY
-static tl_u32 read32_unaligned(const void *buf)
-{
-	tl_u32 ret;
-	memcpy(&ret, buf, 4);
-	return ret;
-}
-#endif
-
 tl_u32 tl_hash_murmur3_32(const void *data, size_t len, tl_u32 seed)
 {
 	const tl_u32 *blocks = (const tl_u32 *)data;
@@ -33,12 +24,11 @@ tl_u32 tl_hash_murmur3_32(const void *data, size_t len, tl_u32 seed)
 	const unsigned char *tail;
 
 	for (i = 0; i < nblocks; ++i) {
-#ifdef TL_ALLIGN_MEMORY
-		if (((size_t)blocks) % sizeof(tl_u32))
-			k = read32_unaligned(blocks + i);
-		else
-#endif
+		if (((size_t)blocks) % sizeof(tl_u32)) {
+			memcpy(&k, blocks + i, 4);
+		} else {
 			k = blocks[i];
+		}
 
 		k *= MM3_C1;
 		k = (k << MM3_R1) | (k >> (32 - MM3_R1));
