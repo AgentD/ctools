@@ -8,7 +8,7 @@
 #define TL_EXPORT
 #include "tl_compress.h"
 
-int tl_compress_blob(tl_blob * dst, const tl_blob * src, int algo, int flags)
+int tl_compress_blob(tl_blob *dst, const tl_blob *src, int algo, int flags)
 {
 	tl_compressor *comp = tl_create_compressor(algo, flags);
 	const unsigned char *ptr;
@@ -25,11 +25,7 @@ int tl_compress_blob(tl_blob * dst, const tl_blob * src, int algo, int flags)
 	tl_blob_init(dst, 0, NULL);
 
 	while (total) {
-		/* stuff into compressor */
-		ret = ((tl_iostream *) comp)->write((tl_iostream *) comp, ptr,
-						    total > 4096 ? 4096 : total,
-						    &actual);
-
+		ret = tl_iostream_write(comp, ptr, total, &actual);
 		if (ret)
 			goto fail;
 
@@ -42,12 +38,9 @@ int tl_compress_blob(tl_blob * dst, const tl_blob * src, int algo, int flags)
 				goto fail;
 		}
 
-		/* pull out of compressor */
 		do {
-			ret =
-			    ((tl_iostream *) comp)->read((tl_iostream *) comp,
-							 buffer, sizeof(buffer),
-							 &actual);
+			ret = tl_iostream_read(comp, buffer, sizeof(buffer),
+					       &actual);
 
 			if (ret < 0 && ret != TL_EOF)
 				goto fail;
@@ -56,15 +49,14 @@ int tl_compress_blob(tl_blob * dst, const tl_blob * src, int algo, int flags)
 				ret = TL_ERR_ALLOC;
 				goto fail;
 			}
-		}
-		while (ret != TL_EOF && actual > 0);
+		} while (ret != TL_EOF && actual > 0);
 	}
 
-	/* cleanup */
-	((tl_iostream *) comp)->destroy((tl_iostream *) comp);
-	return 0;
- fail:
-	tl_blob_cleanup(dst);
-	((tl_iostream *) comp)->destroy((tl_iostream *) comp);
+	ret = 0;
+out:
+	tl_iostream_destroy(comp);
 	return ret;
+fail:
+	tl_blob_cleanup(dst);
+	goto out;
 }
