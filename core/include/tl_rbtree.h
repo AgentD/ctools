@@ -54,14 +54,17 @@
  * \see tl_rbtree
  */
 struct tl_rbtree_node {
+	/** \brief Non-zero if a node is red, zero if it is black */
+	unsigned char is_red;
+
 	/** \brief A pointer to the left child node */
 	tl_rbtree_node *left;
 
 	/** \brief A pointer to the right child node */
 	tl_rbtree_node *right;
 
-	/** \brief Non-zero if a node is red, zero if it is black */
-	unsigned char is_red;
+	/** \brief Payload data */
+	unsigned char payload[1];
 };
 
 /**
@@ -88,6 +91,9 @@ struct tl_rbtree {
 
 	/** \brief The size of the key field in a node */
 	size_t keysize;
+
+	/** \brief The key size rounded up to a multiple of sizeof(void*) */
+	size_t keysize_padded;
 
 	/** \brief The size of the value field in a node */
 	size_t valuesize;

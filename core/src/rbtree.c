@@ -12,38 +12,30 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define IS_RED( n ) ((n) && (n)->is_red)
+#define IS_RED(n) ((n) && (n)->is_red)
 
-#ifdef TL_ALLIGN_MEMORY
-#define PADDING sizeof(void*)
-#define ALLIGN( ptr )\
-            if( ((size_t)(ptr)) % PADDING )\
-                (ptr) += PADDING - (((size_t)(ptr)) % PADDING)
-#else
-#define PADDING 0
-#define ALLIGN( ptr )
-#endif
+static void destroy_node(tl_rbtree_node *this, const tl_rbtree *tree)
+{
+	unsigned char *ptr;
+
+	ptr = &this->payload[0];
+	tl_allocator_cleanup(tree->keyalloc, ptr, tree->keysize, 1);
+
+	ptr += tree->keysize_padded;
+	tl_allocator_cleanup(tree->valalloc, ptr, tree->valuesize, 1);
+	free(this);
+}
 
 static void node_recursive_delete(tl_rbtree_node *this, const tl_rbtree *tree)
 {
 	tl_rbtree_node *l, *r;
-	char *ptr;
 recursion:
 	if (!this)
 		return;
 
 	l = this->left;
 	r = this->right;
-
-	ptr = (char *)this + sizeof(*this);
-	ALLIGN(ptr);
-	tl_allocator_cleanup(tree->keyalloc, ptr, tree->keysize, 1);
-
-	ptr += tree->keysize;
-	ALLIGN(ptr);
-	tl_allocator_cleanup(tree->valalloc, ptr, tree->valuesize, 1);
-
-	free(this);
+	destroy_node(this, tree);
 
 	node_recursive_delete(l, tree);
 	this = r;
@@ -140,18 +132,8 @@ static tl_rbtree_node *subtree_insert(tl_rbtree *this, tl_rbtree_node *root,
 static tl_rbtree_node *remove_min_from_subtree(tl_rbtree_node *this,
 					       tl_rbtree *tree)
 {
-	char *ptr;
-
 	if (!this->left) {
-		ptr = (char *)this + sizeof(*this);
-		ALLIGN(ptr);
-		tl_allocator_cleanup(tree->keyalloc, ptr, tree->keysize, 1);
-
-		ptr += tree->keysize;
-		ALLIGN(ptr);
-		tl_allocator_cleanup(tree->valalloc, ptr, tree->valuesize, 1);
-
-		free(this);
+		destroy_node(this, tree);
 		return NULL;
 	}
 
@@ -165,21 +147,11 @@ static tl_rbtree_node *remove_min_from_subtree(tl_rbtree_node *this,
 static tl_rbtree_node *remove_max_from_subtree(tl_rbtree_node *this,
 					       tl_rbtree *tree)
 {
-	char *ptr;
-
 	if (IS_RED(this->left))
 		this = rotate_right(this);
 
 	if (!this->right) {
-		ptr = (char *)this + sizeof(*this);
-		ALLIGN(ptr);
-		tl_allocator_cleanup(tree->keyalloc, ptr, tree->keysize, 1);
-
-		ptr += tree->keysize;
-		ALLIGN(ptr);
-		tl_allocator_cleanup(tree->valalloc, ptr, tree->valuesize, 1);
-
-		free(this);
+		destroy_node(this, tree);
 		return NULL;
 	}
 
@@ -220,9 +192,8 @@ static tl_rbtree_node *remove_from_subtree(tl_rbtree *this,
 				;
 
 			/* "swap" minimum of right subtree with root */
-			memcpy((unsigned char *)root + sizeof(*root),
-			       (unsigned char *)min + sizeof(*min),
-			       2 * PADDING + this->keysize + this->valuesize);
+			memcpy(&root->payload[0], &min->payload[0],
+			       this->keysize_padded + this->valuesize);
 
 			/* remove minimum of the right subtree */
 			root->right =
@@ -243,20 +214,19 @@ tl_rbtree_node *tl_rbtree_node_create(const tl_rbtree *tree,
 {
 	tl_rbtree_node *node;
 	unsigned char *ptr;
+	size_t size;
 
 	assert(tree);
 
-	node = calloc(1, sizeof(*node) + 2 * PADDING +
-			 tree->keysize + tree->valuesize);
-
+	size = sizeof(*node) - 1 + tree->keysize_padded + tree->valuesize;
+	node = calloc(1, size);
 	if (!node)
 		return NULL;
 
 	node->is_red = 1;
 
 	/* set key pointer */
-	ptr = (unsigned char *)node + sizeof(tl_rbtree_node);
-	ALLIGN(ptr);
+	ptr = &node->payload[0];
 
 	if (key) {
 		tl_allocator_copy(tree->keyalloc, ptr, key, tree->keysize, 1);
@@ -265,12 +235,11 @@ tl_rbtree_node *tl_rbtree_node_create(const tl_rbtree *tree,
 	}
 
 	/* set value */
-	ptr += tree->keysize;
-	ALLIGN(ptr);
+	ptr += tree->keysize_padded;
 
 	if (value) {
-		tl_allocator_copy(tree->valalloc, ptr, value, tree->valuesize,
-				  1);
+		tl_allocator_copy(tree->valalloc, ptr, value,
+				  tree->valuesize, 1);
 	} else {
 		tl_allocator_init(tree->valalloc, ptr, tree->valuesize, 1);
 	}
@@ -280,31 +249,19 @@ tl_rbtree_node *tl_rbtree_node_create(const tl_rbtree *tree,
 void *tl_rbtree_node_get_key(const tl_rbtree *tree,
 			     const tl_rbtree_node *node)
 {
-	char *ptr;
 	(void)tree;
 
 	assert(tree && node);
 
-	ptr = (char *)node + sizeof(tl_rbtree_node);
-	ALLIGN(ptr);
-
-	return ptr;
+	return (void *)&node->payload[0];
 }
 
 void *tl_rbtree_node_get_value(const tl_rbtree *tree,
 			       const tl_rbtree_node *node)
 {
-	char *ptr;
-
 	assert(tree && node);
 
-	ptr = (char *)node + sizeof(tl_rbtree_node);
-	ALLIGN(ptr);
-
-	ptr += tree->keysize;
-	ALLIGN(ptr);
-
-	return ptr;
+	return (void *)(&node->payload[0] + tree->keysize_padded);
 }
 
 static tl_rbtree_node *copy_subtree(const tl_rbtree *this,
@@ -345,9 +302,15 @@ void tl_rbtree_init(tl_rbtree *this, size_t keysize, size_t valuesize,
 	this->size = 0;
 	this->compare = comparefun;
 	this->keysize = keysize;
+	this->keysize_padded = keysize;
 	this->valuesize = valuesize;
 	this->keyalloc = keyalloc;
 	this->valalloc = valalloc;
+
+	if (keysize % sizeof(void*)) {
+		this->keysize_padded += sizeof(void*);
+		this->keysize_padded -= keysize % sizeof(void*);
+	}
 }
 
 void tl_rbtree_cleanup(tl_rbtree *this)
@@ -539,8 +502,8 @@ int tl_rbtree_remove(tl_rbtree *this, const void *key, void *value)
 
 	/* cleanup */
 	tl_allocator_cleanup(this->keyalloc, ptr, this->keysize, 1);
-	ptr += this->keysize;
-	ALLIGN(ptr);
+
+	ptr = tl_rbtree_node_get_value(this, node);
 
 	if (value) {
 		memcpy(value, ptr, this->valuesize);
