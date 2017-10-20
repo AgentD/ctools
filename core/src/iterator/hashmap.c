@@ -34,18 +34,9 @@ typedef struct {
 #endif
 
 
-static void tl_hashmap_iterator_destroy(tl_iterator *this)
+static void find_next_bin(tl_hashmap_iterator *this)
 {
-	free(this);
-}
-
-static void tl_hashmap_iterator_reset(tl_iterator *super)
-{
-	tl_hashmap_iterator *this = (tl_hashmap_iterator *)super;
-
-	this->prev = NULL;
-	this->ent = NULL;
-	this->idx = 0;
+	this->prev = this->ent = NULL;
 
 	while (!this->ent && (this->idx < this->map->bincount)) {
 		this->ent = tl_hashmap_get_bin(this->map, this->idx);
@@ -55,6 +46,20 @@ static void tl_hashmap_iterator_reset(tl_iterator *super)
 
 		++this->idx;
 	}
+}
+
+
+static void tl_hashmap_iterator_destroy(tl_iterator *this)
+{
+	free(this);
+}
+
+static void tl_hashmap_iterator_reset(tl_iterator *super)
+{
+	tl_hashmap_iterator *this = (tl_hashmap_iterator *)super;
+
+	this->idx = 0;
+	find_next_bin(this);
 }
 
 static int tl_hashmap_iterator_has_data(tl_iterator *this)
@@ -71,17 +76,8 @@ static void tl_hashmap_iterator_next(tl_iterator *super)
 		this->ent = this->ent->next;
 
 		if (!this->ent) {
-			this->prev = NULL;
-
-			while (!this->ent) {
-				++this->idx;
-
-				if (this->idx >= this->map->bincount)
-					break;
-
-				this->ent = tl_hashmap_get_bin(this->map,
-								this->idx);
-			}
+			this->idx += 1;
+			find_next_bin(this);
 		}
 	}
 }
@@ -110,20 +106,18 @@ static void tl_hashmap_iterator_remove(tl_iterator *super)
 {
 	tl_hashmap_iterator *this = (tl_hashmap_iterator *)super;
 	tl_hashmap_entry *old;
+	void *key, *val;
 	size_t binsize;
-	char *ptr;
 	int used;
 
 	if (!this->ent)
 		return;
 
-	ptr = (char *)this->ent + sizeof(tl_hashmap_entry);
-	ALLIGN(ptr);
-	tl_allocator_cleanup(this->map->keyalloc, ptr, this->map->keysize, 1);
+	key = tl_hashmap_entry_get_key(this->map, this->ent);
+	val = tl_hashmap_entry_get_value(this->map, this->ent);
 
-	ptr += this->map->keysize;
-	ALLIGN(ptr);
-	tl_allocator_cleanup(this->map->objalloc, ptr, this->map->objsize, 1);
+	tl_allocator_cleanup(this->map->keyalloc, key, this->map->keysize, 1);
+	tl_allocator_cleanup(this->map->objalloc, val, this->map->objsize, 1);
 
 	if (this->prev) {
 		this->prev->next = this->ent->next;
@@ -149,18 +143,8 @@ static void tl_hashmap_iterator_remove(tl_iterator *super)
 		this->map->bitmap[this->idx / (sizeof(int) * CHAR_BIT)]&=used;
 	}
 
-	/* find next bin start */
-	this->prev = NULL;
-	this->ent = NULL;
-
-	while (!this->ent) {
-		++this->idx;
-
-		if (this->idx >= this->map->bincount)
-			break;
-
-		this->ent = tl_hashmap_get_bin(this->map, this->idx);
-	}
+	this->idx += 1;
+	find_next_bin(this);
 }
 
 tl_iterator *tl_hashmap_get_iterator(tl_hashmap *this)
@@ -174,9 +158,6 @@ tl_iterator *tl_hashmap_get_iterator(tl_hashmap *this)
 		return NULL;
 
 	it->map = this;
-	it->ent = NULL;
-	it->prev = NULL;
-	it->idx = 0;
 	it->super.destroy = tl_hashmap_iterator_destroy;
 	it->super.reset = tl_hashmap_iterator_reset;
 	it->super.has_data = tl_hashmap_iterator_has_data;
