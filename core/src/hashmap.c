@@ -30,10 +30,10 @@ typedef struct {
 	tl_hashmap_entry *ent;
 } entrydata;
 
-static void get_entry_data(const tl_hashmap * this, entrydata * ent,
+static void get_entry_data(const tl_hashmap *this, entrydata *ent,
 			   const void *key)
 {
-	ent->binsize = sizeof(tl_hashmap_entry) + this->keysize + this->objsize;
+	ent->binsize = sizeof(ent->ent[0]) + this->keysize + this->objsize;
 	ent->binsize += 2 * PADDING;
 
 	ent->idx = this->hash(key) % this->bincount;
@@ -46,12 +46,11 @@ static void get_entry_data(const tl_hashmap * this, entrydata * ent,
 
 /****************************************************************************/
 
-int tl_hashmap_init(tl_hashmap * this, size_t keysize, size_t objsize,
+int tl_hashmap_init(tl_hashmap *this, size_t keysize, size_t objsize,
 		    size_t bincount, tl_hash keyhash, tl_compare keycompare,
-		    tl_allocator * keyalloc, tl_allocator * valalloc)
+		    tl_allocator *keyalloc, tl_allocator *valalloc)
 {
-	size_t i, binsize, mapcount;
-	char *ptr;
+	size_t binsize, mapcount;
 
 	/* sanity check */
 	assert(this && keysize && objsize && bincount);
@@ -59,26 +58,19 @@ int tl_hashmap_init(tl_hashmap * this, size_t keysize, size_t objsize,
 
 	/* allocate bins */
 	binsize = sizeof(tl_hashmap_entry) + keysize + objsize + 2 * PADDING;
-	this->bins = malloc(binsize * bincount);
+	this->bins = calloc(bincount, binsize);
 
 	if (!this->bins)
 		return 0;
 
 	/* allocate usage bitmap */
 	mapcount = 1 + (bincount / (sizeof(int) * CHAR_BIT));
-	this->bitmap = malloc(mapcount * sizeof(int));
+	this->bitmap = calloc(mapcount, sizeof(int));
 
 	if (!this->bitmap) {
 		free(this->bins);
 		return 0;
 	}
-
-	/* clear hashmap */
-	memset(this->bitmap, 0, mapcount * sizeof(int));
-	ptr = (char *)this->bins;
-
-	for (i = 0; i < bincount; ++i, ptr += binsize)
-		((tl_hashmap_entry *) ptr)->next = NULL;
 
 	/* init */
 	this->keysize = keysize;
@@ -91,7 +83,7 @@ int tl_hashmap_init(tl_hashmap * this, size_t keysize, size_t objsize,
 	return 1;
 }
 
-void tl_hashmap_cleanup(tl_hashmap * this)
+void tl_hashmap_cleanup(tl_hashmap *this)
 {
 	assert(this);
 
@@ -103,7 +95,7 @@ void tl_hashmap_cleanup(tl_hashmap * this)
 	memset(this, 0, sizeof(tl_hashmap));
 }
 
-int tl_hashmap_copy(tl_hashmap * this, const tl_hashmap * src)
+int tl_hashmap_copy(tl_hashmap *this, const tl_hashmap *src)
 {
 	tl_hashmap_entry *sit, *dit;
 	size_t i, binsize, mapcount;
@@ -116,12 +108,12 @@ int tl_hashmap_copy(tl_hashmap * this, const tl_hashmap * src)
 	/* allocate bins */
 	binsize = sizeof(tl_hashmap_entry) + src->keysize + src->objsize;
 	binsize += 2 * PADDING;
-	bins = malloc(binsize * src->bincount);
+	bins = calloc(binsize, src->bincount);
 
 	if (!bins)
 		return 0;
 
-	/* allocate usage bitmap */
+	/* copy usage bitmap */
 	mapcount = 1 + (src->bincount / (sizeof(int) * CHAR_BIT));
 	bitmap = malloc(mapcount * sizeof(int));
 
@@ -130,6 +122,8 @@ int tl_hashmap_copy(tl_hashmap * this, const tl_hashmap * src)
 		return 0;
 	}
 
+	memcpy(bitmap, src->bitmap, mapcount * sizeof(int));
+
 	/* copy bin contents */
 	for (i = 0; i < src->bincount; ++i) {
 		dit = (tl_hashmap_entry *) (bins + i * binsize);
@@ -137,14 +131,10 @@ int tl_hashmap_copy(tl_hashmap * this, const tl_hashmap * src)
 		used = src->bitmap[i / (sizeof(int) * CHAR_BIT)];
 		used = (used >> (i % (sizeof(int) * CHAR_BIT))) & 0x01;
 
-		if (!used) {
-			dit->next = NULL;
+		if (!used)
 			continue;
-		}
 
 		for (; sit != NULL; sit = sit->next, dit = dit->next) {
-			dit->next = NULL;
-
 			dptr = (char *)dit + sizeof(tl_hashmap_entry);
 			sptr = (char *)sit + sizeof(tl_hashmap_entry);
 			ALLIGN(dptr);
@@ -168,10 +158,9 @@ int tl_hashmap_copy(tl_hashmap * this, const tl_hashmap * src)
 		}
 	}
 
-	/* copy */
+	/* set */
 	free(this->bins);
 	free(this->bitmap);
-	memcpy(bitmap, src->bitmap, mapcount * sizeof(int));
 
 	this->keysize = src->keysize;
 	this->objsize = src->objsize;
@@ -181,7 +170,7 @@ int tl_hashmap_copy(tl_hashmap * this, const tl_hashmap * src)
 	this->bins = bins;
 	this->bitmap = bitmap;
 	return 1;
- fail:
+fail:
 	for (i = 0; i < src->bincount; ++i) {
 		sit = ((tl_hashmap_entry *) (bins + i * binsize))->next;
 
@@ -208,7 +197,7 @@ int tl_hashmap_copy(tl_hashmap * this, const tl_hashmap * src)
 	return 0;
 }
 
-void tl_hashmap_clear(tl_hashmap * this)
+void tl_hashmap_clear(tl_hashmap *this)
 {
 	size_t i, binsize, mapcount;
 	tl_hashmap_entry *it, *old;
@@ -264,7 +253,7 @@ void tl_hashmap_clear(tl_hashmap * this)
 	memset(this->bitmap, 0, mapcount * sizeof(int));
 }
 
-tl_hashmap_entry *tl_hashmap_get_bin(const tl_hashmap * this, size_t idx)
+tl_hashmap_entry *tl_hashmap_get_bin(const tl_hashmap *this, size_t idx)
 {
 	size_t binsize;
 	int used;
@@ -283,11 +272,11 @@ tl_hashmap_entry *tl_hashmap_get_bin(const tl_hashmap * this, size_t idx)
 	binsize = sizeof(tl_hashmap_entry) + this->keysize + this->objsize;
 	binsize += 2 * PADDING;
 
-	return (tl_hashmap_entry *) (this->bins + idx * binsize);
+	return (tl_hashmap_entry *)(this->bins + idx * binsize);
 }
 
-void *tl_hashmap_entry_get_key(const tl_hashmap * this,
-			       const tl_hashmap_entry * ent)
+void *tl_hashmap_entry_get_key(const tl_hashmap *this,
+			       const tl_hashmap_entry *ent)
 {
 	char *ptr;
 	(void)this;
@@ -300,8 +289,8 @@ void *tl_hashmap_entry_get_key(const tl_hashmap * this,
 	return ptr;
 }
 
-void *tl_hashmap_entry_get_value(const tl_hashmap * this,
-				 const tl_hashmap_entry * ent)
+void *tl_hashmap_entry_get_value(const tl_hashmap *this,
+				 const tl_hashmap_entry *ent)
 {
 	char *ptr;
 
@@ -315,7 +304,7 @@ void *tl_hashmap_entry_get_value(const tl_hashmap * this,
 	return ptr;
 }
 
-int tl_hashmap_insert(tl_hashmap * this, const void *key, const void *object)
+int tl_hashmap_insert(tl_hashmap *this, const void *key, const void *object)
 {
 	tl_hashmap_entry *new;
 	entrydata data;
@@ -356,7 +345,7 @@ int tl_hashmap_insert(tl_hashmap * this, const void *key, const void *object)
 	return 1;
 }
 
-int tl_hashmap_set(tl_hashmap * this, const void *key, const void *object)
+int tl_hashmap_set(tl_hashmap *this, const void *key, const void *object)
 {
 	void *ptr;
 
@@ -374,7 +363,7 @@ int tl_hashmap_set(tl_hashmap * this, const void *key, const void *object)
 	return 0;
 }
 
-void *tl_hashmap_at(const tl_hashmap * this, const void *key)
+void *tl_hashmap_at(const tl_hashmap *this, const void *key)
 {
 	tl_hashmap_entry *it;
 	entrydata data;
@@ -401,7 +390,7 @@ void *tl_hashmap_at(const tl_hashmap * this, const void *key)
 	return NULL;
 }
 
-int tl_hashmap_remove(tl_hashmap * this, const void *key, void *object)
+int tl_hashmap_remove(tl_hashmap *this, const void *key, void *object)
 {
 	tl_hashmap_entry *it, *old;
 	entrydata data;
@@ -474,7 +463,7 @@ int tl_hashmap_remove(tl_hashmap * this, const void *key, void *object)
 	return 0;
 }
 
-int tl_hashmap_is_empty(const tl_hashmap * this)
+int tl_hashmap_is_empty(const tl_hashmap *this)
 {
 	size_t i, mapcount;
 
