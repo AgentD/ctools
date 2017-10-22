@@ -119,6 +119,9 @@ struct tl_hashmap {
 	/** \brief The number of hash map bins */
 	size_t bincount;
 
+	/** \brif Size of a hashmap entry */
+	size_t binsize;
+
 	/** \brief A function used to compute the hash value of a key object */
 	tl_hash hash;
 

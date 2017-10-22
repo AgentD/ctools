@@ -23,17 +23,6 @@ typedef struct {
 } tl_hashmap_iterator;
 
 
-#ifdef TL_ALLIGN_MEMORY
-    #define PADDING sizeof(void*)
-    #define ALLIGN( ptr )\
-            if( ((size_t)(ptr)) % PADDING )\
-                (ptr) += PADDING - (((size_t)(ptr)) % PADDING)
-#else
-    #define PADDING 0
-    #define ALLIGN( ptr )
-#endif
-
-
 static void find_next_bin(tl_hashmap_iterator *this)
 {
 	this->prev = this->ent = NULL;
@@ -107,7 +96,6 @@ static void tl_hashmap_iterator_remove(tl_iterator *super)
 	tl_hashmap_iterator *this = (tl_hashmap_iterator *)super;
 	tl_hashmap_entry *old;
 	void *key, *val;
-	size_t binsize;
 	int used;
 
 	if (!this->ent)
@@ -129,12 +117,8 @@ static void tl_hashmap_iterator_remove(tl_iterator *super)
 			return;
 	} else {
 		if (this->ent->next) {
-			binsize = sizeof(tl_hashmap_entry);
-			binsize += this->map->keysize + this->map->objsize;
-			binsize += 2 * PADDING;
-
 			old = this->ent->next;
-			memcpy(this->ent, this->ent->next, binsize);
+			memcpy(this->ent, this->ent->next, this->map->binsize);
 			free(old);
 			return;
 		}
