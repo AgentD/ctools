@@ -192,7 +192,7 @@ int tl_hashmap_copy(tl_hashmap *this, const tl_hashmap *src)
 					  this->objsize, 1);
 
 			if (sit->next) {
-				dit->next = malloc(binsize);
+				dit->next = calloc(1, binsize);
 				if (!dit->next)
 					goto fail;
 			}
