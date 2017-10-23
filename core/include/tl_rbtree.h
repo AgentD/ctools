@@ -62,9 +62,6 @@ struct tl_rbtree_node {
 
 	/** \brief A pointer to the right child node */
 	tl_rbtree_node *right;
-
-	/** \brief Payload data */
-	unsigned char payload[1];
 };
 
 /**

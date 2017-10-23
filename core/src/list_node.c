@@ -18,8 +18,8 @@ tl_list_node *tl_list_node_create(const tl_list * this, const void *data)
 
 	assert(this && data);
 
-	node = malloc(sizeof(*node) - 1 + this->unitsize);
-	ptr = &node->data[0];
+	node = calloc(1, sizeof(*node) + this->unitsize);
+	ptr = (char *)node + sizeof(*node);
 
 	if (data) {
 		tl_allocator_copy(this->alloc, ptr, data, this->unitsize, 1);
@@ -27,7 +27,6 @@ tl_list_node *tl_list_node_create(const tl_list * this, const void *data)
 		tl_allocator_init(this->alloc, ptr, this->unitsize, 1);
 	}
 
-	node->prev = node->next = NULL;
 	return node;
 }
 
@@ -35,7 +34,8 @@ void tl_list_node_destroy(tl_list_node * node, tl_list * list)
 {
 	assert(node && list);
 
-	tl_allocator_cleanup(list->alloc, &node->data[0], list->unitsize, 1);
+	tl_allocator_cleanup(list->alloc, (char *)node + sizeof(*node),
+			     list->unitsize, 1);
 	free(node);
 }
 
@@ -43,5 +43,5 @@ void *tl_list_node_get_data(const tl_list_node * node)
 {
 	assert(node);
 
-	return (void *)&node->data[0];
+	return (char *)node + sizeof(*node);
 }
