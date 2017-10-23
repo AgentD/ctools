@@ -224,24 +224,6 @@ tl_hashmap_entry *tl_hashmap_get_bin(const tl_hashmap *this, size_t idx)
 	return (tl_hashmap_entry *)(this->bins + idx * this->binsize);
 }
 
-void *tl_hashmap_entry_get_key(const tl_hashmap *this,
-			       const tl_hashmap_entry *ent)
-{
-	(void)this;
-
-	assert(this && ent);
-
-	return (char *)ent + sizeof(tl_hashmap_entry);
-}
-
-void *tl_hashmap_entry_get_value(const tl_hashmap *this,
-				 const tl_hashmap_entry *ent)
-{
-	assert(this && ent);
-
-	return (char *)ent + sizeof(tl_hashmap_entry) + this->keysize_padded;
-}
-
 int tl_hashmap_insert(tl_hashmap *this, const void *key, const void *object)
 {
 	tl_hashmap_entry *new;

@@ -38,10 +38,3 @@ void tl_list_node_destroy(tl_list_node * node, tl_list * list)
 			     list->unitsize, 1);
 	free(node);
 }
-
-void *tl_list_node_get_data(const tl_list_node * node)
-{
-	assert(node);
-
-	return (char *)node + sizeof(*node);
-}

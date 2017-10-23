@@ -144,7 +144,11 @@ TLAPI void tl_list_node_destroy(tl_list_node *node, tl_list *list);
  *
  * \return A pointer to the data field
  */
-TLAPI void *tl_list_node_get_data(const tl_list_node *node);
+static TL_INLINE void *tl_list_node_get_data(const tl_list_node *node)
+{
+	assert(node);
+	return (char *)node + sizeof(*node);
+}
 
 /**
  * \brief Initialize a previously uninitialized list

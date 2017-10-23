@@ -132,8 +132,13 @@ TLAPI tl_rbtree_node *tl_rbtree_node_create(const tl_rbtree *tree,
  * \return A pointer to the key field, or NULL if one of the given pointers
  *         is NULL
  */
-TLAPI void *tl_rbtree_node_get_key(const tl_rbtree *tree,
-				   const tl_rbtree_node *node);
+static TL_INLINE void *tl_rbtree_node_get_key(const tl_rbtree *tree,
+					      const tl_rbtree_node *node)
+{
+	(void)tree;
+	assert(tree && node);
+	return (char *)node + sizeof(*node);
+}
 
 /**
  * \brief Get a pointer to the value field of a red-black tree node
@@ -146,8 +151,14 @@ TLAPI void *tl_rbtree_node_get_key(const tl_rbtree *tree,
  * \return A pointer to the value field, or NULL if one of the given pointers
  *         is NULL
  */
-TLAPI void *tl_rbtree_node_get_value(const tl_rbtree *tree,
-				     const tl_rbtree_node *node);
+static TL_INLINE void *tl_rbtree_node_get_value(const tl_rbtree *tree,
+						const tl_rbtree_node *node)
+{
+	assert(tree && node);
+
+	return (char *)node + sizeof(*node) + tree->keysize_padded;
+}
+
 
 /**
  * \brief Initialize a red-black tree

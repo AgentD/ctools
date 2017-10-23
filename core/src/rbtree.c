@@ -247,24 +247,6 @@ tl_rbtree_node *tl_rbtree_node_create(const tl_rbtree *tree,
 	return node;
 }
 
-void *tl_rbtree_node_get_key(const tl_rbtree *tree,
-			     const tl_rbtree_node *node)
-{
-	(void)tree;
-
-	assert(tree && node);
-
-	return (char *)node + sizeof(*node);
-}
-
-void *tl_rbtree_node_get_value(const tl_rbtree *tree,
-			       const tl_rbtree_node *node)
-{
-	assert(tree && node);
-
-	return (char *)node + sizeof(*node) + tree->keysize_padded;
-}
-
 static tl_rbtree_node *copy_subtree(const tl_rbtree *this,
 				    const tl_rbtree_node *src)
 {

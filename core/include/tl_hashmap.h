@@ -182,13 +182,19 @@ TLAPI void tl_hashmap_cleanup(tl_hashmap *map);
  *
  * \note This function runs in constant time
  *
- * \param map   A pointer to a hash map
- * \param entry A pointer to a entry
+ * \param map A pointer to a hash map
+ * \param ent A pointer to a entry
  *
  * \return A pointer to the key, or NULL if one of the pointers was NULL
  */
-TLAPI void *tl_hashmap_entry_get_key(const tl_hashmap *map,
-				     const tl_hashmap_entry *entry);
+static TL_INLINE void *tl_hashmap_entry_get_key(const tl_hashmap *map,
+						const tl_hashmap_entry *ent)
+{
+	(void)map;
+	assert(map && ent);
+	return (char *)ent + sizeof(tl_hashmap_entry);
+}
+
 
 /**
  * \brief Get a pointer to the value of a hash map entry
@@ -197,13 +203,17 @@ TLAPI void *tl_hashmap_entry_get_key(const tl_hashmap *map,
  *
  * \note This function runs in constant time
  *
- * \param map   A pointer to a hash map
- * \param entry A pointer to a entry
+ * \param map A pointer to a hash map
+ * \param ent A pointer to a entry
  *
  * \return A pointer to the value, or NULL if one of the pointers was NULL
  */
-TLAPI void *tl_hashmap_entry_get_value(const tl_hashmap *map,
-					const tl_hashmap_entry *entry);
+static TL_INLINE void *tl_hashmap_entry_get_value(const tl_hashmap *map,
+						  const tl_hashmap_entry *ent)
+{
+	assert(map && ent);
+	return (char *)ent + sizeof(tl_hashmap_entry) + map->keysize_padded;
+}
 
 /**
  * \brief Get a pointer to a hash map bin head
