@@ -113,6 +113,9 @@ struct tl_hashmap {
 	/** \brief The size of a key object */
 	size_t keysize;
 
+	/** \brief The key size rounded up to a multiple of sizeof(void*) */
+	size_t keysize_padded;
+
 	/** \brief The size of a value object */
 	size_t objsize;
 

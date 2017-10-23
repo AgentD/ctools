@@ -13,16 +13,6 @@
 #include <string.h>
 #include <limits.h>
 
-#ifdef TL_ALLIGN_MEMORY
-#define PADDING sizeof(void*)
-#define ALLIGN( ptr )\
-            if( ((size_t)(ptr)) % PADDING )\
-                (ptr) += PADDING - (((size_t)(ptr)) % PADDING)
-#else
-#define PADDING 0
-#define ALLIGN( ptr )
-#endif
-
 typedef struct {
 	size_t idx;
 	int used;
@@ -40,7 +30,7 @@ static void get_entry_data(const tl_hashmap *this, entrydata *ent,
 
 	ent->ent = (tl_hashmap_entry *)((char *)this->bins + offset);
 	ent->used = this->bitmap[ent->idx / (sizeof(int) * CHAR_BIT)];
-	ent->used = (ent->used >> (ent->idx % (sizeof(int) * CHAR_BIT))) & 0x01;
+	ent->used &= 1 << (ent->idx % (sizeof(int) * CHAR_BIT));
 }
 
 static void free_hashmap(tl_hashmap *this)
@@ -66,12 +56,10 @@ static void free_hashmap(tl_hashmap *this)
 			it = it->next;
 
 			entry = (char *)it + sizeof(tl_hashmap_entry);
-			ALLIGN(entry);
 			tl_allocator_cleanup(this->keyalloc, entry,
 					     this->keysize, 1);
 
-			entry += this->keysize;
-			ALLIGN(entry);
+			entry += this->keysize_padded;
 			tl_allocator_cleanup(this->objalloc, entry,
 					     this->objsize, 1);
 
@@ -87,14 +75,21 @@ int tl_hashmap_init(tl_hashmap *this, size_t keysize, size_t objsize,
 		    size_t bincount, tl_hash keyhash, tl_compare keycompare,
 		    tl_allocator *keyalloc, tl_allocator *valalloc)
 {
-	size_t binsize, mapcount;
+	size_t binsize, mapcount, keysize_padded;
 
 	/* sanity check */
 	assert(this && keysize && objsize && bincount);
 	assert(keyhash && keycompare);
 
 	/* allocate bins */
-	binsize = sizeof(tl_hashmap_entry) + keysize + objsize + 2 * PADDING;
+	keysize_padded = keysize;
+	if (keysize % sizeof(void*))
+		keysize_padded += sizeof(void*) - keysize % sizeof(void*);
+
+	binsize = sizeof(tl_hashmap_entry) + keysize_padded + objsize;
+	if (binsize % sizeof(void*))
+		binsize += sizeof(void*) - binsize % sizeof(void*);
+
 	this->bins = calloc(bincount, binsize);
 
 	if (!this->bins)
@@ -111,6 +106,7 @@ int tl_hashmap_init(tl_hashmap *this, size_t keysize, size_t objsize,
 
 	/* init */
 	this->keysize = keysize;
+	this->keysize_padded = keysize_padded;
 	this->objsize = objsize;
 	this->bincount = bincount;
 	this->binsize = binsize;
@@ -171,15 +167,11 @@ int tl_hashmap_copy(tl_hashmap *this, const tl_hashmap *src)
 		for (; sit != NULL; sit = sit->next, dit = dit->next) {
 			dptr = (char *)dit + sizeof(tl_hashmap_entry);
 			sptr = (char *)sit + sizeof(tl_hashmap_entry);
-			ALLIGN(dptr);
-			ALLIGN(sptr);
 
 			tl_allocator_copy(cpy.keyalloc, dptr, sptr,
 					  cpy.keysize, 1);
-			sptr += this->keysize;
-			dptr += this->keysize;
-			ALLIGN(sptr);
-			ALLIGN(dptr);
+			sptr += this->keysize_padded;
+			dptr += this->keysize_padded;
 
 			tl_allocator_copy(cpy.objalloc, dptr, sptr,
 					  cpy.objsize, 1);
@@ -235,30 +227,19 @@ tl_hashmap_entry *tl_hashmap_get_bin(const tl_hashmap *this, size_t idx)
 void *tl_hashmap_entry_get_key(const tl_hashmap *this,
 			       const tl_hashmap_entry *ent)
 {
-	char *ptr;
 	(void)this;
 
 	assert(this && ent);
 
-	ptr = (char *)ent + sizeof(tl_hashmap_entry);
-	ALLIGN(ptr);
-
-	return ptr;
+	return (char *)ent + sizeof(tl_hashmap_entry);
 }
 
 void *tl_hashmap_entry_get_value(const tl_hashmap *this,
 				 const tl_hashmap_entry *ent)
 {
-	char *ptr;
-
 	assert(this && ent);
 
-	ptr = (char *)ent + sizeof(tl_hashmap_entry);
-	ALLIGN(ptr);
-	ptr += this->keysize;
-	ALLIGN(ptr);
-
-	return ptr;
+	return (char *)ent + sizeof(tl_hashmap_entry) + this->keysize_padded;
 }
 
 int tl_hashmap_insert(tl_hashmap *this, const void *key, const void *object)
@@ -286,12 +267,10 @@ int tl_hashmap_insert(tl_hashmap *this, const void *key, const void *object)
 
 	/* copy key */
 	ptr = (char *)data.ent + sizeof(tl_hashmap_entry);
-	ALLIGN(ptr);
 	tl_allocator_copy(this->keyalloc, ptr, key, this->keysize, 1);
 
 	/* copy value */
-	ptr += this->keysize;
-	ALLIGN(ptr);
+	ptr += this->keysize_padded;
 	tl_allocator_copy(this->objalloc, ptr, object, this->objsize, 1);
 	return 1;
 }
@@ -329,13 +308,9 @@ void *tl_hashmap_at(const tl_hashmap *this, const void *key)
 
 	for (it = data.ent; it != NULL; it = it->next) {
 		ptr = (char *)it + sizeof(tl_hashmap_entry);
-		ALLIGN(ptr);
 
-		if (this->compare(ptr, key) == 0) {
-			ptr += this->keysize;
-			ALLIGN(ptr);
-			return ptr;
-		}
+		if (this->compare(ptr, key) == 0)
+			return ptr + this->keysize_padded;
 	}
 
 	return NULL;
@@ -361,7 +336,6 @@ int tl_hashmap_remove(tl_hashmap *this, const void *key, void *object)
 
 	while (it != NULL) {
 		ptr = (char *)it + sizeof(tl_hashmap_entry);
-		ALLIGN(ptr);
 
 		if (this->compare(ptr, key) != 0) {
 			prev = it;
@@ -370,8 +344,7 @@ int tl_hashmap_remove(tl_hashmap *this, const void *key, void *object)
 		}
 
 		tl_allocator_cleanup(this->keyalloc, ptr, this->keysize, 1);
-		ptr += this->keysize;
-		ALLIGN(ptr);
+		ptr += this->keysize_padded;
 
 		if (object) {
 			memcpy(object, ptr, this->objsize);
