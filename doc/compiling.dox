@@ -102,11 +102,6 @@ unit tests.
 \section buildopt Build options
 
 The following build options are supported:
-\li \b ALLIGN If set to true, the container data structures take care of
-    allignment of the structures they manage and all allocated structures
-    are manually alligned to the CPU word size. Setting this will set the
-    pre-processor definition \b TL_ALLIGN_MEMORY in the library source code.
-    Default is \b ON.
 \li \b SHARED If set, generate a shared library. If not set, generate a static
     library. If this is set, the pre-processor definition \b TL_SHARED is set
     in the library source code. Default is \b OFF.

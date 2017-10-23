@@ -12,7 +12,6 @@ set( PROJECT_BRIEF "A collection of tools and utillities for C programs" )
 # Feature configuration
 #----------------------------------------------------------------------
 
-option( ALLIGN "Add padding to container structures and allign data addresses" ON )
 option( SHARED "Build a dynamic instead of a static library" OFF )
 option( HAVE_DEFLATE "Support deflate compression" ON )
 
@@ -22,10 +21,6 @@ endif( )
 
 if( SHARED )
   add_definitions( -DTL_SHARED )
-endif( )
-
-if( ALLIGN )
-  add_definitions( -DTL_ALLIGN_MEMORY )
 endif( )
 
 if( HAVE_DEFLATE )
