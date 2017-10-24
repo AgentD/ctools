@@ -6,14 +6,13 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 #define TL_EXPORT
-#include "tl_compress.h"
-#include "compressor.h"
+#include "xfrm.h"
 
 #include <string.h>
 #include <stdlib.h>
 
 typedef struct {
-	base_compressor super;
+	base_transform super;
 	const char *charset;
 	unsigned int flush : 1;
 } tl_base64_encoder;
@@ -28,13 +27,13 @@ static const char *base64_url = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 				"0123456789-_=";
 
 
-static int base64_flush(tl_compressor *super, int flags)
+static int base64_flush(tl_transform *super, int flags)
 {
 	tl_base64_encoder *this = (tl_base64_encoder *)super;
 	(void)flags;
 
 	assert(this != NULL);
-	assert(((tl_iostream *)super)->type == TL_STREAM_TYPE_COMPRESSOR);
+	assert(((tl_iostream *)super)->type == TL_STREAM_TYPE_TRANSFORM);
 
 	this->flush = 1;
 	return 0;
@@ -45,9 +44,9 @@ static void base64_destroy(tl_iostream *stream)
 	tl_base64_encoder *this = (tl_base64_encoder *)stream;
 
 	assert(this != NULL);
-	assert(stream->type == TL_STREAM_TYPE_COMPRESSOR);
+	assert(stream->type == TL_STREAM_TYPE_TRANSFORM);
 
-	free(((base_compressor *)this)->buffer);
+	free(((base_transform *)this)->buffer);
 	free(this);
 }
 
@@ -74,7 +73,7 @@ static TL_INLINE tl_u32 split(const tl_u8 *ptr, int count)
 	return x | ((ptr[2] & 0xC0) << 10) | ((ptr[2] & 0x3F) << 24);
 }
 
-static int base64_read(base_compressor *super, void *buffer,
+static int base64_read(base_transform *super, void *buffer,
 		       size_t size, size_t *actual)
 {
 	tl_base64_encoder *this = (tl_base64_encoder *)super;
@@ -104,7 +103,7 @@ static int base64_read(base_compressor *super, void *buffer,
 		}
 	}
 
-	base_compressor_remove(super, super->used - have);
+	base_transform_remove(super, super->used - have);
 
 	if (actual)
 		*actual = total;
@@ -112,7 +111,7 @@ static int base64_read(base_compressor *super, void *buffer,
 	return ret;
 }
 
-tl_compressor *tl_base64_encode(int flags)
+tl_transform *tl_base64_encode(int flags)
 {
 	tl_base64_encoder *this;
 
@@ -123,12 +122,12 @@ tl_compressor *tl_base64_encode(int flags)
 	if (!this)
 		return NULL;
 
-	base_compressor_init((base_compressor *)this);
+	base_transform_init((base_transform *)this);
 
 	this->charset = (flags & TL_BASE64_URL_SAFE) ? base64_url : base64;
 
 	((tl_iostream *)this)->destroy = base64_destroy;
-	((tl_compressor *)this)->flush = base64_flush;
-	((base_compressor *)this)->read = base64_read;
-	return (tl_compressor *)this;
+	((tl_transform *)this)->flush = base64_flush;
+	((base_transform *)this)->read = base64_read;
+	return (tl_transform *)this;
 }

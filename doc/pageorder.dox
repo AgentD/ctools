@@ -4,7 +4,7 @@
 \page kvcontainers Key-Value-Containers
 \page sorting Sorting Algorithms
 \page hash Hash and Check Sum Algorithms
-\page comp Compression Algorithms
+\page comp Data Compression and Transformation
 \page conv Data conversion Functions
 \page stringproc String processing functions
 \page filesystem Filesystem

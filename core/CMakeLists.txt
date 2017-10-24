@@ -34,13 +34,13 @@ if( HAVE_DEFLATE )
     message( STATUS "Using our own zlib copy" )
   endif( )
 
-  set( COMP_SRC src/comp/deflate.c
-                src/comp/inflate.c )
+  set( XFRM_SRC src/xfrm/deflate.c
+                src/xfrm/inflate.c )
 endif( )
 
-set( COMP_SRC ${COMP_SRC}
-              src/comp/base64_enc.c
-              src/comp/base64_dec.c )
+set( XFRM_SRC ${XFRM_SRC}
+              src/xfrm/base64_enc.c
+              src/xfrm/base64_dec.c )
 
 set( SEARCH_SRC src/search/array.c
                 src/search/array_insert_sorted.c
@@ -87,17 +87,17 @@ add_library( tlcore ${TYPE} src/array.c
                             src/hashmap.c
                             src/allocator.c
                             src/blob.c
-                            src/compress.c
-                            src/comp_blob.c
+                            src/transform.c
+                            src/xfrm_blob.c
                             src/opt.c
-                            src/comp/compressor.c
+                            src/xfrm/xfrm.c
                             ${IOSTREAM_SRC}
                             ${UNICODE_SRC}
                             ${STRING_SRC}
                             ${SEARCH_SRC}
                             ${SORT_SRC}
                             ${HASH_SRC}
-                            ${COMP_SRC}
+                            ${XFRM_SRC}
                             ${ITER_SRC}
                             ${ZLIB_SRCS} )
 
@@ -127,7 +127,7 @@ install( FILES include/tl_allocator.h
                include/tl_string.h
                include/tl_utf16.h
                include/tl_utf8.h
-               include/tl_compress.h
+               include/tl_transform.h
                include/tl_unicode.h
                include/tl_iostream.h
          DESTINATION include )

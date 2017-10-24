@@ -1,4 +1,4 @@
-/* compress.c -- This file is part of ctools
+/* transform.c -- This file is part of ctools
  *
  * Copyright (C) 2015 - David Oberhollenzer
  *
@@ -6,12 +6,12 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 #define TL_EXPORT
-#include "tl_compress.h"
+#include "tl_transform.h"
 
 #include <string.h>
 #include <stdlib.h>
 
-tl_compressor *tl_create_compressor(int algo, int flags)
+tl_transform *tl_create_transform(int algo, int flags)
 {
 	(void)flags;
 

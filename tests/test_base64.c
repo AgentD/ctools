@@ -1,4 +1,4 @@
-#include "tl_compress.h"
+#include "tl_transform.h"
 #include "tl_blob.h"
 
 #include <stdlib.h>
@@ -24,8 +24,8 @@ int main( void )
 	tl_blob b1;
 
 	for (i = 0; i < sizeof(strings) / sizeof(strings[0]); i += 2) {
-		if (tl_compress(&b1, strings[i], strlen(strings[i]),
-				TL_BASE64_ENCODE, 0)) {
+		if (tl_transform_chunk(&b1, strings[i], strlen(strings[i]),
+					TL_BASE64_ENCODE, 0)) {
 			return EXIT_FAILURE;
 		}
 
@@ -37,8 +37,9 @@ int main( void )
 
 		tl_blob_cleanup(&b1);
 
-		if (tl_compress(&b1, strings[i + 1], strlen(strings[i + 1]),
-				TL_BASE64_DECODE, 0)) {
+		if (tl_transform_chunk(&b1, strings[i + 1],
+					strlen(strings[i + 1]),
+					TL_BASE64_DECODE, 0)) {
 			return EXIT_FAILURE;
 		}
 

@@ -6,8 +6,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 #define TL_EXPORT
-#include "tl_compress.h"
-#include "compressor.h"
+#include "xfrm.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -15,21 +14,21 @@
 #include <zlib.h>
 
 typedef struct {
-	base_compressor super;
+	base_transform super;
 	z_stream strm;
 	int flush_mode;
 } tl_deflate_compressor;
 
-static int deflate_flush(tl_compressor *super, int flags)
+static int deflate_flush(tl_transform *super, int flags)
 {
 	tl_deflate_compressor *this = (tl_deflate_compressor *)super;
 
 	assert(this != NULL);
-	assert(((tl_iostream *)super)->type == TL_STREAM_TYPE_COMPRESSOR);
+	assert(((tl_iostream *)super)->type == TL_STREAM_TYPE_TRANSFORM);
 
 	this->flush_mode = Z_SYNC_FLUSH;
 
-	if (flags & TL_COMPRESS_FLUSH_EOF)
+	if (flags & TL_TRANSFORM_FLUSH_EOF)
 		this->flush_mode = Z_FINISH;
 
 	return 0;
@@ -40,14 +39,14 @@ static void deflate_destroy(tl_iostream *stream)
 	tl_deflate_compressor *this = (tl_deflate_compressor *)stream;
 
 	assert(this != NULL);
-	assert(stream->type == TL_STREAM_TYPE_COMPRESSOR);
+	assert(stream->type == TL_STREAM_TYPE_TRANSFORM);
 
 	deflateEnd(&this->strm);
-	free(((base_compressor *)this)->buffer);
+	free(((base_transform *)this)->buffer);
 	free(this);
 }
 
-static int deflate_read(base_compressor *super, void *buffer,
+static int deflate_read(base_transform *super, void *buffer,
 			size_t size, size_t *actual)
 {
 	tl_deflate_compressor *this = (tl_deflate_compressor *)super;
@@ -85,7 +84,7 @@ static int deflate_read(base_compressor *super, void *buffer,
 	} while (size && this->strm.avail_out == 0);
 
 out_remove:
-	base_compressor_remove(super, super->used - this->strm.avail_in);
+	base_transform_remove(super, super->used - this->strm.avail_in);
 
 	if (actual)
 		*actual = total;
@@ -93,19 +92,19 @@ out_remove:
 	return ret;
 }
 
-tl_compressor *tl_deflate(int flags)
+tl_transform *tl_deflate(int flags)
 {
 	int level = Z_DEFAULT_COMPRESSION;
 	tl_deflate_compressor *this;
 
-	if (flags & (~TL_COMPRESS_ALL_FLAGS))
+	if (flags & ~(TL_COMPRESS_GOOD | TL_COMPRESS_FAST))
 		return NULL;
 
 	this = calloc(1, sizeof(*this));
 	if (!this)
 		return NULL;
 
-	base_compressor_init((base_compressor *)this);
+	base_transform_init((base_transform *)this);
 
 	if (flags & TL_COMPRESS_GOOD) {
 		level = Z_BEST_COMPRESSION;
@@ -119,8 +118,8 @@ tl_compressor *tl_deflate(int flags)
 	}
 
 	((tl_iostream *)this)->destroy = deflate_destroy;
-	((tl_compressor *)this)->flush = deflate_flush;
-	((base_compressor *)this)->read = deflate_read;
+	((tl_transform *)this)->flush = deflate_flush;
+	((base_transform *)this)->read = deflate_read;
 	this->flush_mode = Z_NO_FLUSH;
-	return (tl_compressor *)this;
+	return (tl_transform *)this;
 }

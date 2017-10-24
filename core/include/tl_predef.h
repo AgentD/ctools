@@ -204,7 +204,7 @@ typedef struct tl_monitor tl_monitor;
 typedef struct tl_thread tl_thread;
 typedef struct tl_threadpool tl_threadpool;
 typedef struct tl_file_mapping tl_file_mapping;
-typedef struct tl_compressor tl_compressor;
+typedef struct tl_transform tl_transform;
 
 /**
  * \brief A function used to compare two objects

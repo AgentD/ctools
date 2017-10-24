@@ -71,8 +71,8 @@ typedef enum {
 	TL_STREAM_TYPE_FILE = 0x0001,   /**< \brief The stream is a file */
 	TL_STREAM_TYPE_SOCK = 0x0002,   /**< \brief The stream is a socket */
 
-	/** \brief A \ref tl_compressor stream */
-	TL_STREAM_TYPE_COMPRESSOR = 0x0010,
+	/** \brief A \ref tl_transform stream */
+	TL_STREAM_TYPE_TRANSFORM = 0x0010,
 
 	/** \brief Base ID for user defined streams */
 	TL_STREAM_USER = 0x8000

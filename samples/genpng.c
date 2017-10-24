@@ -3,7 +3,7 @@
     out to a PNG file. tl_compress is used to deflate compress
     the image data for the PNG file.
  */
-#include "tl_compress.h"
+#include "tl_transform.h"
 #include "tl_iostream.h"
 #include "tl_blob.h"
 #include "tl_hash.h"
@@ -82,7 +82,7 @@ static void write_image( tl_iostream* f, unsigned char* data,
         inptr += dx;
     }
 
-    tl_compress_blob( &compressed, &img, TL_DEFLATE, TL_COMPRESS_GOOD );
+    tl_transform_blob( &compressed, &img, TL_DEFLATE, TL_COMPRESS_GOOD );
 
     write_chunk( f, "IDAT", &compressed );
     tl_blob_cleanup( &compressed );

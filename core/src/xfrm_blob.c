@@ -1,4 +1,4 @@
-/* comp_blob.c -- This file is part of ctools
+/* xfrm_blob.c -- This file is part of ctools
  *
  * Copyright (C) 2015 - David Oberhollenzer
  *
@@ -6,11 +6,11 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 #define TL_EXPORT
-#include "tl_compress.h"
+#include "tl_transform.h"
 
-int tl_compress_blob(tl_blob *dst, const tl_blob *src, int algo, int flags)
+int tl_transform_blob(tl_blob *dst, const tl_blob *src, int algo, int flags)
 {
-	tl_compressor *comp = tl_create_compressor(algo, flags);
+	tl_transform *comp = tl_create_transform(algo, flags);
 	const unsigned char *ptr;
 	size_t actual, total;
 	char buffer[1024];
@@ -33,7 +33,7 @@ int tl_compress_blob(tl_blob *dst, const tl_blob *src, int algo, int flags)
 		total -= actual;
 
 		if (total == 0) {
-			ret = comp->flush(comp, TL_COMPRESS_FLUSH_EOF);
+			ret = comp->flush(comp, TL_TRANSFORM_FLUSH_EOF);
 			if (ret && ret != TL_ERR_NOT_SUPPORTED)
 				goto fail;
 		}

@@ -2,7 +2,7 @@
     Cumbersome to use command line tool that compresses or
     uncompresses an input file.
  */
-#include "tl_compress.h"
+#include "tl_transform.h"
 #include "tl_iostream.h"
 #include "tl_splice.h"
 #include "tl_file.h"
@@ -119,7 +119,7 @@ int main( int argc, char** argv )
 {
     size_t numoptions = sizeof(options)/sizeof(options[0]);
     tl_file *infile, *outfile;
-    tl_compressor *comp;
+    tl_transform *comp;
     char line[128];
     int i, ret;
 
@@ -177,7 +177,7 @@ int main( int argc, char** argv )
     }
 
     /* compress */
-    comp = tl_create_compressor( algo, flags );
+    comp = tl_create_transform( algo, flags );
 
     if( !comp )
     {
@@ -197,7 +197,7 @@ int main( int argc, char** argv )
             {
                 ((tl_iostream*)infile)->destroy( (tl_iostream*)infile );
                 infile = NULL;
-                comp->flush(comp, TL_COMPRESS_FLUSH_EOF);
+                comp->flush(comp, TL_TRANSFORM_FLUSH_EOF);
             }
             else if(ret < 0)
             {
