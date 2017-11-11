@@ -87,8 +87,18 @@ typedef enum {
 	/** \brief Default: Assume the input data is Latin 1 (ISO 8859-1) */
 	TL_LINE_READ_LATIN1 = 0x00,
 
-	/** \brief Assume the input data is UTF-8 */
-	TL_LINE_READ_UTF8 = 0x01
+	/**
+	 * \brief Assume the input data is UTF-8
+	 *
+	 * Overlong or otherwise illegal encodings are rejected.
+	 */
+	TL_LINE_READ_UTF8 = 0x01,
+
+	/** \brief Read UTF-16 from the stream, low byte first */
+	TL_LINE_READ_UTF16_LE = 0x02,
+
+	/** \brief Read UTF-16 from the stream, high byte first */
+	TL_LINE_READ_UTF16_BE = 0x03
 } TL_READ_LINE_FLAG;
 
 /**
