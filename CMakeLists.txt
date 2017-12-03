@@ -46,15 +46,7 @@ if( MSVC )
   add_definitions( /D_CRT_SECURE_NO_WARNINGS )
   add_definitions( /DUNICODE )
 
-  set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4005 /wd4996" )
-  set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /nologo"         )
-  set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Oi"             )
-
-  if( CMAKE_CL_64 )
-    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /bigobj" )
-  endif( )
-
-  set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /fp:fast /arch:SSE2" )
+  set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4005 /wd4996 /nologo /Oi" )
 endif( )
 
 #----------------------------------------------------------------------
