@@ -1,0 +1,86 @@
+OS_HDR = \
+	os/include/tl_dir.h \
+	os/include/tl_file.h \
+	os/include/tl_fs.h \
+	os/include/tl_network.h \
+	os/include/tl_packetserver.h \
+	os/include/tl_process.h \
+	os/include/tl_server.h \
+	os/include/tl_splice.h \
+	os/include/tl_thread.h \
+	os/include/tl_threadpool.h \
+	os/include/tl_unix.h
+
+OS_SRC= \
+	os/src/network.c \
+	os/src/platform.h \
+	os/src/splice.c
+
+W32_SRC = \
+	os/src/W32/dir_it.c \
+	os/src/W32/dir_scan.c \
+	os/src/W32/file.c \
+	os/src/W32/fs.c \
+	os/src/W32/fstream.c \
+	os/src/W32/iostream.c \
+	os/src/W32/monitor.c \
+	os/src/W32/mutex.c \
+	os/src/W32/network.c \
+	os/src/W32/os.c \
+	os/src/W32/os.h \
+	os/src/W32/path.c \
+	os/src/W32/process.c \
+	os/src/W32/rwlock.c \
+	os/src/W32/sockstream.c \
+	os/src/W32/thread.c \
+	os/src/W32/threadpool.c
+
+UNIX_SRC = \
+	os/src/unix/dir_it.c \
+	os/src/unix/dir_scan.c \
+	os/src/unix/fdstream.c \
+	os/src/unix/file.c \
+	os/src/unix/fs.c \
+	os/src/unix/iostream.c \
+	os/src/unix/monitor.c \
+	os/src/unix/mutex.c \
+	os/src/unix/network.c \
+	os/src/unix/os.c \
+	os/src/unix/os.h \
+	os/src/unix/process.c \
+	os/src/unix/rwlock.c \
+	os/src/unix/thread.c \
+	os/src/unix/threadpool.c
+
+BSDSOCK_SRC = \
+	os/src/bsdsock/addr_v6.c \
+	os/src/bsdsock/bsdsock.h \
+	os/src/bsdsock/network.c \
+	os/src/bsdsock/resolve_addr.c \
+	os/src/bsdsock/resolve_name.c \
+	os/src/bsdsock/sock.c \
+	os/src/bsdsock/tcpserver.c \
+	os/src/bsdsock/udpserver.c
+
+libtlos_la_SOURCES = \
+	$(OS_SRC) \
+	$(BSDSOCK_SRC) \
+	$(OS_HDR)
+
+libtlos_la_CPPFLAGS = $(AM_CPPFLAGS)
+libtlos_la_CFLAGS = $(AM_CFLAGS) $(PTHREAD_CFLAGS)
+libtlos_la_LDFLAGS = $(AM_LDFLAGS) $(PTHREAD_CFLAGS)
+libtlos_la_LIBADD = $(PTHREAD_LIBS) libtlcore.la
+
+if BUILD_WINDOWS
+libtlos_la_SOURCES += $(W32_SRC)
+libtlos_la_LDFLAGS += -no-undefined
+libtlos_la_LIBADD += -luserenv -lws2_32
+else
+libtlos_la_SOURCES += $(UNIX_SRC)
+endif
+
+include_HEADERS += $(OS_HDR)
+lib_LTLIBRARIES += libtlos.la
+
+EXTRA_DIST += $(W32_SRC)

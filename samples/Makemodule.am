@@ -1,0 +1,31 @@
+compress_SOURCES = samples/compress.c
+compress_CPPFLAGS = $(AM_CPPFLAGS)
+compress_CFLAGS = $(AM_CFLAGS)
+compress_LDFLAGS = $(AM_LDFLAGS)
+compress_LDADD = libtlcore.la libtlos.la
+
+genpng_SOURCES = samples/genpng.c
+genpng_CPPFLAGS = $(AM_CPPFLAGS)
+genpng_CFLAGS = $(AM_CFLAGS)
+genpng_LDFLAGS = $(AM_LDFLAGS)
+genpng_LDADD = libtlcore.la libtlos.la
+
+stdio_SOURCES = samples/stdio.c
+stdio_CPPFLAGS = $(AM_CPPFLAGS)
+stdio_CFLAGS = $(AM_CFLAGS)
+stdio_LDFLAGS = $(AM_LDFLAGS)
+stdio_LDADD = libtlcore.la libtlos.la
+
+lookup_SOURCES = samples/lookup.c
+lookup_CPPFLAGS = $(AM_CPPFLAGS)
+lookup_CFLAGS = $(AM_CFLAGS)
+lookup_LDFLAGS = $(AM_LDFLAGS)
+lookup_LDADD = libtlcore.la libtlos.la
+
+dirlist_SOURCES = samples/dirlist.c
+dirlist_CPPFLAGS = $(AM_CPPFLAGS)
+dirlist_CFLAGS = $(AM_CFLAGS)
+dirlist_LDFLAGS = $(AM_LDFLAGS)
+dirlist_LDADD = libtlcore.la libtlos.la
+
+noinst_PROGRAMS += compress genpng stdio lookup dirlist

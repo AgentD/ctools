@@ -1,0 +1,170 @@
+test_array_SOURCES = tests/test_array.c
+test_array_CPPFLAGS = $(AM_CPPFLAGS)
+test_array_CFLAGS = $(AM_CFLAGS)
+test_array_LDFLAGS = $(AM_LDFLAGS)
+test_array_LDADD = libtlcore.la libtlos.la
+
+test_list_SOURCES = tests/test_list.c
+test_list_CPPFLAGS = $(AM_CPPFLAGS)
+test_list_CFLAGS = $(AM_CFLAGS)
+test_list_LDFLAGS = $(AM_LDFLAGS)
+test_list_LDADD = libtlcore.la libtlos.la
+
+test_rbtree_SOURCES = tests/test_rbtree.c
+test_rbtree_CPPFLAGS = $(AM_CPPFLAGS)
+test_rbtree_CFLAGS = $(AM_CFLAGS)
+test_rbtree_LDFLAGS = $(AM_LDFLAGS)
+test_rbtree_LDADD = libtlcore.la libtlos.la
+
+test_sort_SOURCES = tests/test_sort.c
+test_sort_CPPFLAGS = $(AM_CPPFLAGS)
+test_sort_CFLAGS = $(AM_CFLAGS)
+test_sort_LDFLAGS = $(AM_LDFLAGS)
+test_sort_LDADD = libtlcore.la libtlos.la
+
+test_string_SOURCES = tests/test_string.c
+test_string_CPPFLAGS = $(AM_CPPFLAGS)
+test_string_CFLAGS = $(AM_CFLAGS)
+test_string_LDFLAGS = $(AM_LDFLAGS)
+test_string_LDADD = libtlcore.la libtlos.la
+
+test_string2_SOURCES = tests/test_string2.c
+test_string2_CPPFLAGS = $(AM_CPPFLAGS)
+test_string2_CFLAGS = $(AM_CFLAGS)
+test_string2_LDFLAGS = $(AM_LDFLAGS)
+test_string2_LDADD = libtlcore.la libtlos.la
+
+test_fs_SOURCES = tests/test_fs.c
+test_fs_CPPFLAGS = $(AM_CPPFLAGS)
+test_fs_CFLAGS = $(AM_CFLAGS)
+test_fs_LDFLAGS = $(AM_LDFLAGS)
+test_fs_LDADD = libtlcore.la libtlos.la
+
+test_hashmap_SOURCES = tests/test_hashmap.c
+test_hashmap_CPPFLAGS = $(AM_CPPFLAGS)
+test_hashmap_CFLAGS = $(AM_CFLAGS)
+test_hashmap_LDFLAGS = $(AM_LDFLAGS)
+test_hashmap_LDADD = libtlcore.la libtlos.la
+
+test_iterator_SOURCES = tests/test_iterator.c
+test_iterator_CPPFLAGS = $(AM_CPPFLAGS)
+test_iterator_CFLAGS = $(AM_CFLAGS)
+test_iterator_LDFLAGS = $(AM_LDFLAGS)
+test_iterator_LDADD = libtlcore.la libtlos.la
+
+test_iterator_hashmap_SOURCES = tests/test_iterator_hashmap.c
+test_iterator_hashmap_CPPFLAGS = $(AM_CPPFLAGS)
+test_iterator_hashmap_CFLAGS = $(AM_CFLAGS)
+test_iterator_hashmap_LDFLAGS = $(AM_LDFLAGS)
+test_iterator_hashmap_LDADD = libtlcore.la libtlos.la
+
+test_blob_SOURCES = tests/test_blob.c
+test_blob_CPPFLAGS = $(AM_CPPFLAGS)
+test_blob_CFLAGS = $(AM_CFLAGS)
+test_blob_LDFLAGS = $(AM_LDFLAGS)
+test_blob_LDADD = libtlcore.la libtlos.la
+
+test_base64_SOURCES = tests/test_base64.c
+test_base64_CPPFLAGS = $(AM_CPPFLAGS)
+test_base64_CFLAGS = $(AM_CFLAGS)
+test_base64_LDFLAGS = $(AM_LDFLAGS)
+test_base64_LDADD = libtlcore.la libtlos.la
+
+test_namelookup_SOURCES = tests/test_namelookup.c
+test_namelookup_CPPFLAGS = $(AM_CPPFLAGS)
+test_namelookup_CFLAGS = $(AM_CFLAGS)
+test_namelookup_LDFLAGS = $(AM_LDFLAGS)
+test_namelookup_LDADD = libtlcore.la libtlos.la
+
+test_tcp_SOURCES = tests/test_tcp.c
+test_tcp_CPPFLAGS = $(AM_CPPFLAGS)
+test_tcp_CFLAGS = $(AM_CFLAGS)
+test_tcp_LDFLAGS = $(AM_LDFLAGS)
+test_tcp_LDADD = libtlcore.la libtlos.la
+
+test_udp_SOURCES = tests/test_udp.c
+test_udp_CPPFLAGS = $(AM_CPPFLAGS)
+test_udp_CFLAGS = $(AM_CFLAGS)
+test_udp_LDFLAGS = $(AM_LDFLAGS)
+test_udp_LDADD = libtlcore.la libtlos.la
+
+test_opt_SOURCES = tests/test_opt.c
+test_opt_CPPFLAGS = $(AM_CPPFLAGS)
+test_opt_CFLAGS = $(AM_CFLAGS)
+test_opt_LDFLAGS = $(AM_LDFLAGS)
+test_opt_LDADD = libtlcore.la libtlos.la
+
+test_packetserver_SOURCES = tests/test_packetserver.c
+test_packetserver_CPPFLAGS = $(AM_CPPFLAGS)
+test_packetserver_CFLAGS = $(AM_CFLAGS)
+test_packetserver_LDFLAGS = $(AM_LDFLAGS)
+test_packetserver_LDADD = libtlcore.la libtlos.la
+
+test_udpbroadcast_SOURCES = tests/test_udpbroadcast.c
+test_udpbroadcast_CPPFLAGS = $(AM_CPPFLAGS)
+test_udpbroadcast_CFLAGS = $(AM_CFLAGS)
+test_udpbroadcast_LDFLAGS = $(AM_LDFLAGS)
+test_udpbroadcast_LDADD = libtlcore.la libtlos.la
+
+test_thread_SOURCES = tests/test_thread.c
+test_thread_CPPFLAGS = $(AM_CPPFLAGS)
+test_thread_CFLAGS = $(AM_CFLAGS)
+test_thread_LDFLAGS = $(AM_LDFLAGS)
+test_thread_LDADD = libtlcore.la libtlos.la
+
+test_rwlock_SOURCES = tests/test_rwlock.c
+test_rwlock_CPPFLAGS = $(AM_CPPFLAGS)
+test_rwlock_CFLAGS = $(AM_CFLAGS)
+test_rwlock_LDFLAGS = $(AM_LDFLAGS)
+test_rwlock_LDADD = libtlcore.la libtlos.la
+
+test_threadpool_SOURCES = tests/test_threadpool.c
+test_threadpool_CPPFLAGS = $(AM_CPPFLAGS)
+test_threadpool_CFLAGS = $(AM_CFLAGS)
+test_threadpool_LDFLAGS = $(AM_LDFLAGS)
+test_threadpool_LDADD = libtlcore.la libtlos.la
+
+test_hash_SOURCES = tests/test_hash.c
+test_hash_CPPFLAGS = $(AM_CPPFLAGS)
+test_hash_CFLAGS = $(AM_CFLAGS)
+test_hash_LDFLAGS = $(AM_LDFLAGS)
+test_hash_LDADD = libtlcore.la libtlos.la
+
+childproc_SOURCES = tests/childproc.c
+childproc_CPPFLAGS = $(AM_CPPFLAGS)
+childproc_CFLAGS = $(AM_CFLAGS)
+childproc_LDFLAGS = $(AM_LDFLAGS)
+childproc_LDADD = libtlcore.la libtlos.la
+
+test_process_SOURCES = tests/test_process.c
+test_process_CPPFLAGS = $(AM_CPPFLAGS)
+test_process_CFLAGS = $(AM_CFLAGS)
+test_process_LDFLAGS = $(AM_LDFLAGS)
+test_process_LDADD = libtlcore.la libtlos.la
+
+TESTPROGS = test_array \
+	test_list \
+	test_rbtree \
+	test_sort \
+	test_string \
+	test_string2 \
+	test_fs \
+	test_hashmap \
+	test_iterator \
+	test_iterator_hashmap \
+	test_blob \
+	test_base64 \
+	test_namelookup \
+	test_tcp \
+	test_udp \
+	test_opt \
+	test_packetserver \
+	test_udpbroadcast \
+	test_thread \
+	test_rwlock \
+	test_threadpool \
+	test_hash \
+	test_process
+
+check_PROGRAMS += $(TESTPROGS) childproc
+TESTS += $(TESTPROGS)
