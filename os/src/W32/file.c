@@ -81,7 +81,7 @@ static int file_write(tl_iostream *stream, const void *buffer,
 	DWORD result;
 
 	assert(this != NULL);
-	assert(stream->type == TL_STREAM_FILE);
+	assert(stream->type == TL_STREAM_TYPE_FILE);
 
 	if (actual)
 		*actual = 0;
@@ -114,7 +114,7 @@ static int file_read(tl_iostream *stream, void *buffer, size_t size,
 	DWORD result;
 
 	assert(this != NULL);
-	assert(stream->type == TL_STREAM_FILE);
+	assert(stream->type == TL_STREAM_TYPE_FILE);
 
 	if (actual)
 		*actual = 0;
@@ -136,7 +136,7 @@ static int file_set_timeout(tl_iostream *stream, unsigned int timeout)
 	filestream *this = (filestream *)stream;
 
 	assert(this != NULL);
-	assert(((tl_iostream *)this)->type == TL_STREAM_FILE);
+	assert(((tl_iostream *)this)->type == TL_STREAM_TYPE_FILE);
 
 	set_handle_timeout(this->fhnd, timeout);
 	return 0;
@@ -147,7 +147,7 @@ static int file_seek(tl_file *super, tl_u64 position)
 	filestream *this = (filestream *)super;
 
 	assert(this != NULL);
-	assert(((tl_iostream *)this)->type == TL_STREAM_FILE);
+	assert(((tl_iostream *)this)->type == TL_STREAM_TYPE_FILE);
 
 	if (w32_lseek(this->fhnd, position, FILE_BEGIN) == -1)
 		return errno_to_fs(GetLastError());
@@ -161,7 +161,7 @@ static int file_tell(tl_file *file, tl_u64 *position)
 	tl_s64 pos;
 
 	assert(this != NULL);
-	assert(((tl_iostream *)this)->type == TL_STREAM_FILE);
+	assert(((tl_iostream *)this)->type == TL_STREAM_TYPE_FILE);
 
 	pos = w32_lseek(this->fhnd, 0, FILE_CURRENT);
 	if (pos == -1)
@@ -182,7 +182,7 @@ static const tl_file_mapping *file_map(tl_file *file, tl_u64 offset,
 	void *ptr;
 
 	assert(this != NULL);
-	assert(((tl_iostream *)this)->type == TL_STREAM_FILE);
+	assert(((tl_iostream *)this)->type == TL_STREAM_TYPE_FILE);
 
 	if (flags & (~TL_ALL_MAP_FLAGS))
 		return NULL;
