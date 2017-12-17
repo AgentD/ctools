@@ -1,6 +1,6 @@
 
-  About
-  *****
+  0) About
+  ********
 
  This is small utility library for C programs, containing generic
  implementations of commonly used container structures, data structures,
@@ -42,90 +42,99 @@
     - TCP server that creates client streams for connections
     - packet oriented UDP server
     - name resolving
-  - data compression
+  - data compression and conversion
+    - abstract I/O stream based
+    - deflate/inflate
+    - base64
 
 
-  Compiling
-  *********
+  1) Compiling
+  ************
 
- The library uses a CMake based build system.
+ 1.1) Unix-like Systems
 
- On UNIX(R) like systems, run the following to create a build directory,
- generate make files and build the library:
+ The library uses an Autotools based build system. So simply run configure,
+ make, make install as usual.
 
-    $ mkdir build
-    $ cd build
-    $ cmake ..
-    $ make
+ When working with the GIT tree, run the autogen.sh script to generate the
+ build system.
 
- To cross compile the library from UNIX(R) like systems for 32 bit Windows(R)
- using the provided toolchain file, run the following instead:
+ In addition to the default autoconf options, the following configure options
+ are provided:
+   --disable-deflate    Disable the zlib deflate/inflate support.
+                        If left enabled (default), the library depends on
+                        Zlib, wich is searched for using pkg-config.
 
-    $ mkdir build
-    $ cd build
-    $ cmake .. -DCMAKE_TOOLCHAIN_FILE=../CMake/mingw.cmake
-    $ make
+   --with-builtin-zlib  Use a stripped down version of Zlib included in the
+                        source tree, instead of the one installed on the
+                        system and compile it statically into the
+                        core library.
 
- For 64 bit Windows(R), use '-DCMAKE_TOOLCHAIN_FILE=../CMake/mingw64.cmake'.
+ To generate the doxygen based documentation and reference manual,
+ simply run
 
- To generate the doxygen API reference and documentation, run the following
- in the build directory after generating the Makefile:
-
-    $ make doc
-
- This generates a HTML reference in <build_directory>/doxydoc/html, man pages
- for section 3 under <build_directory>/doxydoc/man and LaTeX input files in
- <build_directory>/doxydoc/latex.
-
- The doxygen reference includes hand written documentation pages with lots
- of examples.
-
- To run the unit tests, run the following:
-
-    $ make test
+   $ make doxygen-doc
 
 
+ To run the unit test programs, simply run
+
+   $ make check
 
 
- To compile the library on Windows(R), start the CMake gui, set the input
- directory to the root source directory containing the CMakeLists.txt file
- and set an output directory of your choice. Click 'configure', select a
- build system, click 'configure' again, then click 'generate'.
+ 1.2) Windows
+
+ The Autotools build system supports compiling and cross compiling for
+ Windows(R) using mingw (e.g. by specifying the configure option
+ --host=i686-w64-mingw32).
+
+
+ For compiling on Windows(R), for instance using VisualStudio(R), a minimal
+ CMake based build system is maintained.
+
+ Start the CMake gui, set the input directory to the root source directory
+ containing the CMakeLists.txt file and set an output directory of your
+ choice. Click 'configure', select a build system, click 'configure' again,
+ then click 'generate'.
 
  Use the generated build system files in the target directory (e.g. MSVC
  solution) to compile the library.
 
 
-
- If the cmake option "SHARED" is set, a shared library is generated. When
- crosscompiling for Windows(R), the option "USEWINE" can be set to run the
- unit test programs via wine.
+ If the cmake option "SHARED" is set, a shared library is generated.
 
 
-  Directory Hirarchy
-  ******************
+  2) Directory Hirarchy
+  *********************
 
  The root directory contains the following files and directories:
-  - CMake/              Containing misc. CMake files (e.g. toolchain files)
-  - core/               Contains the core library (containers, algorithsm,...)
+  - 3rdparty/           Contains 3rd party source code (e.g. zlib stub)
+  - doc/                Contains additional doxygen input files
+  - m4/                 Contains m4 macros used by the build system
+  - main/               Contains the core library (containers, algorithms,...)
     - include/          Contains the core library headers
     - src/              Contains the core library source
-    - CMakeLists.txt    CMake file for core library
+    - CMakeLists.txt    CMake file for the core library
+    - Makemodule.am     Automake file for the core library
   - os/                 Contains the OS abstraction library (threads,
                         network, ...)
     - include/          Contains the OS library headers
     - src/              Contains the OS library source
     - CMakeLists.txt    CMake file for OS library
+    - Makemodule.am     Automake file for the OS library
+  - samples/            Contains small demo programs
   - tests/              Contains unit tests
+  - autogen.sh          Buildconf stub script that runs autoreconf
   - CMakeLists.txt      CMake build system main input file
+  - configure.ac        Autoconf input file
   - Doxyfile.in         Doxygen input file consumed by build system
   - LICENSE             License file
+  - Makefile.am         Main automake input file
   - README              The file you are reading right now
 
 
 
-  License
-  *******
+  3) License
+  **********
 
  Copyright (C) 2015 - David Oberhollenzer
 
