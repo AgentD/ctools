@@ -8,16 +8,16 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 set( PROJECT_BRIEF "A collection of tools and utillities for C programs" )
 
+if( NOT WIN32 )
+  message( FATAL_ERROR "The CMake file only exists for compiling on Windows! Please use the Autotools build system" )
+endif( )
+
 #----------------------------------------------------------------------
 # Feature configuration
 #----------------------------------------------------------------------
 
 option( SHARED "Build a dynamic instead of a static library" OFF )
 option( HAVE_DEFLATE "Support deflate compression" ON )
-
-if( WIN32 )
-  option( USEWINE "Run test programms through wine" OFF )
-endif( )
 
 if( SHARED )
   add_definitions( -DTL_SHARED )
@@ -52,17 +52,7 @@ endif( )
 #----------------------------------------------------------------------
 # Configure targets
 #----------------------------------------------------------------------
-if( UNIX )
-  find_package( Threads )
-
-  add_definitions( -D_GNU_SOURCE )
-  add_definitions( -D_POSIX_SOURCE=1 )
-  add_definitions( -D_POSIX_C_SOURCE=200112L )
-
-  set( CTOOLS_SYSLIBS ${CMAKE_THREAD_LIBS_INIT} rt )
-elseif( WIN32 )
-  set( CTOOLS_SYSLIBS userenv ws2_32 )
-endif( )
+set( CTOOLS_SYSLIBS userenv ws2_32 )
 
 include_directories( ${CMAKE_SOURCE_DIR}/main/include/
                      ${CMAKE_SOURCE_DIR}/os/include/ )
@@ -89,11 +79,7 @@ function( testcase name args )
   set( command
        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${name}${CMAKE_EXECUTABLE_SUFFIX}" )
 
-  if( USEWINE )
-    add_test( ${name} wine ${command} ${args} )
-  else( )
-    add_test( ${name} ${command} ${args} )
-  endif( )
+  add_test( ${name} ${command} ${args} )
 endfunction( )
 
 add_executable( childproc tests/childproc.c )
@@ -124,20 +110,3 @@ testcase( test_thread "" )
 testcase( test_rwlock "" )
 testcase( test_threadpool "" )
 testcase( test_hash "" )
-
-#----------------------------------------------------------------------
-# generate Doxygen API reference
-#----------------------------------------------------------------------
-find_package( Doxygen )
-
-if( DOXYGEN_FOUND )
-    configure_file( ${CMAKE_SOURCE_DIR}/Doxyfile.in
-                    ${CMAKE_BINARY_DIR}/Doxyfile @ONLY )
-
-    add_custom_target( doc ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
-                       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                       COMMENT "Generating API documentation with Doxygen"
-                       VERBATIM
-                     )
-endif( )
-
