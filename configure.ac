@@ -9,6 +9,7 @@ AC_PROG_INSTALL
 AC_CANONICAL_HOST
 LT_INIT([win32-dll])
 
+AC_SUBST(PROJECT_BRIEF, ["A collection of tools and utillities for C programs"])
 
 ##### host OS detection #####
 build_windows="no"
@@ -90,6 +91,29 @@ fi
 
 if test "x$dep_missing" = "xyes"; then
 	AC_MSG_ERROR([missing one or more dependencies])
+fi
+
+##### Doxygen reference manual & documentation #####
+
+AC_CHECK_PROGS([DOXYGEN], [doxygen])
+AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
+
+if test -z "$DOXYGEN"; then
+	AC_MSG_WARN([Doxygen not found - continuing without Doxygen support])
+else
+	AC_CONFIG_FILES([Doxyfile])
+
+	DX_DOXYGEN_FEATURE(ON)
+	DX_DOT_FEATURE(ON)
+	DX_HTML_FEATURE(ON)
+	DX_CHM_FEATURE(OFF)
+	DX_CHI_FEATURE(OFF)
+	DX_MAN_FEATURE(ON)
+	DX_RTF_FEATURE(OFF)
+	DX_XML_FEATURE(OFF)
+	DX_PDF_FEATURE(ON)
+	DX_PS_FEATURE(OFF)
+	DX_INIT_DOXYGEN(ctools, Doxyfile)
 fi
 
 ##### generate output #####

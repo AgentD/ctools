@@ -4,11 +4,11 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = @CMAKE_PROJECT_NAME@
-PROJECT_NUMBER         = 
+PROJECT_NAME           = @PACKAGE_NAME@
+PROJECT_NUMBER         = @PACKAGE_VERSION@
 PROJECT_BRIEF          = "@PROJECT_BRIEF@"
 PROJECT_LOGO           = 
-OUTPUT_DIRECTORY       = @CMAKE_BINARY_DIR@/doxydoc
+OUTPUT_DIRECTORY       = @DX_DOCDIR@
 CREATE_SUBDIRS         = NO
 ALLOW_UNICODE_NAMES    = NO
 OUTPUT_LANGUAGE        = English
@@ -115,10 +115,10 @@ WARN_LOGFILE           =
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
 
-INPUT                  = @CMAKE_SOURCE_DIR@/doc/pageorder.dox
-INPUT                 += @CMAKE_SOURCE_DIR@/core/include/
-INPUT                 += @CMAKE_SOURCE_DIR@/os/include/
-INPUT                 += @CMAKE_SOURCE_DIR@/doc/
+INPUT                  = @top_srcdir@/doc/pageorder.dox
+INPUT                 += @top_srcdir@/core/include/
+INPUT                 += @top_srcdir@/os/include/
+INPUT                 += @top_srcdir@/doc/
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h
 FILE_PATTERNS         += *.dox
@@ -127,10 +127,10 @@ EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXCLUDE_SYMBOLS        = 
-EXAMPLE_PATH           = @CMAKE_SOURCE_DIR@/samples/
+EXAMPLE_PATH           = @top_srcdir@/samples/
 EXAMPLE_PATTERNS       = *.c
 EXAMPLE_RECURSIVE      = NO
-IMAGE_PATH             = @CMAKE_SOURCE_DIR@/doc/
+IMAGE_PATH             = @top_srcdir@/doc/
 INPUT_FILTER           = 
 FILTER_PATTERNS        = 
 FILTER_SOURCE_FILES    = NO
@@ -225,7 +225,7 @@ EXTRA_SEARCH_MAPPINGS  =
 
 GENERATE_LATEX         = YES
 LATEX_OUTPUT           = latex
-LATEX_CMD_NAME         = latex
+LATEX_CMD_NAME         = pdflatex
 MAKEINDEX_CMD_NAME     = makeindex
 COMPACT_LATEX          = NO
 PAPER_TYPE             = a4

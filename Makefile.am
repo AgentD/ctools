@@ -44,3 +44,9 @@ include core/Makemodule.am
 include os/Makemodule.am
 include samples/Makemodule.am
 include tests/Makemodule.am
+
+if HAVE_DOXYGEN
+@DX_RULES@
+
+MOSTLYCLEANFILES = $(DX_CLEANFILES)
+endif
