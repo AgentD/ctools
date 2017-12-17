@@ -116,7 +116,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 
 INPUT                  = @top_srcdir@/doc/pageorder.dox
-INPUT                 += @top_srcdir@/core/include/
+INPUT                 += @top_srcdir@/main/include/
 INPUT                 += @top_srcdir@/os/include/
 INPUT                 += @top_srcdir@/doc/
 INPUT_ENCODING         = UTF-8

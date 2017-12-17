@@ -64,7 +64,7 @@ elseif( WIN32 )
   set( CTOOLS_SYSLIBS userenv ws2_32 )
 endif( )
 
-include_directories( ${CMAKE_SOURCE_DIR}/core/include/
+include_directories( ${CMAKE_SOURCE_DIR}/main/include/
                      ${CMAKE_SOURCE_DIR}/os/include/ )
 
 if( SHARED )
@@ -73,7 +73,7 @@ else( )
   set( TYPE STATIC )
 endif( )
 
-add_subdirectory( core )
+add_subdirectory( main )
 add_subdirectory( os )
 add_subdirectory( samples )
 

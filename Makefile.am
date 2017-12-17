@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-INC_FLAGS = -I$(top_srcdir)/core/include -I$(top_srcdir)/os/include
+INC_FLAGS = -I$(top_srcdir)/main/include -I$(top_srcdir)/os/include
 
 AM_CPPFLAGS = -D_GNU_SOURCE $(INC_FLAGS)
 AM_CFLAGS = -ansi -pedantic -Wall -Wextra
@@ -40,7 +40,7 @@ check_PROGRAMS =
 TESTS =
 EXTRA_DIST = LICENSE README doc $(ZLIB_SRC) $(ZLIB_EXTRA)
 
-include core/Makemodule.am
+include main/Makemodule.am
 include os/Makemodule.am
 include samples/Makemodule.am
 include tests/Makemodule.am
