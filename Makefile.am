@@ -40,6 +40,9 @@ check_PROGRAMS =
 TESTS =
 EXTRA_DIST = LICENSE README doc $(ZLIB_SRC) $(ZLIB_EXTRA)
 
+EXTRA_DIST += CMakeLists.txt samples/CMakeLists.txt \
+		os/CMakeLists.txt main/CMakeLists.txt
+
 include main/Makemodule.am
 include os/Makemodule.am
 include samples/Makemodule.am
