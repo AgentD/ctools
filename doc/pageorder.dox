@@ -5,7 +5,6 @@
 \page sorting Sorting Algorithms
 \page hash Hash and Check Sum Algorithms
 \page comp Data Compression and Transformation
-\page conv Data conversion Functions
 \page stringproc String processing functions
 \page filesystem Filesystem
 \page io Input/Output
