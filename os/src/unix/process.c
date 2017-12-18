@@ -85,9 +85,9 @@ tl_process *tl_process_create(const char *filename, const char *const *argv,
 			dup2(inpipe[0], STDIN_FILENO);
 
 		if (env) {
-			execv(filename, (char **)argv);
-		} else {
 			execve(filename, (char **)argv, (char **)env);
+		} else {
+			execv(filename, (char **)argv);
 		}
 
 		abort();
