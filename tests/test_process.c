@@ -7,6 +7,7 @@
 
 const char* args[] =
 {
+    "dummy",
     "argA",
     "argB",
     "argC",
@@ -55,7 +56,7 @@ static int test_process( const char* path, int flags )
     if( value!=14 )
         return 0;
 
-    for( i=0; args[i]; ++i )
+    for( i=1; args[i]; ++i )
     {
         if( !receive_message( io, args[i] ) )
             return 0;

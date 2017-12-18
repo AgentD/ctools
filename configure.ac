@@ -118,4 +118,6 @@ fi
 
 ##### generate output #####
 
+AC_CONFIG_FILES([tests/test_process_wrap.sh],
+		[chmod +x tests/test_process_wrap.sh])
 AC_OUTPUT([Makefile])

@@ -163,8 +163,8 @@ TESTPROGS = test_array \
 	test_thread \
 	test_rwlock \
 	test_threadpool \
-	test_hash \
-	test_process
+	test_hash
 
-check_PROGRAMS += $(TESTPROGS) childproc
-TESTS += $(TESTPROGS)
+check_SCRIPTS += $(top_builddir)/tests/test_process_wrap.sh
+check_PROGRAMS += $(TESTPROGS) childproc test_process
+TESTS += $(TESTPROGS) $(top_builddir)/tests/test_process_wrap.sh

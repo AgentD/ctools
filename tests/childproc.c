@@ -27,7 +27,7 @@ int main( int argc, char** argv )
     char buffer[ 128 ];
     int i;
 
-    for( i=0; i<argc; ++i )
+    for( i=1; i<argc; ++i )
     {
         puts( argv[i] );
         fflush( stdout );
