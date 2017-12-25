@@ -28,4 +28,10 @@ dirlist_CFLAGS = $(AM_CFLAGS)
 dirlist_LDFLAGS = $(AM_LDFLAGS)
 dirlist_LDADD = libtlcore.la libtlos.la
 
-noinst_PROGRAMS += compress genpng stdio lookup dirlist
+cmdline_SOURCES = samples/cmdline.c
+cmdline_CPPFLAGS = $(AM_CPPFLAGS)
+cmdline_CFLAGS = $(AM_CFLAGS)
+cmdline_LDFLAGS = $(AM_LDFLAGS)
+cmdline_LDADD = libtlcore.la libtlos.la
+
+noinst_PROGRAMS += compress genpng stdio lookup dirlist cmdline

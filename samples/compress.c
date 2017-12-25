@@ -65,13 +65,12 @@ static void set_out_file( tl_option* opt, const char* value )
     out = value;
 }
 
-static int opt_error_handler( tl_option* opt, const char* option, int issue )
+static void opt_error_handler( const char* option, int issue )
 {
     if( issue==TL_OPT_UNKNOWN )
         fprintf( stderr, "Unknown option '%s'\n", option );
     else if( issue==TL_OPT_MISSING_ARGUMENT )
-        fprintf( stderr, "Option '%s' requires an argument\n", opt->opt );
-    return TL_OPT_FAIL;
+        fprintf( stderr, "Option '%s' requires an argument\n", option );
 }
 
 static void usage( void )
@@ -103,21 +102,17 @@ static void usage( void )
 
 static tl_option options[] =
 {
-    { TL_SHORT_OPTION, "a",          0,      NULL, opt_algo_callback },
-    { TL_LONG_OPTION,  "algorithm",  0,      NULL, opt_algo_callback },
-    { TL_LONG_OPTION,  "in",         0,      NULL, set_in_file       },
-    { TL_LONG_OPTION,  "out",        0,      NULL, set_out_file      },
-
-    { TL_SHORT_FLAG,   "f",          TL_COMPRESS_FAST, &flags, NULL },
-    { TL_SHORT_FLAG,   "g",          TL_COMPRESS_GOOD, &flags, NULL },
-    { TL_LONG_FLAG,    "fast",       TL_COMPRESS_FAST, &flags, NULL },
-    { TL_LONG_FLAG,    "good",       TL_COMPRESS_GOOD, &flags, NULL },
+    { TL_OPT_ARG_REQ, "algorithm", 'a',  0, NULL, opt_algo_callback },
+    { TL_OPT_ARG_REQ, "in",        '\0', 0, NULL, set_in_file       },
+    { TL_OPT_ARG_REQ, "out",       '\0', 0, NULL, set_out_file      },
+    { TL_OPT_ARG_NONE, "fast", 'f', TL_COMPRESS_FAST, &flags, NULL },
+    { TL_OPT_ARG_NONE, "good", 'g', TL_COMPRESS_GOOD, &flags, NULL },
+    { 0, NULL, '\0', 0, NULL, NULL },
 };
 
 
 int main( int argc, char** argv )
 {
-    size_t numoptions = sizeof(options)/sizeof(options[0]);
     tl_file *infile, *outfile;
     tl_transform *comp;
     char line[128];
@@ -133,8 +128,11 @@ int main( int argc, char** argv )
         }
     }
 
-    if( !tl_process_args(options,numoptions,&argc,argv,opt_error_handler) )
+    ret = tl_process_args(options, argc, argv, &i);
+    if( ret < 0 ) {
+        opt_error_handler(argv[i], ret);
         return EXIT_FAILURE;
+    }
 
     /* sanity check input and output file paths */
     if( !in )

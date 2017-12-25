@@ -29,5 +29,6 @@ dirlist
 genpng
 lookup
 stdio
+cmdline
 Doxyfile
 doxygen-doc

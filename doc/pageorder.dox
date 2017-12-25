@@ -14,4 +14,5 @@
 
 \example lookup.c
 \example dirlist.c
+\example cmdline.c
 */
